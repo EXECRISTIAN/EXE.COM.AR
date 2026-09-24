@@ -1,0 +1,94 @@
+[
+  {
+    "id": "procesador-intel-core-i5",
+    "name": "Procesador Intel Core i5",
+    "brand": "Intel",
+    "category": "Procesadores",
+    "price": 0,
+    "stock": 5,
+    "images": ["assets/img/products/producto-1.webp"]
+  },
+  {
+    "id": "procesador-intel-core-i7",
+    "name": "Procesador Intel Core i7",
+    "brand": "Intel",
+    "category": "Procesadores",
+    "price": 0,
+    "stock": 3,
+    "images": ["assets/img/products/producto-2.webp"]
+  },
+  {
+    "id": "procesador-amd-ryzen-7",
+    "name": "Procesador AMD Ryzen 7",
+    "brand": "AMD",
+    "category": "Procesadores",
+    "price": 0,
+    "stock": 4,
+    "images": ["assets/img/products/producto-3.webp"]
+  },
+  {
+    "id": "procesador-amd-ryzen-5",
+    "name": "Procesador AMD Ryzen 5",
+    "brand": "AMD",
+    "category": "Procesadores",
+    "price": 0,
+    "stock": 6,
+    "images": ["assets/img/products/producto-4.webp", "assets/img/products/producto-4.1.webp"]
+  },
+  {
+    "id": "motherboard-asus-prime",
+    "name": "Motherboard ASUS Prime",
+    "brand": "ASUS",
+    "category": "Motherboards",
+    "price": 0,
+    "stock": 2,
+    "images": ["assets/img/products/producto-5.webp", "assets/img/products/producto-5.1.webp", "assets/img/products/producto-5.2.webp"]
+  },
+  {
+    "id": "placa-msi-geforce-gtx-ventus",
+    "name": "Placa de video MSI GeForce GTX Ventus XS",
+    "brand": "MSI",
+    "category": "Placas de video",
+    "price": 0,
+    "stock": 3,
+    "showStock": false,
+    "images": ["assets/img/products/asus-gtx1660-01.webp", "assets/img/products/asus-gtx1660-02.webp", "assets/img/products/asus-gtx1660-03.webp"]
+  },
+  {
+    "id": "gabinete-antec-nx200m-white",
+    "name": "Gabinete Antec NX200M White Vidrio Templado",
+    "brand": "Antec",
+    "category": "Gabinetes",
+    "price": 0,
+    "stock": 5,
+    "images": ["assets/img/products/gabinete-antec-01.webp", "assets/img/products/gabinete-antec-02.webp", "assets/img/products/gabinete-antec-03.webp", "assets/img/products/gabinete-antec-04.webp", "assets/img/products/gabinete-antec-05.webp", "assets/img/products/gabinete-antec-06.webp"]
+  },
+  {
+    "id": "fuente-aerocool-cylon-600w",
+    "name": "Fuente Aerocool Cylon 600W RGB 80 Plus Bronze",
+    "brand": "Aerocool",
+    "category": "Fuentes",
+    "price": 0,
+    "stock": 2,
+    "images": ["assets/img/products/fuente-aerocool-01.webp", "assets/img/products/fuente-aerocool-02.webp", "assets/img/products/fuente-aerocool-03.webp", "assets/img/products/fuente-aerocool-04.webp", "assets/img/products/fuente-aerocool-05.webp", "assets/img/products/fuente-aerocool-06.webp"]
+  },
+  {
+    "id": "memoria-tforce-delta-ddr4-8gb",
+    "name": "Memoria Team T-Force Delta RGB DDR4 8GB 3600MHz",
+    "brand": "Team Group",
+    "category": "Memorias",
+    "price": 0,
+    "stock": 10,
+    "variants": ["Black", "White"],
+    "images": ["assets/img/products/memoria-tforce-delta.webp"]
+  },
+  {
+    "id": "cooler-deepcool-ag400-plus",
+    "name": "Cooler CPU DeepCool AG400 PLUS",
+    "brand": "DeepCool",
+    "category": "Refrigeración",
+    "price": 0,
+    "stock": 0,
+    "images": ["assets/img/products/cooler-deepcool-02.webp", "assets/img/products/cooler-deepcool-03.webp", "assets/img/products/cooler-deepcool-04.webp"]
+  }
+]
