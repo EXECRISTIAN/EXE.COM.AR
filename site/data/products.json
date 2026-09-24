@@ -1,0 +1,49 @@
+[
+  {
+    "id": "gabinete-antec-nx200m-white",
+    "name": "Gabinete Antec NX200M White Vidrio Templado",
+    "brand": "Antec",
+    "category": "Gabinetes",
+    "price": 0,
+    "stock": 5,
+    "image": "assets/img/products/gabinete-antec-nx200m.jpg"
+  },
+  {
+    "id": "fuente-aerocool-cylon-600w",
+    "name": "Fuente Aerocool Cylon 600W RGB 80 Plus Bronze",
+    "brand": "Aerocool",
+    "category": "Fuentes",
+    "price": 0,
+    "stock": 2,
+    "image": "assets/img/products/fuente-aerocool-cylon-600w.jpg"
+  },
+  {
+    "id": "memoria-tforce-delta-ddr4-8gb",
+    "name": "Memoria Team T-Force Delta RGB DDR4 8GB 3600MHz",
+    "brand": "Team Group",
+    "category": "Memorias",
+    "price": 0,
+    "stock": 10,
+    "variants": ["Black", "White"],
+    "image": "assets/img/products/memoria-tforce-delta.jpg"
+  },
+  {
+    "id": "cooler-deepcool-ag400-plus",
+    "name": "Cooler CPU DeepCool AG400 PLUS",
+    "brand": "DeepCool",
+    "category": "Refrigeración",
+    "price": 0,
+    "stock": 0,
+    "image": "assets/img/products/cooler-deepcool-ag400.jpg"
+  },
+  {
+    "id": "placa-asus-gtx-1660",
+    "name": "Placa de video ASUS GeForce GTX 1660",
+    "brand": "ASUS",
+    "category": "Placas de video",
+    "price": 0,
+    "stock": 3,
+    "showStock": false,
+    "image": "assets/img/products/asus-gtx-1660.jpg"
+  }
+]
