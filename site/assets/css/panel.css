@@ -1,6 +1,6 @@
 /* Estilos de "Mi cuenta" y del panel de administración (reusan los tokens de styles.css). */
 .auth-page { min-height: calc(100vh - var(--header-h)); display: grid; place-items: center; padding: 40px 20px;
-  background: linear-gradient(180deg, #111111b3, #111111d9), url("../img/hero-02.webp") center / cover; }
+  background: linear-gradient(180deg, #111111b3, #111111d9), url("../img/login-bg-02.webp") center / cover; }
 .auth-card { width: min(440px, 100%); background: #fff; border-radius: 10px; padding: 36px; box-shadow: 0 30px 60px -20px #0006; }
 .auth-card h1 { font-size: 1.6rem; color: var(--heading); font-weight: 500; }
 .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--c4); padding: 4px; border-radius: 8px; margin-bottom: 22px; }

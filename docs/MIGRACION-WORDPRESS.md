@@ -7,7 +7,8 @@ Fuente: backup del hosting en Google Drive (home de cPanel: `exe.com.ar/`, `Mail
 |---|---|
 | `uploads/elementor/css/post-4387.css` (portada 2024) | `site/index.html` + `styles.css` con las mismas medidas (ids de Elementor comentados) |
 | Breakpoints Elementor 1024 / 767 px | Media queries iguales |
-| `uploads/2024/05/login-exe.com_.ar-*.jpg` | `assets/img/hero-01/02.webp` (carrusel principal) |
+| `uploads/2024/05/login-exe.com_.ar-*.jpg` | `assets/img/login-bg-01/02.webp` (fondo del login) |
+| Banners ASUS "Series 500 y 400" y "Z790" (enviados aparte) | `assets/img/hero-01/02.webp` (carrusel principal) |
 | `banner-marca-01..03`, `cel-300x300-01/02`, `banner-tablet-01` | Banners de marca (escritorio / celular / tablet) |
 | `banner-inferior-01.jpg` | Banner ancho de la sección de marcas |
 | `imagen_marca_*` | `assets/img/marcas/` (carrusel de logos) |

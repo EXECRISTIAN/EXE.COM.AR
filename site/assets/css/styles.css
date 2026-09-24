@@ -84,7 +84,7 @@ button { font: inherit; }
 .hero { position: relative; overflow: hidden; background: var(--c7); }
 .hero-track { display: flex; transition: transform .8s var(--ease); }
 .hero-slide { flex: 0 0 100%; }
-.hero-slide img { width: 100%; height: auto; aspect-ratio: 16 / 9; max-height: calc(100vh - var(--header-h)); object-fit: cover; }
+.hero-slide img { width: 100%; height: auto; aspect-ratio: 1904 / 650; object-fit: cover; }
 .hero-arrow { position: absolute; top: 50%; z-index: 2; width: 46px; height: 46px; margin-top: -23px; border-radius: 50%; border: 0;
   background: #0006; color: #fff; cursor: pointer; display: grid; place-items: center; transition: background .3s, transform .3s; }
 .hero-arrow:hover { background: #000a; transform: scale(1.08); }
