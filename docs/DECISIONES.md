@@ -34,3 +34,9 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 22. **Roles base**: administrador (todo), moderador (pedidos + stock), suscriptor (cliente). Permisos separados para "marcar pagado" y "cambiar estado".
 23. **Pedidos**: el navegador no puede crearlos ni modificarlos directamente; los precios los pone la base y "pagado" solo lo marca el webhook de Mercado Pago o un permiso específico, con auditoría.
 24. **Panel**: `/admin/` (vista previa en `/admin/?demo=1`).
+
+## Envíos (Andreani)
+25. **Andreani vía Edge Function de Supabase**: las credenciales no pueden estar en un sitio estático, así que todas las llamadas pasan por `supabase/functions/andreani`. Detalle en `docs/ANDREANI.md`.
+26. **Cotización en el carrito, apagada por defecto** (`andreani.enabled: false` en `config.js`). Muestra domicilio y sucursal; el costo va en el WhatsApp como "estimado". Mientras no haya pago online, el envío se confirma por WhatsApp.
+27. **Crear envío solo con pedido pagado** y permiso `shipping.manage` (administrador y moderador). Evita generar guías de pedidos falsos.
+28. **Peso por defecto 1 kg** por producto hasta que cargues el real (`weight_kg`). Cambiar en la tabla `products`.

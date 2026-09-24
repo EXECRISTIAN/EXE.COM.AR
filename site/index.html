@@ -172,6 +172,12 @@
     <ul class="cart-items" id="cartItems"></ul>
     <div class="cart-foot">
       <label class="field">Tu nombre (opcional)<input id="customerName" type="text" autocomplete="name"></label>
+      <div class="ship" id="ship" hidden>
+        <label class="field">Envío con Andreani — código postal
+          <span class="ship-row"><input id="shipCp" inputmode="numeric" maxlength="4" placeholder="Ej: 1406" autocomplete="postal-code"><button class="btn btn-outline" id="shipQuote" type="button">Calcular</button></span>
+        </label>
+        <div class="ship-opts" id="shipOpts"></div>
+      </div>
       <label class="field">Nota (opcional)<textarea id="customerNote" rows="2" placeholder="Ej: envío a CABA, factura A…"></textarea></label>
       <div class="total"><span>Total estimado</span><strong id="cartTotal">$0</strong></div>
       <button class="btn btn-wa" id="sendWa">Enviar pedido por WhatsApp</button>

@@ -209,6 +209,9 @@ button { font: inherit; }
 .cart-foot { padding: 20px; border-top: 1px solid #eee; display: grid; gap: 12px; }
 .field { display: grid; gap: 4px; font-size: .88rem; color: var(--c3); }
 .field input, .field textarea { padding: 10px; border: 1px solid var(--c6); border-radius: 4px; font: inherit; background: #fff; color: var(--c2); }
+.ship-row { display: flex; gap: 8px; } .ship-row input { flex: 1; min-width: 0; }
+.ship-opts { display: grid; gap: 6px; font-size: .9rem; color: var(--c2); }
+.ship-opts label { display: flex; gap: 8px; align-items: center; } .ship-opts b { margin-left: auto; }
 .total { display: flex; justify-content: space-between; font-size: 1.05rem; color: var(--c2); }
 
 /* ---------- Aviso ---------- */

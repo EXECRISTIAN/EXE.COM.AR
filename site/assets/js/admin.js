@@ -10,9 +10,9 @@
   const money = (n) => "$" + Number(n || 0).toLocaleString("es-AR");
 
   const DEMO = {
-    perms: new Set(["dashboard.access", "orders.read", "orders.update_status", "products.read", "products.write", "stock.write", "users.read", "roles.manage", "emails.manage"]),
+    perms: new Set(["dashboard.access", "orders.read", "orders.update_status", "products.read", "products.write", "stock.write", "users.read", "roles.manage", "emails.manage", "shipping.manage"]),
     orders: [
-      { id: 1042, created_at: "2026-09-20", customer: "Juan Pérez", status: "paid", total: 452000 },
+      { id: 1042, created_at: "2026-09-20", customer: "Juan Pérez", status: "paid", total: 452000, andreani_number: "360000012345670" },
       { id: 1043, created_at: "2026-09-22", customer: "Ana Gómez", status: "pending", total: 98000 },
       { id: 1044, created_at: "2026-09-23", customer: "Leo Díaz", status: "cancelled", total: 15000 },
     ],
@@ -26,7 +26,7 @@
       { name: "moderador", perms: ["dashboard.access", "orders.read", "orders.update_status", "products.read", "stock.write"] },
       { name: "suscriptor", perms: [] },
     ],
-    allPerms: ["dashboard.access", "orders.read", "orders.update_status", "orders.mark_paid", "products.read", "products.write", "stock.write", "users.read", "users.assign_roles", "roles.manage", "emails.manage"],
+    allPerms: ["dashboard.access", "orders.read", "orders.update_status", "orders.mark_paid", "products.read", "products.write", "stock.write", "users.read", "users.assign_roles", "roles.manage", "emails.manage", "shipping.manage"],
   };
 
   let perms = new Set();
@@ -73,8 +73,8 @@
     },
     async pedidos() {
       const rows = await load("orders");
-      return `<div class="panel"><table class="table"><tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Estado</th><th>Total</th></tr>
-        ${rows.map((o) => `<tr><td>${o.id}</td><td>${esc(o.created_at).slice(0, 10)}</td><td>${esc(o.customer)}</td><td><span class="pill ${esc(o.status)}">${esc(o.status)}</span></td><td>${money(o.total)}</td></tr>`).join("")}
+      return `<div class="panel"><table class="table"><tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Estado</th><th>Total</th><th>Andreani</th></tr>
+        ${rows.map((o) => `<tr><td>${o.id}</td><td>${esc(o.created_at).slice(0, 10)}</td><td>${esc(o.customer)}</td><td><span class="pill ${esc(o.status)}">${esc(o.status)}</span></td><td>${money(o.total)}</td><td>${shipCell(o)}</td></tr>`).join("")}
         </table></div><p class="notice info">"Pagado" lo marca solamente el sistema al recibir la confirmación de Mercado Pago (o un administrador con el permiso <b>orders.mark_paid</b>, quedando registrado quién y cuándo).</p>`;
     },
     async productos() {
@@ -106,10 +106,37 @@
     },
   };
 
+  // Envíos Andreani: crear el envío (solo pedidos pagados) e imprimir la etiqueta. La función valida el permiso.
+  function shipCell(o) {
+    if (o.andreani_number) return `${esc(o.andreani_number)} ${perms.has("shipping.manage") ? `<button class="link-btn" data-label="${o.id}">Etiqueta</button>` : ""}`;
+    if (perms.has("shipping.manage") && ["paid", "preparing"].includes(o.status)) return `<button class="link-btn" data-ship="${o.id}">Crear envío</button>`;
+    return "—";
+  }
+  async function shipAction(action, order_id) {
+    if (demo) return alertView("Modo demo: acá se crearía el envío / se descargaría la etiqueta.");
+    const { data: { session } } = await be.sb.auth.getSession();
+    const r = await fetch(`${window.SITE_CONFIG.supabaseUrl}/functions/v1/andreani`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: window.SITE_CONFIG.supabaseAnonKey, Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ action, order_id }),
+    });
+    const data = await r.json();
+    if (!r.ok) return alertView(data.error || "Error");
+    if (action === "label") {
+      const bytes = Uint8Array.from(atob(data.pdf), (c) => c.charCodeAt(0));
+      window.open(URL.createObjectURL(new Blob([bytes], { type: "application/pdf" })), "_blank");
+    } else route();
+  }
+  const alertView = (msg) => $("view").insertAdjacentHTML("afterbegin", `<p class="notice info">${esc(msg)}</p>`);
+  $("view").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ship],[data-label]");
+    if (b) shipAction(b.dataset.ship ? "create" : "label", Number(b.dataset.ship || b.dataset.label));
+  });
+
   async function load(kind) {
     if (demo) return DEMO[kind];
     const q = {
-      orders: () => be.sb.from("orders").select("id, created_at, status, total, customer:profiles(full_name)").order("created_at", { ascending: false }),
+      orders: () => be.sb.from("orders").select("id, created_at, status, total, andreani_number, customer:profiles(full_name)").order("created_at", { ascending: false }),
       products: () => be.sb.from("products").select("id, name, price, stock, show_stock, active").order("name"),
       users: () => be.sb.rpc("admin_list_users"),
       roles: () => be.sb.rpc("admin_list_roles"),
