@@ -1,6 +1,6 @@
 # exe.com.ar
 
-Tienda de hardware y equipos gamer. Migración del WordPress/WooCommerce original a un sitio estático alojado gratis en GitHub Pages, con backend opcional en Supabase.
+Tienda de hardware y componentes de PC. Migración del WordPress/WooCommerce original a un sitio estático alojado gratis en GitHub Pages, con backend opcional en Supabase.
 
 ## Estructura
 
@@ -18,7 +18,7 @@ exe.com.ar/
 ├── supabase/
 │   ├── migrations/0001_schema.sql   Usuarios, roles, permisos, productos, stock, pedidos, seguridad
 │   └── functions/                   mp-webhook (pagos) · send-email (emails automáticos)
-├── docs/                     ARQUITECTURA · ROLES-Y-PERMISOS · MIGRACION-WORDPRESS
+├── docs/                     ARQUITECTURA · ROLES-Y-PERMISOS · MIGRACION-WORDPRESS · DECISIONES
 └── .github/workflows/pages.yml      Publica site/ en GitHub Pages en cada push a main
 ```
 

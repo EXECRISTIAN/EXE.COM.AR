@@ -5,6 +5,7 @@
   const $ = (id) => document.getElementById(id);
   const money = (n) =>
     new Intl.NumberFormat(cfg.locale, { style: "currency", currency: cfg.currency, maximumFractionDigits: 0 }).format(n);
+  const mainImg = (p) => (p.images && p.images[0]) || p.image || PLACEHOLDER;
   const priceLabel = (p) => (p.price > 0 ? money(p.price) : "Consultar");
   const esc = (s) =>
     String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -57,7 +58,8 @@
           return `
           <article class="card reveal" style="--d:${(i % 4) * 0.08}s">
             <div class="card-media">
-              <img src="${esc(p.image || PLACEHOLDER)}" alt="${esc(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
+              <img src="${esc(mainImg(p))}" alt="${esc(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
+              ${p.images && p.images[1] ? `<img class="alt" src="${esc(p.images[1])}" alt="" loading="lazy">` : ""}
               ${p.category ? `<span class="tag">${esc(p.category)}</span>` : ""}
             </div>
             <div class="card-body">
@@ -101,7 +103,7 @@
     $("cartItems").innerHTML = lines.length
       ? lines.map((l, i) => `
         <li>
-          <img src="${esc(l.product.image || PLACEHOLDER)}" alt="" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
+          <img src="${esc(mainImg(l.product))}" alt="" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
           <div class="info">${esc(l.product.name)}
             <small>${l.variant ? esc(l.variant) + " · " : ""}${priceLabel(l.product)}</small>
           </div>
@@ -197,20 +199,32 @@
   }, { rootMargin: "-45% 0px -50% 0px" });
   navLinks.forEach((a) => { const s = document.querySelector(a.hash); if (s) spy.observe(s); });
 
-  /* ---------- Carrusel hero ---------- */
-  const slides = [...document.querySelectorAll(".hero .slide")];
+  /* ---------- Carrusel principal ---------- */
+  const track = $("heroTrack");
+  const slideCount = track.children.length;
   let current = 0;
   let timer;
-  $("dots").innerHTML = slides.map((_, i) => `<button aria-label="Slide ${i + 1}"${i === 0 ? ' class="active"' : ""}></button>`).join("");
+  $("dots").innerHTML = [...track.children].map((_, i) => `<button aria-label="Imagen ${i + 1}"${i === 0 ? ' class="active"' : ""}></button>`).join("");
   const dots = [...$("dots").children];
   function go(i) {
-    slides[current].classList.remove("active"); dots[current].classList.remove("active");
-    current = (i + slides.length) % slides.length;
-    slides[current].classList.add("active"); dots[current].classList.add("active");
+    current = (i + slideCount) % slideCount;
+    track.style.transform = `translateX(-${current * 100}%)`;
+    dots.forEach((d, k) => d.classList.toggle("active", k === current));
   }
-  const play = () => { clearInterval(timer); timer = setInterval(() => go(current + 1), 6000); };
+  const play = () => { clearInterval(timer); timer = setInterval(() => go(current + 1), 5000); };
   dots.forEach((d, i) => d.addEventListener("click", () => { go(i); play(); }));
-  if (slides.length > 1) play();
+  $("heroPrev").onclick = () => { go(current - 1); play(); };
+  $("heroNext").onclick = () => { go(current + 1); play(); };
+  // Deslizar con el dedo en celulares
+  let touchX = null;
+  track.addEventListener("touchstart", (e) => (touchX = e.touches[0].clientX), { passive: true });
+  track.addEventListener("touchend", (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 40) { go(current + (dx < 0 ? 1 : -1)); play(); }
+    touchX = null;
+  });
+  if (slideCount > 1) play();
 
   /* ---------- Animaciones de entrada ---------- */
   const revealer = new IntersectionObserver((entries) => {
@@ -222,14 +236,15 @@
   observeReveals();
 
   /* ---------- Contenido de config ---------- */
-  const brands = cfg.brands || [];
-  $("marquee").innerHTML = [...brands, ...brands].map((b) => `<span>${esc(b)}</span>`).join("");
+  const logos = cfg.brandLogos || [];
+  $("logos").innerHTML = [...logos, ...logos]
+    .map((l) => `<img src="${esc(l.src)}" alt="${esc(l.name)}" title="${esc(l.name)}" loading="lazy">`).join("");
   const waHello = waLink("Hola EXE! Quería hacer una consulta.");
   $("waDirect").href = waHello; $("waFloat").href = waHello; $("waFooter").href = waHello;
   $("mailFooter").href = `mailto:${cfg.email}`; $("mailFooter").textContent = cfg.email;
   $("socials").innerHTML = Object.entries(cfg.socials || {})
     .filter(([, url]) => url)
-    .map(([name, url]) => `<a class="btn btn-ghost" href="${esc(url)}" target="_blank" rel="noopener">${esc(name)}</a>`).join("");
+    .map(([name, url]) => `<a class="btn btn-outline" href="${esc(url)}" target="_blank" rel="noopener">${esc(name)}</a>`).join("");
   $("year").textContent = new Date().getFullYear();
 
   /* ---------- Datos ---------- */

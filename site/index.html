@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EXE | Hardware y equipos gamer</title>
-  <meta name="description" content="EXE: placas de video, motherboards, monitores, fuentes, gabinetes y periféricos. Armá tu pedido y envialo por WhatsApp.">
-  <meta name="theme-color" content="#07090d">
-  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <title>EXE | Hardware y componentes de PC</title>
+  <meta name="description" content="EXE: procesadores, placas de video, motherboards, fuentes, gabinetes y más. Armá tu pedido y envialo por WhatsApp.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="assets/img/favicon.jpg" type="image/jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap">
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
   <!-- ===== Header ===== -->
   <header class="site-header" id="header">
     <div class="container header-inner">
-      <a href="#" class="logo" aria-label="EXE inicio"><span class="logo-mark">EXE</span></a>
+      <a href="#inicio" class="logo" aria-label="EXE inicio"><img src="assets/img/logo.png" alt="EXE" width="106" height="55"></a>
       <nav class="nav" id="nav">
         <a href="#inicio" class="active">Inicio</a>
         <a href="#productos">Productos</a>
@@ -25,10 +25,10 @@
       </nav>
       <div class="header-actions">
         <a class="icon-btn" href="cuenta.html" aria-label="Mi cuenta">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
         </a>
         <button class="icon-btn" id="cartOpen" aria-label="Abrir carrito">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
           <span class="badge" id="cartCount">0</span>
         </button>
         <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menú">
@@ -39,41 +39,39 @@
   </header>
 
   <main>
-    <!-- ===== Hero carrusel (post-4387: 90b73e5) ===== -->
-    <section class="hero" id="inicio">
-      <div class="slide active"><img src="assets/img/hero-01.webp" alt="Setup gamer con PC y monitor"></div>
-      <div class="slide"><img src="assets/img/hero-02.webp" alt="Setup gamer iluminado"></div>
-      <div class="hero-content">
-        <div class="container">
-          <span class="eyebrow reveal">Hardware · Gaming · Setup</span>
-          <h1 class="reveal" style="--d:.1s">Armá tu equipo al siguiente nivel</h1>
-          <p class="reveal" style="--d:.2s">Placas de video, motherboards, monitores y todo lo que necesitás. Elegí, sumá al carrito y coordinamos por WhatsApp.</p>
-          <div class="hero-ctas reveal" style="--d:.3s">
-            <a href="#productos" class="btn btn-primary">Ver productos</a>
-            <a href="#contacto" class="btn btn-ghost">Contacto</a>
-          </div>
-        </div>
+    <!-- ===== Carrusel principal (39db343 / 90b73e5) ===== -->
+    <section class="hero" id="inicio" aria-roledescription="carrusel">
+      <div class="hero-track" id="heroTrack">
+        <div class="hero-slide"><img src="assets/img/hero-01.webp" alt="Setup gamer con PC, monitor y periféricos" width="1920" height="1080"></div>
+        <div class="hero-slide"><img src="assets/img/hero-02.webp" alt="Escritorio gamer iluminado" width="1920" height="1080" loading="lazy"></div>
       </div>
+      <button class="hero-arrow prev" id="heroPrev" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="hero-arrow next" id="heroNext" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5l7 7-7 7"/></svg></button>
       <div class="dots" id="dots"></div>
-      <div class="scroll-cue" aria-hidden="true"></div>
     </section>
 
-    <!-- ===== Banners de marca (9986b28) ===== -->
-    <section class="container brand-banners">
+    <!-- ===== Banners de marca (be97f60 / 9986b28) ===== -->
+    <section class="brand-banners">
       <article class="brand-card reveal">
-        <img src="assets/img/banner-marca-01.webp" alt="Serie ASUS GeForce RTX 4060" loading="lazy">
-        <h3>Placas de video</h3>
-        <a href="#productos" data-filter="Placas de video" class="btn btn-ghost">Ver más</a>
+        <picture>
+          <source media="(max-width: 767px)" srcset="assets/img/cel-300x300-01.webp">
+          <img src="assets/img/banner-marca-01.webp" alt="Serie ASUS GeForce RTX 4060: poderosas, frías, silenciosas" width="352" height="480" loading="lazy">
+        </picture>
+        <a href="#productos" data-filter="Placas de video" class="btn btn-banner">Ver más</a>
       </article>
-      <article class="brand-card reveal" style="--d:.15s">
-        <img src="assets/img/banner-marca-02.webp" alt="Monitores next-gen" loading="lazy">
-        <h3>Monitores</h3>
-        <a href="#productos" data-filter="Monitores" class="btn btn-ghost">Ver más</a>
+      <article class="brand-card reveal" style="--d:.12s">
+        <picture>
+          <source media="(max-width: 767px)" srcset="assets/img/cel-300x300-02.webp">
+          <img src="assets/img/banner-marca-02.webp" alt="Monitores next-gen, listos para la batalla" width="352" height="480" loading="lazy">
+        </picture>
+        <a href="#productos" data-filter="Monitores" class="btn btn-banner">Ver más</a>
       </article>
-      <article class="brand-card reveal" style="--d:.3s">
-        <img src="assets/img/banner-marca-03.webp" alt="Motherboards para AMD Ryzen serie 8000" loading="lazy">
-        <h3>Motherboards</h3>
-        <a href="#productos" data-filter="Motherboards" class="btn btn-ghost">Ver más</a>
+      <article class="brand-card reveal" style="--d:.24s">
+        <picture>
+          <source media="(max-width: 1024px)" srcset="assets/img/banner-tablet-01.webp">
+          <img src="assets/img/banner-marca-03.webp" alt="BIOS listo para procesadores AMD Ryzen serie 8000" width="352" height="480" loading="lazy">
+        </picture>
+        <a href="#productos" data-filter="Motherboards" class="btn btn-banner">Ver más</a>
       </article>
     </section>
 
@@ -82,7 +80,7 @@
       <div class="container">
         <div class="section-head reveal">
           <h2>Productos</h2>
-          <span class="divider wide"></span>
+          <span class="divider"></span>
           <p>Agregá lo que quieras al carrito y envianos el pedido por WhatsApp. Te confirmamos stock, precio final y envío.</p>
         </div>
         <input class="search reveal" id="search" type="search" placeholder="Buscar producto o marca…" aria-label="Buscar">
@@ -91,47 +89,44 @@
       </div>
     </section>
 
-    <!-- ===== Marcas / Nosotros (1d45057 + 957d0fb + 37e1671) ===== -->
-    <section class="section section-alt" id="marcas">
+    <!-- ===== Marcas (1d45057 / 957d0fb / 37e1671 / df67cbb) ===== -->
+    <section class="brands" id="marcas">
       <div class="container">
-        <div class="section-head reveal">
-          <h2>Trabajamos con las mejores marcas</h2>
-          <span class="divider wide"></span>
-          <p>Texto institucional pendiente de migrar desde la base de datos de WordPress.</p>
-        </div>
-        <div class="wide-banner reveal zoom">
-          <img src="assets/img/banner-inferior-01.webp" alt="Motherboards series 500 y 400" loading="lazy">
+        <h2 class="reveal">Las mejores marcas</h2>
+        <span class="divider reveal"></span>
+        <p class="brands-text reveal">Trabajamos con las marcas líderes en hardware para que armes o mejores tu PC con productos originales y garantía oficial.</p>
+        <a href="#productos" data-filter="Motherboards" class="wide-banner reveal zoom" aria-label="Motherboards ASUS series 500 y 400">
           <span class="shine"></span>
-        </div>
+        </a>
         <div class="features">
           <div class="feature reveal">
-            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></div>
+            <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12h24v20H4zM28 18h8l6 6v8H28"/><circle cx="12" cy="36" r="4"/><circle cx="34" cy="36" r="4"/></svg>
             <h3>Envíos a todo el país</h3>
             <p>Coordinamos el envío o retiro al confirmar tu pedido.</p>
           </div>
-          <div class="feature reveal" style="--d:.15s">
-            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="feature reveal" style="--d:.12s">
+            <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M24 5l16 6v12c0 10-7 16-16 19-9-3-16-9-16-19V11z"/><path d="M17 24l5 5 9-10"/></svg>
             <h3>Garantía oficial</h3>
             <p>Productos nuevos, originales y con garantía.</p>
           </div>
-          <div class="feature reveal" style="--d:.3s">
-            <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg></div>
+          <div class="feature reveal" style="--d:.24s">
+            <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="4" y="10" width="40" height="28" rx="4"/><path d="M4 19h40M11 30h9"/></svg>
             <h3>Medios de pago</h3>
             <p>Transferencia, efectivo y más. Consultanos.</p>
           </div>
         </div>
       </div>
-      <div class="marquee" aria-label="Marcas">
-        <div class="marquee-track" id="marquee"></div>
+      <div class="logos" aria-label="Marcas con las que trabajamos">
+        <div class="logos-track" id="logos"></div>
       </div>
     </section>
 
     <!-- ===== Contacto ===== -->
-    <section class="section" id="contacto">
+    <section class="section contact" id="contacto">
       <div class="container">
-        <div class="cta reveal zoom">
+        <div class="contact-card reveal zoom">
           <h2>¿Tenés dudas o querés armar tu PC?</h2>
-          <span class="divider"></span>
+          <span class="divider short"></span>
           <p>Escribinos y te asesoramos para elegir los componentes ideales.</p>
           <a class="btn btn-primary" id="waDirect" target="_blank" rel="noopener">Hablar por WhatsApp</a>
           <div class="socials" id="socials"></div>
@@ -145,8 +140,8 @@
     <div class="container">
       <div class="footer-grid">
         <div>
-          <a href="#" class="logo"><span class="logo-mark">EXE</span></a>
-          <p style="margin-top:12px;max-width:360px">Hardware, componentes y periféricos gamer.</p>
+          <a href="#inicio" class="logo"><img src="assets/img/logo-blanco.png" alt="EXE" width="113" height="50" loading="lazy"></a>
+          <p style="margin-top:14px;max-width:360px">Hardware, componentes y periféricos para armar tu PC.</p>
         </div>
         <div>
           <h4>Tienda</h4>

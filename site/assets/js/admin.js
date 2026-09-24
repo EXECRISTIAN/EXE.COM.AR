@@ -17,7 +17,7 @@
       { id: 1044, created_at: "2026-09-23", customer: "Leo Díaz", status: "cancelled", total: 15000 },
     ],
     products: [
-      { id: "gabinete-antec-nx200m-white", name: "Gabinete Antec NX200M White", price: 0, stock: 5, show_stock: true, active: true },
+      { id: "gabinete-antec-nx200m-white", name: "Gabinete Antec NX200M White Vidrio Templado", price: 0, stock: 5, show_stock: true, active: true },
       { id: "cooler-deepcool-ag400-plus", name: "Cooler DeepCool AG400 PLUS", price: 0, stock: 0, show_stock: true, active: true },
     ],
     users: [{ email: "admin@exe.com.ar", full_name: "Administrador", roles: ["administrador"] }, { email: "cliente@mail.com", full_name: "Cliente", roles: ["suscriptor"] }],

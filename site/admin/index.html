@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Panel | EXE</title>
   <meta name="robots" content="noindex, nofollow">
-  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="../assets/img/favicon.jpg" type="image/jpeg">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap">
   <link rel="stylesheet" href="../assets/css/styles.css">
   <link rel="stylesheet" href="../assets/css/panel.css">
@@ -18,7 +18,7 @@
       <p class="notice info" id="gateMsg">Verificando permisos…</p>
       <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
         <a class="btn btn-primary" href="../cuenta.html">Ingresar</a>
-        <a class="btn btn-ghost" href="?demo=1" id="demoLink" hidden>Ver demo del diseño</a>
+        <a class="btn btn-outline" href="?demo=1" id="demoLink" hidden>Ver demo del diseño</a>
       </div>
     </div>
   </main>
@@ -26,7 +26,7 @@
   <!-- Panel (solo se muestra con permiso dashboard.access; los datos igual están protegidos por RLS en la base) -->
   <div class="admin" id="app" hidden>
     <aside class="sidebar">
-      <a href="../index.html" class="logo"><span class="logo-mark">EXE</span></a>
+      <a href="../index.html" class="logo"><img src="../assets/img/logo.png" alt="EXE" width="106" height="55"></a>
       <nav class="side-nav" id="sideNav">
         <a href="#resumen" data-perm="dashboard.access" class="active">📊 Resumen</a>
         <a href="#pedidos" data-perm="orders.read">🧾 Pedidos</a>
@@ -39,7 +39,7 @@
     <main class="admin-main">
       <div class="admin-top">
         <h1 id="viewTitle" style="margin:0">Resumen</h1>
-        <div><span id="me" style="color:var(--c3);margin-right:12px"></span><button class="btn btn-ghost" id="logout">Salir</button></div>
+        <div><span id="me" style="color:var(--c3);margin-right:12px"></span><button class="btn btn-outline" id="logout">Salir</button></div>
       </div>
       <p class="notice info" id="demoBanner" hidden>Modo demo: datos de ejemplo, sin conexión a la base de datos.</p>
       <div id="view"></div>
