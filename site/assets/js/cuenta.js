@@ -61,10 +61,10 @@
     $("who").textContent = user.user_metadata?.full_name || user.email;
     const perms = await be.permissions().catch(() => new Set());
     $("dashLink").hidden = !perms.has("dashboard.access");
-    const { data: orders } = await sb.from("orders").select("id, created_at, status, total, andreani_number").order("created_at", { ascending: false });
+    const { data: orders } = await sb.from("orders").select("id, created_at, status, total, carrier, tracking_number").order("created_at", { ascending: false });
     $("orders").innerHTML = orders?.length
       ? `<table class="table"><tr><th>Pedido</th><th>Fecha</th><th>Estado</th><th>Total</th><th>Envío</th></tr>${orders
-          .map((o) => `<tr><td>#${esc(o.id)}</td><td>${new Date(o.created_at).toLocaleDateString("es-AR")}</td><td><span class="pill ${esc(o.status)}">${esc(o.status)}</span></td><td>$${Number(o.total).toLocaleString("es-AR")}</td><td>${o.andreani_number ? `<a href="https://www.andreani.com/#!/informacionEnvio/${encodeURIComponent(o.andreani_number)}" target="_blank" rel="noopener">Seguir ${esc(o.andreani_number)}</a>` : "—"}</td></tr>`)
+          .map((o) => `<tr><td>#${esc(o.id)}</td><td>${new Date(o.created_at).toLocaleDateString("es-AR")}</td><td><span class="pill ${esc(o.status)}">${esc(o.status)}</span></td><td>$${Number(o.total).toLocaleString("es-AR")}</td><td>${o.tracking_number ? `${esc(o.carrier || "")} <a href="https://envia.com/es-AR/rastreo?label=${encodeURIComponent(o.tracking_number)}" target="_blank" rel="noopener">Seguir ${esc(o.tracking_number)}</a>` : "—"}</td></tr>`)
           .join("")}</table>`
       : `<p class="notice info">Todavía no tenés pedidos.</p>`;
   }

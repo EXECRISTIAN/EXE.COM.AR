@@ -35,8 +35,9 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 23. **Pedidos**: el navegador no puede crearlos ni modificarlos directamente; los precios los pone la base y "pagado" solo lo marca el webhook de Mercado Pago o un permiso específico, con auditoría.
 24. **Panel**: `/admin/` (vista previa en `/admin/?demo=1`).
 
-## Envíos (Andreani)
-25. **Andreani vía Edge Function de Supabase**: las credenciales no pueden estar en un sitio estático, así que todas las llamadas pasan por `supabase/functions/andreani`. Detalle en `docs/ANDREANI.md`.
-26. **Cotización en el carrito, apagada por defecto** (`andreani.enabled: false` en `config.js`). Muestra domicilio y sucursal; el costo va en el WhatsApp como "estimado". Mientras no haya pago online, el envío se confirma por WhatsApp.
-27. **Crear envío solo con pedido pagado** y permiso `shipping.manage` (administrador y moderador). Evita generar guías de pedidos falsos.
-28. **Peso por defecto 1 kg** por producto hasta que cargues el real (`weight_kg`). Cambiar en la tabla `products`.
+## Envíos (Envia.com)
+25. **Envia.com en lugar de Andreani directo** (pedido tuyo): una sola cuenta cotiza y genera guías de varios transportistas. Todo pasa por la Edge Function `supabase/functions/envios` porque el token no puede estar en un sitio público. Detalle en `docs/ENVIOS.md`. Se eliminó la integración directa con Andreani.
+26. **Cotización en el carrito, apagada por defecto** (`shipping.enabled: false` en `config.js`). Muestra todas las opciones ordenadas por precio; la elegida va en el WhatsApp como "estimada".
+27. **Crear envío solo con pedido pagado** y permiso `shipping.manage` (administrador y moderador). Evita generar guías (que cuestan saldo) para pedidos falsos.
+28. **Peso por defecto 1 kg y caja 30×20×15 cm** por producto hasta que cargues los reales. Cambiar en la tabla `products`.
+29. **Transportistas a cotizar**: se eligen con el secret `ENVIA_CARRIERS` (sugerido: `andreani,correo-argentino,oca`).

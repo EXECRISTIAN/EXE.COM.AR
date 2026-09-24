@@ -27,8 +27,9 @@ window.SITE_CONFIG = {
     facebook: "",
   },
 
-  // Envíos con Andreani: cotización en el carrito. Requiere Supabase + la función "andreani" (ver docs/ANDREANI.md).
-  andreani: { enabled: false },
+  // Envíos con Envia.com (Andreani, Correo Argentino, OCA…): cotización en el carrito.
+  // Requiere Supabase + la función "envios" (ver docs/ENVIOS.md).
+  shipping: { enabled: false },
 
   // Backend (Supabase). Dejar vacío hasta crear el proyecto: el sitio funciona igual en modo estático.
   supabaseUrl: "",
