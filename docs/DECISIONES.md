@@ -26,7 +26,7 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 16. **Productos cargados** (10), identificados por las fotos del backup: Intel Core i5, Intel Core i7, AMD Ryzen 7, AMD Ryzen 5, Motherboard ASUS Prime, Placa MSI GeForce GTX Ventus XS (el archivo decía "rtx1660-asus" pero la foto es MSI), Gabinete Antec NX200M, Fuente Aerocool Cylon 600W, Memoria T-Force Delta, Cooler DeepCool AG400. Cambiar: `site/data/products.json`.
 17. **Precios en 0 = "Consultar"** (no había precios en el backup).
 18. **Stock de ejemplo** (números inventados para mostrar cómo funciona; el cooler en 0 para mostrar "Sin stock"). La placa MSI tiene `showStock: false` como ejemplo de stock oculto.
-19. **Carrito → WhatsApp** con número de ejemplo `5490000000000`. Cambiar en `site/assets/js/config.js`.
+19. **Carrito → WhatsApp** al número 11 3009-5254 (formato internacional `5491130095254`). Cambiar en `site/assets/js/config.js`.
 20. **Al agregar al carrito** se muestra un aviso en vez de abrir el carrito, para poder seguir comprando.
 
 ## Usuarios, seguridad y backend
