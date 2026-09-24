@@ -34,3 +34,4 @@ exe.com.ar/
 2. Custom domain: `exe.com.ar`; en el DNS del dominio apuntar registros A a GitHub Pages y `www` (CNAME) a `execristian.github.io`.
 
 Más detalle en [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md).
+- `docs/ANDREANI.md`: envíos con Andreani.

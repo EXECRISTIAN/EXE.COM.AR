@@ -117,8 +117,48 @@
     return { lines, total, hasConsult };
   }
 
+  // ---------- Envío (Andreani) ----------
+  let shipping = null; // { method, cp, cost }
+  const shipOn = cfg.andreani?.enabled && cfg.supabaseUrl && cfg.supabaseAnonKey;
+  if (shipOn) $("ship").hidden = false;
+  async function andreani(payload) {
+    const r = await fetch(`${cfg.supabaseUrl}/functions/v1/andreani`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: cfg.supabaseAnonKey, Authorization: `Bearer ${cfg.supabaseAnonKey}` },
+      body: JSON.stringify(payload),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "Error al cotizar");
+    return data;
+  }
+  function renderShip(q) {
+    const opts = [["domicilio", "A domicilio"], ["sucursal", "Retiro en sucursal Andreani"]].filter(([k]) => q[k] != null);
+    $("shipOpts").innerHTML = opts.length
+      ? opts.map(([k, label]) => `<label><input type="radio" name="ship" value="${k}" data-cost="${q[k]}"> ${label} <b>${money(q[k])}</b></label>`).join("")
+      : `<small>No hay tarifas para ese código postal. Te cotizamos por WhatsApp.</small>`;
+  }
+  if (shipOn) {
+    $("shipQuote").onclick = async () => {
+      const cp = $("shipCp").value.trim();
+      if (!/^\d{4}$/.test(cp)) return toast("Ingresá un código postal de 4 dígitos");
+      if (!cart.length) return toast("Agregá productos al carrito");
+      $("shipQuote").disabled = true; shipping = null;
+      $("shipOpts").innerHTML = "<small>Cotizando…</small>";
+      try { renderShip(await andreani({ action: "quote", cp, items: cart.map((l) => ({ id: l.id, qty: l.qty })) })); }
+      catch (e) { $("shipOpts").innerHTML = `<small>${esc(e.message)}</small>`; }
+      finally { $("shipQuote").disabled = false; }
+    };
+    $("shipOpts").onchange = (e) => {
+      shipping = { method: e.target.value, cp: $("shipCp").value.trim(), cost: Number(e.target.dataset.cost), sig: cartSig() };
+    };
+  }
+
+  const cartSig = () => cart.map((l) => `${l.id}:${l.variant || ""}:${l.qty}`).join("|");
+
   function buildMessage() {
     const { lines, total, hasConsult } = renderCart();
+    // Si el carrito cambió después de cotizar, la tarifa ya no vale.
+    if (shipping && shipping.sig !== cartSig()) { shipping = null; $("shipOpts").innerHTML = "<small>El carrito cambió: volvé a calcular el envío.</small>"; }
     const name = $("customerName").value.trim();
     const note = $("customerNote").value.trim();
     const rows = lines.map((l) => {
@@ -131,6 +171,7 @@
       ...rows,
       "",
       total ? `*Total estimado: ${money(total)}*${hasConsult ? " (+ productos a consultar)" : ""}` : "*Precio a consultar*",
+      shipping ? `Envío Andreani ${shipping.method === "sucursal" ? "a sucursal" : "a domicilio"} (CP ${shipping.cp}): ${money(shipping.cost)} — cotización estimada` : "",
       note ? `\nNota: ${note}` : "",
     ].join("\n").trim();
   }
@@ -179,7 +220,7 @@
   $("cartClose").onclick = () => toggleCart(false);
   $("overlay").onclick = () => toggleCart(false);
   document.addEventListener("keydown", (e) => e.key === "Escape" && toggleCart(false));
-  $("cartClear").onclick = () => { cart = []; save(); renderCart(); renderProducts(); };
+  $("cartClear").onclick = () => { cart = []; shipping = null; if (shipOn) $("shipOpts").innerHTML = ""; save(); renderCart(); renderProducts(); };
   $("sendWa").onclick = () => window.open(waLink(buildMessage()), "_blank", "noopener");
 
   /* ---------- Header / menú ---------- */
