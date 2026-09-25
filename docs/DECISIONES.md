@@ -18,7 +18,8 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 10. **Textos**: títulos y párrafos ("Productos", "Las mejores marcas", beneficios, contacto) son provisorios — los reales están en la base de datos.
 11. **Beneficios** (envíos, garantía, pagos): íconos SVG propios porque las imágenes originales de esas cajas no se identificaron.
 12. **Carrusel de logos**: 6 logos reales del backup (NVIDIA, AMD, Western Digital, ROG, Intel, HyperX), en gris y a color al pasar el mouse.
-13. **Header**: logo negro `logo-3.png`; footer oscuro con `logo-b.png` (blanco).
+13. **Header**: logo negro `logo-3.png`; footer oscuro con `logo-b.png` (blanco). Medidas copiadas de la portada original (medidas sobre tu captura): **80 px de alto**, contenido centrado de ~820 px, menú pegado al logo e íconos a la derecha. En modo oscuro el header queda negro con el logo blanco, como el original.
+    - **Banner principal**: todo el ancho, con la proporción del original (**1904×540**). Tus imágenes miden 1904×650, así que se recorta la franja vacía de arriba (queda anclada abajo) y el contenido queda igual que en la página de WordPress. Cambiar: `.hero-slide img` en `styles.css`.
 14. **Animaciones**: aparición al hacer scroll, zoom en banners, segunda foto del producto al pasar el mouse, brillo en el banner ancho, header que se achica. Se desactivan si el sistema tiene "reducir movimiento".
 15. **Imágenes**: convertidas a WebP (≈800 KB en total). Recuperadas del Drive exportando un Google Doc temporal (`exe-img-bundle`, `exe-img-test` en tu carpeta de Drive — se pueden borrar).
 
@@ -41,3 +42,11 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 27. **Crear envío solo con pedido pagado** y permiso `shipping.manage` (administrador y moderador). Evita generar guías (que cuestan saldo) para pedidos falsos.
 28. **Peso por defecto 1 kg y caja 30×20×15 cm** por producto hasta que cargues los reales. Cambiar en la tabla `products`.
 29. **Transportistas a cotizar**: se eligen con el secret `ENVIA_CARRIERS` (sugerido: `andreani,correo-argentino,oca`).
+
+## Modo claro / oscuro
+30. **Selector de 3 posiciones al pie de la página** (Claro · Automático · Oscuro), deslizante, junto al copyright. "Automático" sigue la configuración del sistema; es el valor por defecto.
+31. **Se recuerda la elección** en el navegador del visitante (`localStorage`), y se aplica en todas las páginas (tienda, Mi cuenta y panel) antes de dibujar, para que no parpadee.
+32. **Colores del modo oscuro**: fondos casi negros con un toque azul (`#0b0f16`, tarjetas `#151b25`), textos claros y el azul de la marca un poco más brillante para que se lea. Los botones azules usan un tono más profundo (`#1f6fd6`) para que el texto blanco contraste. Todo está en variables al inicio de `styles.css`.
+33. **Logo**: negro en modo claro y blanco en oscuro (`logo-oscuro.png`, generado del logo blanco original con el mismo tamaño y márgenes que el negro). Los logos de marcas se invierten a blanco en oscuro y recuperan su color al pasar el mouse.
+34. **Fotos de producto**: mantienen el fondo blanco en los dos modos, porque las fotos originales son sobre blanco y recortarlas se vería peor.
+

@@ -7,6 +7,8 @@
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="../assets/img/favicon.jpg" type="image/jpeg">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap">
+  <!-- Tema guardado (claro/oscuro); sin valor = automático según el sistema. Va antes del CSS para que no parpadee. -->
+  <script>try{var t=localStorage.getItem("exe-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
   <link rel="stylesheet" href="../assets/css/styles.css">
   <link rel="stylesheet" href="../assets/css/panel.css">
 </head>
@@ -26,7 +28,7 @@
   <!-- Panel (solo se muestra con permiso dashboard.access; los datos igual están protegidos por RLS en la base) -->
   <div class="admin" id="app" hidden>
     <aside class="sidebar">
-      <a href="../index.html" class="logo"><img src="../assets/img/logo.png" alt="EXE" width="106" height="55"></a>
+      <a href="../index.html" class="logo"><img class="logo-light" src="../assets/img/logo.png" alt="EXE" width="106" height="55"><img class="logo-dark" src="../assets/img/logo-oscuro.png" alt="EXE" width="106" height="55"></a>
       <nav class="side-nav" id="sideNav">
         <a href="#resumen" data-perm="dashboard.access" class="active">📊 Resumen</a>
         <a href="#pedidos" data-perm="orders.read">🧾 Pedidos</a>

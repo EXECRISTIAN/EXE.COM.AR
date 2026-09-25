@@ -225,6 +225,46 @@
   $("sendWa").onclick = () => window.open(waLink(buildMessage()), "_blank", "noopener");
 
   /* ---------- Header / menú ---------- */
+  // ---------- Tema: claro / automático / oscuro ----------
+  // "auto" no guarda nada y deja que el CSS siga al sistema (prefers-color-scheme).
+  const themeSwitch = $("themeSwitch");
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const MODES = ["light", "auto", "dark"];
+  const syncThemeMeta = () => {
+    const t = document.documentElement.dataset.theme;
+    const dark = t === "dark" || (t !== "light" && darkQuery.matches);
+    if (themeMeta) themeMeta.content = dark ? "#05070b" : "#ffffff";
+  };
+  function applyTheme(mode, save = true) {
+    const root = document.documentElement;
+    if (mode === "auto") delete root.dataset.theme; else root.dataset.theme = mode;
+    if (save) { try { mode === "auto" ? localStorage.removeItem("exe-theme") : localStorage.setItem("exe-theme", mode); } catch (e) {} }
+    themeSwitch.dataset.mode = mode;
+    themeSwitch.querySelectorAll("button").forEach((b) => {
+      const on = b.dataset.mode === mode;
+      b.setAttribute("aria-checked", String(on));
+      b.tabIndex = on ? 0 : -1;
+    });
+    syncThemeMeta();
+  }
+  let storedTheme = null;
+  try { storedTheme = localStorage.getItem("exe-theme"); } catch (e) {}
+  applyTheme(MODES.includes(storedTheme) ? storedTheme : "auto", false);
+  themeSwitch.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (b) applyTheme(b.dataset.mode);
+  });
+  themeSwitch.addEventListener("keydown", (e) => {
+    const step = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    const next = MODES[Math.min(2, Math.max(0, MODES.indexOf(themeSwitch.dataset.mode) + step))];
+    applyTheme(next);
+    themeSwitch.querySelector(`[data-mode="${next}"]`).focus();
+  });
+  darkQuery.addEventListener("change", syncThemeMeta);
+
   const header = $("header");
   const onScroll = () => header.classList.toggle("scrolled", window.scrollY > 40);
   window.addEventListener("scroll", onScroll, { passive: true });
