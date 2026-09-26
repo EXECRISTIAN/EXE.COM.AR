@@ -50,3 +50,7 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 33. **Logo**: negro en modo claro y blanco en oscuro (`logo-oscuro.png`, generado del logo blanco original con el mismo tamaño y márgenes que el negro). Los logos de marcas se invierten a blanco en oscuro y recuperan su color al pasar el mouse.
 34. **Fotos de producto**: mantienen el fondo blanco en los dos modos, porque las fotos originales son sobre blanco y recortarlas se vería peor.
 
+## Supabase
+35. **Proyecto `EXE.COM.AR`** (ref `sbayacwjvnxwktrhkgnk`, región São Paulo `sa-east-1`, plan gratis), creado el 26/09/2026. Migraciones `0001_schema.sql` y `0002_envios.sql` aplicadas desde Claude Code en tu PC.
+36. **El sitio usa la clave "publishable"** (la nueva recomendada por Supabase), no la anon JWT legacy. Las claves secretas (service_role / secret) nunca van en el repo.
+

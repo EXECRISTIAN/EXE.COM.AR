@@ -32,6 +32,7 @@ window.SITE_CONFIG = {
   shipping: { enabled: false },
 
   // Backend (Supabase). Dejar vacío hasta crear el proyecto: el sitio funciona igual en modo estático.
-  supabaseUrl: "",
-  supabaseAnonKey: "",
+  // Clave pública (publishable): es segura de exponer; los datos los protege la base con RLS.
+  supabaseUrl: "https://sbayacwjvnxwktrhkgnk.supabase.co",
+  supabaseAnonKey: "sb_publishable_vtcKfnXsn9UXQopzVFdAOQ_NFe4v4mK",
 };
