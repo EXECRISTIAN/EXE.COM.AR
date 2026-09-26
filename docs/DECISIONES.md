@@ -15,7 +15,7 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 7. **Tipografías**: Montserrat (títulos) + Inter (texto). Ambas estaban descargadas en `uploads/fonts`; no se sabe cuál usaba exactamente cada parte. Cambiar: `--font` y `--font-head` en `styles.css` y el link de Google Fonts en los HTML.
 8. **Carrusel principal**: solo imágenes, con flechas, puntos, autoplay de 5 s y deslizamiento. Imágenes: banners ASUS "Series 500 y 400" y "Z790" (1904×650) que pasaste vos. Las fotos `login-exe.com_.ar-*` del backup quedaron como fondo del login (`login-bg-01/02.webp`), y se pueden reusar en la pantalla de pago.
 9. **Banners de marca**: 3 tarjetas con el botón "Ver más" (texto elegido por mí; el real está en la base). En celular usan las imágenes `cel-300x300-*` y en tablet `banner-tablet-01`, igual que el original. Cada botón filtra el catálogo por categoría.
-10. **Textos**: títulos y párrafos ("Productos", "Las mejores marcas", beneficios, contacto) son provisorios — los reales están en la base de datos.
+10. **Textos**: ya son los reales de la portada de WordPress (exportación XML del 26/09/2026): "Productos destacados", botones "Placas de video" / "Monitores" / "Motherboards" y los beneficios "Envios a todo el País", "Los mejores precios", "Pagos Seguros". Se quitó el título inventado "Las mejores marcas". Siguen siendo míos: el texto bajo "Productos destacados" (explica el pedido por WhatsApp), la tarjeta de contacto y el footer.
 11. **Beneficios** (envíos, garantía, pagos): íconos SVG propios porque las imágenes originales de esas cajas no se identificaron.
 12. **Carrusel de logos**: 6 logos reales del backup (NVIDIA, AMD, Western Digital, ROG, Intel, HyperX), en gris y a color al pasar el mouse.
 13. **Header**: logo negro `logo-3.png`; footer oscuro con `logo-b.png` (blanco). Medidas copiadas de la portada original (medidas sobre tu captura): **80 px de alto**, contenido centrado de ~820 px, menú pegado al logo e íconos a la derecha. En modo oscuro el header queda negro con el logo blanco, como el original.
@@ -25,8 +25,8 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 
 ## Tienda
 16. **Productos cargados** (10), identificados por las fotos del backup: Intel Core i5, Intel Core i7, AMD Ryzen 7, AMD Ryzen 5, Motherboard ASUS Prime, Placa MSI GeForce GTX Ventus XS (el archivo decía "rtx1660-asus" pero la foto es MSI), Gabinete Antec NX200M, Fuente Aerocool Cylon 600W, Memoria T-Force Delta, Cooler DeepCool AG400. Cambiar: `site/data/products.json`.
-17. **Precios en 0 = "Consultar"** (no había precios en el backup).
-18. **Stock de ejemplo** (números inventados para mostrar cómo funciona; el cooler en 0 para mostrar "Sin stock"). La placa MSI tiene `showStock: false` como ejemplo de stock oculto.
+17. **Precios reales** de WooCommerce (exportación XML). Un precio en 0 se sigue mostrando como "Consultar".
+18. **Stock real**: en WordPress solo la placa MSI GTX 1650 tenía stock controlado (10 unidades); los demás figuraban "en stock" sin cantidad, así que no muestran número. Se quitaron los números de ejemplo para no mostrar datos falsos. La memoria T-Force se publica solo en Black, como en WordPress.
 19. **Carrito → WhatsApp** al número 11 3009-5254 (formato internacional `5491130095254`). Cambiar en `site/assets/js/config.js`.
 20. **Al agregar al carrito** se muestra un aviso en vez de abrir el carrito, para poder seguir comprando.
 
