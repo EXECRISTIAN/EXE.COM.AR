@@ -7,16 +7,17 @@
 
 :root {
   /* Paleta global de Astra (--ast-global-color-0 … 8) */
-  --c0: #046bd2;   /* acento: separadores, links */
-  --c1: #045cb4;   /* acento hover */
-  --c2: #1e293b;   /* títulos / hover de botones */
-  --c3: #334155;   /* texto */
-  --c4: #f0f5fa;   /* fondo de secciones */
-  --c5: #ffffff;   /* blanco */
-  --c6: #d1d5db;   /* bordes */
-  --c7: #111111;   /* oscuro */
+  /* Valores reales de la base de WordPress (astra-settings → global-color-palette, palette_1) */
+  --c0: #0084d6;   /* Theme Color: acento, separadores */
+  --c1: #0075be;   /* Link Hover Color */
+  --c2: #000000;   /* Heading Color */
+  --c3: #333333;   /* Text Color */
+  --c4: #f5f7f9;   /* Background Color: fondo de secciones */
+  --c5: #ffffff;   /* Extra Color 1 */
+  --c6: #e2e2e2;   /* border-color de Astra */
+  --c7: #000000;   /* Extra Color 3 */
   --heading: #383838;          /* ef219fc: color de títulos de sección */
-  --muted: #64748b;
+  --muted: #6b7280;
   --wa: #25d366;
 
   /* Superficies y líneas (se redefinen en modo oscuro) */
@@ -46,8 +47,8 @@
   --container: 1200px;         /* ancho de contenido de Astra */
   --header-h: 80px;            /* alto del header original (medido en exe.com.ar) */
   --ease: cubic-bezier(.2, .7, .2, 1);
-  --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-head: "Montserrat", var(--font);
+  --font: "Lato", system-ui, -apple-system, "Segoe UI", sans-serif;   /* body-font-family de Astra */
+  --font-head: var(--font);                                             /* headings-font-family: Lato 700 */
 }
 
 /* ---------- Modo oscuro ----------
@@ -82,7 +83,7 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: var(--header-h); }
 body { transition: background-color .3s, color .3s; margin: 0; font-family: var(--font); font-size: 16px; line-height: 1.65; color: var(--c3); background: var(--bg); -webkit-font-smoothing: antialiased; }
-h1, h2, h3, h4 { font-family: var(--font-head); color: var(--c2); line-height: 1.2; margin: 0 0 .5em; font-weight: 600; }
+h1, h2, h3, h4 { font-family: var(--font-head); color: var(--c2); line-height: 1.2; margin: 0 0 .5em; font-weight: 700; }
 p { margin: 0 0 1em; }
 img { max-width: 100%; display: block; }
 a { color: var(--c0); text-decoration: none; }
@@ -91,7 +92,8 @@ button { font: inherit; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
 /* ---------- Botones ---------- */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: .5em; padding: 15px 30px; border-radius: 4px;
+/* Astra: theme-button-padding 10×20, button-radius 15 */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .5em; padding: 12px 24px; border-radius: 15px;
   font-weight: 500; line-height: 1; cursor: pointer; border: 2px solid transparent;
   transition: background .3s, color .3s, border-color .3s, transform .3s var(--ease), box-shadow .3s; }
 .btn-primary { background: var(--accent-bg); color: var(--on-accent); }
