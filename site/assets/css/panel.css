@@ -233,62 +233,8 @@
 .st-img-row .pr-in { flex: 1; width: auto; }
 .st-listed { display: grid; gap: 10px; }
 
-/* ---- Botón "Ir a mi cuenta": aurora, órbitas, inclinación 3D y chispas ---- */
-@property --acc-ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-.my-acc {
-  position: relative; isolation: isolate; overflow: hidden;
-  display: flex; align-items: center; gap: 12px; justify-content: flex-start;
-  padding: 10px 16px; border: 0; cursor: pointer; color: var(--c2);
-  background:
-    radial-gradient(120px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,.18), transparent 60%) padding-box,
-    linear-gradient(var(--surface), var(--surface)) padding-box,
-    conic-gradient(from var(--acc-ang), #00e0ff, #7c4dff, #ff3d9a, #ffb300, #00e676, #00e0ff) border-box;
-  border: 2px solid transparent; border-radius: 14px;
-  transform: perspective(600px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-  transition: transform .15s ease, box-shadow .3s ease;
-  animation: acc-spin 6s linear infinite, acc-glow 4s ease-in-out infinite;
-}
-.my-acc::after {
-  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,.35) 50%, transparent 65%);
-  transform: translateX(-120%); animation: acc-shine 5s ease-in-out infinite 1s;
-}
-.my-acc:hover { box-shadow: 0 8px 26px rgba(124, 77, 255, .35); }
-.my-acc:active { transform: perspective(600px) scale(.97); }
-.my-acc-avatar {
-  position: relative; flex: none; width: 38px; height: 38px; border-radius: 50%;
-  display: grid; place-items: center; font-weight: 800; font-size: .9rem; color: #fff;
-  background: linear-gradient(135deg, #7c4dff, #00b8d4);
-  animation: acc-breathe 3s ease-in-out infinite;
-}
-.my-acc-avatar.big { width: 64px; height: 64px; font-size: 1.4rem; }
-.my-acc-orbit { position: absolute; left: 16px; top: 50%; width: 38px; height: 38px; margin-top: -19px; pointer-events: none; }
-.my-acc-orbit i {
-  position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; margin: -2.5px; border-radius: 50%;
-  background: #ffb300; box-shadow: 0 0 6px currentColor; animation: acc-orbit 3s linear infinite;
-}
-.my-acc-orbit i:nth-child(2) { background: #ff3d9a; animation-duration: 4.2s; animation-direction: reverse; }
-.my-acc-orbit i:nth-child(3) { background: #00e676; animation-duration: 5.4s; }
-.my-acc-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; }
-.my-acc-text b { font-size: .98rem; }
-.my-acc-text small { font-size: .75rem; color: var(--muted); transition: opacity .3s, transform .3s; }
-.my-acc-text small.out { opacity: 0; transform: translateY(6px); }
-.my-acc-ripple {
-  position: absolute; width: 20px; height: 20px; margin: -10px; border-radius: 50%; pointer-events: none;
-  background: rgba(124, 77, 255, .45); animation: acc-ripple .7s ease-out forwards;
-}
-.my-acc-spark {
-  position: fixed; width: 6px; height: 6px; margin: -3px; border-radius: 50%; pointer-events: none; z-index: 9999;
-  animation: acc-spark .8s ease-out forwards;
-}
-@keyframes acc-spin { to { --acc-ang: 360deg; } }
-@keyframes acc-glow { 50% { box-shadow: 0 0 18px rgba(0, 224, 255, .3); } }
-@keyframes acc-shine { 0%, 60% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
-@keyframes acc-breathe { 50% { box-shadow: 0 0 0 5px rgba(124, 77, 255, .2); } }
-@keyframes acc-orbit { from { transform: rotate(0) translateX(24px); } to { transform: rotate(360deg) translateX(24px); } }
-@keyframes acc-ripple { to { transform: scale(18); opacity: 0; } }
-@keyframes acc-spark { to { transform: translate(var(--dx), var(--dy)) scale(.2); opacity: 0; } }
-
+/* ---- Ventana "Mi cuenta" ---- */
+.my-acc-avatar { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #fff; background: linear-gradient(135deg, #7c4dff, #00b8d4); }
 .acc-dlg { width: min(420px, calc(100% - 32px)); position: relative; }
 .acc-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; text-align: left; }
 .acc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
@@ -296,8 +242,6 @@
 .acc-dlg label { display: grid; gap: 4px; margin-bottom: 10px; text-align: left; font-size: .85rem; }
 .acc-close { position: absolute; top: 8px; right: 10px; border: 0; background: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); }
 
-@media (prefers-reduced-motion: reduce) {
-  .my-acc, .my-acc::after, .my-acc-avatar, .my-acc-orbit i { animation: none; }
-  .my-acc { transform: none; }
-  .my-acc-orbit { display: none; }
-}
+.acc-stats b, .acc-stats small { display: block; }
+.acc-stats b { font-size: 1.1rem; color: var(--c2); }
+.acc-stats small { font-size: .78rem; color: var(--muted); }

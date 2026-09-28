@@ -125,43 +125,12 @@
     if (logoutDialog.returnValue === "ok") { await sb.auth.signOut(); render(); }
   });
 
-  /* ---------- Botón "Ir a mi cuenta" (animado) y ventana de datos ---------- */
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* ---------- Botón "Ir a mi cuenta" y ventana de datos ---------- */
   const initials = (name) => (String(name || "?").trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("") || "?").toUpperCase();
-  const myBtn = $("myAccBtn"), hints = ["Tus datos", "Tus pedidos", "Tu seguridad", "Tu perfil"];
-  let hintI = 0;
-  if (!reduce) setInterval(() => {
-    const h = $("myAccHint"); if (!h || $("logged").hidden) return;
-    h.classList.add("out");
-    setTimeout(() => { hintI = (hintI + 1) % hints.length; h.textContent = hints[hintI]; h.classList.remove("out"); }, 250);
-  }, 2600);
-  // Inclinación 3D siguiendo el mouse + brillo que acompaña al puntero
-  myBtn.addEventListener("pointermove", (e) => {
-    if (reduce) return;
-    const r = myBtn.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-    myBtn.style.setProperty("--rx", `${(0.5 - y) * 14}deg`); myBtn.style.setProperty("--ry", `${(x - 0.5) * 18}deg`);
-    myBtn.style.setProperty("--mx", `${x * 100}%`); myBtn.style.setProperty("--my", `${y * 100}%`);
-  });
-  myBtn.addEventListener("pointerleave", () => { myBtn.style.setProperty("--rx", "0deg"); myBtn.style.setProperty("--ry", "0deg"); });
-  // Al tocar: onda + chispas de colores
-  function burst(e) {
-    if (reduce) return;
-    const r = myBtn.getBoundingClientRect();
-    const cx = (e.clientX || r.left + r.width / 2) - r.left, cy = (e.clientY || r.top + r.height / 2) - r.top;
-    const ring = document.createElement("span"); ring.className = "my-acc-ripple"; ring.style.left = cx + "px"; ring.style.top = cy + "px";
-    myBtn.appendChild(ring); setTimeout(() => ring.remove(), 700);
-    const colors = ["#0084d6", "#22c55e", "#f59e0b", "#a855f7", "#ec4899", "#06b6d4"];
-    for (let i = 0; i < 16; i++) {
-      const p = document.createElement("span"); p.className = "my-acc-spark";
-      const a = (Math.PI * 2 * i) / 16, d = 40 + Math.random() * 40;
-      p.style.cssText = `left:${r.left + cx}px;top:${r.top + cy}px;background:${colors[i % colors.length]};--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px`;
-      document.body.appendChild(p); setTimeout(() => p.remove(), 800);
-    }
-  }
+  const myBtn = $("myAccBtn");
   const accDialog = $("accDialog"), accForm = $("accForm");
   const accMsg = (t, k) => { const m = $("accMsg"); m.hidden = !t; m.className = `notice ${k}`; m.textContent = t || ""; };
-  myBtn.addEventListener("click", async (e) => {
-    burst(e);
+  myBtn.addEventListener("click", async () => {
     const user = await be.user(); if (!user) return;
     const { data: prof } = await sb.from("profiles").select("full_name, phone, email, created_at, email_verified_at").eq("id", user.id).maybeSingle();
     const { count } = await sb.from("orders").select("id", { count: "exact", head: true }).eq("user_id", user.id);
@@ -170,9 +139,9 @@
     $("accInitials").textContent = initials(accForm.full_name.value || user.email);
     $("accSince").textContent = `Cliente desde ${new Date(prof?.created_at || user.created_at).toLocaleDateString("es-AR", { month: "long", year: "numeric" })}`;
     $("accOrders").textContent = count || 0;
-    $("accVerified").textContent = prof?.email_verified_at || user.email_confirmed_at ? "✔ verificado" : "sin verificar";
+    $("accVerified").textContent = prof?.email_verified_at || user.email_confirmed_at ? "✔ Verificado" : "Sin verificar";
     accMsg("");
-    setTimeout(() => accDialog.showModal(), reduce ? 0 : 180);
+    accDialog.showModal();
   });
   $("accClose").onclick = () => accDialog.close();
   accDialog.addEventListener("click", (e) => { if (e.target === accDialog) accDialog.close(); });
@@ -184,7 +153,7 @@
     if (error) return accMsg("No se pudo guardar. Probá de nuevo.", "error");
     await sb.auth.updateUser({ data: { full_name } }).catch(() => {});
     accMsg("¡Datos guardados!", "ok");
-    $("who").textContent = full_name || user.email; $("myAccInitials").textContent = $("accInitials").textContent = initials(full_name || user.email);
+    $("who").textContent = full_name || user.email; $("accInitials").textContent = initials(full_name || user.email);
   });
   $("accReset").onclick = async () => {
     const user = await be.user(); if (!user) return;
@@ -198,7 +167,6 @@
     $("logged").hidden = !user;
     if (!user) return;
     $("who").textContent = user.user_metadata?.full_name || user.email;
-    $("myAccInitials").textContent = initials(user.user_metadata?.full_name || user.email);
     $("dashLink").hidden = true; // oculto por defecto; solo se muestra si la base confirma el permiso
     const perms = await be.permissions().catch(() => new Set());
     $("dashLink").hidden = !perms.has("dashboard.access");
