@@ -8,10 +8,13 @@ Idea base (a definir con Cristian antes de empezar):
   socket CPU ↔ mother, tipo de memoria (DDR4/DDR5) ↔ mother, formato (ATX/M-ATX/ITX) ↔ gabinete,
   consumo estimado ↔ potencia de la fuente, "incluye cooler" del procesador.
 - Resumen con total, botón "Agregar todo al carrito" y "Enviar por WhatsApp".
-- Requisito previo: completar las fichas técnicas que faltan (i7 13700, GTX 1650, DeepCool AG400) y cargar más productos.
+- Requisito previo: cargar más productos (las fichas técnicas de los 10 actuales ya están completas).
 
-## Fichas técnicas a corregir
-En WordPress estas fichas no correspondían al producto, por eso no se muestran:
-- Procesador Intel Core i7 13700 → tenía la ficha del i5 13400.
-- Placa de video MSI GTX 1650 4GB → tenía la de una Zotac GTX 1660 SUPER 6GB.
-- Cooler DeepCool AG400 PLUS → decía "AK400 ZERO DARK".
+## Necesitan a Cristian
+- **Revocar claves pegadas en el chat**: token `sbp_…` de Supabase, token de Envia.com y la primera clave de Resend (`re_CXX…`).
+- **Edge Functions** (`send-email`, `envios`, `mp-webhook`): no están desplegadas. Necesitan secrets que solo carga Cristian
+  (`RESEND_API_KEY`, `EMAIL_FROM`, `ADMIN_EMAIL`, `ENVIA_TOKEN`, `MP_ACCESS_TOKEN`) en Supabase → Edge Functions → Secrets.
+- **Protección de contraseñas filtradas** (HaveIBeenPwned) en Supabase Auth: es función del plan Pro (pago), queda apagada.
+- **Mercado Pago**: crear la cuenta de integración y el token para cobrar online.
+- **Dominio**: pasar exe.com.ar a GitHub Pages cuando se decida (hoy sigue el WordPress).
+- **Peso de la GTX 1650** en `products.json`: dice 10 kg (dato de WordPress); revisar antes de activar envíos.
