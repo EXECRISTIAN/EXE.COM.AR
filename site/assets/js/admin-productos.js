@@ -569,7 +569,7 @@
   /* ---------- Dólar: cotización manual o automática (cada 30 min, con máximo del día) ---------- */
   const FX_SOURCES = [["max", "Automático (el más alto)"], ["mid", "Automático (punto medio)"], ["min", "Automático (el más bajo)"], ["oficial", "Oficial"], ["blue", "Blue"], ["bolsa", "MEP (bolsa)"], ["contadoconliqui", "CCL (contado con liqui)"], ["mayorista", "Mayorista"], ["cripto", "Cripto"], ["tarjeta", "Tarjeta"]];
   A.views.dolar = async function () {
-    const r = A.demo ? { data: { mode: "auto", manual_rate: null, source: "oficial", round_to: 100, last_auto_rate: 1545, last_auto_at: new Date().toISOString(), day_max_rate: 1550, day_date: "2026-09-28", effective_rate: 1550, day_max_by_source: { oficial: 1545, blue: 1560, bolsa: 1557.3, contadoconliqui: 1616.6, mayorista: 1525.5, cripto: 1613.92, tarjeta: 2008.5 }, max_sources: ["oficial", "blue", "bolsa", "contadoconliqui", "mayorista", "cripto"] } } : await sb().from("fx_settings").select("*").eq("id", 1).single();
+    const r = A.demo ? { data: { mode: "auto", manual_rate: null, source: "oficial", round_to: 100, last_auto_rate: 1545, last_auto_at: new Date().toISOString(), day_max_rate: 1550, day_date: "2026-09-28", effective_rate: 1550, day_max_by_source: { oficial: 1545, blue: 1560, bolsa: 1557.3, contadoconliqui: 1616.6, mayorista: 1525.5, cripto: 1613.92, tarjeta: 2008.5 }, max_sources: ["oficial", "blue", "bolsa", "contadoconliqui", "mayorista", "cripto"], vol_up_on: true, vol_up_pts: 100, vol_down_on: false, vol_down_pts: 100, day_open_rate: 1545, vol_state: null } } : await sb().from("fx_settings").select("*").eq("id", 1).single();
     if (r.error) throw r.error;
     const s = r.data;
     const nUsd = A.demo ? 1 : (await sb().from("products").select("id", { count: "exact", head: true }).not("price_usd", "is", null)).count;
@@ -595,14 +595,66 @@
         </div>
         <div class="fx-maxsrc"><small>Cotizaciones que tienen en cuenta los modos <b>Automático</b> (más alto, punto medio y más bajo) — tocá para activar o desactivar:</small>
           <div class="fx-chips">${FX_SOURCES.filter(([v]) => !["max", "mid", "min"].includes(v)).map(([v, n]) => `<label class="fx-chip"><input type="checkbox" name="maxsrc" value="${v}" ${(s.max_sources || []).includes(v) ? "checked" : ""}><span>${n}</span></label>`).join("")}</div></div>
+        <div class="fx-vol">
+          <small>Días de mucha fluctuación (se compara con el primer valor del día de la fuente elegida):</small>
+          <label class="fx-vol-row"><input type="checkbox" name="volUp" ${s.vol_up_on ? "checked" : ""}> Si <b>sube</b> <input name="volUpPts" inputmode="decimal" value="${s.vol_up_pts ?? 100}"> pesos o más → usar la cotización <b>más alta</b></label>
+          <label class="fx-vol-row"><input type="checkbox" name="volDown" ${s.vol_down_on ? "checked" : ""}> Si <b>baja</b> <input name="volDownPts" inputmode="decimal" value="${s.vol_down_pts ?? 100}"> pesos o más → usar la cotización <b>más baja</b> (ese día el precio sí puede bajar)</label>
+          ${s.vol_state ? `<p class="notice ${s.vol_state === "sube" ? "error" : "info"}">Hoy se activó: ${s.vol_state === "sube" ? "subió" : "bajó"} más de lo indicado desde la apertura (${money(s.day_open_rate)}).</p>` : ""}
+        </div>
         <p class="ed-hint">Automático — último valor leído: <b>${s.last_auto_rate ? money(s.last_auto_rate) : "—"}</b> (${t(s.last_auto_at)}) · máximo de hoy: <b>${s.day_max_rate ? money(s.day_max_rate) : "—"}</b>${s.last_error ? ` · <span class="pr-low">último error: ${esc(s.last_error)}</span>` : ""}</p>
         <div class="ed-row-btns"><button class="btn btn-primary" type="submit">Guardar y recalcular precios</button></div>
         <p class="notice" id="fxMsg" hidden></p>
       </form>
+      <div class="panel fx-hist"><h3>Historial de cotizaciones</h3>
+        <div class="fx-hist-bar">
+          <div class="fx-chips" id="fxRange">${[[1, "24 h"], [7, "7 días"], [30, "30 días"], [90, "3 meses"], [365, "1 año"], [730, "2 años"]].map(([d, n]) => `<button type="button" class="fx-rbtn ${d === 30 ? "on" : ""}" data-d="${d}">${n}</button>`).join("")}</div>
+          <label class="fx-pct"><input type="checkbox" id="fxPct"> Comparar en % (desde el inicio del período)</label>
+        </div>
+        <div class="fx-chips" id="fxSeries">${FX_SOURCES.filter(([v]) => !["max", "mid", "min"].includes(v)).map(([v, n]) => `<label class="fx-chip"><input type="checkbox" value="${v}" ${["oficial", "blue", "bolsa", "tarjeta"].includes(v) ? "checked" : ""}><span>${n}</span></label>`).join("")}</div>
+        <div class="fx-chart"><canvas id="fxChart" aria-label="Gráfico histórico del dólar"></canvas></div>
+        <div id="fxStats"></div>
+      </div>
       <div class="panel"><h3>Cotizaciones de hoy (dolarapi.com)</h3><div id="fxLive" class="fx-live">Cargando…</div></div>
       <p class="notice info">Para poner un producto en dólares: editalo y en <b>2. Precio</b> elegí <b>Dólares (USD)</b>. El precio en pesos de la tienda se recalcula solo cada vez que cambia la cotización.</p>`;
   };
+  /* Gráfico histórico (Chart.js se carga solo al abrir esta sección) */
+  const FX_COLORS = { oficial: "#0084d6", blue: "#2563eb", bolsa: "#16a34a", contadoconliqui: "#9333ea", mayorista: "#64748b", cripto: "#f59e0b", tarjeta: "#dc2626" };
+  const loadChart = () => window.Chart ? Promise.resolve() : new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
+  let fxChart = null;
+  async function fxHistory(days) {
+    if (A.demo) { const out = []; const now = Date.now(); const base = { oficial: 1545, blue: 1560, bolsa: 1557, contadoconliqui: 1616, mayorista: 1525, cripto: 1613, tarjeta: 2008 }; const pts = days <= 14 ? days * 48 : days; const step = (days * 864e5) / pts;
+      for (let i = pts; i >= 0; i--) for (const [k, b] of Object.entries(base)) out.push({ ts: new Date(now - i * step).toISOString(), casa: k, venta: +(b * (1 - i / pts * 0.25) + Math.sin(i / 7) * 12).toFixed(2) }); return out; }
+    const all = [];
+    for (let i = 0; ; i += 1000) { const r = await sb().rpc("fx_history_range", { p_days: days }).range(i, i + 999); if (r.error) throw r.error; all.push(...r.data); if (r.data.length < 1000) break; }
+    return all;
+  }
+  async function drawFx() {
+    const days = +document.querySelector("#fxRange .on").dataset.d, pct = $("fxPct").checked;
+    const sel = [...document.querySelectorAll("#fxSeries input:checked")].map((c) => c.value);
+    $("fxStats").innerHTML = "<small>Cargando…</small>";
+    try { await loadChart(); } catch { $("fxStats").textContent = "No se pudo cargar el gráfico."; return; }
+    const rows = await fxHistory(days);
+    const by = {}; rows.forEach((r) => (by[r.casa] ||= []).push({ x: new Date(r.ts).getTime(), y: Number(r.venta) }));
+    const name = Object.fromEntries(FX_SOURCES);
+    const fmtD = (t) => new Date(t).toLocaleString("es-AR", days <= 14 ? { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" } : { day: "2-digit", month: "2-digit", year: "2-digit" });
+    const datasets = sel.filter((k) => by[k]?.length).map((k) => { const d = by[k], y0 = d[0].y;
+      return { label: name[k], borderColor: FX_COLORS[k], backgroundColor: FX_COLORS[k], borderWidth: 2, pointRadius: 0, tension: 0.2, data: d.map((p) => ({ x: p.x, y: pct ? +((p.y / y0 - 1) * 100).toFixed(2) : p.y })) }; });
+    const css = getComputedStyle(document.body), tc = css.color, gc = "rgba(128,128,128,.18)";
+    fxChart?.destroy();
+    fxChart = new Chart($("fxChart"), { type: "line", data: { datasets },
+      options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: "nearest", axis: "x", intersect: false }, parsing: false,
+        scales: { x: { type: "linear", ticks: { color: tc, maxTicksLimit: 8, callback: (v) => fmtD(v) }, grid: { color: gc } },
+                  y: { ticks: { color: tc, callback: (v) => (pct ? v + " %" : money(v)) }, grid: { color: gc } } },
+        plugins: { legend: { labels: { color: tc } }, tooltip: { callbacks: { title: (it) => fmtD(it[0].parsed.x), label: (c) => `${c.dataset.label}: ${pct ? c.parsed.y + " %" : money(c.parsed.y)}` } } } } });
+    const st = sel.filter((k) => by[k]?.length).map((k) => { const v = by[k].map((p) => p.y), a = v[0], z = v[v.length - 1], mn = Math.min(...v), mx = Math.max(...v);
+      return `<tr><td><span class="fx-dot" style="background:${FX_COLORS[k]}"></span>${esc(name[k])}</td><td><b>${money(z)}</b></td><td>${money(mn)}</td><td>${money(mx)}</td><td>${money(Math.round(v.reduce((s, x) => s + x, 0) / v.length * 100) / 100)}</td><td class="${z >= a ? "pr-up" : "pr-low"}">${z >= a ? "▲" : "▼"} ${money(Math.round((z - a) * 100) / 100)} (${((z / a - 1) * 100).toFixed(1)} %)</td><td>${money(Math.round((mx - mn) * 100) / 100)}</td></tr>`; }).join("");
+    $("fxStats").innerHTML = st ? `<div class="table-wrap"><table class="table"><tr><th>Cotización</th><th>Última</th><th>Mínimo</th><th>Máximo</th><th>Promedio</th><th>Variación del período</th><th>Rango</th></tr>${st}</table></div>` : "<small>Elegí al menos una cotización.</small>";
+  }
+
   A.views.dolar.after = () => {
+    $("fxRange").addEventListener("click", (e) => { const b = e.target.closest("[data-d]"); if (!b) return; document.querySelectorAll("#fxRange .on").forEach((x) => x.classList.remove("on")); b.classList.add("on"); drawFx(); });
+    $("fxSeries").addEventListener("change", drawFx); $("fxPct").addEventListener("change", drawFx);
+    drawFx();
     fetch("https://dolarapi.com/v1/dolares").then((r) => r.json()).then((rows) => {
       $("fxLive").innerHTML = `<table class="table"><tr><th>Tipo</th><th>Compra</th><th>Venta</th><th>Actualizado</th><th></th></tr>${rows.map((r) => `<tr><td>${esc(r.nombre)}</td><td>${money(r.compra)}</td><td><b>${money(r.venta)}</b></td><td>${new Date(r.fechaActualizacion).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}</td>
         <td><button type="button" class="link-btn" data-use="${r.venta}">Usar como mi valor</button></td></tr>`).join("")}</table>`;
@@ -614,7 +666,9 @@
       if (mode === "manual" && !manual) { m.hidden = false; m.className = "notice error"; return (m.textContent = "Poné tu valor del dólar."); }
       if (!f.querySelector("[name=maxsrc]:checked")) { m.hidden = false; m.className = "notice error"; return (m.textContent = "Dejá al menos una cotización activada para el modo Automático."); }
       if (A.demo) { m.hidden = false; m.className = "notice info"; return (m.textContent = "Modo demo: acá se guardaría y se recalcularían los precios."); }
-      const r = await sb().rpc("fx_save", { p_mode: mode, p_manual: manual, p_source: f.elements.source.value, p_round: Number(f.elements.round.value), p_max_sources: [...f.querySelectorAll("[name=maxsrc]:checked")].map((c) => c.value) });
+      const r = await sb().rpc("fx_save", { p_mode: mode, p_manual: manual, p_source: f.elements.source.value, p_round: Number(f.elements.round.value), p_max_sources: [...f.querySelectorAll("[name=maxsrc]:checked")].map((c) => c.value),
+        p_vol_up_on: f.elements.volUp.checked, p_vol_up_pts: Number(String(f.elements.volUpPts.value).replace(",", ".")) || 100,
+        p_vol_down_on: f.elements.volDown.checked, p_vol_down_pts: Number(String(f.elements.volDownPts.value).replace(",", ".")) || 100 });
       if (r.error) { m.hidden = false; m.className = "notice error"; return (m.textContent = r.error.message); }
       await A.route();
       const m2 = $("fxMsg"); m2.hidden = false; m2.className = "notice ok";

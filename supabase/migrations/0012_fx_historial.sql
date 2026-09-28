@@ -1,0 +1,6 @@
+-- Historial de cotizaciones (fx_history, solo admins) cargado con 2 años de cierres diarios (argentinadatos.com)
+-- y luego cada 30 min por fx_refresh. RPC fx_history_range(p_days) para el gráfico del panel.
+-- Reglas de fluctuación en fx_settings: vol_up_on/vol_up_pts (si sube ≥ N pesos desde la apertura → cotización más alta)
+-- y vol_down_on/vol_down_pts (si baja ≥ N → más baja; ese día el precio puede bajar). fx_save acepta esos parámetros.
+-- fx_refresh ya no es ejecutable por usuarios (solo cron y fx_save).
+-- (Aplicado en Supabase como migraciones fx_historial_y_fluctuacion, fx_refresh_historial_fluctuacion y fx_history_range.)
