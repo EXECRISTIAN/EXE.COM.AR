@@ -54,38 +54,10 @@
   "error": "sin og:image"
  },
  {
-  "id": "outlet-asus-prime-z590-p",
-  "ok": true,
-  "src": "https://dlcdnwebimgs.asus.com/gain/17aff855-1b28-4a7d-8ca1-9aaf8418b723/",
-  "kb": 80,
-  "corners": null
- },
- {
-  "id": "outlet-asus-prime-b560-plus-ac-hes",
-  "ok": true,
-  "src": "https://dlcdnwebimgs.asus.com/gain/5e40f987-6d97-4a2d-8b2e-c42b8d690cc0/",
-  "kb": 85,
-  "corners": null
- },
- {
-  "id": "outlet-asus-prime-b460m-a-r2",
-  "ok": true,
-  "src": "https://dlcdnwebimgs.asus.com/gain/16d8a2b2-3c4f-419d-a933-911575f7bb75/",
-  "kb": 138,
-  "corners": null
- },
- {
   "id": "outlet-gigabyte-b460m-ds3h-v2",
   "ok": false,
   "src": null,
   "error": "HTTP Error 403: Forbidden"
- },
- {
-  "id": "outlet-rog-strix-z490-e",
-  "ok": true,
-  "src": "https://dlcdnwebimgs.asus.com/gain/ECBF5DA1-F9D1-4F29-9A4E-6F7F35BC1D4D",
-  "kb": 70,
-  "corners": null
  },
  {
   "id": "outlet-msi-h510m-a-pro",
@@ -98,13 +70,6 @@
   "ok": false,
   "src": null,
   "error": "HTTP Error 403: Forbidden"
- },
- {
-  "id": "outlet-rog-strix-b450-f-ii",
-  "ok": true,
-  "src": "https://dlcdnwebimgs.asus.com/gain/50558398-9875-47BE-B89C-DA3A50C936CA",
-  "kb": 64,
-  "corners": null
  },
  {
   "id": "outlet-thermaltake-smart-700w",
@@ -150,21 +115,16 @@
  },
  {
   "id": "outlet-sentey-r20",
-  "ok": false,
-  "src": null,
-  "error": "sin og:image"
+  "ok": true,
+  "src": "https://www.sentey.com/media/Headers_Products/menu/psu/MBP.jpg",
+  "kb": 19,
+  "corners": 55.0
  },
  {
   "id": "outlet-sentey-x10",
-  "ok": false,
-  "src": null,
-  "error": "sin og:image"
- },
- {
-  "id": "outlet-steam-deck-512",
   "ok": true,
-  "src": "https://clan.fastly.steamstatic.com/images/39049601/cd78aecb9b08a705ea2008a833c2b03f1305c848.jpg",
-  "kb": 12,
-  "corners": 11.25
+  "src": "https://www.sentey.com/media/Headers_Products/menu/psu/MBP.jpg",
+  "kb": 19,
+  "corners": 55.0
  }
 ]
