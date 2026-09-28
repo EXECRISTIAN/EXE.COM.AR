@@ -77,3 +77,35 @@
 .btn-outline.btn-solid:hover::before, .btn-outline.btn-solid:focus-visible::before { opacity: .7; }
 @keyframes argb-spin { to { --argb-angle: 360deg; } }
 @media (prefers-reduced-motion: reduce) { .btn-outline.btn-solid { animation: none; } }
+
+/* ---------- Selector de tema flotante (Mi cuenta) ----------
+   Botón redondo abajo a la derecha, medio escondido fuera de la pantalla; asoma al pasar el mouse o con foco.
+   Íconos: claro = sol blanco, automático = "A" en negrita, oscuro = luna negra. */
+.theme-fab {
+  --fab-bg: #0084d6;             /* azul de la marca: contrasta con el sol blanco y con la luna negra */
+  position: fixed; right: 0; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 50;
+  width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; background: var(--fab-bg);
+  box-shadow: 0 2px 10px var(--shadow-strong);
+  transform: translateX(50%); opacity: .55;
+  transition: transform .3s var(--ease), opacity .3s;
+}
+.theme-fab:hover, .theme-fab:focus-visible { transform: translateX(-12px); opacity: 1; }
+.theme-fab:focus-visible { outline: 2px solid var(--c2); outline-offset: 3px; }
+.theme-fab svg, .theme-fab .tf-auto { grid-area: 1 / 1; display: none; }
+.theme-fab svg { width: 22px; height: 22px; }
+.theme-fab .tf-sun { fill: #fff; stroke: #fff; stroke-width: 2; stroke-linecap: round; }
+.theme-fab .tf-moon { fill: #000; }
+.theme-fab .tf-auto { font: 900 20px/1 var(--font); color: #fff; }
+.theme-fab[data-mode="light"] .tf-sun,
+.theme-fab[data-mode="dark"] .tf-moon { display: block; }
+.theme-fab[data-mode="auto"] .tf-auto { display: block; }
+.theme-fab .tf-tip {
+  position: absolute; right: 0; bottom: calc(100% + 10px); width: max-content; max-width: 220px;
+  padding: 7px 11px; border-radius: 8px; background: var(--inverse-bg); color: var(--inverse-fg);
+  font: 13px/1.35 var(--font); text-align: left; box-shadow: 0 4px 14px var(--shadow-strong);
+  opacity: 0; visibility: hidden; transform: translateY(4px); transition: opacity .2s, transform .2s, visibility .2s;
+  pointer-events: none;
+}
+.theme-fab.show-tip .tf-tip { opacity: 1; visibility: visible; transform: none; }
+@media (prefers-reduced-motion: reduce) { .theme-fab, .theme-fab .tf-tip { transition: none; } }
