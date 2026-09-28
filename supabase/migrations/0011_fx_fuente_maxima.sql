@@ -8,3 +8,8 @@ alter table public.fx_settings add constraint fx_settings_source_check check (so
 -- Cotizaciones que usa "Automático (el más alto)" (se activan/desactivan en el panel). fx_save recibe p_max_sources.
 -- (Aplicado en Supabase como migración fx_fuentes_del_maximo.)
 alter table public.fx_settings add column if not exists max_sources text[] not null default array['oficial','blue','bolsa','contadoconliqui','mayorista','cripto','tarjeta'];
+
+-- Modos automáticos "min" (el más bajo) y "mid" (punto medio entre el más alto y el más bajo), sobre las mismas cotizaciones activadas.
+-- (Aplicado en Supabase como migración fx_min_y_medio.)
+alter table public.fx_settings drop constraint if exists fx_settings_source_check;
+alter table public.fx_settings add constraint fx_settings_source_check check (source = any (array['max','min','mid','oficial','blue','bolsa','contadoconliqui','mayorista','cripto','tarjeta']));
