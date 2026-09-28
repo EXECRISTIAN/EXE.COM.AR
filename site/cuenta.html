@@ -71,19 +71,20 @@
     </div>
   </main>
 
-  <!-- Selector de tema flotante (solo en Mi cuenta): abajo a la derecha, medio oculto -->
-  <button class="theme-fab" id="themeFab" type="button" aria-label="Modo de tema: automático">
-    <svg class="tf-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg>
-    <span class="tf-auto" aria-hidden="true">A</span>
-    <svg class="tf-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
-    <span class="tf-tip" role="tooltip">Modo de tema: claro / automático / oscuro</span>
-  </button>
+  <!-- Selector de tema mini (solo en Mi cuenta): abajo a la derecha, medio oculto y casi transparente -->
+  <div class="theme-mini" id="themeMini" role="radiogroup" aria-label="Modo de tema" data-mode="auto">
+    <span class="tm-thumb" aria-hidden="true"></span>
+    <button type="button" role="radio" data-mode="light" aria-label="Claro"><svg class="tm-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg></button>
+    <button type="button" role="radio" data-mode="auto" aria-label="Automático"><b class="tm-a" aria-hidden="true">A</b></button>
+    <button type="button" role="radio" data-mode="dark" aria-label="Oscuro"><svg class="tm-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg></button>
+    <span class="tm-tip" role="tooltip">Modo de tema: claro / automático / oscuro</span>
+  </div>
 
   <script src="assets/js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="assets/js/backend.js"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&hl=es" async defer></script>
   <script src="assets/js/cuenta.js"></script>
-  <script src="assets/js/theme-fab.js"></script>
+  <script src="assets/js/theme-mini.js"></script>
 </body>
 </html>
