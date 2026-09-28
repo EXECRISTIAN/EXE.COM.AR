@@ -1,1 +1,6 @@
-[]
+[
+ {"id": "outlet-msi-h510m-a-pro", "page": "https://www.msi.com/Motherboard/H510M-A-PRO"},
+ {"id": "outlet-msi-mpg-z490-gaming-plus", "page": "https://www.msi.com/Motherboard/MPG-Z490-GAMING-PLUS"},
+ {"id": "outlet-thermaltake-smart-700w", "page": "https://www.thermaltake.com/smart-700w.html"},
+ {"id": "outlet-rtx3090-zotac-trinity", "page": "https://www.zotac.com/us/product/graphics_card/zotac-gaming-geforce-rtx-3090-trinity"}
+]
