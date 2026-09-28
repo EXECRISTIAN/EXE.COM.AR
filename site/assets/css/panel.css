@@ -55,3 +55,25 @@
 .btn-outline.btn-solid:hover { opacity: .88; }
 /* Cerrar sesión: rojo al pasar el mouse o con foco de teclado */
 .btn-logout:hover, .btn-logout:focus-visible { background: var(--danger-bg); border-color: var(--danger-bg); color: #fff; }
+
+/* Panel de administración: al pasar el mouse, borde tipo tira LED ARGB con efecto arcoíris que gira */
+@property --argb-angle { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+.btn-outline.btn-solid {
+  --argb: conic-gradient(from var(--argb-angle), #ff0040, #ff8000, #ffee00, #00ff5a, #00d0ff, #3a3aff, #c000ff, #ff0040);
+  position: relative; isolation: isolate;
+  animation: argb-spin 2.4s linear infinite paused;
+}
+.btn-outline.btn-solid:hover, .btn-outline.btn-solid:focus-visible {
+  opacity: 1; border: 2px solid transparent; animation-play-state: running;
+  background: linear-gradient(var(--c2), var(--c2)) padding-box, var(--argb) border-box;
+}
+.btn-outline.btn-solid::before {             /* resplandor de la tira */
+  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1;
+  background: var(--argb); filter: blur(12px); opacity: 0; transition: opacity .25s;
+}
+.btn-outline.btn-solid::after {              /* relleno encima del resplandor (debajo del texto) */
+  content: ""; position: absolute; inset: 0; border-radius: 13px; z-index: -1; background: var(--c2);
+}
+.btn-outline.btn-solid:hover::before, .btn-outline.btn-solid:focus-visible::before { opacity: .7; }
+@keyframes argb-spin { to { --argb-angle: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .btn-outline.btn-solid { animation: none; } }
