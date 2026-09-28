@@ -288,3 +288,4 @@
 .ed-src > .ed-src-money { flex: 0 1 210px; }
 .ed-src > [data-sf="delivery_note"] { flex: 1 1 140px; }
 .ed-src .pr-in { min-width: 0; }
+.ed-src-money[hidden] { display: none; } .ed-src .pr-ship { width: 100%; }
