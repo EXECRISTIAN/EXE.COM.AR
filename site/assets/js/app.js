@@ -13,6 +13,7 @@
 
   let products = [];
   let filter = "Todos";
+  let brandFilter = null;   // { brand, match: [...] } o null = todas las marcas
   let query = "";
   let cart = load();
 
@@ -39,17 +40,40 @@
   }
 
   /* ---------- Catálogo ---------- */
+  // Etiquetas de marca: cada marca de los productos + las de los logos de abajo
+  const words = (s) => String(s || "").toLowerCase();
+  const brandMatches = (p, bf) => {
+    const hay = ` ${words(p.brand)} ${words(p.name)} `.replace(/[^a-z0-9áéíóúñ]+/g, " ");
+    return bf.match.some((m) => hay.includes(` ${m} `));
+  };
+  const brandOf = (name) => {
+    const logo = (cfg.brandLogos || []).find((l) => l.brand === name);
+    return logo ? { brand: logo.brand, match: logo.match } : { brand: name, match: [words(name)] };
+  };
   function renderFilters() {
     const cats = ["Todos", ...new Set(products.map((p) => p.category).filter(Boolean))];
+    const brands = [...new Set(products.map((p) => p.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b));
     $("filters").innerHTML = cats
       .map((c) => `<button class="chip${c === filter ? " active" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`)
-      .join("");
+      .join("") +
+      `<div class="brand-chips" role="group" aria-label="Filtrar por marca"><span class="brand-chips-label">Marca:</span>` +
+      [`<button class="chip chip-sm${!brandFilter ? " active" : ""}" data-brand="">Todas</button>`,
+        ...[...new Set([...brands, ...(brandFilter ? [brandFilter.brand] : [])])].map((b) =>
+          `<button class="chip chip-sm${brandFilter && brandFilter.brand === b ? " active" : ""}" data-brand="${esc(b)}">${esc(b)}</button>`)].join("") +
+      `</div>`;
+  }
+  function setBrand(name, scroll) {
+    brandFilter = name ? brandOf(name) : null;
+    if (name) filter = "Todos";
+    renderFilters(); renderProducts();
+    if (scroll) document.getElementById("productos").scrollIntoView({ behavior: "smooth" });
   }
 
   function renderProducts() {
     const q = query.toLowerCase();
     const list = products.filter(
       (p) => (filter === "Todos" || p.category === filter) &&
+        (!brandFilter || brandMatches(p, brandFilter)) &&
         (!q || `${p.name} ${p.brand || ""} ${p.category || ""}`.toLowerCase().includes(q))
     );
     $("productGrid").innerHTML = list.length
@@ -64,7 +88,7 @@
               ${p.images && p.images.length > 1 ? `<span class="img-count" aria-hidden="true">${p.images.length} fotos</span>` : ""}
             </a>
             <div class="card-body">
-              ${p.brand ? `<span class="card-brand">${esc(p.brand)}</span>` : ""}
+              ${p.brand ? `<button class="tag-brand" data-brand="${esc(p.brand)}" title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
               <h3><a href="#producto/${encodeURIComponent(p.id)}">${esc(p.name)}</a></h3>
               <div class="price">${priceLabel(p)}</div>
               ${stockBadge(p)}
@@ -74,7 +98,9 @@
             </div>
           </article>`;
         }).join("")
-      : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
+      : brandFilter && !q && filter === "Todos"
+        ? `<p class="empty-state">Todavía no tenemos productos ${esc(brandFilter.brand)} publicados.<br><a href="${esc(waLink(`Hola EXE! Busco productos ${brandFilter.brand}. ¿Qué tienen disponible?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te conseguimos lo que buscás.</p>`
+        : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
     observeReveals();
   }
 
@@ -110,7 +136,7 @@
         ${imgs.length > 1 ? `<div class="pd-thumbs">${imgs.map((src, k) => `<button data-pd-img="${k}" aria-label="Ver foto ${k + 1}"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}
       </div>
       <div class="pd-info">
-        ${p.brand ? `<span class="card-brand">${esc(p.brand)}</span>` : ""}
+        ${p.brand ? `<button class="tag-brand" data-brand="${esc(p.brand)}" data-close-pd title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
         <h2 id="pdName">${esc(p.name)}</h2>
         <div class="price">${priceLabel(p)}</div>
         ${stockBadge(p)}
@@ -304,6 +330,9 @@
       const i = +t.dataset.dec;
       if (--cart[i].qty <= 0) cart.splice(i, 1);
       save(); renderCart();
+    } else if (t.dataset.brand !== undefined) {
+      if (t.hasAttribute("data-close-pd")) closeProduct();
+      setBrand(t.dataset.brand, t.classList.contains("tag-brand") || t.classList.contains("logo-btn"));
     } else if (t.dataset.cat) {
       filter = t.dataset.cat; renderFilters(); renderProducts();
     } else if (t.dataset.filter) {
@@ -416,7 +445,7 @@
   /* ---------- Contenido de config ---------- */
   const logos = cfg.brandLogos || [];
   $("logos").innerHTML = [...logos, ...logos]
-    .map((l) => `<img src="${esc(l.src)}" alt="${esc(l.name)}" title="${esc(l.name)}" loading="lazy">`).join("");
+    .map((l, i) => `<button class="logo-btn" data-brand="${esc(l.brand || l.name)}" ${i >= logos.length ? 'tabindex="-1" aria-hidden="true"' : ""} aria-label="Ver productos ${esc(l.brand || l.name)}" title="Ver productos ${esc(l.brand || l.name)}"><img src="${esc(l.src)}" alt="${esc(l.name)}" loading="lazy"></button>`).join("");
   const waHello = waLink("Hola EXE! Quería hacer una consulta.");
   $("waDirect").href = waHello; $("waFloat").href = waHello; $("waFooter").href = waHello;
   $("mailFooter").href = `mailto:${cfg.email}`; $("mailFooter").textContent = cfg.email;
