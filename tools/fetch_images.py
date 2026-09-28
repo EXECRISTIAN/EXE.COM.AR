@@ -35,14 +35,28 @@ def corners_white(path):
     if len(vals) < 400: return None
     c = [vals[0], vals[19], vals[380], vals[399]]
     return sum(c) / 4
+PREFER = re.compile(r"(m\.media-amazon\.com|images-na\.ssl-images-amazon\.com|c1\.neweggimages\.com|neweggimages\.com|bhphotovideo\.com/images)", re.I)
+def bing_candidates(q):
+    html = _get("https://www.bing.com/images/search?form=HDRSC2&first=1&q=" + urllib.parse.quote(q)).decode("utf-8", "ignore")
+    urls = [urllib.parse.unquote(u).replace("&amp;", "&") for u in re.findall(r'murl&quot;:&quot;(.*?)&quot;', html)]
+    return [u for u in urls if PREFER.search(u)][:8]
 report = []
 for it in json.load(open("tools/images.json")):
     pid, src = it["id"], it.get("img")
     try:
-        if not src: src = og_image(it["page"])
-        if not src: raise RuntimeError("sin og:image")
         raw = pathlib.Path("/tmp") / (pid + ".src")
-        raw.write_bytes(get(src))
+        if it.get("q"):   # búsqueda: primera foto de Amazon/Newegg con fondo blanco
+            src = None
+            for cand in bing_candidates(it["q"]):
+                try:
+                    raw.write_bytes(_get(cand)); w = corners_white(str(raw))
+                    if w is not None and w > 240: src = cand; break
+                except Exception: pass
+            if not src: raise RuntimeError("sin foto de fondo blanco en la búsqueda")
+        else:
+            if not src: src = og_image(it["page"])
+            if not src: raise RuntimeError("sin og:image")
+            raw.write_bytes(get(src))
         dst = OUT / f"{pid}.webp"
         subprocess.run(["convert", str(raw), "-background", "white", "-alpha", "remove", "-alpha", "off", "-trim", "+repage",
                         "-resize", "720x720", "-gravity", "center", "-extent", "800x800", "-quality", "82", str(dst)], check=True)

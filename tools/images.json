@@ -1,86 +1,90 @@
 [
  {
   "id": "outlet-rtx3090-zotac-trinity",
-  "page": "https://www.zotac.com/us/product/graphics_card/zotac-gaming-geforce-rtx-3090-trinity"
+  "q": "ZOTAC GAMING GeForce RTX 3090 Trinity ZT-A30900D-10P"
  },
  {
   "id": "outlet-pentium-g5420",
-  "page": "https://www.intel.com/content/www/us/en/products/sku/135456/intel-pentium-gold-g5420-processor-4m-cache-3-80-ghz/specifications.html"
+  "q": "Intel Pentium Gold G5420 processor box BX80684G5420"
  },
  {
   "id": "outlet-celeron-g5925",
-  "page": "https://www.intel.com/content/www/us/en/products/sku/201887/intel-celeron-processor-g5925-4m-cache-3-60-ghz/specifications.html"
+  "q": "Intel Celeron G5925 processor box BX80701G5925"
  },
  {
   "id": "outlet-celeron-g5905",
-  "page": "https://www.intel.com/content/www/us/en/products/sku/201899/intel-celeron-processor-g5905-4m-cache-3-50-ghz/specifications.html"
+  "q": "Intel Celeron G5905 processor box BX80701G5905"
  },
  {
   "id": "outlet-i3-10100",
-  "page": "https://www.intel.com/content/www/us/en/products/sku/199280/intel-core-i310100-processor-6m-cache-up-to-4-30-ghz/specifications.html"
+  "q": "Intel Core i3-10100 processor box BX8070110100"
  },
  {
   "id": "outlet-i5-10400",
-  "page": "https://www.intel.com/content/www/us/en/products/sku/199271/intel-core-i510400-processor-12m-cache-up-to-4-30-ghz/specifications.html"
+  "q": "Intel Core i5-10400 processor box BX8070110400"
  },
  {
   "id": "outlet-i3-12100f",
-  "page": "https://www.intel.com/content/www/us/en/products/sku/134584/intel-core-i312100f-processor-12m-cache-up-to-4-30-ghz/specifications.html"
+  "q": "Intel Core i3-12100F processor box BX8071512100F"
  },
  {
   "id": "outlet-z390-aorus-elite",
-  "page": "https://www.gigabyte.com/Motherboard/Z390-AORUS-ELITE-rev-10"
+  "q": "Gigabyte Z390 AORUS ELITE motherboard"
  },
  {
   "id": "outlet-biostar-z490a-silver",
-  "page": "https://www.biostar.com.tw/app/en/mb/introduction.php?S_ID=1027"
+  "q": "Biostar Racing Z490A-SILVER motherboard"
  },
  {
   "id": "outlet-gigabyte-b460m-ds3h-v2",
-  "page": "https://www.gigabyte.com/Motherboard/B460M-DS3H-V2-rev-10"
+  "q": "Gigabyte B460M DS3H V2 motherboard"
  },
  {
   "id": "outlet-msi-h510m-a-pro",
-  "page": "https://www.msi.com/Motherboard/H510M-A-PRO"
+  "q": "MSI H510M-A PRO motherboard"
  },
  {
   "id": "outlet-msi-mpg-z490-gaming-plus",
-  "page": "https://www.msi.com/Motherboard/MPG-Z490-GAMING-PLUS"
+  "q": "MSI MPG Z490 GAMING PLUS motherboard"
  },
  {
   "id": "outlet-thermaltake-smart-700w",
-  "page": "https://www.thermaltake.com/smart-700w.html"
+  "q": "Thermaltake Smart 700W 80 PLUS PS-SPD-0700NPCWUS-W"
  },
  {
   "id": "outlet-gigabyte-p650b",
-  "page": "https://www.gigabyte.com/Power-Supply/GP-P650B"
+  "q": "Gigabyte P650B power supply GP-P650B"
  },
  {
   "id": "outlet-gigabyte-p750gm",
-  "page": "https://www.gigabyte.com/Power-Supply/GP-P750GM"
+  "q": "Gigabyte P750GM power supply GP-P750GM"
  },
  {
   "id": "outlet-gigabyte-p850gm",
-  "page": "https://www.gigabyte.com/Power-Supply/P850GM"
+  "q": "Gigabyte P850GM power supply GP-P850GM"
  },
  {
   "id": "outlet-gigabyte-p1000gm",
-  "page": "https://www.gigabyte.com/Power-Supply/GP-P1000GM"
+  "q": "Gigabyte P1000GM power supply GP-P1000GM"
  },
  {
   "id": "outlet-thermaltake-smart-rgb-700w",
-  "page": "https://www.thermaltake.com/smart-rgb-700w.html"
+  "q": "Thermaltake Smart RGB 700W power supply"
  },
  {
   "id": "outlet-aorus-p750w",
-  "page": "https://www.gigabyte.com/Power-Supply/GP-AP750GM"
+  "q": "Gigabyte AORUS P750W GP-AP750GM power supply"
  },
  {
   "id": "outlet-sentey-r20",
-  "page": "https://www.sentey.com/es/gabinete-sentey-r20-r20/"
+  "q": "Gabinete Sentey R20 RGB"
  },
  {
   "id": "outlet-sentey-x10",
-  "page": "https://www.sentey.com/es/gabinete-sentey-x10-rainbow-x10/"
+  "q": "Gabinete Sentey X10 Rainbow"
+ },
+ {
+  "id": "outlet-steam-deck-512",
+  "q": "Valve Steam Deck 512GB handheld"
  }
 ]
