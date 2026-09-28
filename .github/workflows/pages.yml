@@ -3,7 +3,7 @@ name: Deploy site to GitHub Pages
 on:
   push:
     branches: [main]
-    paths: ["site/**", ".github/workflows/pages.yml"]
+    paths: ["site/**", "supabase/functions/_shared/emails.js", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -24,6 +24,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # Plantillas de email: el panel usa el mismo archivo que el envío real (vista previa idéntica)
+      - name: Copiar generador de emails
+        run: cp supabase/functions/_shared/emails.js site/assets/js/emails.mjs
       # Evita que el navegador use CSS/JS viejos: cada deploy agrega ?v=<commit> a sus enlaces
       - name: Versionar CSS y JS (cache busting)
         run: |

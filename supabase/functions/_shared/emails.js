@@ -172,3 +172,48 @@ export const authTemplates = {
     }),
   },
 };
+
+// ---------- Plantillas editables desde el panel (tabla email_templates) ----------
+// El texto se escribe plano: línea en blanco = párrafo nuevo; "1. …" = lista; {{variable}} se reemplaza (con escape).
+// {{resumen}} en una línea sola inserta la tabla del pedido. Nunca se interpreta HTML escrito en el panel.
+export const TEMPLATE_VARS = {
+  nombre: "Nombre del cliente", pedido: "Número de pedido", total: "Total del pedido", email: "Email del cliente",
+  telefono: "Teléfono del cliente", nota: "Nota del pedido", transportista: "Empresa de envío", seguimiento: "Número de seguimiento",
+  motivo: "Motivo de cancelación", resumen: "Tabla con los productos (en una línea sola)", link_cuenta: "Link a Mi cuenta",
+  link_seguimiento: "Link de seguimiento del envío", link_whatsapp: "Link a WhatsApp", link_panel: "Link al panel",
+};
+export const SAMPLE_ORDER = {
+  id: 1042, name: "Juan Pérez", email: "juan@mail.com", phone: "+54 9 11 5555-5555", total: 452000, note: "Entregar por la tarde",
+  items: [{ qty: 1, name: "Procesador AMD Ryzen 5 8500G", unit_price: 359100 }, { qty: 2, name: "Memoria Team DDR4 8GB 3600MHz", variant: "Negra", unit_price: 46450 }],
+  shipping: { cost: 0, label: "Andreani · Estándar" }, carrier: "andreani", tracking: "360000012345670",
+  trackUrl: "https://envia.com/es-AR/rastreo?label=360000012345670", reason: "Sin stock del producto",
+};
+function templateValues(o) {
+  const first = o.name ? String(o.name).split(" ")[0] : "";
+  return {
+    nombre: first, pedido: o.id ?? "", total: money(o.total), email: o.email || "", telefono: o.phone || "", nota: o.note || "—",
+    transportista: o.carrier ? cap(o.carrier) : "nuestro correo", seguimiento: o.tracking || "(te lo enviamos apenas esté)",
+    motivo: o.reason || "", link_cuenta: BRAND.site + "cuenta.html", link_seguimiento: o.trackUrl || BRAND.site + "cuenta.html",
+    link_whatsapp: `https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(`Hola EXE, consulta por mi pedido #${o.id ?? ""}`)}`,
+    link_panel: BRAND.site + "admin/#pedidos",
+  };
+}
+const fill = (text, v) => String(text ?? "").replace(/\{\{\s*([a-z_]+)\s*\}\}/g, (m, k) => (k in v ? String(v[k]) : m));
+export function renderTemplate(t, o = SAMPLE_ORDER) {
+  const v = templateValues(o);
+  const blocks = String(t.body || "").replace(/\r/g, "").replace(/\{\{\s*resumen\s*\}\}/g, "\n\n{{resumen}}\n\n").split(/\n\s*\n/).filter((b) => b.trim());
+  const html = blocks.map((b) => {
+    if (/^\s*\{\{\s*resumen\s*\}\}\s*$/.test(b)) return itemsTable(o.items, o.total, o.shipping);
+    const lines = b.split("\n");
+    if (lines.every((l) => /^\s*\d+[.)]\s+/.test(l)))
+      return `<ol style="margin:0 0 14px;padding-left:20px">${lines.map((l) => `<li>${esc(fill(l.replace(/^\s*\d+[.)]\s+/, ""), v))}</li>`).join("")}</ol>`;
+    return `<p style="margin:0 0 14px">${lines.map((l) => esc(fill(l, v))).join("<br>")}</p>`;
+  }).join("");
+  const url = fill(t.button_url, v);
+  const btn = t.button_label && /^https?:\/\//.test(url) ? button(fill(t.button_label, v), esc(url)) : "";
+  const items = t.show_items && !/\{\{\s*resumen\s*\}\}/.test(t.body || "") ? itemsTable(o.items, o.total, o.shipping) : "";
+  return {
+    subject: fill(t.subject, v),
+    html: layout({ preheader: fill(t.preheader || "", v), title: fill(t.title, v), why: fill(t.why || "", v), body: html + items + btn }),
+  };
+}
