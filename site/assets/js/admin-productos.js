@@ -17,6 +17,9 @@
 
   /* ---------- Datos ---------- */
   let cache = null;                      // { products, costs: Map, sources: Map }
+  let fx = null;                         // fila de fx_settings (cotización vigente)
+  const rate = () => (A.demo ? 1500 : Number(fx && fx.effective_rate) || 0);
+  const usd = (n) => "US$ " + Number(n || 0).toLocaleString("es-AR", { maximumFractionDigits: 2 });
   const demoStore = () => {
     const d = A.DEMO;
     if (!d._full) {
@@ -34,7 +37,9 @@
   async function loadAll(force) {
     if (A.demo) return (cache = demoStore());
     if (cache && !force) return cache;
-    const cols = "id,name,brand,category,description,price,stock,show_stock,active,outlet,condition,image,images,specs,weight_kg,sort,variants,updated_at";
+    const cols = "id,name,brand,category,description,price,price_usd,stock,show_stock,active,outlet,condition,image,images,specs,weight_kg,sort,variants,updated_at";
+    const fxr = await sb().from("fx_settings").select("*").eq("id", 1).maybeSingle();
+    fx = fxr.data || null;
     const [p, c, s] = await Promise.all([
       sb().from("products").select(cols).order("sort").order("name"),
       can("products.write") ? sb().from("product_costs").select("*") : { data: [] },
@@ -148,7 +153,9 @@
           <small class="pr-meta">${esc(p.brand || "")}${p.outlet ? ` · <span class="pill pending">Outlet</span>` : ""}${p.condition ? ` · ${esc(p.condition)}` : ""}</small></td>
         <td>${esc(p.category || "—")}</td>
         ${w ? `<td><input class="pr-in" data-f="cost" inputmode="numeric" value="${c ?? ""}" placeholder="—"></td>` : ""}
-        <td>${w ? `<input class="pr-in" data-f="price" inputmode="numeric" value="${p.price || 0}">` : (p.price ? money(p.price) : "Consultar")}</td>
+        <td>${p.price_usd != null
+          ? (w ? `<input class="pr-in" data-f="price_usd" inputmode="decimal" value="${p.price_usd}" title="Precio en dólares"><small class="pr-meta">US$ → ${p.price ? money(p.price) : "sin cotización"}</small>` : `${usd(p.price_usd)}<small class="pr-meta">${money(p.price)}</small>`)
+          : (w ? `<input class="pr-in" data-f="price" inputmode="numeric" value="${p.price || 0}">` : (p.price ? money(p.price) : "Consultar"))}</td>
         ${w ? `<td class="${m < 15 ? "pr-low" : ""}">${pct(m)}</td>` : ""}
         <td>${sw ? `<input class="pr-in pr-in-sm" data-f="stock" inputmode="numeric" value="${p.show_stock ? p.stock : ""}" placeholder="∞" title="Vacío = sin control de stock">` : (p.show_stock ? p.stock : "∞")}</td>
         <td>${sw ? `<label class="switch"><input type="checkbox" data-f="active" ${p.active ? "checked" : ""}><span></span></label>` : (p.active ? "Sí" : "No")}</td>
@@ -180,6 +187,7 @@
       try {
         if (f === "active") await patchProduct(id, { active: t.checked });
         if (f === "price") await patchProduct(id, { price: num(t.value) });
+        if (f === "price_usd") { await patchProduct(id, { price_usd: Math.max(0, Number(String(t.value).replace(",", ".")) || 0) }); if (!A.demo) { const r = await sb().from("products").select("price").eq("id", id).single(); if (r.data) cache.products.find((x) => x.id === id).price = r.data.price; } }
         if (f === "stock") await patchProduct(id, t.value.trim() === "" ? { show_stock: false, stock: 999 } : { show_stock: true, stock: Math.max(0, Math.round(num(t.value))) });
         if (f === "cost") await saveCost(id, { cost: t.value.trim() === "" ? null : num(t.value) });
         flash(t, true); if (f !== "active") renderRows(); else tr.classList.toggle("is-off", !t.checked);
@@ -291,10 +299,14 @@
         </section>
 
         <section class="panel ed-sec"><h3>2. Precio</h3>
+          ${w ? `<div class="ed-cur"><span>Moneda del precio:</span>
+            <label><input type="radio" name="cur" value="ARS" ${p.price_usd == null ? "checked" : ""}> Pesos (ARS)</label>
+            <label><input type="radio" name="cur" value="USD" ${p.price_usd != null ? "checked" : ""}> Dólares (USD)</label>
+            <small id="edFx">${rate() ? `Cotización vigente: ${money(rate())} por dólar` : "Todavía no hay cotización: configurala en 💵 Dólar."}</small></div>` : ""}
           <div class="ed-grid ed-grid-4">
-            ${w ? `<label class="field">Costo de compra ($)<input name="cost" inputmode="numeric" value="${c.cost ?? ""}" placeholder="Solo lo ven admins"></label>
+            ${w ? `<label class="field"><span data-cur-label="Costo de compra">Costo de compra ($)</span><input name="cost" inputmode="decimal" value="${p.price_usd != null ? (c.cost_usd ?? "") : (c.cost ?? "")}" placeholder="Solo lo ven admins"></label>
             <label class="field">Margen (%)<input name="margin" inputmode="decimal" value="${isFinite(m) ? Math.round(m) : DEFAULT_MARGIN}"></label>` : ""}
-            <label class="field">Precio de venta ($)<input name="price" inputmode="numeric" value="${p.price || 0}" ${ro}><small>0 = "Consultar precio por WhatsApp"</small></label>
+            <label class="field"><span data-cur-label="Precio de venta">Precio de venta ($)</span><input name="price" inputmode="decimal" value="${p.price_usd != null ? p.price_usd : p.price || 0}" ${ro}><small id="edArs">0 = "Consultar precio por WhatsApp"</small></label>
             ${w ? `<label class="field ed-check"><input type="checkbox" name="round" checked> Redondear a $100</label>` : ""}
           </div>
           ${w ? `<p class="ed-hint" id="edProfit"></p>
@@ -428,13 +440,22 @@
     if (ed.isNew) el("name").addEventListener("input", () => { if (!el("id").dataset.touched) el("id").value = slug(el("name").value); });
     if (ed.isNew) el("id").addEventListener("input", () => (el("id").dataset.touched = "1"));
     // Costo / margen / precio enlazados
-    const profit = () => { const p = $("edProfit"); if (!p) return; const c = num(el("cost").value), v = num(el("price").value); p.textContent = c > 0 && v > 0 ? `Ganancia por unidad: ${money(v - c)} · margen ${pct(margin(v, c))} sobre costo` : "Cargá el costo para ver la ganancia."; };
-    const fromMargin = () => { const c = num(el("cost").value); if (c > 0) { const v = c * (1 + num(el("margin").value) / 100); el("price").value = el("round").checked ? round100(v) : Math.round(v); } profit(); };
+    const profit = () => { const p = $("edProfit"); if (!p) return; const c = val("cost"), v = val("price"); p.textContent = c > 0 && v > 0 ? `Ganancia por unidad: ${isUsd() ? usd(v - c) + (rate() ? ` (≈ ${money((v - c) * rate())})` : "") : money(v - c)} · margen ${pct(margin(v, c))} sobre costo` : "Cargá el costo para ver la ganancia."; };
+    const isUsd = () => w && el("cur") && f.querySelector("[name=cur]:checked").value === "USD";
+    const dec = (v) => Number(String(v).replace(",", ".")) || 0;          // USD con decimales
+    const val = (n) => (isUsd() ? dec(el(n).value) : num(el(n).value));
+    const curUi = () => {
+      f.querySelectorAll("[data-cur-label]").forEach((s) => (s.textContent = `${s.dataset.curLabel} (${isUsd() ? "US$" : "$"})`));
+      const ars = $("edArs"); if (!ars) return;
+      ars.textContent = isUsd() ? (rate() ? `≈ ${money(Math.round(val("price") * rate() / 100) * 100)} en la tienda (se actualiza solo con el dólar)` : "Sin cotización todavía") : '0 = "Consultar precio por WhatsApp"';
+    };
+    const fromMargin = () => { const c = val("cost"); if (c > 0) { const v = c * (1 + num(el("margin").value) / 100); el("price").value = isUsd() ? Math.round(v * 100) / 100 : el("round").checked ? round100(v) : Math.round(v); } profit(); curUi(); };
     if (w) {
       el("cost").addEventListener("input", fromMargin);
       el("margin").addEventListener("input", fromMargin);
-      el("price").addEventListener("input", () => { const c = num(el("cost").value), v = num(el("price").value); if (c > 0 && v > 0) el("margin").value = Math.round(margin(v, c)); profit(); });
-      profit();
+      el("price").addEventListener("input", () => { const c = val("cost"), v = val("price"); if (c > 0 && v > 0) el("margin").value = Math.round(margin(v, c)); profit(); curUi(); });
+      f.querySelectorAll("[name=cur]").forEach((r) => r.addEventListener("change", () => { profit(); curUi(); }));
+      profit(); curUi();
     }
     el("show_stock").addEventListener("change", () => { el("stock").disabled = !el("show_stock").checked; });
     el("stock").disabled = !el("show_stock").checked;
@@ -495,14 +516,16 @@
       if (ed.isNew && cache.products.some((x) => x.id === id)) return msg(`Ya existe un producto con el código "${id}". Cambialo.`, "error");
       const prod = {
         id, name: el("name").value.trim(), brand: el("brand").value.trim() || null, category: el("category").value.trim() || null,
-        outlet: el("outlet").checked, condition: el("condition").value.trim() || null, price: Math.max(0, num(el("price").value)),
+        outlet: el("outlet").checked, condition: el("condition").value.trim() || null,
+        ...(isUsd() ? { price_usd: Math.max(0, val("price")) } : { price: Math.max(0, num(el("price").value)), price_usd: null }),
         show_stock: el("show_stock").checked, stock: el("show_stock").checked ? Math.max(0, Math.round(num(el("stock").value))) : 999,
         active: el("active").checked, weight_kg: Math.max(0.01, num(el("weight_kg").value) || 1), description: el("description").value.trim() || null,
         images: ed.images, specs: ed.specs.map((s) => ({ title: s.title.trim() || "Características", rows: s.rows.filter((r) => r[0].trim() && r[1].trim()).map((r) => [r[0].trim(), r[1].trim()]) })).filter((s) => s.rows.length),
       };
       if (ed.isNew) prod.sort = cache.products.length;
       if (!w) { delete prod.name; }   // moderador (stock.write): solo stock / visibilidad
-      const cost = w ? { cost: el("cost").value.trim() === "" ? null : num(el("cost").value), supplier: el("supplier").value.trim() || null, notes: el("notes").value.trim() || null } : null;
+      const costV = el("cost").value.trim() === "" ? null : val("cost");
+      const cost = w ? { ...(isUsd() ? { cost_usd: costV, cost: costV != null && rate() ? Math.round(costV * rate()) : null } : { cost: costV, cost_usd: null }), supplier: el("supplier").value.trim() || null, notes: el("notes").value.trim() || null } : null;
       try {
         msg("Guardando…", "info");
         if (w) await saveProduct(prod, cost);
@@ -532,6 +555,59 @@
       d.addEventListener("close", () => { resolve(d.returnValue === "ok" ? d.querySelector("textarea").value : null); d.remove(); });
     });
   }
+
+  /* ---------- Dólar: cotización manual o automática (cada 30 min, con máximo del día) ---------- */
+  const FX_SOURCES = [["oficial", "Oficial"], ["blue", "Blue"], ["bolsa", "MEP (bolsa)"], ["contadoconliqui", "CCL (contado con liqui)"], ["mayorista", "Mayorista"], ["cripto", "Cripto"], ["tarjeta", "Tarjeta"]];
+  A.views.dolar = async function () {
+    const r = A.demo ? { data: { mode: "auto", manual_rate: null, source: "oficial", round_to: 100, last_auto_rate: 1545, last_auto_at: new Date().toISOString(), day_max_rate: 1550, day_date: "2026-09-28", effective_rate: 1550 } } : await sb().from("fx_settings").select("*").eq("id", 1).single();
+    if (r.error) throw r.error;
+    const s = r.data;
+    const nUsd = A.demo ? 1 : (await sb().from("products").select("id", { count: "exact", head: true }).not("price_usd", "is", null)).count;
+    const t = (d) => (d ? new Date(d).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" }) : "—");
+    return `
+      <div class="kpis">
+        <div class="kpi"><small>Cotización en uso</small><strong>${s.effective_rate ? money(s.effective_rate) : "—"}</strong></div>
+        <div class="kpi"><small>Modo</small><strong>${s.mode === "manual" ? "Manual" : "Automático"}</strong></div>
+        <div class="kpi"><small>Productos en dólares</small><strong>${nUsd ?? 0}</strong></div>
+      </div>
+      <form class="panel ed-sec" id="fxForm">
+        <h3>Cómo se calcula el precio en pesos</h3>
+        <div class="fx-modes">
+          <label class="fx-mode"><input type="radio" name="mode" value="manual" ${s.mode === "manual" ? "checked" : ""}>
+            <span><b>Manual</b> — uso el valor que pongo yo.</span></label>
+          <label class="fx-mode"><input type="radio" name="mode" value="auto" ${s.mode === "auto" ? "checked" : ""}>
+            <span><b>Automático</b> — se actualiza cada 30 minutos con la fuente elegida. <b>Durante el día nunca baja</b>: se usa el valor más alto del día; al día siguiente arranca de nuevo.</span></label>
+        </div>
+        <div class="ed-grid ed-grid-4">
+          <label class="field">Mi valor (manual, $ por US$ 1)<input name="manual" inputmode="decimal" value="${s.manual_rate ?? ""}" placeholder="Ej: 1550"></label>
+          <label class="field">Fuente automática<select name="source">${FX_SOURCES.map(([v, n]) => `<option value="${v}" ${v === s.source ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+          <label class="field">Redondear precios a<select name="round">${[1, 10, 100, 1000].map((v) => `<option value="${v}" ${v === s.round_to ? "selected" : ""}>$${v}</option>`).join("")}</select></label>
+        </div>
+        <p class="ed-hint">Automático — último valor leído: <b>${s.last_auto_rate ? money(s.last_auto_rate) : "—"}</b> (${t(s.last_auto_at)}) · máximo de hoy: <b>${s.day_max_rate ? money(s.day_max_rate) : "—"}</b>${s.last_error ? ` · <span class="pr-low">último error: ${esc(s.last_error)}</span>` : ""}</p>
+        <div class="ed-row-btns"><button class="btn btn-primary" type="submit">Guardar y recalcular precios</button></div>
+        <p class="notice" id="fxMsg" hidden></p>
+      </form>
+      <div class="panel"><h3>Cotizaciones de hoy (dolarapi.com)</h3><div id="fxLive" class="fx-live">Cargando…</div></div>
+      <p class="notice info">Para poner un producto en dólares: editalo y en <b>2. Precio</b> elegí <b>Dólares (USD)</b>. El precio en pesos de la tienda se recalcula solo cada vez que cambia la cotización.</p>`;
+  };
+  A.views.dolar.after = () => {
+    fetch("https://dolarapi.com/v1/dolares").then((r) => r.json()).then((rows) => {
+      $("fxLive").innerHTML = `<table class="table"><tr><th>Tipo</th><th>Compra</th><th>Venta</th><th>Actualizado</th><th></th></tr>${rows.map((r) => `<tr><td>${esc(r.nombre)}</td><td>${money(r.compra)}</td><td><b>${money(r.venta)}</b></td><td>${new Date(r.fechaActualizacion).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" })}</td>
+        <td><button type="button" class="link-btn" data-use="${r.venta}">Usar como mi valor</button></td></tr>`).join("")}</table>`;
+    }).catch(() => ($("fxLive").textContent = "No se pudieron cargar las cotizaciones en vivo."));
+    $("fxLive").addEventListener("click", (e) => { const b = e.target.closest("[data-use]"); if (!b) return; const f = $("fxForm"); f.elements.manual.value = b.dataset.use; f.querySelector("[value=manual]").checked = true; });
+    $("fxForm").addEventListener("submit", async (e) => {
+      e.preventDefault(); const f = e.target; const m = $("fxMsg");
+      const mode = f.querySelector("[name=mode]:checked").value, manual = Number(String(f.elements.manual.value).replace(",", ".")) || null;
+      if (mode === "manual" && !manual) { m.hidden = false; m.className = "notice error"; return (m.textContent = "Poné tu valor del dólar."); }
+      if (A.demo) { m.hidden = false; m.className = "notice info"; return (m.textContent = "Modo demo: acá se guardaría y se recalcularían los precios."); }
+      const r = await sb().rpc("fx_save", { p_mode: mode, p_manual: manual, p_source: f.elements.source.value, p_round: Number(f.elements.round.value) });
+      if (r.error) { m.hidden = false; m.className = "notice error"; return (m.textContent = r.error.message); }
+      await A.route();
+      const m2 = $("fxMsg"); m2.hidden = false; m2.className = "notice ok";
+      m2.textContent = `Guardado. Cotización en uso: ${money(r.data.rate)} · ${r.data.productos_actualizados} precio(s) actualizados.${r.data.error ? " Error de la fuente: " + r.data.error : ""}`;
+    });
+  };
 
   A.start();
 })();

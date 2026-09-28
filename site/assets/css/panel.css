@@ -207,3 +207,13 @@
   .ed-src { grid-template-columns: 1fr 1fr; }
   .ed-spec-row { grid-template-columns: 1fr 1fr auto; }
 }
+/* Dólar */
+.ed-cur { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 12px; font-size: .9rem; }
+.ed-cur label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.ed-cur small { color: var(--muted); }
+.fx-modes { display: grid; gap: 10px; margin-bottom: 16px; }
+.fx-mode { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.fx-mode:has(input:checked) { border-color: var(--c0); background: color-mix(in srgb, var(--c0) 7%, transparent); }
+.fx-mode input { margin-top: 3px; accent-color: var(--c0); }
+.ed .field select, #fxForm select { height: 38px; padding: 0 10px; border: 1px solid var(--c6); border-radius: 4px; background: var(--surface); color: var(--c2); font: inherit; }
+.fx-live .table td, .fx-live .table th { padding: 8px; }
