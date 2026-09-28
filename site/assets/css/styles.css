@@ -36,6 +36,7 @@
   --shadow: rgba(0,0,0,.05);
   --shadow-strong: rgba(0,0,0,.15);
   --ok: #16a34a; --warn: #d97706; --err: #dc2626;
+  --danger-bg: #dc2626;        /* botón "Cerrar sesión" al pasar el mouse (mismo rojo en claro y oscuro: contrasta con texto blanco) */
   --info-fg: #0b4a8f; --ok-fg: #166534; --err-fg: #991b1b;
   --logo-light: block;         /* logo negro */
   --logo-dark: none;           /* logo blanco */
