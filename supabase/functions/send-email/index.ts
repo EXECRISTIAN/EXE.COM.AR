@@ -27,8 +27,9 @@ Deno.serve(async (req) => {
     return new Response("forbidden", { status: 403 });
   }
   const { template, order_id, reason } = await req.json();
-  const tpl = (orderTemplates as any)[template];
-  if (!tpl || template === "admin_new_order") return new Response("unknown template", { status: 400 });
+  // Plantilla fija de respaldo (solo existe para algunos eventos; el resto vive solo en email_templates)
+  if (!/^[a-z_]{3,40}$/.test(String(template)) || template === "admin_new_order") return new Response("unknown template", { status: 400 });
+  const tpl = (orderTemplates as any)[template] || (() => null);
 
   const { data: o } = await db
     .from("orders")
@@ -45,7 +46,7 @@ Deno.serve(async (req) => {
     id: o.id, total: o.total, name: p.full_name, email: p.email, phone: p.phone, note: o.note, reason,
     items: (o.order_items || []).map((i: any) => ({ qty: i.qty, variant: i.variant, unit_price: i.unit_price, name: i.products?.name })),
     shipping: o.shipping_cost ? { cost: o.shipping_cost, label: [o.carrier, s.service].filter(Boolean).join(" · ") } : null,
-    carrier: o.carrier, tracking: o.tracking_number,
+    carrier: o.carrier, tracking: o.tracking_number, pickup: s.pickup_point || s.branch || null,
     trackUrl: o.tracking_number ? `https://envia.com/es-AR/rastreo?label=${encodeURIComponent(o.tracking_number)}` : null,
   };
 

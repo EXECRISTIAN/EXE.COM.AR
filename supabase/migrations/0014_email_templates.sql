@@ -19,3 +19,7 @@ revoke all on public.email_templates from anon;
 -- ofertas, fechas especiales, reapertura, cierre temporal) y condiciones: delay_days, send_at, audience, min_total, category.
 -- Consentimiento para publicidad: profiles.marketing_opt_in (+ _at), editable por el propio usuario.
 -- (Aplicado en Supabase como migración email_eventos_condiciones.)
+
+-- Estados del pedido con plantilla propia: en proceso, pago en proceso, pago procesado y verificado (order_paid), en preparación,
+-- embalado, despachado, entregado al servicio de envío, entregado, listo para retirar (punto de retiro / local).
+-- (Aplicado en Supabase como migración email_estados_pedido.)
