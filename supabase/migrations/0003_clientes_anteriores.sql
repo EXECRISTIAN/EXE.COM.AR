@@ -21,6 +21,8 @@ create policy "ver clientes anteriores" on public.legacy_customers for select us
 
 -- Verificación: el perfil guarda cuándo confirmó su email. Solo a perfiles verificados se les envían emails.
 alter table public.profiles add column email_verified_at timestamptz;
+-- cuentas que ya existían y ya confirmaron su email
+update public.profiles p set email_verified_at = u.email_confirmed_at from auth.users u where u.id = p.id and u.email_confirmed_at is not null;
 
 create or replace function public.handle_email_confirmed() returns trigger
 language plpgsql security definer set search_path = public as $$
