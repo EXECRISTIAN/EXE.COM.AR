@@ -196,11 +196,11 @@
   async function adminSources(id) {
     await adminReady;
     const box = $("pdAdmin"); if (!box || !adminApi) return;
-    const { data } = await adminApi.from("product_sources").select("store,url,ref_price,sale_price,delivery_note,checked_at").eq("product_id", id).order("ref_price");
+    const { data } = await adminApi.from("product_sources").select("store,url,ref_price,margin,sale_price,delivery_note,checked_at").eq("product_id", id).order("ref_price");
     if (!data || !data.length) { box.innerHTML = `<b>Solo admins</b> · Sin precio de referencia cargado todavía.`; box.hidden = false; return; }
     box.innerHTML = `<b>Solo admins · precio de referencia</b>` + data.map((d) =>
       `<div class="pd-admin-row"><a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">${esc(d.store)}</a>
-        <span>${money(d.ref_price)} → venta ${money(d.sale_price)} (+30 %)</span>
+        <span>${money(d.ref_price)} → venta ${money(d.sale_price)} (+${Math.round(d.margin * 100)} %)</span>
         <small>${d.delivery_note ? esc(d.delivery_note) + " · " : ""}revisado ${new Date(d.checked_at).toLocaleDateString("es-AR")}</small></div>`).join("");
     box.hidden = false;
   }

@@ -6,7 +6,7 @@ create table if not exists public.product_sources (
   store text not null,
   url text not null check (url ~ '^https://'),
   ref_price numeric not null check (ref_price > 0),
-  margin numeric not null default 0.30,
+  margin numeric not null default 0.50,
   sale_price numeric generated always as (round(ref_price * (1 + margin), -2)) stored,
   delivery_note text,
   checked_at timestamptz not null default now(),
