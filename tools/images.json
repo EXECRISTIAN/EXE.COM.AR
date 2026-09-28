@@ -4,71 +4,71 @@
  },
  {
   "id": "outlet-rtx3090-zotac-trinity",
-  "q": "ZOTAC GAMING GeForce RTX 3090 Trinity"
+  "q": "RTX 3090"
  },
  {
   "id": "outlet-pentium-g5420",
-  "q": "Intel Pentium Gold G5420 box"
+  "q": "Pentium Gold G5420"
  },
  {
   "id": "outlet-celeron-g5925",
-  "q": "Intel Celeron G5925 box"
+  "q": "Intel Celeron Comet Lake"
  },
  {
   "id": "outlet-celeron-g5905",
-  "q": "Intel Celeron G5905 box"
+  "q": "Intel Celeron G5905"
  },
  {
   "id": "outlet-i3-10100",
-  "q": "Intel Core i3-10100 box"
+  "q": "Intel Core i3-10100"
  },
  {
   "id": "outlet-i5-10400",
-  "q": "Intel Core i5-10400 box"
+  "q": "Intel Core i5-10400"
  },
  {
   "id": "outlet-i3-12100f",
-  "q": "Intel Core i3-12100F box"
+  "q": "Intel Core i3-12100F"
  },
  {
   "id": "outlet-z390-aorus-elite",
-  "q": "Gigabyte Z390 AORUS ELITE motherboard"
+  "q": "Gigabyte Z390 motherboard"
  },
  {
   "id": "outlet-biostar-z490a-silver",
-  "q": "Biostar Racing Z490A-SILVER"
+  "q": "Biostar motherboard"
  },
  {
   "id": "outlet-gigabyte-b460m-ds3h-v2",
-  "q": "Gigabyte B460M DS3H V2"
+  "q": "Gigabyte B460M"
  },
  {
   "id": "outlet-msi-h510m-a-pro",
-  "q": "MSI H510M-A PRO motherboard"
+  "q": "MSI H510M motherboard"
  },
  {
   "id": "outlet-msi-mpg-z490-gaming-plus",
-  "q": "MSI MPG Z490 GAMING PLUS"
+  "q": "MSI Z490 motherboard"
  },
  {
   "id": "outlet-thermaltake-smart-700w",
-  "q": "Thermaltake Smart 700W 80 Plus White power supply"
+  "q": "Thermaltake Smart power supply"
  },
  {
   "id": "outlet-gigabyte-p650b",
-  "q": "Gigabyte P650B power supply"
+  "q": "Gigabyte power supply"
  },
  {
   "id": "outlet-gigabyte-p750gm",
-  "q": "Gigabyte P750GM power supply"
+  "q": "Gigabyte P750GM"
  },
  {
   "id": "outlet-gigabyte-p850gm",
-  "q": "Gigabyte P850GM power supply"
+  "q": "Gigabyte P850GM"
  },
  {
   "id": "outlet-gigabyte-p1000gm",
-  "q": "Gigabyte P1000GM power supply"
+  "q": "Gigabyte P1000GM"
  },
  {
   "id": "outlet-thermaltake-smart-rgb-700w",
@@ -76,22 +76,22 @@
  },
  {
   "id": "outlet-aorus-p750w",
-  "q": "AORUS P750W GP-AP750GM"
+  "q": "AORUS power supply"
  },
  {
   "id": "outlet-redragon-850w",
-  "q": "Redragon RGPS 850W power supply"
+  "q": "Redragon power supply"
  },
  {
   "id": "outlet-sentey-r20",
-  "q": "gabinete Sentey R20"
+  "q": "Sentey computer case"
  },
  {
   "id": "outlet-sentey-x10",
-  "q": "gabinete Sentey X10"
+  "q": "Sentey case"
  },
  {
   "id": "outlet-steam-deck-512",
-  "q": "Steam Deck 512GB console"
+  "q": "Steam Deck"
  }
 ]

@@ -41,18 +41,23 @@ def bing_candidates(q):
     bad = re.compile(r"pinterest|pinimg|youtube|ytimg|facebook|fbcdn|instagram|tiktok|reddit|redd\.it|wikia|aliexpress|alicdn", re.I)
     urls = [u for u in urls if u.startswith("https://") and not bad.search(u)]
     return (sorted(urls, key=lambda u: 0 if PREFER.search(u) else 1))[:10]   # primero Amazon/Newegg
+def commons_urls(q):
+    api = "https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|mime&iiurlwidth=900&gsrsearch=" + urllib.parse.quote(q)
+    data = json.loads(_get(api).decode("utf-8"))
+    pages = sorted((data.get("query") or {}).get("pages", {}).values(), key=lambda p: p.get("index", 99))
+    return [p["imageinfo"][0].get("thumburl") or p["imageinfo"][0]["url"] for p in pages if p.get("imageinfo") and p["imageinfo"][0].get("mime", "").startswith("image/")]
 def candidates_mode(items):
     """Baja hasta 4 fotos candidatas por producto (sin exigir fondo blanco) para elegir a mano."""
     out = pathlib.Path("tools/candidatas"); out.mkdir(exist_ok=True)
     rep = []
     for it in items:
-        html = _get("https://www.bing.com/images/search?form=HDRSC2&first=1&q=" + urllib.parse.quote(it["q"])).decode("utf-8", "ignore")
-        urls = [urllib.parse.unquote(u).replace("&amp;", "&") for u in re.findall(r'murl&quot;:&quot;(.*?)&quot;', html)]
+        try: urls = commons_urls(it["q"])
+        except Exception: urls = []
         bad = re.compile(r"pinterest|pinimg|youtube|ytimg|facebook|fbcdn|instagram|tiktok|reddit|redd\\.it|aliexpress|alicdn|wallpaper|shutterstock|alamy|dreamstime|123rf|istock|gettyimages|depositphotos", re.I)
         urls = [u for u in urls if u.startswith("http") and not bad.search(u)]
         got = []
         for u in urls:
-            if len(got) >= 4: break
+            if len(got) >= 3: break
             try:
                 raw = pathlib.Path("/tmp") / "c.src"; raw.write_bytes(_get(u))
                 dst = out / f"{it['id']}-{len(got)}.webp"
