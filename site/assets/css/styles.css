@@ -476,3 +476,25 @@ body.no-scroll { overflow: hidden; }
 .condition { display: block; font-size: .78rem; color: var(--muted); }
 .pd-condition { margin: 2px 0 6px; font-size: .88rem; color: var(--c3); }
 .pd-condition .tag-outlet { display: inline-block; margin-right: 6px; padding: 2px 8px; border-radius: 4px; background: #f59e0b; color: #1a1200; font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+
+/* Bloques de la sección de marcas separados (se pueden mover/ocultar desde el panel) */
+.brands.brands-banner { padding-bottom: 0; }
+.brands.brands-features { padding-top: 0; padding-bottom: 0; }
+.brands.brands-features .features { margin-top: 60px; }
+.brands.brands-logos { padding-top: 30px; }
+.brands.brands-banner + .brands.brands-features .features { margin-top: 80px; }
+/* Secciones nuevas creadas desde el panel */
+.cms-block { padding: 50px 0; }
+.cms-text { max-width: 820px; margin: 0 auto; text-align: center; }
+.cms-text h2 { color: var(--heading); font-weight: 500; font-size: clamp(1.6rem, 3vw, 2.2rem); }
+.cms-text p { white-space: pre-line; }
+.cms-img a, .cms-img img { display: block; width: 100%; border-radius: 20px; }
+.cms-img img { height: auto; }
+.cms-it { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+.cms-it.rev > :first-child { order: 2; }
+.cms-it img { width: 100%; height: auto; border-radius: 20px; }
+.cms-it h2 { color: var(--heading); font-weight: 500; }
+.cms-it p { white-space: pre-line; }
+.cms-aviso { background: var(--accent-bg); color: var(--on-accent); text-align: center; padding: 10px 16px; font-weight: 700; }
+.cms-aviso a { color: inherit; }
+@media (max-width: 767px) { .cms-it { grid-template-columns: 1fr; } .cms-it.rev > :first-child { order: 0; } }
