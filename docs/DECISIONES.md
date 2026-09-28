@@ -54,3 +54,10 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 35. **Proyecto `EXE.COM.AR`** (ref `sbayacwjvnxwktrhkgnk`, región São Paulo `sa-east-1`, plan gratis), creado el 26/09/2026. Migraciones `0001_schema.sql` y `0002_envios.sql` aplicadas desde Claude Code en tu PC.
 36. **El sitio usa la clave "publishable"** (la nueva recomendada por Supabase), no la anon JWT legacy. Las claves secretas (service_role / secret) nunca van en el repo.
 
+## Usuarios de WordPress y antibots
+37. **Los "5.000 usuarios" eran bots**: 4.225 cuentas, 4.219 de spam (nombres tipo "Charlesamoft", emails de EE.UU., hasta 248 altas en un día, sin compras). **No se importan ni se les escribe**: dañaría la reputación de exe.com.ar y Resend podría suspender la cuenta.
+38. **Clientes reales** (2 compradores + el equipo): se cargan en `legacy_customers` (migración 0003) **sin crearles cuenta ni mandarles emails**. Cuando vuelven, crean su cuenta con el mismo email y al **confirmarlo** se vinculan solos sus datos. Los datos personales no están en el repo.
+39. **Solo se envían emails a cuentas con email confirmado** (`profiles.email_verified_at`, controlado en `send-email`). En Supabase debe estar activo "Confirm email".
+40. **Antibots: Cloudflare Turnstile** (gratis, en español, casi siempre sin hacer nada el usuario) en ingresar, crear cuenta y olvidé mi contraseña. Lo valida Supabase del lado del servidor. Widget "exe.com.ar" en la cuenta de Cloudflare.
+41. **Recuperar contraseña**: al volver del email aparece "Elegí tu nueva contraseña" (antes no había pantalla para eso).
+

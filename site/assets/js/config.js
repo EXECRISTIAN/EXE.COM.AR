@@ -33,6 +33,10 @@ window.SITE_CONFIG = {
 
   // Backend (Supabase). Dejar vacío hasta crear el proyecto: el sitio funciona igual en modo estático.
   // Clave pública (publishable): es segura de exponer; los datos los protege la base con RLS.
+  // Antibots en login/registro (Cloudflare Turnstile, gratis). Clave pública del widget "exe.com.ar".
+  // El secret va SOLO en Supabase → Authentication → Attack Protection → Captcha.
+  turnstileSiteKey: "0x4AAAAAAFFqiE4e4uABCDg_",
+
   supabaseUrl: "https://sbayacwjvnxwktrhkgnk.supabase.co",
   supabaseAnonKey: "sb_publishable_vtcKfnXsn9UXQopzVFdAOQ_NFe4v4mK",
 };
