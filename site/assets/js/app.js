@@ -593,7 +593,7 @@
   const renderers = {
     hero(el, d) {
       if (!d.slides || !d.slides.length) return;
-      track.innerHTML = d.slides.map((sl, i) => `<div class="hero-slide">${sl.link ? `<a ${linkOf(sl)}>` : ""}<img src="${src(sl.img)}" alt="${esc(sl.alt || "")}" width="1904" height="650"${i ? ' loading="lazy"' : ""}>${sl.link ? "</a>" : ""}</div>`).join("");
+      track.innerHTML = d.slides.map((sl, i) => `<div class="hero-slide">${sl.link ? `<a ${linkOf(sl)}>` : ""}<img src="${src(sl.img)}" alt="${esc(sl.alt || "")}" width="1904" height="650"${i ? ' loading="lazy"' : ' fetchpriority="high"'}>${sl.link ? "</a>" : ""}</div>`).join("");
       setupHero();
     },
     tarjetas(el, d) {
