@@ -321,3 +321,16 @@
 .st-preview { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
 .st-preview > div { padding: 14px; border-radius: 10px; border: 1px solid var(--c6); }
 .st-preview p { margin: 4px 0 0; font-size: .88rem; }
+/* Panel en celular: menú en una fila deslizable y sin desplazamiento lateral de la página (las tablas se deslizan solas) */
+.admin-main { min-width: 0; }
+.panel:has(> table), .panel:has(> .table), .pr-table-wrap, #view .table-wrap { overflow-x: auto; }
+@media (max-width: 860px) {
+  .side-nav { display: flex; overflow-x: auto; gap: 6px; padding-bottom: 6px; scrollbar-width: thin; }
+  .side-nav a { flex: none; white-space: nowrap; padding: 8px 12px; }
+  .admin-main { overflow-x: hidden; }
+  .admin-main > header, .view-head { flex-wrap: wrap; gap: 8px; }
+  .st-item { flex-wrap: wrap; }
+  .pr-toolbar input[type=search] { min-width: 0; flex: 1 1 100%; }
+}
+@media (max-width: 860px) { .admin { grid-template-columns: minmax(0, 1fr); } .sidebar, .side-nav { min-width: 0; max-width: 100%; } }
+@media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px; } .kpi strong { font-size: 1.3rem; } }
