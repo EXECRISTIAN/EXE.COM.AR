@@ -288,7 +288,7 @@
         <li>
           <img src="${esc(mainImg(l.product))}" alt="" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
           <div class="info">${esc(l.product.name)}
-            <small>${l.variant ? esc(l.variant) + " · " : ""}${priceLabel(l.product)}</small>
+            <small>${l.variant ? esc(l.variant) + " · " : ""}${priceLabel(l.product)}${l.product.noStock ? " · a pedido" : l.product.askStock ? " · stock a consultar" : ""}</small>
           </div>
           <div class="qty">
             <button data-dec="${i}" aria-label="Restar">−</button>
@@ -347,7 +347,8 @@
     const note = $("customerNote").value.trim();
     const rows = lines.map((l) => {
       const sub = l.product.price > 0 ? money(l.qty * l.product.price) : "a consultar";
-      return `• ${l.qty} x ${l.product.name}${l.variant ? ` (${l.variant})` : ""} — ${sub}`;
+      const tag = l.product.noStock ? " (a pedido)" : l.product.askStock ? " (consultar stock)" : "";
+      return `• ${l.qty} x ${l.product.name}${l.variant ? ` (${l.variant})` : ""}${tag} — ${sub}`;
     });
     return [
       `Hola EXE! ${name ? `Soy ${name}. ` : ""}Quiero hacer este pedido:`,
