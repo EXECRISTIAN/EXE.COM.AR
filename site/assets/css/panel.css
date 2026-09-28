@@ -129,3 +129,10 @@
 .confirm-actions .btn { flex: 1 1 130px; padding-inline: 14px; white-space: nowrap; }
 .btn-danger { background: var(--danger-bg); border-color: var(--danger-bg); color: #fff; }
 .btn-danger:hover, .btn-danger:focus-visible { background: #b91c1c; border-color: #b91c1c; color: #fff; }
+
+/* "Volver" del diálogo: mantiene el borde del tema y suma un anillo verde de confirmación por dentro y por fuera,
+   en claro/oscuro y en todos los estados (normal, hover, foco) */
+.btn-back, .btn-back:hover, .btn-back:focus, .btn-back:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--ok), 0 0 0 2px var(--ok);
+}
+.btn-back:focus-visible { outline: 2px solid var(--c0); outline-offset: 4px; }
