@@ -6,7 +6,7 @@
   const money = (n) =>
     new Intl.NumberFormat(cfg.locale, { style: "currency", currency: cfg.currency, maximumFractionDigits: 0 }).format(n);
   const mainImg = (p) => (p.images && p.images[0]) || p.image || PLACEHOLDER;
-  const priceLabel = (p) => (p.price > 0 ? money(p.price) : "Consultar precio por WhatsApp");
+  const priceLabel = (p) => (p.price > 0 ? money(p.price) : p.askStock ? "Consultar precio y stock" : "Consultar precio por WhatsApp");
   const esc = (s) =>
     String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
   const waLink = (text) => `https://wa.me/${cfg.whatsappNumber}?text=${encodeURIComponent(text)}`;
@@ -37,7 +37,18 @@
   const inCart = (id) => cart.filter((l) => l.id === id).reduce((n, l) => n + l.qty, 0);
   const available = (p) => (tracksStock(p) ? Math.max(0, p.stock - inCart(p.id)) : Infinity);
 
+  // ¿Se puede agregar al carrito? (cartOk = false: si no hay precio o stock, solo se consulta por WhatsApp)
+  const needsAsk = (p) => !(p.price > 0) || p.askStock || p.noStock || (tracksStock(p) && p.stock <= 0);
+  const blocked = (p) => p.cartOk === false && needsAsk(p);
+  const addBtn = (p, attr) => {
+    if (blocked(p)) return `<a class="btn btn-primary" href="${esc(waLink(`Hola EXE! Quería consultar precio y disponibilidad de: ${p.name}`))}" target="_blank" rel="noopener">Consultar por WhatsApp</a>`;
+    const out = tracksStock(p) && p.stock <= 0;
+    return `<button class="btn btn-primary" ${attr}="${esc(p.id)}" ${out ? "disabled" : ""}>${out ? "Sin stock" : "Agregar al carrito"}</button>`;
+  };
+
   function stockBadge(p) {
+    if (p.askStock) return p.price > 0 ? `<span class="stock ask">Consultar stock</span>` : "";
+    if (p.noStock) return `<span class="stock low">Sin stock · a pedido</span>`;
     if (!tracksStock(p)) return "";
     if (p.stock <= 0) return `<span class="stock out">Sin stock</span>`;
     if (!showsStock(p)) return `<span class="stock ok">En stock</span>`;
@@ -91,7 +102,7 @@
               ${(p.tags || []).length ? `<div class="p-tags">${p.tags.filter((t) => t !== "Outlet").map((t) => `<button type="button" class="p-tag" data-tag="${esc(t)}">${esc(t)}</button>`).join("")}</div>` : ""}
               ${stockBadge(p)}
               ${p.variants ? `<select data-variant="${esc(p.id)}" aria-label="Variante">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select>` : ""}
-              <button class="btn btn-primary" data-add="${esc(p.id)}" ${out ? "disabled" : ""}>${out ? "Sin stock" : "Agregar al carrito"}</button>
+              ${addBtn(p, "data-add")}
               <a class="card-more" href="#producto/${encodeURIComponent(p.id)}">Ver detalles${p.specs ? " y especificaciones" : ""}</a>
             </div>
           </article>`;
@@ -144,13 +155,13 @@
         ${stockBadge(p)}
         ${p.variants ? `<label class="field">Variante<select id="pdVariant">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select></label>` : ""}
         <div class="pd-actions">
-          ${out ? "" : `<div class="pd-qty-row"><label for="pdQty">Cantidad</label>
+          ${out || blocked(p) ? "" : `<div class="pd-qty-row"><label for="pdQty">Cantidad</label>
             <div class="qty-stepper">
               <button type="button" data-pd-qty="-1" aria-label="Restar una unidad">−</button>
               <input id="pdQty" type="number" inputmode="numeric" min="1" max="${Math.min(99, available(p))}" value="1" aria-label="Cantidad de unidades">
               <button type="button" data-pd-qty="1" aria-label="Sumar una unidad">+</button>
             </div></div>`}
-          <button class="btn btn-primary" data-pd-add="${esc(p.id)}" ${out ? "disabled" : ""}>${out ? "Sin stock" : "Agregar al carrito"}</button>
+          ${addBtn(p, "data-pd-add")}
           <a class="btn btn-outline" href="${esc(waAsk)}" target="_blank" rel="noopener">Consultar por WhatsApp</a>
         </div>
         ${p.description ? `<div class="pd-desc">${esc(p.description)}</div>` : ""}
@@ -677,17 +688,20 @@
 
   /* ---------- Datos ---------- */
   // Catálogo: primero Supabase (lo que se edita en el panel se ve al instante); si falla, la copia products.json.
+  // ask_price / ask_stock: mostrar "Consultar"; cart_ok: sin precio/stock se puede igual agregar al carrito
+  // (sin stock + cart_ok = "a pedido", sin límite); hide_no_stock: no se muestra si el stock llega a 0.
   const fromDb = (r) => ({
-    id: r.id, name: r.name, brand: r.brand, category: r.category, description: r.description, price: Number(r.price) || 0,
-    ...(r.show_stock ? { stock: r.stock } : {}), images: r.images && r.images.length ? r.images : (r.image ? [r.image] : []),
+    id: r.id, name: r.name, brand: r.brand, category: r.category, description: r.description, price: r.ask_price ? 0 : Number(r.price) || 0,
+    askStock: !!r.ask_stock, cartOk: r.cart_ok !== false, noStock: !r.ask_stock && r.show_stock && r.stock <= 0 && r.cart_ok !== false,
+    ...(r.show_stock && !r.ask_stock && !(r.stock <= 0 && r.cart_ok !== false) ? { stock: r.stock } : {}), images: r.images && r.images.length ? r.images : (r.image ? [r.image] : []),
     specs: r.specs && r.specs.length ? r.specs : undefined, outlet: r.outlet, condition: r.condition, weightKg: Number(r.weight_kg) || 1,
     variants: r.variants && r.variants.length ? r.variants : undefined, tags: r.tags || [],
   });
   const loadDb = () => {
     if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) return Promise.reject();
-    const cols = "id,name,brand,category,description,price,stock,show_stock,image,images,specs,outlet,condition,weight_kg,variants,tags";
+    const cols = "id,name,brand,category,description,price,stock,show_stock,image,images,specs,outlet,condition,weight_kg,variants,tags,ask_price,ask_stock,cart_ok,hide_no_stock";
     return fetch(`${cfg.supabaseUrl}/rest/v1/products?select=${cols}&active=eq.true&order=sort.asc,name.asc`, { headers: { apikey: cfg.supabaseAnonKey } })
-      .then((r) => (r.ok ? r.json() : Promise.reject())).then((rows) => (rows.length ? rows.map(fromDb) : Promise.reject()));
+      .then((r) => (r.ok ? r.json() : Promise.reject())).then((rows) => (rows.length ? rows.filter((r) => !(r.hide_no_stock && r.show_stock && r.stock <= 0)).map(fromDb) : Promise.reject()));
   };
   const loadJson = () => fetch("data/products.json", { cache: "no-cache" }).then((r) => r.json())
     .then((data) => data.filter((p) => p.active !== false));   // "active": false = sin stock: no se muestra ni se puede pedir
