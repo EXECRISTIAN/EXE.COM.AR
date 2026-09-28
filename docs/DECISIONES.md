@@ -79,3 +79,4 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 51. **Sin enlaces de sesión**: las descripciones de PR y los commits nuevos no incluyen enlaces a la conversación de Claude.
 52. **Botones de Mi cuenta**: "Panel de administración" queda fijo con el aspecto de hover (relleno del color de títulos, se adapta a claro/oscuro); "Cerrar sesión" se pone rojo (`--danger-bg`) al pasar el mouse o con foco de teclado.
 53. **Efecto ARGB** en "Panel de administración" al pasar el mouse: borde arcoíris que gira (conic-gradient + `@property`) con resplandor; el relleno sigue el tema. Se desactiva la animación si el sistema pide menos movimiento.
+54. **Cache busting**: el deploy agrega `?v=<commit>` a los enlaces de CSS/JS, así cada cambio se ve al recargar la página (GitHub Pages cachea ~10 min). `products.json` se pide con `cache: "no-cache"` para no mostrar precios o stock viejos.
