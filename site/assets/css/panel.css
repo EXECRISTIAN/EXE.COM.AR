@@ -133,6 +133,7 @@
 /* "Volver" del diálogo: borde verde de confirmación con un halo verde suave, en claro/oscuro y en todos los estados */
 .btn-back, .btn-back:hover, .btn-back:focus, .btn-back:focus-visible {
   border-color: var(--ok);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 35%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c2) 28%, transparent),   /* línea interna negra (claro) / blanca (oscuro), semitransparente */
+              0 0 0 3px color-mix(in srgb, var(--ok) 35%, transparent);
 }
 .btn-back:focus-visible { outline: 2px solid var(--c0); outline-offset: 4px; }
