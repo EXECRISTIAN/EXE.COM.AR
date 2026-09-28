@@ -525,7 +525,7 @@
     "category": "Placas de video",
     "price": 305100,
     "stock": 10,
-    "weightKg": 10,
+    "weightKg": 0.999,
     "images": [
       "assets/img/products/asus-gtx1660-01.webp",
       "assets/img/products/asus-gtx1660-02.webp",
