@@ -7,7 +7,6 @@ panel en `?demo`), hace PR + merge y lo tilda con la fecha. Reglas:
 - No tocar precios de venta outlet ni costos. No publicar links/costos en el repo.
 
 ## Pendiente
-- [ ] Mi cuenta: registro, login, recuperar contraseña, configuración, mensajes de error en español.
 - [ ] Panel: cada sección en `?demo` sin errores de consola; tablas usables en celular.
 - [ ] Rendimiento: peso de imágenes (WebP ≤ 200 KB), lazy-loading, orden de scripts, caché.
 - [ ] SEO básico: títulos, descripciones, Open Graph, favicon, sitemap.xml y robots.txt, datos estructurados de productos.
@@ -17,6 +16,7 @@ panel en `?demo`), hace PR + merge y lo tilda con la fecha. Reglas:
 - [ ] Fotos: productos sin foto (seguir con la tanda de precios/fotos).
 
 ## Hecho
+- [x] 28/09 — Mi cuenta: mensajes de error claros en español para ingreso, registro y cambio de contraseña (demasiados intentos, captcha, contraseña débil o repetida, email inválido, sin conexión), sin revelar si un email ya tiene cuenta.
 - [x] 28/09 — Carrito: cantidades respetan el stock, variantes y "a consultar" en el total funcionan. Ahora el carrito y el mensaje de WhatsApp aclaran "a pedido" y "consultar stock".
 - [x] 28/09 — Accesibilidad: tienda, Mi cuenta y 404 sin imágenes sin alt, campos sin etiqueta ni botones sin nombre; ficha se abre con Enter y se cierra con Esc. Panel: todos los campos reciben nombre para lectores de pantalla (filtros, celdas de la tabla, colores, números). Anillo de foco explícito en chips y etiquetas.
 - [x] 28/09 — Contraste (chequeo automático en tienda, Mi cuenta y panel, claro y oscuro): chips/botones seleccionados del panel legibles en oscuro; "disponibles"/"últimas unidades" más oscuros en claro (pasan el mínimo). Sin otros problemas en oscuro.
