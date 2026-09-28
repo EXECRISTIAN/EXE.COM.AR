@@ -17,4 +17,3 @@ Idea base (a definir con Cristian antes de empezar):
 - **Protección de contraseñas filtradas** (HaveIBeenPwned) en Supabase Auth: es función del plan Pro (pago), queda apagada.
 - **Mercado Pago**: crear la cuenta de integración y el token para cobrar online.
 - **Dominio**: pasar exe.com.ar a GitHub Pages cuando se decida (hoy sigue el WordPress).
-- **Peso de la GTX 1650** en `products.json`: dice 10 kg (dato de WordPress); revisar antes de activar envíos.
