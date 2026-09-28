@@ -67,4 +67,9 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 44. **Remitente**: `EXE <ventas@exe.com.ar>` (dominio verificado en Resend, región São Paulo). Las respuestas van a ventas@.
 45. **Plantillas en un solo archivo** (`supabase/functions/_shared/emails.js`), en español, con el look del sitio: franja negra con logo blanco, azul `#0084d6`, Lato, pie con WhatsApp y el motivo del envío. Vistas previas en `docs/emails/` (`node scripts/build-emails.mjs`).
 46. **9 plantillas**: cuenta (confirmar, restablecer contraseña, cambio de email) y pedido (recibido, pago confirmado, enviado con seguimiento, entregado, cancelado) + aviso interno de nuevo pedido a ventas@. Solo transaccionales: nada de publicidad.
+47. **Emails de cuenta desde @exe.com.ar**: Supabase Auth manda por SMTP de Resend (clave "supabase-auth-smtp", solo envío y solo para exe.com.ar) como `EXE <ventas@exe.com.ar>`, con las 3 plantillas en español. Límite: 30 emails/hora.
+
+## Productos
+48. **Ficha de producto**: tocando la foto, el nombre o "Ver detalles" se abre una ficha con todas las fotos (flechas, miniaturas, teclado y deslizar con el dedo), precio, stock, variante, agregar al carrito, consultar por WhatsApp y especificaciones por secciones. Link compartible: `#producto/<id>`.
+49. **Especificaciones reales** de WordPress (7 productos). No se muestran las de 3 productos cuyo texto en WordPress era de otro modelo (ver `docs/PENDIENTES.md`); en su lugar dice que la ficha está en revisión.
 

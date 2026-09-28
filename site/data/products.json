@@ -8,6 +8,75 @@
     "weightKg": 1,
     "images": [
       "assets/img/products/producto-1.webp"
+    ],
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "13400"
+          ],
+          [
+            "Socket",
+            "1700 Raptor Lake"
+          ],
+          [
+            "Núcleos",
+            "10"
+          ],
+          [
+            "Frecuencia",
+            "2500.00 mhz"
+          ],
+          [
+            "Proceso de fabricación",
+            "10 nm"
+          ],
+          [
+            "Chipset gpu",
+            "UHD Graphics 730"
+          ],
+          [
+            "Hilos",
+            "16"
+          ],
+          [
+            "Frecuencia turbo",
+            "4600 mhz"
+          ],
+          [
+            "Familia",
+            "Intel Core i5"
+          ]
+        ]
+      },
+      {
+        "title": "Coolers y disipadores",
+        "rows": [
+          [
+            "Tdp",
+            "120 w"
+          ],
+          [
+            "Incluye cooler cpu",
+            "Si"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Caché l2",
+            "9.5 mb"
+          ],
+          [
+            "Caché l3",
+            "20 mb"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -30,6 +99,75 @@
     "weightKg": 1,
     "images": [
       "assets/img/products/producto-3.webp"
+    ],
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "5800X"
+          ],
+          [
+            "Socket",
+            "AM4 Ryzen 4th Gen"
+          ],
+          [
+            "Núcleos",
+            "8"
+          ],
+          [
+            "Frecuencia",
+            "3800.00 mhz"
+          ],
+          [
+            "Proceso de fabricación",
+            "7 nm"
+          ],
+          [
+            "Chipset gpu",
+            "NO Posee Gráficos Integrados"
+          ],
+          [
+            "Hilos",
+            "16"
+          ],
+          [
+            "Frecuencia turbo",
+            "4700 mhz"
+          ],
+          [
+            "Familia",
+            "AMD RYZEN 7"
+          ]
+        ]
+      },
+      {
+        "title": "Coolers y disipadores",
+        "rows": [
+          [
+            "Tdp",
+            "105 w"
+          ],
+          [
+            "Incluye cooler cpu",
+            "No"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Caché l2",
+            "4 mb"
+          ],
+          [
+            "Caché l3",
+            "32 mb"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -42,6 +180,75 @@
     "images": [
       "assets/img/products/producto-4.webp",
       "assets/img/products/producto-4.1.webp"
+    ],
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "8500G"
+          ],
+          [
+            "Socket",
+            "AM5 Ryzen 7000"
+          ],
+          [
+            "Núcleos",
+            "6"
+          ],
+          [
+            "Frecuencia",
+            "3500.00 mhz"
+          ],
+          [
+            "Proceso de fabricación",
+            "4 nm"
+          ],
+          [
+            "Chipset gpu",
+            "AMD Radeon Graphics"
+          ],
+          [
+            "Hilos",
+            "12"
+          ],
+          [
+            "Frecuencia turbo",
+            "5000 mhz"
+          ],
+          [
+            "Familia",
+            "AMD RYZEN 5"
+          ]
+        ]
+      },
+      {
+        "title": "Coolers y disipadores",
+        "rows": [
+          [
+            "Tdp",
+            "65 w"
+          ],
+          [
+            "Incluye cooler cpu",
+            "Si"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Caché l2",
+            "6 mb"
+          ],
+          [
+            "Caché l3",
+            "15 mb"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -55,6 +262,178 @@
       "assets/img/products/producto-5.webp",
       "assets/img/products/producto-5.1.webp",
       "assets/img/products/producto-5.2.webp"
+    ],
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Plataforma",
+            "AMD"
+          ],
+          [
+            "Socket",
+            "AM5 Ryzen 7000"
+          ],
+          [
+            "Chipsets principal",
+            "AMD A620"
+          ],
+          [
+            "Boton bios flashback",
+            "Si"
+          ]
+        ]
+      },
+      {
+        "title": "Conectividad",
+        "rows": [
+          [
+            "Slots PCI-e x16",
+            "1"
+          ],
+          [
+            "Slots PCI-e x1",
+            "2"
+          ],
+          [
+            "Tecnología multi gpu",
+            "0"
+          ],
+          [
+            "Puertos sata",
+            "4"
+          ],
+          [
+            "Salidas vga",
+            "1"
+          ],
+          [
+            "Salidas hdmi",
+            "1"
+          ],
+          [
+            "Salidas dvi",
+            "0"
+          ],
+          [
+            "Salidas display ports",
+            "1"
+          ],
+          [
+            "Cantidad de slot m.2 totales",
+            "2"
+          ],
+          [
+            "Placa wifi integrada",
+            "No"
+          ],
+          [
+            "Sistema de conexión rgb",
+            "RGB Header,ARGB Header"
+          ],
+          [
+            "Placa de red",
+            "1 Gb/s"
+          ],
+          [
+            "Puerto ps/2",
+            "Si"
+          ],
+          [
+            "Puertos usb 2.0 traseros",
+            "4"
+          ],
+          [
+            "Puertos usb 3.0 traseros",
+            "0"
+          ],
+          [
+            "Puertos usb 3.1 traseros",
+            "0"
+          ],
+          [
+            "Puertos usb 3.2 traseros",
+            "2"
+          ],
+          [
+            "Puertos Usb Type-c",
+            "0"
+          ],
+          [
+            "Slots PCI-e x4",
+            "0"
+          ],
+          [
+            "Cantidad de slot m.2 sata",
+            "0"
+          ],
+          [
+            "Cantidad de slot m.2 nvme",
+            "2"
+          ]
+        ]
+      },
+      {
+        "title": "Dimensiones",
+        "rows": [
+          [
+            "Factor",
+            "M-ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Energía",
+        "rows": [
+          [
+            "Watts máximos para cpu",
+            "128"
+          ],
+          [
+            "Conector CPU 4 pines",
+            "1"
+          ],
+          [
+            "Conector CPU 4 pines plus",
+            "1"
+          ],
+          [
+            "Conector 24 pines",
+            "1"
+          ],
+          [
+            "Consumo",
+            "45 w"
+          ],
+          [
+            "Procesador integrado",
+            "No"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Tipo de memoria",
+            "DDR5"
+          ],
+          [
+            "Cantidad de slot de memorias",
+            "4"
+          ]
+        ]
+      },
+      {
+        "title": "Sonido",
+        "rows": [
+          [
+            "Placa de sonido",
+            "Realtek 7.1 CODEC"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -84,6 +463,74 @@
       "assets/img/products/gabinete-antec-04.webp",
       "assets/img/products/gabinete-antec-05.webp",
       "assets/img/products/gabinete-antec-06.webp"
+    ],
+    "specs": [
+      {
+        "title": "Características principales",
+        "rows": [
+          [
+            "Marca",
+            "Antec"
+          ],
+          [
+            "Modelo",
+            "NX200 M"
+          ],
+          [
+            "Modelo alfanumérico",
+            "NX200M WHITE"
+          ]
+        ]
+      },
+      {
+        "title": "Otras características",
+        "rows": [
+          [
+            "Tipo de estructura",
+            "Mini tower"
+          ],
+          [
+            "Puertos",
+            "Power Reset 1 x USB3.0 2 x USB2.0 MIC/HD-AUDIO"
+          ],
+          [
+            "Placas madre compatibles",
+            "Mini-ITX,Micro-ATX"
+          ],
+          [
+            "Altura x Ancho x Largo",
+            "200 mm x 390 mm x 351 mm"
+          ],
+          [
+            "Es gamer",
+            "Sí"
+          ],
+          [
+            "Es apto para refrigeración liquida",
+            "Sí"
+          ],
+          [
+            "Incluye panel lateral",
+            "Sí"
+          ],
+          [
+            "Material del panel",
+            "Vidrio templado"
+          ],
+          [
+            "Cantidad máxima de ventiladores",
+            "5"
+          ],
+          [
+            "Cantidad de bahías para unidades de 3,5”",
+            "1"
+          ],
+          [
+            "Cantidad de bahías para unidades de 2,5”",
+            "2"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -99,6 +546,102 @@
       "assets/img/products/fuente-aerocool-04.webp",
       "assets/img/products/fuente-aerocool-05.webp",
       "assets/img/products/fuente-aerocool-06.webp"
+    ],
+    "specs": [
+      {
+        "title": "Características principales",
+        "rows": [
+          [
+            "Marca",
+            "Aerocool Advanced Technologies"
+          ],
+          [
+            "Línea",
+            "Cylon"
+          ],
+          [
+            "Modelo",
+            "600W Full Range"
+          ],
+          [
+            "Potencia de salida",
+            "600 W"
+          ],
+          [
+            "Color",
+            "Black"
+          ],
+          [
+            "Voltaje",
+            "100V/240V"
+          ]
+        ]
+      },
+      {
+        "title": "Otros",
+        "rows": [
+          [
+            "Tipo de fuente de alimentación para PC",
+            "ATX"
+          ],
+          [
+            "Tipo de refrigeración",
+            "Por aire"
+          ],
+          [
+            "Con protección de bajo voltaje",
+            "Sí"
+          ],
+          [
+            "Con iluminación RGB",
+            "Sí"
+          ],
+          [
+            "Cantidad de conectores HDD",
+            "3"
+          ],
+          [
+            "Cantidad de conectores SATA",
+            "5"
+          ],
+          [
+            "Cantidad de conectores PCI-E",
+            "2"
+          ],
+          [
+            "Certificación de eficiencia",
+            "80 Plus Bronze"
+          ],
+          [
+            "Corrección del factor de potencia",
+            "Activo"
+          ],
+          [
+            "Diámetro del ventilador",
+            "12 cm"
+          ],
+          [
+            "Frecuencia",
+            "60 Hz"
+          ],
+          [
+            "Largo del conector principal",
+            "500 mm"
+          ],
+          [
+            "Es gamer",
+            "Sí"
+          ],
+          [
+            "Con funcionamiento silencioso",
+            "Sí"
+          ],
+          [
+            "Cantidad de pines de la placa madre",
+            "24"
+          ]
+        ]
+      }
     ]
   },
   {
@@ -109,6 +652,96 @@
     "price": 52380,
     "images": [
       "assets/img/products/memoria-tforce-delta.webp"
+    ],
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Marca",
+            "Team Group"
+          ],
+          [
+            "Línea",
+            "T-Force"
+          ],
+          [
+            "Modelo",
+            "15016245"
+          ],
+          [
+            "Módulos de memoria RAM",
+            "1 x 8 GB"
+          ],
+          [
+            "Capacidad total",
+            "8 GB"
+          ],
+          [
+            "Color",
+            "Negro"
+          ],
+          [
+            "Capacidad individual",
+            "8 GB"
+          ]
+        ]
+      },
+      {
+        "title": "Compatibilidad",
+        "rows": [
+          [
+            "Aplicación",
+            "Computadoras de escritorio"
+          ]
+        ]
+      },
+      {
+        "title": "Especificaciones",
+        "rows": [
+          [
+            "Color de la luz",
+            "RGB"
+          ],
+          [
+            "Tecnología de la memoria RAM",
+            "DDR4 SDRAM"
+          ],
+          [
+            "Formato de la memoria RAM",
+            "UDIMM"
+          ],
+          [
+            "Velocidad de la memoria RAM",
+            "3600 MHz"
+          ],
+          [
+            "Es gamer",
+            "Sí"
+          ]
+        ]
+      },
+      {
+        "title": "Otros",
+        "rows": [
+          [
+            "Cantidad de pines",
+            "288"
+          ],
+          [
+            "Tasa de transferencia",
+            "28800 MB/s"
+          ],
+          [
+            "Latencia CAS",
+            "18"
+          ],
+          [
+            "Voltaje de alimentación",
+            "1.35V"
+          ]
+        ]
+      }
     ]
   },
   {
