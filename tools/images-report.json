@@ -3,128 +3,132 @@
   "id": "outlet-rtx3090-zotac-trinity",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 468: <none>"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-pentium-g5420",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-celeron-g5925",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-celeron-g5905",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-i3-10100",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-i5-10400",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-i3-12100f",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-z390-aorus-elite",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-biostar-z490a-silver",
   "ok": false,
   "src": null,
-  "error": "sin og:image"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-gigabyte-b460m-ds3h-v2",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-msi-h510m-a-pro",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-msi-mpg-z490-gaming-plus",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-thermaltake-smart-700w",
   "ok": false,
-  "src": "https://www.thermaltake.com/media/catalog/product/cache/4793a12a0283398819e8308a2be5fbc2/db/imgs/pdt/angle/PS-SPD-0700NPCW-W_05c1d686a53f407890b0353d43c1f168.jpg",
-  "error": "HTTP Error 404: Not Found"
+  "src": null,
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-gigabyte-p650b",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-gigabyte-p750gm",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-gigabyte-p850gm",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-gigabyte-p1000gm",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-thermaltake-smart-rgb-700w",
   "ok": false,
-  "src": "https://www.thermaltake.com/media/catalog/product/cache/4793a12a0283398819e8308a2be5fbc2/db/imgs/pdt/angle/PS-SPR-0700NHFAWx-1_e8e0f78805a0460ba5147f5e5e2d27f0.jpg",
-  "error": "HTTP Error 404: Not Found"
+  "src": null,
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-aorus-p750w",
   "ok": false,
   "src": null,
-  "error": "HTTP Error 403: Forbidden"
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-sentey-r20",
-  "ok": true,
-  "src": "https://www.sentey.com/media/Headers_Products/menu/psu/MBP.jpg",
-  "kb": 19,
-  "corners": 55.0
+  "ok": false,
+  "src": null,
+  "error": "sin foto de fondo blanco en la búsqueda"
  },
  {
   "id": "outlet-sentey-x10",
-  "ok": true,
-  "src": "https://www.sentey.com/media/Headers_Products/menu/psu/MBP.jpg",
-  "kb": 19,
-  "corners": 55.0
+  "ok": false,
+  "src": null,
+  "error": "sin foto de fondo blanco en la búsqueda"
+ },
+ {
+  "id": "outlet-steam-deck-512",
+  "ok": false,
+  "src": null,
+  "error": "sin foto de fondo blanco en la búsqueda"
  }
 ]
