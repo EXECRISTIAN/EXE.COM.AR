@@ -8,12 +8,12 @@ para páginas que bloquean) y deja anotado dónde quedó. Nunca se usa una foto 
 | Producto (id) | Estado | Notas / candidata |
 |---|---|---|
 | outlet-steam-deck-512 | pendiente | |
-| outlet-aorus-p750w-nueva | pendiente | |
+| outlet-aorus-p750w-nueva | pendiente | 28/09: gigabyte.com (página oficial vía Action + Worker) → 404. Probar tienda oficial/Amazon o foto propia. |
 | outlet-aorus-p750w-usada | pendiente | |
-| outlet-gigabyte-p1000gm | pendiente | |
-| outlet-gigabyte-p650b | pendiente | |
-| outlet-gigabyte-p750gm | pendiente | |
-| outlet-gigabyte-p850gm | pendiente | |
+| outlet-gigabyte-p1000gm | pendiente | 28/09: gigabyte.com (página oficial vía Action + Worker) → 404. Probar tienda oficial/Amazon o foto propia. |
+| outlet-gigabyte-p650b | pendiente | 28/09: gigabyte.com (página oficial vía Action + Worker) → 404. Probar tienda oficial/Amazon o foto propia. |
+| outlet-gigabyte-p750gm | pendiente | 28/09: gigabyte.com (página oficial vía Action + Worker) → 404. Probar tienda oficial/Amazon o foto propia. |
+| outlet-gigabyte-p850gm | pendiente | 28/09: gigabyte.com (página oficial vía Action + Worker) → 404. Probar tienda oficial/Amazon o foto propia. |
 | outlet-redragon-850w | pendiente | |
 | outlet-thermaltake-smart-700w | pendiente | |
 | outlet-thermaltake-smart-rgb-700w | pendiente | |
