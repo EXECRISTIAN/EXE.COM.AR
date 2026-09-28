@@ -664,7 +664,7 @@
     });
   }
 
-  /* ---------- Dólar: cotización manual o automática (cada 30 min, con máximo del día) ---------- */
+  /* ---------- Dólar: cotización manual o automática (cada 10 min, con máximo del día) ---------- */
   const FX_SOURCES = [["max", "Automático (el más alto)"], ["mid", "Automático (punto medio)"], ["min", "Automático (el más bajo)"], ["oficial", "Oficial"], ["blue", "Blue"], ["bolsa", "MEP (bolsa)"], ["contadoconliqui", "CCL (contado con liqui)"], ["mayorista", "Mayorista"], ["cripto", "Cripto"], ["tarjeta", "Tarjeta"]];
   A.views.dolar = async function () {
     const r = A.demo ? { data: { mode: "auto", manual_rate: null, source: "oficial", round_to: 100, last_auto_rate: 1545, last_auto_at: new Date().toISOString(), day_max_rate: 1550, day_date: "2026-09-28", effective_rate: 1550, day_max_by_source: { oficial: 1545, blue: 1560, bolsa: 1557.3, contadoconliqui: 1616.6, mayorista: 1525.5, cripto: 1613.92, tarjeta: 2008.5 }, max_sources: ["oficial", "blue", "bolsa", "contadoconliqui", "mayorista", "cripto"], vol_up_on: true, vol_up_pts: 100, vol_down_on: false, vol_down_pts: 100, day_open_rate: 1545, vol_state: null } } : await sb().from("fx_settings").select("*").eq("id", 1).single();
@@ -684,7 +684,7 @@
           <label class="fx-mode"><input type="radio" name="mode" value="manual" ${s.mode === "manual" ? "checked" : ""}>
             <span><b>Manual</b> — uso el valor que pongo yo.</span></label>
           <label class="fx-mode"><input type="radio" name="mode" value="auto" ${s.mode === "auto" ? "checked" : ""}>
-            <span><b>Automático</b> — se actualiza cada 30 minutos con la fuente elegida (al lado de cada una, su valor más alto de hoy; "Automático" usa la más alta, la más baja o el punto medio entre ambas). <b>Durante el día nunca baja</b>: se usa el valor más alto del día; al día siguiente arranca de nuevo.</span></label>
+            <span><b>Automático</b> — se actualiza cada 10 minutos con la fuente elegida (al lado de cada una, su valor más alto de hoy; "Automático" usa la más alta, la más baja o el punto medio entre ambas). <b>Durante el día nunca baja</b>: se usa el valor más alto del día; al día siguiente arranca de nuevo.</span></label>
         </div>
         <div class="ed-grid ed-grid-4">
           <label class="field">Mi valor (manual, $ por US$ 1)<input name="manual" inputmode="decimal" value="${s.manual_rate ?? ""}" placeholder="Ej: 1550"></label>
@@ -708,6 +708,17 @@
           <div class="fx-chips" id="fxRange">${[[1, "24 h"], [7, "7 días"], [30, "30 días"], [90, "3 meses"], [365, "1 año"], [730, "2 años"]].map(([d, n]) => `<button type="button" class="fx-rbtn ${d === 30 ? "on" : ""}" data-d="${d}">${n}</button>`).join("")}</div>
           <label class="fx-pct"><input type="checkbox" id="fxPct"> Comparar en % (desde el inicio del período)</label>
         </div>
+        <div class="fx-hist-bar">
+          <div class="fx-chips" id="fxStep"><small class="fx-lbl">Ver cada:</small>${[[0, "⏱ Tiempo real"], [10, "10 min"], [30, "30 min"], [60, "1 h"], [360, "6 h"], [720, "12 h"], [1440, "1 día"]].map(([m, n]) => `<button type="button" class="fx-rbtn" data-m="${m}">${n}</button>`).join("")}<button type="button" class="fx-rbtn" id="fxCustomBtn" aria-expanded="false">Personalizado ▾</button></div>
+        </div>
+        <div class="fx-custom" id="fxCustom" hidden>
+          <label class="field">Cada<input id="fxCN" type="number" min="1" value="2" inputmode="numeric"></label>
+          <label class="field">&nbsp;<select id="fxCU"><option value="1">minutos</option><option value="60" selected>horas</option><option value="1440">días</option></select></label>
+          <label class="field">Desde<input id="fxFrom" type="datetime-local"></label>
+          <label class="field">Hasta<input id="fxTo" type="datetime-local"></label>
+          <button type="button" class="btn btn-primary" id="fxCApply">Aplicar</button>
+        </div>
+        <p class="ed-hint" id="fxNote"></p>
         <div class="fx-chips" id="fxSeries">${FX_SOURCES.filter(([v]) => !["max", "mid", "min"].includes(v)).map(([v, n]) => `<label class="fx-chip"><input type="checkbox" value="${v}" ${["oficial", "blue", "bolsa", "tarjeta"].includes(v) ? "checked" : ""}><span>${n}</span></label>`).join("")}</div>
         <div class="fx-chart"><canvas id="fxChart" aria-label="Gráfico histórico del dólar"></canvas></div>
         <div id="fxStats"></div>
@@ -719,38 +730,74 @@
   const FX_COLORS = { oficial: "#0084d6", blue: "#2563eb", bolsa: "#16a34a", contadoconliqui: "#9333ea", mayorista: "#64748b", cripto: "#f59e0b", tarjeta: "#dc2626" };
   const loadChart = () => window.Chart ? Promise.resolve() : new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
   let fxChart = null;
-  async function fxHistory(days) {
-    if (A.demo) { const out = []; const now = Date.now(); const base = { oficial: 1545, blue: 1560, bolsa: 1557, contadoconliqui: 1616, mayorista: 1525, cripto: 1613, tarjeta: 2008 }; const pts = days <= 14 ? days * 48 : days; const step = (days * 864e5) / pts;
-      for (let i = pts; i >= 0; i--) for (const [k, b] of Object.entries(base)) out.push({ ts: new Date(now - i * step).toISOString(), casa: k, venta: +(b * (1 - i / pts * 0.25) + Math.sin(i / 7) * 12).toFixed(2) }); return out; }
+  // Estado del historial: rango (días), intervalo (min; 0 = cada lectura / tiempo real) y fechas personalizadas
+  const fxv = { days: 30, step: null, from: null, to: null, live: false };
+  const autoStep = (d) => (d <= 1 ? 10 : d <= 7 ? 60 : d <= 30 ? 360 : 1440);
+  let fxTimer = null;
+  async function fxHistory(from, to, step) {
+    if (A.demo) { const out = []; const base = { oficial: 1545, blue: 1560, bolsa: 1557, contadoconliqui: 1616, mayorista: 1525, cripto: 1613, tarjeta: 2008 };
+      const st = Math.max(10, step || 10, Math.ceil((to - from) / 6e4 / 3000)) * 6e4, n = Math.floor((to - from) / st);
+      for (let i = n; i >= 0; i--) for (const [k, b] of Object.entries(base)) { const v = +(b * (1 - i / n * 0.05) + Math.sin(i / 5) * 6).toFixed(2); out.push({ ts: new Date(to - i * st).toISOString(), casa: k, venta: v, venta_max: v + 2, venta_min: v - 2 }); }
+      return out; }
     const all = [];
-    for (let i = 0; ; i += 1000) { const r = await sb().rpc("fx_history_range", { p_days: days }).range(i, i + 999); if (r.error) throw r.error; all.push(...r.data); if (r.data.length < 1000) break; }
+    for (let i = 0; ; i += 1000) { const r = await sb().rpc("fx_history_bucket", { p_from: new Date(from).toISOString(), p_to: new Date(to).toISOString(), p_bucket_min: step }).range(i, i + 999); if (r.error) throw r.error; all.push(...r.data); if (r.data.length < 1000) break; }
     return all;
   }
   async function drawFx() {
-    const days = +document.querySelector("#fxRange .on").dataset.d, pct = $("fxPct").checked;
+    const pct = $("fxPct").checked;
+    const to = fxv.to || Date.now(), from = fxv.from || to - fxv.days * 864e5, days = (to - from) / 864e5;
+    const step = fxv.live ? 0 : fxv.step ?? autoStep(days);
+    document.querySelectorAll("#fxStep [data-m]").forEach((b) => b.classList.toggle("on", !fxv.custom && (fxv.live ? b.dataset.m === "0" : +b.dataset.m === step && fxv.step != null)));
+    $("fxCustomBtn").classList.toggle("on", !!fxv.custom);
+    const eff = Math.max(step, Math.ceil((to - from) / 6e4 / 3000));
+    const lbl = (m) => (m === 0 ? "cada lectura" : m % 1440 === 0 ? `${m / 1440} día(s)` : m % 60 === 0 ? `${m / 60} h` : `${m} min`);
+    $("fxNote").textContent = fxv.live ? "Tiempo real: se agrega un punto por minuto con la cotización en vivo mientras esta pantalla esté abierta. Las lecturas guardadas son cada 10 minutos."
+      : `Mostrando un punto cada ${lbl(eff)}${eff > step ? ` (ajustado por la cantidad de datos del período; elegí un período más corto para ver más detalle)` : ""}. Las lecturas se guardan cada 10 minutos (antes del 28/09: una por día).`;
     const sel = [...document.querySelectorAll("#fxSeries input:checked")].map((c) => c.value);
     $("fxStats").innerHTML = "<small>Cargando…</small>";
     try { await loadChart(); } catch { $("fxStats").textContent = "No se pudo cargar el gráfico."; return; }
-    const rows = await fxHistory(days);
-    const by = {}; rows.forEach((r) => (by[r.casa] ||= []).push({ x: new Date(r.ts).getTime(), y: Number(r.venta) }));
+    const rows = await fxHistory(from, to, step);
+    const by = {}; rows.forEach((r) => (by[r.casa] ||= []).push({ x: new Date(r.ts).getTime(), y: Number(r.venta), hi: Number(r.venta_max), lo: Number(r.venta_min) }));
+    fxv.by = by;
     const name = Object.fromEntries(FX_SOURCES);
     const fmtD = (t) => new Date(t).toLocaleString("es-AR", days <= 14 ? { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" } : { day: "2-digit", month: "2-digit", year: "2-digit" });
     const datasets = sel.filter((k) => by[k]?.length).map((k) => { const d = by[k], y0 = d[0].y;
-      return { label: name[k], borderColor: FX_COLORS[k], backgroundColor: FX_COLORS[k], borderWidth: 2, pointRadius: 0, tension: 0.2, data: d.map((p) => ({ x: p.x, y: pct ? +((p.y / y0 - 1) * 100).toFixed(2) : p.y })) }; });
+      return { key: k, y0, label: name[k], borderColor: FX_COLORS[k], backgroundColor: FX_COLORS[k], borderWidth: 2, pointRadius: d.length < 80 ? 2 : 0, tension: 0.2, data: d.map((p) => ({ x: p.x, y: pct ? +((p.y / y0 - 1) * 100).toFixed(2) : p.y, hi: p.hi, lo: p.lo })) }; });
     const css = getComputedStyle(document.body), tc = css.color, gc = "rgba(128,128,128,.18)";
     fxChart?.destroy();
     fxChart = new Chart($("fxChart"), { type: "line", data: { datasets },
       options: { responsive: true, maintainAspectRatio: false, animation: false, interaction: { mode: "nearest", axis: "x", intersect: false }, parsing: false,
         scales: { x: { type: "linear", ticks: { color: tc, maxTicksLimit: 8, callback: (v) => fmtD(v) }, grid: { color: gc } },
                   y: { ticks: { color: tc, callback: (v) => (pct ? v + " %" : money(v)) }, grid: { color: gc } } },
-        plugins: { legend: { labels: { color: tc } }, tooltip: { callbacks: { title: (it) => fmtD(it[0].parsed.x), label: (c) => `${c.dataset.label}: ${pct ? c.parsed.y + " %" : money(c.parsed.y)}` } } } } });
+        plugins: { legend: { labels: { color: tc } }, tooltip: { callbacks: { title: (it) => fmtD(it[0].parsed.x), label: (c) => { const r = c.raw; return `${c.dataset.label}: ${pct ? c.parsed.y + " %" : money(c.parsed.y)}${!pct && r.hi && r.hi !== r.lo ? ` (mín ${money(r.lo)} · máx ${money(r.hi)})` : ""}`; } } } } } });
+    fxv.pct = pct;
     const st = sel.filter((k) => by[k]?.length).map((k) => { const v = by[k].map((p) => p.y), a = v[0], z = v[v.length - 1], mn = Math.min(...v), mx = Math.max(...v);
       return `<tr><td><span class="fx-dot" style="background:${FX_COLORS[k]}"></span>${esc(name[k])}</td><td><b>${money(z)}</b></td><td>${money(mn)}</td><td>${money(mx)}</td><td>${money(Math.round(v.reduce((s, x) => s + x, 0) / v.length * 100) / 100)}</td><td class="${z >= a ? "pr-up" : "pr-low"}">${z >= a ? "▲" : "▼"} ${money(Math.round((z - a) * 100) / 100)} (${((z / a - 1) * 100).toFixed(1)} %)</td><td>${money(Math.round((mx - mn) * 100) / 100)}</td></tr>`; }).join("");
     $("fxStats").innerHTML = st ? `<div class="table-wrap"><table class="table"><tr><th>Cotización</th><th>Última</th><th>Mínimo</th><th>Máximo</th><th>Promedio</th><th>Variación del período</th><th>Rango</th></tr>${st}</table></div>` : "<small>Elegí al menos una cotización.</small>";
   }
 
   A.views.dolar.after = () => {
-    $("fxRange").addEventListener("click", (e) => { const b = e.target.closest("[data-d]"); if (!b) return; document.querySelectorAll("#fxRange .on").forEach((x) => x.classList.remove("on")); b.classList.add("on"); drawFx(); });
+    const setLive = (on) => { fxv.live = on; clearInterval(fxTimer); fxTimer = null; if (on) fxTimer = setInterval(liveTick, 60000); };
+    $("fxRange").addEventListener("click", (e) => { const b = e.target.closest("[data-d]"); if (!b) return; document.querySelectorAll("#fxRange .on").forEach((x) => x.classList.remove("on")); b.classList.add("on");
+      Object.assign(fxv, { days: +b.dataset.d, from: null, to: null, custom: false }); setLive(false); drawFx(); });
+    $("fxStep").addEventListener("click", (e) => { const b = e.target.closest("[data-m]"); if (!b) return; const m = +b.dataset.m; fxv.custom = false; fxv.from = fxv.to = null;
+      if (m === 0) { fxv.days = 1; document.querySelectorAll("#fxRange .fx-rbtn").forEach((x) => x.classList.toggle("on", x.dataset.d === "1")); setLive(true); } else { fxv.step = m; setLive(false); }
+      drawFx(); });
+    $("fxCustomBtn").onclick = () => { const c = $("fxCustom"); c.hidden = !c.hidden; $("fxCustomBtn").setAttribute("aria-expanded", String(!c.hidden)); };
+    $("fxCApply").onclick = () => {
+      const m = Math.max(1, Math.round(+$("fxCN").value || 1)) * +$("fxCU").value;
+      const f = $("fxFrom").value ? new Date($("fxFrom").value).getTime() : null, t = $("fxTo").value ? new Date($("fxTo").value).getTime() : null;
+      if (f && t && t <= f) return ($("fxNote").textContent = "La fecha \"Hasta\" tiene que ser posterior a \"Desde\".");
+      Object.assign(fxv, { step: m, from: f, to: t, custom: true }); if (f && !t) fxv.to = Date.now(); setLive(false);
+      if (f || t) document.querySelectorAll("#fxRange .on").forEach((x) => x.classList.remove("on"));
+      drawFx(); };
+    // Tiempo real: suma un punto por minuto con dolarapi.com (se detiene al salir de la sección)
+    async function liveTick() {
+      if (!$("fxChart") || !fxChart) return setLive(false);
+      try { const rows = await (await fetch("https://dolarapi.com/v1/dolares")).json(); const x = Date.now();
+        fxChart.data.datasets.forEach((ds) => { const r = rows.find((q) => q.casa === ds.key); if (!r) return; const y = fxv.pct ? +((r.venta / ds.y0 - 1) * 100).toFixed(2) : r.venta; ds.data.push({ x, y, hi: r.venta, lo: r.venta }); });
+        fxChart.update("none"); } catch { /* sin conexión: se reintenta en el próximo minuto */ }
+    }
     $("fxSeries").addEventListener("change", drawFx); $("fxPct").addEventListener("change", drawFx);
     drawFx();
     fetch("https://dolarapi.com/v1/dolares").then((r) => r.json()).then((rows) => {
