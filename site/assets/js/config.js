@@ -14,12 +14,13 @@ window.SITE_CONFIG = {
 
   // Logos del carrusel de marcas (imágenes en assets/img/marcas/).
   brandLogos: [
-    { name: "NVIDIA GeForce RTX", src: "assets/img/marcas/marca-316.webp" },
-    { name: "AMD", src: "assets/img/marcas/marca-320.webp" },
-    { name: "Western Digital", src: "assets/img/marcas/marca-322.webp" },
-    { name: "ASUS ROG", src: "assets/img/marcas/marca-331.webp" },
-    { name: "Intel", src: "assets/img/marcas/marca-364.webp" },
-    { name: "HyperX", src: "assets/img/marcas/marca-365.webp" },
+    // brand: nombre que se muestra al filtrar; match: palabras que se buscan en la marca o el nombre del producto
+    { name: "NVIDIA GeForce RTX", brand: "NVIDIA", match: ["nvidia", "geforce"], src: "assets/img/marcas/marca-316.webp" },
+    { name: "AMD", brand: "AMD", match: ["amd", "ryzen", "radeon"], src: "assets/img/marcas/marca-320.webp" },
+    { name: "Western Digital", brand: "Western Digital", match: ["western digital", "wd"], src: "assets/img/marcas/marca-322.webp" },
+    { name: "ASUS ROG", brand: "ASUS", match: ["asus", "rog"], src: "assets/img/marcas/marca-331.webp" },
+    { name: "Intel", brand: "Intel", match: ["intel"], src: "assets/img/marcas/marca-364.webp" },
+    { name: "HyperX", brand: "HyperX", match: ["hyperx"], src: "assets/img/marcas/marca-365.webp" },
   ],
 
   socials: {
