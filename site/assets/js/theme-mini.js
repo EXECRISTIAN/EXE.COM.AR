@@ -28,8 +28,20 @@
     apply(next, true); sw.querySelector(`[data-mode="${next}"]`).focus();
   });
 
-  // Explicación solo si el mouse queda encima más de 5 segundos
-  let timer = null;
-  sw.addEventListener("mouseenter", () => { timer = setTimeout(() => sw.classList.add("show-tip"), 5000); });
-  sw.addEventListener("mouseleave", () => { clearTimeout(timer); sw.classList.remove("show-tip"); });
+  // Explicación solo si el mouse queda encima: breve a los 5 s, detallada a los 17 s
+  const tip = sw.querySelector(".tm-tip");
+  const SHORT = tip.textContent;
+  const LONG = "Modo de tema: elegí cómo se ve la página.\n☀ Claro: fondo blanco, ideal de día.\nA Automático: sigue el modo de tu dispositivo (claro u oscuro) y cambia solo.\n☾ Oscuro: fondo oscuro, cansa menos la vista de noche.\nTu elección se guarda en este navegador y se aplica también en la tienda.";
+  let timers = [];
+  sw.addEventListener("mouseenter", () => {
+    timers = [
+      setTimeout(() => { tip.textContent = SHORT; sw.classList.add("show-tip"); }, 5000),
+      setTimeout(() => { tip.textContent = LONG; sw.classList.add("show-tip", "tip-long"); }, 17000),
+    ];
+  });
+  sw.addEventListener("mouseleave", () => {
+    timers.forEach(clearTimeout);
+    sw.classList.remove("show-tip", "tip-long");
+    tip.textContent = SHORT;
+  });
 })();
