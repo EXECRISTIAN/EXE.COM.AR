@@ -65,17 +65,15 @@
         <div class="account-actions">
           <a class="btn btn-outline btn-solid" id="dashLink" href="admin/" hidden>Panel de administración</a>
           <a class="btn btn-primary" href="index.html">Ir a la tienda</a>
-          <button class="btn btn-outline" id="myAccBtn" type="button" aria-haspopup="dialog">Ir a mi cuenta</button>
+          <a class="btn btn-outline" id="myAccBtn" href="#configuracion">Ir a mi cuenta</a>
           <button class="btn btn-outline btn-logout" id="logout">Cerrar sesión</button>
         </div>
       </section>
-    </div>
-  </main>
 
-  <!-- Mi cuenta: datos personales y seguridad -->
-  <dialog class="confirm acc-dlg" id="accDialog" aria-labelledby="accTitle">
+      <!-- Configuración de mi cuenta (para todos, incluidos administradores) -->
+      <section id="settings" class="acc-page" hidden aria-labelledby="accTitle">
     <form id="accForm">
-      <div class="acc-head"><span class="my-acc-avatar big" id="accInitials" aria-hidden="true">?</span><div><h2 id="accTitle">Mi cuenta</h2><small id="accSince"></small></div></div>
+      <div class="acc-head"><span class="my-acc-avatar big" id="accInitials" aria-hidden="true">?</span><div><h1 id="accTitle">Configuración de mi cuenta</h1><small id="accSince"></small></div></div>
       <label class="field">Nombre y apellido<input name="full_name" autocomplete="name" maxlength="80"></label>
       <label class="field">Teléfono / WhatsApp<input name="phone" autocomplete="tel" inputmode="tel" maxlength="30"></label>
       <label class="field">Email<input name="email" readonly></label>
@@ -83,11 +81,14 @@
       <p class="notice" id="accMsg" hidden></p>
       <div class="confirm-actions">
         <button class="btn btn-outline" type="button" id="accReset">Cambiar contraseña</button>
-        <button class="btn btn-primary" type="submit">Guardar</button>
+        <button class="btn btn-primary" type="submit">Guardar cambios</button>
       </div>
-      <button class="acc-close" type="button" id="accClose" aria-label="Cerrar">✕</button>
+      <div class="account-actions"><a class="btn btn-outline btn-back" href="#" id="accBack">← Volver a mi cuenta</a></div>
     </form>
-  </dialog>
+      </section>
+    </div>
+  </main>
+  <p class="build-ver">Versión __BUILD__</p>
 
   <!-- Confirmación de cierre de sesión -->
   <dialog class="confirm" id="logoutDialog" aria-labelledby="logoutTitle">

@@ -29,6 +29,7 @@ jobs:
         run: |
           v="${GITHUB_SHA::8}"
           find site -name '*.html' -print0 | xargs -0 sed -i -E "s#((src|href)=\"[^\"?]*assets/(css|js)/[^\"?]+\.(css|js))\"#\1?v=$v\"#g"
+          find site -name '*.html' -print0 | xargs -0 sed -i "s#__BUILD__#$v · $(TZ=America/Argentina/Buenos_Aires date '+%d/%m %H:%M')#g"
           grep -rhoE 'assets/(css|js)/[^"]+' site --include='*.html' | sort -u
       - uses: actions/upload-pages-artifact@v3
         with:

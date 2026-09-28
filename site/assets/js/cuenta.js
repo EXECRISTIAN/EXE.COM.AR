@@ -127,11 +127,15 @@
 
   /* ---------- Botón "Ir a mi cuenta" y ventana de datos ---------- */
   const initials = (name) => (String(name || "?").trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("") || "?").toUpperCase();
-  const myBtn = $("myAccBtn");
-  const accDialog = $("accDialog"), accForm = $("accForm");
+  const accForm = $("accForm");
   const accMsg = (t, k) => { const m = $("accMsg"); m.hidden = !t; m.className = `notice ${k}`; m.textContent = t || ""; };
-  myBtn.addEventListener("click", async () => {
-    const user = await be.user(); if (!user) return;
+  // "Ir a mi cuenta" abre cuenta.html#configuracion (igual para clientes y administradores)
+  async function showSettings() {
+    const on = location.hash === "#configuracion";
+    const user = await be.user();
+    $("settings").hidden = !(on && user);
+    if (user) $("logged").hidden = on;
+    if (!on || !user) return;
     const { data: prof } = await sb.from("profiles").select("full_name, phone, email, created_at, email_verified_at").eq("id", user.id).maybeSingle();
     const { count } = await sb.from("orders").select("id", { count: "exact", head: true }).eq("user_id", user.id);
     accForm.full_name.value = prof?.full_name || user.user_metadata?.full_name || "";
@@ -141,10 +145,10 @@
     $("accOrders").textContent = count || 0;
     $("accVerified").textContent = prof?.email_verified_at || user.email_confirmed_at ? "✔ Verificado" : "Sin verificar";
     accMsg("");
-    accDialog.showModal();
-  });
-  $("accClose").onclick = () => accDialog.close();
-  accDialog.addEventListener("click", (e) => { if (e.target === accDialog) accDialog.close(); });
+    scrollTo(0, 0);
+  }
+  addEventListener("hashchange", showSettings);
+  $("accBack").onclick = (e) => { e.preventDefault(); history.pushState("", "", location.pathname + location.search); showSettings(); };
   accForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const user = await be.user(); if (!user) return;
@@ -165,6 +169,7 @@
     const user = await be.user();
     $("guest").hidden = !!user;
     $("logged").hidden = !user;
+    await showSettings();
     if (!user) return;
     $("who").textContent = user.user_metadata?.full_name || user.email;
     $("dashLink").hidden = true; // oculto por defecto; solo se muestra si la base confirma el permiso
