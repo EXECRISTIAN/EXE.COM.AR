@@ -246,3 +246,9 @@
 .acc-stats small { font-size: .78rem; color: var(--muted); }
 .acc-page .acc-head h1 { margin: 0; font-size: 1.4rem; }
 .build-ver { text-align: center; font-size: .7rem; color: var(--muted); opacity: .6; margin: 8px 0 16px; }
+.fx-maxsrc { margin: 4px 0 10px; }
+.fx-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.fx-chip input { position: absolute; opacity: 0; }
+.fx-chip span { display: inline-block; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--c6); font-size: .82rem; cursor: pointer; color: var(--muted); text-decoration: line-through; }
+.fx-chip input:checked + span { background: var(--c1, #0084d6); border-color: transparent; color: #fff; text-decoration: none; }
+.fx-chip input:focus-visible + span { outline: 2px solid var(--c1, #0084d6); outline-offset: 2px; }

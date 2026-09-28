@@ -569,7 +569,7 @@
   /* ---------- Dólar: cotización manual o automática (cada 30 min, con máximo del día) ---------- */
   const FX_SOURCES = [["max", "Automático (el más alto)"], ["oficial", "Oficial"], ["blue", "Blue"], ["bolsa", "MEP (bolsa)"], ["contadoconliqui", "CCL (contado con liqui)"], ["mayorista", "Mayorista"], ["cripto", "Cripto"], ["tarjeta", "Tarjeta"]];
   A.views.dolar = async function () {
-    const r = A.demo ? { data: { mode: "auto", manual_rate: null, source: "oficial", round_to: 100, last_auto_rate: 1545, last_auto_at: new Date().toISOString(), day_max_rate: 1550, day_date: "2026-09-28", effective_rate: 1550, day_max_by_source: { oficial: 1545, blue: 1560, bolsa: 1557.3, contadoconliqui: 1616.6, mayorista: 1525.5, cripto: 1613.92, tarjeta: 2008.5 } } } : await sb().from("fx_settings").select("*").eq("id", 1).single();
+    const r = A.demo ? { data: { mode: "auto", manual_rate: null, source: "oficial", round_to: 100, last_auto_rate: 1545, last_auto_at: new Date().toISOString(), day_max_rate: 1550, day_date: "2026-09-28", effective_rate: 1550, day_max_by_source: { oficial: 1545, blue: 1560, bolsa: 1557.3, contadoconliqui: 1616.6, mayorista: 1525.5, cripto: 1613.92, tarjeta: 2008.5 }, max_sources: ["oficial", "blue", "bolsa", "contadoconliqui", "mayorista", "cripto"] } } : await sb().from("fx_settings").select("*").eq("id", 1).single();
     if (r.error) throw r.error;
     const s = r.data;
     const nUsd = A.demo ? 1 : (await sb().from("products").select("id", { count: "exact", head: true }).not("price_usd", "is", null)).count;
@@ -590,9 +590,11 @@
         </div>
         <div class="ed-grid ed-grid-4">
           <label class="field">Mi valor (manual, $ por US$ 1)<input name="manual" inputmode="decimal" value="${s.manual_rate ?? ""}" placeholder="Ej: 1550"></label>
-          <label class="field">Fuente automática<select name="source">${FX_SOURCES.map(([v, n]) => { const mx = s.day_max_by_source || {}; const val = v === "max" ? Math.max(0, ...Object.values(mx).map(Number)) : Number(mx[v]); return `<option value="${v}" ${v === s.source ? "selected" : ""}>${n}${val ? " — " + money(val) : ""}</option>`; }).join("")}</select></label>
+          <label class="field">Fuente automática<select name="source">${FX_SOURCES.map(([v, n]) => { const mx = s.day_max_by_source || {}; const ms = s.max_sources || []; const val = v === "max" ? Math.max(0, ...ms.map((k) => Number(mx[k]) || 0)) : Number(mx[v]); return `<option value="${v}" ${v === s.source ? "selected" : ""}>${n}${val ? " — " + money(val) : ""}</option>`; }).join("")}</select></label>
           <label class="field">Redondear precios a<select name="round">${[1, 10, 100, 1000].map((v) => `<option value="${v}" ${v === s.round_to ? "selected" : ""}>$${v}</option>`).join("")}</select></label>
         </div>
+        <div class="fx-maxsrc"><small>Cotizaciones que tiene en cuenta <b>Automático (el más alto)</b> — tocá para activar o desactivar:</small>
+          <div class="fx-chips">${FX_SOURCES.filter(([v]) => v !== "max").map(([v, n]) => `<label class="fx-chip"><input type="checkbox" name="maxsrc" value="${v}" ${(s.max_sources || []).includes(v) ? "checked" : ""}><span>${n}</span></label>`).join("")}</div></div>
         <p class="ed-hint">Automático — último valor leído: <b>${s.last_auto_rate ? money(s.last_auto_rate) : "—"}</b> (${t(s.last_auto_at)}) · máximo de hoy: <b>${s.day_max_rate ? money(s.day_max_rate) : "—"}</b>${s.last_error ? ` · <span class="pr-low">último error: ${esc(s.last_error)}</span>` : ""}</p>
         <div class="ed-row-btns"><button class="btn btn-primary" type="submit">Guardar y recalcular precios</button></div>
         <p class="notice" id="fxMsg" hidden></p>
@@ -610,8 +612,9 @@
       e.preventDefault(); const f = e.target; const m = $("fxMsg");
       const mode = f.querySelector("[name=mode]:checked").value, manual = Number(String(f.elements.manual.value).replace(",", ".")) || null;
       if (mode === "manual" && !manual) { m.hidden = false; m.className = "notice error"; return (m.textContent = "Poné tu valor del dólar."); }
+      if (!f.querySelector("[name=maxsrc]:checked")) { m.hidden = false; m.className = "notice error"; return (m.textContent = "Dejá al menos una cotización activada para el modo Automático."); }
       if (A.demo) { m.hidden = false; m.className = "notice info"; return (m.textContent = "Modo demo: acá se guardaría y se recalcularían los precios."); }
-      const r = await sb().rpc("fx_save", { p_mode: mode, p_manual: manual, p_source: f.elements.source.value, p_round: Number(f.elements.round.value) });
+      const r = await sb().rpc("fx_save", { p_mode: mode, p_manual: manual, p_source: f.elements.source.value, p_round: Number(f.elements.round.value), p_max_sources: [...f.querySelectorAll("[name=maxsrc]:checked")].map((c) => c.value) });
       if (r.error) { m.hidden = false; m.className = "notice error"; return (m.textContent = r.error.message); }
       await A.route();
       const m2 = $("fxMsg"); m2.hidden = false; m2.className = "notice ok";
