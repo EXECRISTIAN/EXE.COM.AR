@@ -101,6 +101,7 @@
     $("logged").hidden = !user;
     if (!user) return;
     $("who").textContent = user.user_metadata?.full_name || user.email;
+    $("dashLink").hidden = true; // oculto por defecto; solo se muestra si la base confirma el permiso
     const perms = await be.permissions().catch(() => new Set());
     $("dashLink").hidden = !perms.has("dashboard.access");
     const { data: orders } = await sb.from("orders").select("id, created_at, status, total, carrier, tracking_number").order("created_at", { ascending: false });
