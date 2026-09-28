@@ -217,3 +217,18 @@
 .fx-mode input { margin-top: 3px; accent-color: var(--c0); }
 .ed .field select, #fxForm select { height: 38px; padding: 0 10px; border: 1px solid var(--c6); border-radius: 4px; background: var(--surface); color: var(--c2); font: inherit; }
 .fx-live .table td, .fx-live .table th { padding: 8px; }
+/* Página web */
+.st-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.st-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.st-item.is-off { opacity: .6; }
+.st-move { display: grid; gap: 2px; }
+.st-move button { border: 1px solid var(--line); background: var(--surface); color: var(--c2); border-radius: 4px; cursor: pointer; font-size: .7rem; padding: 1px 6px; }
+.st-move button:disabled { opacity: .3; cursor: default; }
+.st-info { flex: 1; display: grid; } .st-info small { color: var(--muted); font-size: .8rem; }
+.st-item .btn { padding: 6px 14px; font-size: .85rem; }
+.st-lock { width: 28px; text-align: center; opacity: .6; }
+.st-types { display: grid; gap: 8px; margin-bottom: 14px; }
+.st-img-row { display: flex; gap: 10px; align-items: center; }
+.st-img-row img { width: 90px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); background: #fff; }
+.st-img-row .pr-in { flex: 1; width: auto; }
+.st-listed { display: grid; gap: 10px; }

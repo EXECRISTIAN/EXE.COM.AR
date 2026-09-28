@@ -43,7 +43,7 @@
 
   <main>
     <!-- ===== Carrusel principal (39db343 / 90b73e5) ===== -->
-    <section class="hero" id="inicio" aria-roledescription="carrusel">
+    <section class="hero" id="inicio" aria-roledescription="carrusel" data-block="hero">
       <div class="hero-track" id="heroTrack">
         <div class="hero-slide"><img src="assets/img/banner-asus-series-500-400.webp" alt="Motherboards ASUS series 500 y 400: domina el juego" width="1904" height="650"></div>
         <div class="hero-slide"><img src="assets/img/banner-asus-z790.webp" alt="Nuevas motherboards ASUS Z790 listas para Intel 14.ª gen" width="1904" height="650" loading="lazy"></div>
@@ -54,7 +54,7 @@
     </section>
 
     <!-- ===== Banners de marca (be97f60 / 9986b28) ===== -->
-    <section class="brand-banners">
+    <section class="brand-banners" data-block="tarjetas">
       <article class="brand-card reveal">
         <picture>
           <source media="(max-width: 767px)" srcset="assets/img/cel-300x300-01.webp">
@@ -79,7 +79,7 @@
     </section>
 
     <!-- ===== Catálogo ===== -->
-    <section class="section" id="productos">
+    <section class="section" id="productos" data-block="catalogo">
       <div class="container">
         <div class="section-head reveal">
           <h2>Productos destacados</h2>
@@ -126,12 +126,17 @@
       </div>
     </section>
 
-    <!-- ===== Marcas (1d45057 / 957d0fb / 37e1671 / df67cbb) ===== -->
-    <section class="brands" id="marcas">
+    <!-- ===== Banner ancho (desactivable desde el panel → Página web) ===== -->
+    <section class="brands brands-banner" data-block="banner-ancho" hidden>
       <div class="container">
         <a href="#productos" data-filter="Motherboards" class="wide-banner reveal zoom" aria-label="Motherboards ASUS series 500 y 400">
           <span class="shine"></span>
         </a>
+      </div>
+    </section>
+    <!-- ===== Beneficios ===== -->
+    <section class="brands brands-features" data-block="beneficios">
+      <div class="container">
         <div class="features">
           <div class="feature reveal">
             <svg class="ico" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="24" cy="24" r="19"/><path d="M5 24h38M24 5c6 5 8 12 8 19s-2 14-8 19c-6-5-8-12-8-19s2-14 8-19z"/></svg>
@@ -150,13 +155,15 @@
           </div>
         </div>
       </div>
+    </section>
+    <!-- ===== Logos de marcas ===== -->
+    <section class="brands brands-logos" id="marcas" data-block="logos">
       <div class="logos" aria-label="Marcas con las que trabajamos">
         <div class="logos-track" id="logos"></div>
       </div>
     </section>
-
     <!-- ===== Contacto ===== -->
-    <section class="section contact" id="contacto">
+    <section class="section contact" id="contacto" data-block="contacto">
       <div class="container">
         <div class="contact-card reveal zoom">
           <h2>¿Tenés dudas o querés armar tu PC?</h2>

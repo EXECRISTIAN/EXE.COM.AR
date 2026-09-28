@@ -526,18 +526,23 @@
 
   /* ---------- Carrusel principal ---------- */
   const track = $("heroTrack");
-  const slideCount = track.children.length;
-  let current = 0;
-  let timer;
-  $("dots").innerHTML = [...track.children].map((_, i) => `<button aria-label="Imagen ${i + 1}"${i === 0 ? ' class="active"' : ""}></button>`).join("");
-  const dots = [...$("dots").children];
+  let slideCount = 0, current = 0, timer, dots = [];
   function go(i) {
+    if (!slideCount) return;
     current = (i + slideCount) % slideCount;
     track.style.transform = `translateX(-${current * 100}%)`;
     dots.forEach((d, k) => d.classList.toggle("active", k === current));
   }
-  const play = () => { clearInterval(timer); timer = setInterval(() => go(current + 1), 5000); };
-  dots.forEach((d, i) => d.addEventListener("click", () => { go(i); play(); }));
+  const play = () => { clearInterval(timer); if (slideCount > 1) timer = setInterval(() => go(current + 1), 5000); };
+  // Se puede volver a llamar si el panel cambió las imágenes del carrusel
+  function setupHero() {
+    slideCount = track.children.length; current = 0;
+    $("dots").innerHTML = [...track.children].map((_, i) => `<button aria-label="Imagen ${i + 1}"${i === 0 ? ' class="active"' : ""}></button>`).join("");
+    dots = [...$("dots").children];
+    dots.forEach((d, i) => d.addEventListener("click", () => { go(i); play(); }));
+    [$("heroPrev"), $("heroNext"), $("dots")].forEach((el) => (el.hidden = slideCount < 2));
+    go(0); play();
+  }
   $("heroPrev").onclick = () => { go(current - 1); play(); };
   $("heroNext").onclick = () => { go(current + 1); play(); };
   // Deslizar con el dedo en celulares
@@ -549,8 +554,71 @@
     if (Math.abs(dx) > 40) { go(current + (dx < 0 ? 1 : -1)); play(); }
     touchX = null;
   });
-  if (slideCount > 1) play();
+  setupHero();
 
+  /* ---------- Página editable desde el panel (tabla site_blocks) ----------
+     Cada sección del inicio tiene data-block="id". Supabase dice el orden, cuáles se muestran y su contenido;
+     las secciones nuevas (texto, imagen, imagen + texto, aviso) se crean acá. Si Supabase no responde, queda el HTML. */
+  const src = (u) => esc(u || "");
+  const linkOf = (d) => (d.link ? `href="${src(d.link)}"${/^https?:/.test(d.link) ? ' target="_blank" rel="noopener"' : ""}` : d.filter ? `href="#productos" data-filter="${esc(d.filter)}"` : "");
+  const renderers = {
+    hero(el, d) {
+      if (!d.slides || !d.slides.length) return;
+      track.innerHTML = d.slides.map((sl, i) => `<div class="hero-slide">${sl.link ? `<a ${linkOf(sl)}>` : ""}<img src="${src(sl.img)}" alt="${esc(sl.alt || "")}" width="1904" height="650"${i ? ' loading="lazy"' : ""}>${sl.link ? "</a>" : ""}</div>`).join("");
+      setupHero();
+    },
+    tarjetas(el, d) {
+      if (!d.cards) return;
+      el.innerHTML = d.cards.map((c, i) => `<article class="brand-card reveal" style="--d:${i * 0.12}s"><picture>${c.img_mobile ? `<source media="(max-width: 767px)" srcset="${src(c.img_mobile)}">` : ""}<img src="${src(c.img)}" alt="${esc(c.alt || "")}" width="352" height="480" loading="lazy"></picture>${c.text ? `<a ${linkOf(c) || 'href="#productos"'} class="btn btn-banner">${esc(c.text)}</a>` : ""}</article>`).join("");
+    },
+    catalogo(el, d) {
+      const h = el.querySelector(".section-head"); if (!h) return;
+      if (d.title) h.querySelector("h2").textContent = d.title;
+      if (d.text !== undefined) h.querySelector("p").textContent = d.text;
+    },
+    banner(el, d) {
+      const a = el.querySelector(".wide-banner"); if (!a) return;
+      if (d.img) a.style.backgroundImage = `url("${String(d.img).replace(/"/g, "")}")`;
+      a.setAttribute("aria-label", d.alt || "");
+      a.removeAttribute("data-filter"); a.removeAttribute("target");
+      if (d.link) { a.href = d.link; if (/^https?:/.test(d.link)) { a.target = "_blank"; a.rel = "noopener"; } }
+      else { a.href = "#productos"; if (d.filter) a.dataset.filter = d.filter; }
+    },
+    beneficios(el, d) {
+      const feats = el.querySelectorAll(".feature"); if (!d.items) return;
+      d.items.forEach((it, i) => { const f = feats[i]; if (!f) return; f.querySelector("h3").textContent = it.title || ""; f.querySelector("p").textContent = it.text || ""; });
+      feats.forEach((f, i) => (f.hidden = i >= d.items.length));
+    },
+    logos() {},
+    contacto(el, d) {
+      const c = el.querySelector(".contact-card"); if (!c) return;
+      if (d.title) c.querySelector("h2").textContent = d.title;
+      if (d.text !== undefined) c.querySelector("p").textContent = d.text;
+      if (d.button) $("waDirect").textContent = d.button;
+    },
+  };
+  const creators = {
+    texto: (d) => `<div class="container cms-text reveal">${d.title ? `<h2>${esc(d.title)}</h2><span class="divider"></span>` : ""}${d.text ? `<p>${esc(d.text)}</p>` : ""}${d.button_text ? `<a class="btn btn-primary" ${linkOf({ link: d.button_link }) || 'href="#productos"'}>${esc(d.button_text)}</a>` : ""}</div>`,
+    imagen: (d) => `<div class="container cms-img reveal">${d.img ? `${d.link ? `<a ${linkOf(d)}>` : ""}<img src="${src(d.img)}" alt="${esc(d.alt || "")}" loading="lazy">${d.link ? "</a>" : ""}` : ""}</div>`,
+    imagen_texto: (d) => `<div class="container cms-it reveal${d.side === "derecha" ? " rev" : ""}"><div>${d.img ? `<img src="${src(d.img)}" alt="${esc(d.alt || "")}" loading="lazy">` : ""}</div><div>${d.title ? `<h2>${esc(d.title)}</h2>` : ""}${d.text ? `<p>${esc(d.text)}</p>` : ""}${d.button_text ? `<a class="btn btn-primary" ${linkOf({ link: d.button_link }) || 'href="#productos"'}>${esc(d.button_text)}</a>` : ""}</div></div>`,
+    aviso: (d) => `<div class="cms-aviso">${d.link ? `<a ${linkOf(d)}>` : ""}${esc(d.text || "")}${d.link ? "</a>" : ""}</div>`,
+  };
+  function applySite(blocks) {
+    const main = document.querySelector("main");
+    document.querySelectorAll("[data-block-cms]").forEach((el) => el.remove());
+    blocks.sort((a, b) => a.position - b.position).forEach((b) => {
+      let el = document.querySelector(`[data-block="${CSS.escape(b.id)}"]`);
+      if (!el && creators[b.type]) {
+        el = document.createElement("section");
+        el.className = b.type === "aviso" ? "cms-aviso-wrap" : "cms-block"; el.dataset.block = b.id; el.dataset.blockCms = "";
+        el.innerHTML = creators[b.type](b.data || {});
+      } else if (el && renderers[b.type]) { try { renderers[b.type](el, b.data || {}); } catch (e) { /* si un bloque falla, queda el contenido original */ } }
+      if (!el) return;
+      el.hidden = !b.active;
+      main.appendChild(el);   // reordena según la posición
+    });
+    observeReveals();
+  }
   /* ---------- Animaciones de entrada ---------- */
   const revealer = new IntersectionObserver((entries) => {
     entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("in"); revealer.unobserve(en.target); } });
@@ -559,6 +627,11 @@
     document.querySelectorAll(".reveal:not(.in)").forEach((el) => revealer.observe(el));
   }
   observeReveals();
+
+  if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
+    fetch(`${cfg.supabaseUrl}/rest/v1/site_blocks?select=id,type,position,active,data&page=eq.inicio&order=position`, { headers: { apikey: cfg.supabaseAnonKey } })
+      .then((r) => (r.ok ? r.json() : Promise.reject())).then((rows) => { if (rows.length) applySite(rows); }).catch(() => {});
+  }
 
   /* ---------- Contenido de config ---------- */
   const logos = cfg.brandLogos || [];
