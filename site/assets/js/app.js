@@ -78,6 +78,7 @@
               <img src="${esc(mainImg(p))}" alt="${esc(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
               ${p.images && p.images[1] ? `<img class="alt" src="${esc(p.images[1])}" alt="" loading="lazy">` : ""}
               ${p.category ? `<span class="tag">${esc(p.category)}</span>` : ""}
+              ${p.outlet ? `<span class="tag tag-outlet">Outlet</span>` : ""}
               ${p.images && p.images.length > 1 ? `<span class="img-count" aria-hidden="true">${p.images.length} fotos</span>` : ""}
             </a>
             <div class="card-body">
@@ -85,6 +86,7 @@
               <h3><a href="#producto/${encodeURIComponent(p.id)}">${esc(p.name)}</a></h3>
               <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>
               ${p.price > 0 ? `<span class="price-note">Consultar precio final</span>` : ""}
+              ${p.condition ? `<span class="condition">Estado: ${esc(p.condition)}</span>` : ""}
               ${stockBadge(p)}
               ${p.variants ? `<select data-variant="${esc(p.id)}" aria-label="Variante">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select>` : ""}
               <button class="btn btn-primary" data-add="${esc(p.id)}" ${out ? "disabled" : ""}>${out ? "Sin stock" : "Agregar al carrito"}</button>
@@ -134,6 +136,7 @@
         <h2 id="pdName">${esc(p.name)}</h2>
         <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>
         ${p.price > 0 ? `<span class="price-note">Consultá el precio final actualizado</span>` : ""}
+        ${p.outlet ? `<p class="pd-condition"><span class="tag-outlet">Outlet</span> ${esc(p.condition || "")}</p>` : ""}
         <div class="pd-admin" id="pdAdmin" hidden></div>
         ${stockBadge(p)}
         ${p.variants ? `<label class="field">Variante<select id="pdVariant">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select></label>` : ""}
