@@ -7,7 +7,6 @@ panel en `?demo`), hace PR + merge y lo tilda con la fecha. Reglas:
 - No tocar precios de venta outlet ni costos. No publicar links/costos en el repo.
 
 ## Pendiente
-- [ ] Rendimiento: peso de imágenes (WebP ≤ 200 KB), lazy-loading, orden de scripts, caché.
 - [ ] SEO básico: títulos, descripciones, Open Graph, favicon, sitemap.xml y robots.txt, datos estructurados de productos.
 - [ ] Textos: ortografía y tono en toda la web (español rioplatense), páginas legales (términos, privacidad, garantía, envíos).
 - [ ] Seguridad: revisar advisors de Supabase, políticas RLS de cada tabla, funciones SECURITY DEFINER, cabeceras (CSP) posibles en Pages.
@@ -15,6 +14,7 @@ panel en `?demo`), hace PR + merge y lo tilda con la fecha. Reglas:
 - [ ] Fotos: productos sin foto (seguir con la tanda de precios/fotos).
 
 ## Hecho
+- [x] 28/09 — Rendimiento: todas las imágenes < 200 KB (1,5 MB en total), carga inicial 725 KB / 36 archivos, imagen principal visible en ~0,6 s. Agregado: conexión anticipada a Supabase (catálogo) y prioridad alta a la primera imagen del carrusel. Scripts ya al final y CSS/JS con versión por deploy (caché).
 - [x] 28/09 — Panel en celular: las 11 secciones sin errores de consola; menú en una fila deslizable; la página ya no se desplaza de costado (las tablas se deslizan dentro de su recuadro); indicadores en 2 columnas.
 - [x] 28/09 — Mi cuenta: mensajes de error claros en español para ingreso, registro y cambio de contraseña (demasiados intentos, captcha, contraseña débil o repetida, email inválido, sin conexión), sin revelar si un email ya tiene cuenta.
 - [x] 28/09 — Carrito: cantidades respetan el stock, variantes y "a consultar" en el total funcionan. Ahora el carrito y el mensaje de WhatsApp aclaran "a pedido" y "consultar stock".

@@ -9,6 +9,7 @@
   <link rel="icon" href="assets/img/favicon.jpg" type="image/jpeg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://sbayacwjvnxwktrhkgnk.supabase.co" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap">
   <!-- Tema guardado (claro/oscuro); sin valor = automático según el sistema. Va antes del CSS para que no parpadee. -->
   <script>try{var t=localStorage.getItem("exe-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
@@ -45,7 +46,7 @@
     <!-- ===== Carrusel principal (39db343 / 90b73e5) ===== -->
     <section class="hero" id="inicio" aria-roledescription="carrusel" data-block="hero">
       <div class="hero-track" id="heroTrack">
-        <div class="hero-slide"><img src="assets/img/banner-asus-series-500-400.webp" alt="Motherboards ASUS series 500 y 400: domina el juego" width="1904" height="650"></div>
+        <div class="hero-slide"><img fetchpriority="high" src="assets/img/banner-asus-series-500-400.webp" alt="Motherboards ASUS series 500 y 400: domina el juego" width="1904" height="650"></div>
         <div class="hero-slide"><img src="assets/img/banner-asus-z790.webp" alt="Nuevas motherboards ASUS Z790 listas para Intel 14.ª gen" width="1904" height="650" loading="lazy"></div>
       </div>
       <button class="hero-arrow prev" id="heroPrev" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg></button>
