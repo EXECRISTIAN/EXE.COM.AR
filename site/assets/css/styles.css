@@ -503,3 +503,4 @@ body.no-scroll { overflow: hidden; }
 .p-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
 .p-tag { padding: 2px 8px; border-radius: 999px; border: 1px solid var(--c6); background: var(--c4); color: var(--c3); font: 600 .7rem/1.5 var(--font); cursor: pointer; }
 .p-tag:hover { border-color: var(--c0); color: var(--c0); }
+.stock.ask { color: var(--c1, #0084d6); }

@@ -37,7 +37,7 @@
   async function loadAll(force) {
     if (A.demo) return (cache = demoStore());
     if (cache && !force) return cache;
-    const cols = "id,name,brand,category,tags,description,price,price_usd,stock,show_stock,active,outlet,condition,image,images,specs,weight_kg,sort,variants,updated_at";
+    const cols = "id,name,brand,category,tags,description,price,price_usd,stock,show_stock,active,outlet,condition,image,images,specs,weight_kg,sort,variants,updated_at,ask_price,ask_stock,cart_ok,hide_no_stock";
     const fxr = await sb().from("fx_settings").select("*").eq("id", 1).maybeSingle();
     fx = fxr.data || null;
     const [p, c, s] = await Promise.all([
@@ -74,8 +74,17 @@
     const p = cache && cache.products.find((x) => x.id === id); if (p) Object.assign(p, fields);
   }
 
+  // Opciones de venta por producto (se ven en la tabla, el editor y las acciones masivas)
+  const FLAGS = [
+    ["ask_price", "💲", "Consultar precio", "Muestra \"Consultar precio\" en vez del precio"],
+    ["ask_stock", "📦", "Consultar stock", "Muestra \"Consultar stock\" en vez del stock (con los dos: \"Consultar precio y stock\")"],
+    ["cart_ok", "🛒", "Carrito sin precio/stock", "Se puede agregar al carrito aunque no tenga precio o stock (si no, solo \"Consultar por WhatsApp\")"],
+    ["hide_no_stock", "🙈", "Ocultar sin stock", "No se muestra en la tienda cuando el stock llega a 0"],
+  ];
+  const flagOn = (p, f) => (f === "cart_ok" ? p.cart_ok !== false : !!p[f]);
+
   /* ---------- Listado ---------- */
-  const listState = { q: "", cat: "", filter: "", sel: new Set() };
+  const listState = { q: "", cat: "", filter: "", brand: "", tag: "", pmin: "", pmax: "", cur: "", sel: new Set() };
   A.subviews.editar = { perm: "products.read", parent: "productos", title: (args) => (args[0] === "nuevo" ? "Nuevo producto" : "Editar producto") };
 
   A.views.productos = async function () {
@@ -103,16 +112,34 @@
         <input type="search" id="prQ" placeholder="Buscar por nombre, marca, código o etiqueta…" value="${esc(listState.q)}">
         <select id="prCat"><option value="">Todas las categorías</option>${cats.map((c) => `<option ${c === listState.cat ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
         <select id="prFilter">
-          ${[["", "Todos"], ["activos", "Activos"], ["inactivos", "Inactivos"], ["outlet", "Outlet"], ["sinfoto", "Sin foto"], ["sinprecio", "Sin precio"], ["sinstock", "Sin stock"], ["sincosto", "Sin costo cargado"]]
+          ${[["", "Todos"], ["activos", "Activos"], ["inactivos", "Inactivos"], ["outlet", "Outlet"], ["sinfoto", "Sin foto"], ["sinprecio", "Sin precio"], ["sinstock", "Sin stock"], ["constock", "Con stock"], ["sincosto", "Sin costo cargado"], ["f:ask_price", "💲 Consultar precio"], ["f:ask_stock", "📦 Consultar stock"], ["nocart", "🛒 Sin carrito (solo WhatsApp)"], ["f:hide_no_stock", "🙈 Se ocultan sin stock"]]
             .map(([v, t]) => `<option value="${v}" ${v === listState.filter ? "selected" : ""}>${t}</option>`).join("")}
         </select>
         <button class="btn btn-outline" id="prCsv" type="button">⬇ Exportar CSV</button>
       </div>
+      <details class="pr-adv" ${listState.brand || listState.tag || listState.pmin || listState.pmax || listState.cur ? "open" : ""}><summary>Más filtros</summary>
+        <div class="pr-adv-grid">
+          <select id="prBrand"><option value="">Todas las marcas</option>${[...new Set(products.map((p) => p.brand).filter(Boolean))].sort().map((b) => `<option ${b === listState.brand ? "selected" : ""}>${esc(b)}</option>`).join("")}</select>
+          <select id="prTag"><option value="">Todas las etiquetas</option>${[...new Set(products.flatMap((p) => p.tags || []))].sort().map((t) => `<option ${t === listState.tag ? "selected" : ""}>${esc(t)}</option>`).join("")}</select>
+          <select id="prCur"><option value="">Pesos y dólares</option><option value="ars" ${listState.cur === "ars" ? "selected" : ""}>Solo en pesos</option><option value="usd" ${listState.cur === "usd" ? "selected" : ""}>Solo en dólares</option></select>
+          <input id="prPmin" inputmode="numeric" placeholder="Precio desde $" value="${esc(listState.pmin)}">
+          <input id="prPmax" inputmode="numeric" placeholder="Precio hasta $" value="${esc(listState.pmax)}">
+          <button class="link-btn" id="prClearF" type="button">Limpiar filtros</button>
+        </div>
+      </details>
+      <div class="pr-selbar"><span id="prCount"></span> <button class="link-btn" id="prSelAll" type="button">Seleccionar todos los filtrados</button></div>
       <div class="pr-bulk" id="prBulk" hidden>
         <b id="prBulkN"></b>
         ${w ? `<button class="btn btn-outline" data-bulk="on">Activar</button>
         <button class="btn btn-outline" data-bulk="off">Desactivar</button>
         <button class="btn btn-outline" data-bulk="pct">Subir/bajar precio %</button>
+        <button class="btn btn-outline" data-bulk="amt">Sumar/restar $</button>
+        <button class="btn btn-outline" data-bulk="set">Fijar precio</button>
+        <button class="btn btn-outline" data-bulk="round">Redondear precios</button>
+        ${w ? `<button class="btn btn-outline" data-bulk="ref">Precio = referencia + %</button>
+        <button class="btn btn-outline" data-bulk="tousd">Pasar a dólares</button>
+        <button class="btn btn-outline" data-bulk="toars">Pasar a pesos</button>` : ""}
+        ${FLAGS.map(([f, ic, n]) => `<span class="pr-bulk-flag">${ic} ${n}: <button class="link-btn" data-bulk="${f}:1">Activar</button> / <button class="link-btn" data-bulk="${f}:0">Desactivar</button></span>`).join("")}
         <button class="btn btn-outline" data-bulk="margin">Aplicar margen sobre costo</button>
         <button class="btn btn-outline" data-bulk="consult">Poner "a consultar"</button>
         <button class="btn btn-outline" data-bulk="tagadd">🏷 Agregar etiqueta</button>
@@ -122,7 +149,7 @@
       </div>
       <div class="panel pr-table-wrap"><table class="table pr-table">
         <thead><tr><th><input type="checkbox" id="prAll" aria-label="Seleccionar todos"></th><th></th><th>Producto</th><th>Categoría</th>
-          ${w ? "<th>Costo</th>" : ""}<th>Venta</th>${w ? "<th>Margen</th>" : ""}<th>Stock</th><th>Activo</th><th></th></tr></thead>
+          ${w ? "<th>Costo</th>" : ""}<th>Venta</th>${w ? "<th>Margen</th>" : ""}<th>Stock</th><th>Activo</th><th title="Opciones de venta">Opciones</th><th></th></tr></thead>
         <tbody id="prRows"></tbody></table></div>
       <p class="notice info">Tip: el precio y el stock se editan directo en la tabla (se guarda al salir del campo). "0" en venta = <b>Consultar precio por WhatsApp</b>. El costo solo lo ven los administradores.</p>`;
   };
@@ -134,7 +161,15 @@
     return products.filter((p) => {
       if (q && !`${p.name} ${p.brand || ""} ${p.id} ${(p.tags || []).join(" ")}`.toLowerCase().includes(q)) return false;
       if (listState.cat && p.category !== listState.cat) return false;
+      if (listState.brand && p.brand !== listState.brand) return false;
+      if (listState.tag && !(p.tags || []).includes(listState.tag)) return false;
+      if (listState.cur === "usd" && p.price_usd == null) return false;
+      if (listState.cur === "ars" && p.price_usd != null) return false;
+      if (listState.pmin && !(p.price >= num(listState.pmin))) return false;
+      if (listState.pmax && !(p.price > 0 && p.price <= num(listState.pmax))) return false;
+      if (listState.filter.startsWith("f:")) return !!p[listState.filter.slice(2)];
       switch (listState.filter) {
+        case "constock": return !p.show_stock || p.stock > 0; case "nocart": return p.cart_ok === false;
         case "activos": return p.active; case "inactivos": return !p.active; case "outlet": return p.outlet;
         case "sinfoto": return !(p.images || []).length; case "sinprecio": return !(p.price > 0);
         case "sinstock": return p.show_stock && p.stock <= 0; case "sincosto": return !((costs.get(p.id) || {}).cost > 0);
@@ -162,9 +197,11 @@
         ${w ? `<td class="${m < 15 ? "pr-low" : ""}">${pct(m)}</td>` : ""}
         <td>${sw ? `<input class="pr-in pr-in-sm" data-f="stock" inputmode="numeric" value="${p.show_stock ? p.stock : ""}" placeholder="∞" title="Vacío = sin control de stock">` : (p.show_stock ? p.stock : "∞")}</td>
         <td>${sw ? `<label class="switch"><input type="checkbox" data-f="active" ${p.active ? "checked" : ""}><span></span></label>` : (p.active ? "Sí" : "No")}</td>
+        <td class="pr-flags">${FLAGS.map(([f, ic, n, d]) => `<button type="button" class="pr-flag ${flagOn(p, f) ? "on" : ""}" data-flag="${f}" title="${esc(n + ": " + d)}" aria-pressed="${flagOn(p, f)}" ${w ? "" : "disabled"}>${ic}</button>`).join("")}</td>
         <td class="pr-actions"><a href="#editar/${encodeURIComponent(p.id)}" title="Editar">✏️</a>${w ? `<button class="link-btn" data-dup title="Duplicar">⧉</button>` : ""}<a href="../index.html#producto/${encodeURIComponent(p.id)}" target="_blank" rel="noopener" title="Ver en la tienda">↗</a></td>
       </tr>`;
-    }).join("") || `<tr><td colspan="10" class="pr-empty">No hay productos con ese filtro.</td></tr>`;
+    }).join("") || `<tr><td colspan="11" class="pr-empty">No hay productos con ese filtro.</td></tr>`;
+    $("prCount").textContent = `${rows.length} de ${cache.products.length} productos`;
     updateBulk();
   }
   function updateBulk() {
@@ -181,6 +218,10 @@
     $("prFilter").onchange = (e) => { listState.filter = e.target.value; renderRows(); };
     $("prAll").onchange = (e) => { visible().forEach((p) => (e.target.checked ? listState.sel.add(p.id) : listState.sel.delete(p.id))); renderRows(); };
     $("prCsv").onclick = exportCsv;
+    [["prBrand", "brand"], ["prTag", "tag"], ["prCur", "cur"]].forEach(([i, k]) => ($(i).onchange = (e) => { listState[k] = e.target.value; renderRows(); }));
+    [["prPmin", "pmin"], ["prPmax", "pmax"]].forEach(([i, k]) => ($(i).oninput = (e) => { listState[k] = e.target.value; renderRows(); }));
+    $("prClearF").onclick = () => { Object.assign(listState, { q: "", cat: "", filter: "", brand: "", tag: "", pmin: "", pmax: "", cur: "" }); A.route(); };
+    $("prSelAll").onclick = () => { visible().forEach((p) => listState.sel.add(p.id)); renderRows(); };
     const tbody = $("prRows");
     tbody.addEventListener("change", async (e) => {
       const tr = e.target.closest("tr[data-id]"); if (!tr) return;
@@ -196,7 +237,11 @@
         flash(t, true); if (f !== "active") renderRows(); else tr.classList.toggle("is-off", !t.checked);
       } catch (err) { flash(t, false); A.alertView("No se pudo guardar: " + err.message); }
     });
-    tbody.addEventListener("click", (e) => { const b = e.target.closest("[data-dup]"); if (b) duplicate(b.closest("tr").dataset.id); });
+    tbody.addEventListener("click", async (e) => {
+      const fl = e.target.closest("[data-flag]");
+      if (fl) { const id = fl.closest("tr").dataset.id, f = fl.dataset.flag, p = cache.products.find((x) => x.id === id), v = !flagOn(p, f);
+        try { await patchProduct(id, { [f]: v }); fl.classList.toggle("on", v); fl.setAttribute("aria-pressed", v); flash(fl, true); } catch (err) { flash(fl, false); A.alertView("No se pudo guardar: " + err.message); } return; }
+      const b = e.target.closest("[data-dup]"); if (b) duplicate(b.closest("tr").dataset.id); });
     $("prBulk").addEventListener("click", (e) => { const b = e.target.closest("[data-bulk]"); if (b) bulk(b.dataset.bulk); });
   }
   async function saveCost(id, fields) {
@@ -224,10 +269,43 @@
       if (!v || !v.trim()) return; const tag = v.trim();
       fn = (p) => { const t = new Set(p.tags || []); action === "tagadd" ? t.add(tag) : t.delete(tag); return patchProduct(p.id, { tags: [...t] }); };
     }
+    const flagM = action.match(/^(ask_price|ask_stock|cart_ok|hide_no_stock):([01])$/);
+    if (flagM) fn = (p) => patchProduct(p.id, { [flagM[1]]: flagM[2] === "1" });
+    // Cambia el precio en su moneda: dólares (2 decimales) o pesos (redondeo a $100 salvo "round")
+    const setPrice = (p, calc) => p.price_usd != null
+      ? patchProduct(p.id, { price_usd: Math.max(0, Math.round(calc(Number(p.price_usd)) * 100) / 100) })
+      : (p.price > 0 ? patchProduct(p.id, { price: Math.max(0, round100(calc(p.price))) }) : null);
+    if (action === "ref") {
+      const v = await ask("Precio según referencia de compra", "Precio = referencia más barata cargada × (1 + %). Ej: 50. Solo cambia los que tienen referencia (en pesos).", String(DEFAULT_MARGIN));
+      if (v === null) return; const f = 1 + num(v) / 100;
+      fn = (p) => { const refs = (cache.sources.get(p.id) || []).map((r) => Number(r.ref_price)).filter((x) => x > 0); return refs.length ? patchProduct(p.id, { price: round100(Math.min(...refs) * f), price_usd: null }) : null; };
+    }
+    if (action === "tousd" || action === "toars") {
+      const fx = A.demo ? 1550 : (await sb().from("fx_settings").select("effective_rate").eq("id", 1).single()).data?.effective_rate;
+      if (!(fx > 0)) return A.alertView("No hay cotización del dólar cargada (sección 💵 Dólar).");
+      fn = action === "tousd"
+        ? (p) => (p.price_usd == null && p.price > 0 ? patchProduct(p.id, { price_usd: Math.round((p.price / fx) * 100) / 100 }) : null)
+        : (p) => (p.price_usd != null ? patchProduct(p.id, { price_usd: null, price: round100(p.price_usd * fx) }) : null);
+    }
+    if (action === "amt") {
+      const v = await ask("Sumar o restar un monto", "Monto en la moneda de cada producto (ej: 5000 suma $5.000; -2000 resta; en productos en dólares: 5 = US$ 5). Solo cambia los que tienen precio.", "5000");
+      if (v === null) return; const d = num(v); fn = (p) => setPrice(p, (x) => x + d);
+    }
+    if (action === "set") {
+      const v = await ask("Fijar precio", "Precio nuevo para todos los seleccionados (en su moneda: pesos o dólares). 0 = a consultar.", "");
+      if (v === null || v === "") return; const d = num(v);
+      fn = (p) => (p.price_usd != null ? patchProduct(p.id, { price_usd: Math.max(0, d) }) : patchProduct(p.id, { price: Math.max(0, Math.round(d)) }));
+    }
+    if (action === "round") {
+      const v = await ask("Redondear precios", "Redondear a (ej: 100, 1000, 500). Termina en 999: escribí 999 (ej: $45.999).", "1000");
+      if (v === null) return; const r = Math.max(1, Math.round(num(v)));
+      const rnd = r === 999 ? (x) => Math.ceil(x / 1000) * 1000 - 1 : (x) => Math.round(x / r) * r;
+      fn = (p) => (p.price_usd == null && p.price > 0 ? patchProduct(p.id, { price: rnd(p.price) }) : null);
+    }
     if (action === "pct") {
       const v = await ask("Subir o bajar el precio de venta", "Porcentaje (ej: 10 para subir 10 %, -5 para bajar 5 %). Se redondea a $100.", "10");
       if (v === null) return; const f = 1 + num(v) / 100;
-      fn = (p) => (p.price > 0 ? patchProduct(p.id, { price: round100(p.price * f) }) : null);
+      fn = (p) => setPrice(p, (x) => x * f);
     }
     if (action === "margin") {
       const v = await ask("Aplicar margen sobre el costo", "Margen en % (precio = costo × (1 + margen)). Solo cambia los que tienen costo cargado.", String(DEFAULT_MARGIN));
@@ -330,6 +408,7 @@
             <label class="field ed-check"><input type="checkbox" name="active" ${p.active ? "checked" : ""}> Visible en la tienda</label>
             <label class="field">Peso (kg, para envíos)<input name="weight_kg" inputmode="decimal" value="${p.weight_kg ?? 1}" ${ro}></label>
           </div>
+          <div class="ed-flags">${FLAGS.map(([f, ic, n, d]) => `<label class="ed-flag"><input type="checkbox" name="${f}" ${flagOn(p, f) ? "checked" : ""} ${ro}><span><b>${ic} ${n}</b><small>${d}</small></span></label>`).join("")}</div>
         </section>
 
         <section class="panel ed-sec"><h3>4. Fotos</h3>
@@ -527,6 +606,7 @@
         id, name: el("name").value.trim(), brand: el("brand").value.trim() || null, category: el("category").value.trim() || null,
         outlet: el("outlet").checked, condition: el("condition").value.trim() || null,
         ...(isUsd() ? { price_usd: Math.max(0, val("price")) } : { price: Math.max(0, num(el("price").value)), price_usd: null }),
+        ...Object.fromEntries(FLAGS.map(([f]) => [f, el(f).checked])),
         show_stock: el("show_stock").checked, stock: el("show_stock").checked ? Math.max(0, Math.round(num(el("stock").value))) : 999,
         tags: [...new Set(el("tags").value.split(",").map((t) => t.trim()).filter(Boolean))],
         active: el("active").checked, weight_kg: Math.max(0.01, num(el("weight_kg").value) || 1), description: el("description").value.trim() || null,

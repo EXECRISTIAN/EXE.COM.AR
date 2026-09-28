@@ -263,3 +263,19 @@
 .fx-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 .pr-up { color: #16a34a; }
 .table-wrap { overflow-x: auto; }
+.pr-adv { margin: 8px 0; }
+.pr-adv summary { cursor: pointer; font-size: .9rem; color: var(--c1, #0084d6); }
+.pr-adv-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; align-items: center; }
+.pr-adv-grid select, .pr-adv-grid input { padding: 8px 10px; border: 1px solid var(--c6); border-radius: 8px; background: var(--surface); color: inherit; font: inherit; }
+.pr-adv-grid input { width: 150px; }
+.pr-selbar { font-size: .85rem; color: var(--muted); margin: 4px 0 8px; display: flex; gap: 10px; align-items: center; }
+.pr-bulk-flag { font-size: .82rem; white-space: nowrap; padding: 4px 8px; border: 1px dashed var(--c6); border-radius: 8px; }
+.pr-flags { white-space: nowrap; }
+.pr-flag { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--c6); background: none; cursor: pointer; filter: grayscale(1); opacity: .45; padding: 0; }
+.pr-flag.on { filter: none; opacity: 1; border-color: var(--c1, #0084d6); background: rgba(0, 132, 214, .12); }
+.pr-flag:disabled { cursor: default; }
+.ed-flags { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 12px; }
+.ed-flag { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--c6); border-radius: 10px; cursor: pointer; }
+.ed-flag span { display: grid; gap: 2px; }
+.ed-flag small { color: var(--muted); font-size: .78rem; }
+.ed-flag:has(input:checked) { border-color: var(--c1, #0084d6); background: rgba(0, 132, 214, .06); }
