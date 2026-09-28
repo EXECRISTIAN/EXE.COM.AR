@@ -24,6 +24,22 @@
   }
   const { sb } = be;
 
+  // ---------- A dónde va cada usuario después de entrar ----------
+  // Clientes: a la página de inicio (o a ?next=… si algo los mandó a loguearse, ej. terminar una compra).
+  // Administradores/moderadores: se quedan en "Mi cuenta" con el acceso al panel.
+  // Solo pasa justo después de un evento (ingresar, confirmar email, nueva contraseña), no al abrir "Mi cuenta" a propósito.
+  const nextUrl = (() => {
+    const n = new URLSearchParams(location.search).get("next");
+    return n && /^[\w\-./?=&#%]+$/.test(n) && !n.startsWith("//") && !/^[a-z]+:/i.test(n) ? n : "index.html";
+  })();
+  async function afterAuth() {
+    const perms = await be.permissions().catch(() => new Set());
+    if (!perms.has("dashboard.access")) { location.replace(nextUrl); return true; }
+    return false;
+  }
+  // Volvió desde el link de confirmación de email.
+  const cameFromEmail = /type=(signup|magiclink|invite|email_change)/.test(location.hash);
+
   // ---------- Antibots (Cloudflare Turnstile, en español) ----------
   // Supabase valida el token del lado del servidor cuando el captcha está activado en Attack Protection.
   const siteKey = window.SITE_CONFIG?.turnstileSiteKey;
@@ -53,6 +69,7 @@
     const { error } = await sb.auth.signInWithPassword({ email: f.get("email"), password: f.get("password"), options: c });
     resetCaptcha("login");
     if (error) return show(/confirm/i.test(error.message) ? "Tenés que confirmar tu email: revisá tu bandeja de entrada (y spam)." : "Email o contraseña incorrectos.");
+    if (await afterAuth()) return;
     render();
   });
 
@@ -90,7 +107,7 @@
     const m = $("recoveryMsg"); m.hidden = false;
     if (error) { m.className = "notice error"; m.textContent = "No se pudo guardar. Probá con otra contraseña (mínimo 8 caracteres)."; return; }
     m.className = "notice ok"; m.textContent = "¡Listo! Contraseña guardada.";
-    setTimeout(() => { $("recovery").hidden = true; render(); }, 1200);
+    setTimeout(async () => { $("recovery").hidden = true; if (!(await afterAuth())) render(); }, 1200);
   });
 
   $("logout").addEventListener("click", async () => { await sb.auth.signOut(); render(); });
@@ -111,5 +128,8 @@
           .join("")}</table>`
       : `<p class="notice info">Todavía no tenés pedidos.</p>`;
   }
-  render();
+  (async () => {
+    if (cameFromEmail && (await be.user()) && (await afterAuth())) return;
+    render();
+  })();
 })();

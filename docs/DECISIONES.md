@@ -60,4 +60,6 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 39. **Solo se envían emails a cuentas con email confirmado** (`profiles.email_verified_at`, controlado en `send-email`). En Supabase debe estar activo "Confirm email".
 40. **Antibots: Cloudflare Turnstile** (gratis, en español, casi siempre sin hacer nada el usuario) en ingresar, crear cuenta y olvidé mi contraseña. Lo valida Supabase del lado del servidor. Widget "exe.com.ar" en la cuenta de Cloudflare.
 41. **Recuperar contraseña**: al volver del email aparece "Elegí tu nueva contraseña" (antes no había pantalla para eso).
+42. **Después de entrar**: los clientes van a la página de inicio (o a `cuenta.html?next=…` si un evento los mandó a loguearse). Administradores y moderadores se quedan en "Mi cuenta". Solo después de ingresar, confirmar email o elegir contraseña nueva; abrir "Mi cuenta" a propósito no redirige. `next` solo acepta rutas internas.
+43. **Botones de "Mi cuenta"** centrados, uno debajo del otro, mismo ancho.
 
