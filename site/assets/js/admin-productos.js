@@ -567,9 +567,9 @@
   }
 
   /* ---------- Dólar: cotización manual o automática (cada 30 min, con máximo del día) ---------- */
-  const FX_SOURCES = [["oficial", "Oficial"], ["blue", "Blue"], ["bolsa", "MEP (bolsa)"], ["contadoconliqui", "CCL (contado con liqui)"], ["mayorista", "Mayorista"], ["cripto", "Cripto"], ["tarjeta", "Tarjeta"]];
+  const FX_SOURCES = [["max", "Automático (el más alto)"], ["oficial", "Oficial"], ["blue", "Blue"], ["bolsa", "MEP (bolsa)"], ["contadoconliqui", "CCL (contado con liqui)"], ["mayorista", "Mayorista"], ["cripto", "Cripto"], ["tarjeta", "Tarjeta"]];
   A.views.dolar = async function () {
-    const r = A.demo ? { data: { mode: "auto", manual_rate: null, source: "oficial", round_to: 100, last_auto_rate: 1545, last_auto_at: new Date().toISOString(), day_max_rate: 1550, day_date: "2026-09-28", effective_rate: 1550 } } : await sb().from("fx_settings").select("*").eq("id", 1).single();
+    const r = A.demo ? { data: { mode: "auto", manual_rate: null, source: "oficial", round_to: 100, last_auto_rate: 1545, last_auto_at: new Date().toISOString(), day_max_rate: 1550, day_date: "2026-09-28", effective_rate: 1550, day_max_by_source: { oficial: 1545, blue: 1560, bolsa: 1557.3, contadoconliqui: 1616.6, mayorista: 1525.5, cripto: 1613.92, tarjeta: 2008.5 } } } : await sb().from("fx_settings").select("*").eq("id", 1).single();
     if (r.error) throw r.error;
     const s = r.data;
     const nUsd = A.demo ? 1 : (await sb().from("products").select("id", { count: "exact", head: true }).not("price_usd", "is", null)).count;
@@ -586,11 +586,11 @@
           <label class="fx-mode"><input type="radio" name="mode" value="manual" ${s.mode === "manual" ? "checked" : ""}>
             <span><b>Manual</b> — uso el valor que pongo yo.</span></label>
           <label class="fx-mode"><input type="radio" name="mode" value="auto" ${s.mode === "auto" ? "checked" : ""}>
-            <span><b>Automático</b> — se actualiza cada 30 minutos con la fuente elegida. <b>Durante el día nunca baja</b>: se usa el valor más alto del día; al día siguiente arranca de nuevo.</span></label>
+            <span><b>Automático</b> — se actualiza cada 30 minutos con la fuente elegida (al lado de cada una, su valor más alto de hoy; "Automático" usa la más alta de todas). <b>Durante el día nunca baja</b>: se usa el valor más alto del día; al día siguiente arranca de nuevo.</span></label>
         </div>
         <div class="ed-grid ed-grid-4">
           <label class="field">Mi valor (manual, $ por US$ 1)<input name="manual" inputmode="decimal" value="${s.manual_rate ?? ""}" placeholder="Ej: 1550"></label>
-          <label class="field">Fuente automática<select name="source">${FX_SOURCES.map(([v, n]) => `<option value="${v}" ${v === s.source ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+          <label class="field">Fuente automática<select name="source">${FX_SOURCES.map(([v, n]) => { const mx = s.day_max_by_source || {}; const val = v === "max" ? Math.max(0, ...Object.values(mx).map(Number)) : Number(mx[v]); return `<option value="${v}" ${v === s.source ? "selected" : ""}>${n}${val ? " — " + money(val) : ""}</option>`; }).join("")}</select></label>
           <label class="field">Redondear precios a<select name="round">${[1, 10, 100, 1000].map((v) => `<option value="${v}" ${v === s.round_to ? "selected" : ""}>$${v}</option>`).join("")}</select></label>
         </div>
         <p class="ed-hint">Automático — último valor leído: <b>${s.last_auto_rate ? money(s.last_auto_rate) : "—"}</b> (${t(s.last_auto_at)}) · máximo de hoy: <b>${s.day_max_rate ? money(s.day_max_rate) : "—"}</b>${s.last_error ? ` · <span class="pr-low">último error: ${esc(s.last_error)}</span>` : ""}</p>
