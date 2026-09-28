@@ -709,7 +709,7 @@
           <label class="fx-pct"><input type="checkbox" id="fxPct"> Comparar en % (desde el inicio del período)</label>
         </div>
         <div class="fx-hist-bar">
-          <div class="fx-chips" id="fxStep"><small class="fx-lbl">Ver cada:</small>${[[0, "⏱ Tiempo real"], [10, "10 min"], [30, "30 min"], [60, "1 h"], [360, "6 h"], [720, "12 h"], [1440, "1 día"]].map(([m, n]) => `<button type="button" class="fx-rbtn" data-m="${m}">${n}</button>`).join("")}<button type="button" class="fx-rbtn" id="fxCustomBtn" aria-expanded="false">Personalizado ▾</button></div>
+          <div class="fx-chips" id="fxStep"><small class="fx-lbl">Ver cada:</small><span id="fxQuick" class="fx-chips">${quickBtns(s.quick_steps)}</span><button type="button" class="fx-rbtn" id="fxCustomBtn" aria-expanded="false">Personalizado ▾</button></div>
         </div>
         <div class="fx-custom" id="fxCustom" hidden>
           <label class="field">Cada<input id="fxCN" type="number" min="1" value="2" inputmode="numeric"></label>
@@ -717,6 +717,9 @@
           <label class="field">Desde<input id="fxFrom" type="datetime-local"></label>
           <label class="field">Hasta<input id="fxTo" type="datetime-local"></label>
           <button type="button" class="btn btn-primary" id="fxCApply">Aplicar</button>
+          <button type="button" class="btn btn-outline" id="fxCSave" title="Agrega este intervalo a los botones de acceso rápido">＋ Guardar como acceso rápido</button>
+          <div class="fx-qedit"><small>Accesos rápidos (tocá ✕ para quitar):</small><div class="fx-chips" id="fxQEdit"></div>
+            <button type="button" class="link-btn" id="fxQReset">Restaurar los predefinidos</button></div>
         </div>
         <p class="ed-hint" id="fxNote"></p>
         <div class="fx-chips" id="fxSeries">${FX_SOURCES.filter(([v]) => !["max", "mid", "min"].includes(v)).map(([v, n]) => `<label class="fx-chip"><input type="checkbox" value="${v}" ${["oficial", "blue", "bolsa", "tarjeta"].includes(v) ? "checked" : ""}><span>${n}</span></label>`).join("")}</div>
@@ -730,6 +733,17 @@
   const FX_COLORS = { oficial: "#0084d6", blue: "#2563eb", bolsa: "#16a34a", contadoconliqui: "#9333ea", mayorista: "#64748b", cripto: "#f59e0b", tarjeta: "#dc2626" };
   const loadChart = () => window.Chart ? Promise.resolve() : new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
   let fxChart = null;
+  // Accesos rápidos de "Ver cada" (se guardan en fx_settings.quick_steps, iguales para todos los administradores)
+  const QDEF = [0, 10, 30, 60, 360, 720, 1440];
+  const stepName = (m) => (m === 0 ? "⏱ Tiempo real" : m % 1440 === 0 ? `${m / 1440} día${m === 1440 ? "" : "s"}` : m % 60 === 0 ? `${m / 60} h` : `${m} min`);
+  const quickBtns = (arr) => (arr && arr.length ? arr : QDEF).map((m) => `<button type="button" class="fx-rbtn" data-m="${m}">${stepName(m)}</button>`).join("");
+  let quick = null;
+  async function saveQuick(arr) {
+    if (!A.demo) { const r = await sb().rpc("fx_quick_steps", { p_steps: arr }); if (r.error) throw r.error; arr = r.data; }
+    quick = [...arr].sort((a, b) => a - b);
+    $("fxQuick").innerHTML = quickBtns(quick); renderQEdit();
+  }
+  function renderQEdit() { $("fxQEdit").innerHTML = quick.map((m) => `<span class="fx-qchip">${stepName(m)}<button type="button" data-qrm="${m}" aria-label="Quitar ${stepName(m)}">✕</button></span>`).join("") || "<small>Sin accesos rápidos.</small>"; }
   // Estado del historial: rango (días), intervalo (min; 0 = cada lectura / tiempo real) y fechas personalizadas
   const fxv = { days: 30, step: null, from: null, to: null, live: false };
   const autoStep = (d) => (d <= 1 ? 10 : d <= 7 ? 60 : d <= 30 ? 360 : 1440);
@@ -777,6 +791,12 @@
   }
 
   A.views.dolar.after = () => {
+    quick = [...document.querySelectorAll("#fxQuick [data-m]")].map((b) => +b.dataset.m); renderQEdit();
+    const customStep = () => Math.max(1, Math.round(+$("fxCN").value || 1)) * +$("fxCU").value;
+    $("fxCSave").onclick = () => { const m = customStep(); if (quick.includes(m)) return ($("fxNote").textContent = `"${stepName(m)}" ya está en los accesos rápidos.`);
+      saveQuick([...quick, m]).then(() => ($("fxNote").textContent = `Listo: "${stepName(m)}" agregado a los accesos rápidos.`)).catch((e) => ($("fxNote").textContent = "No se pudo guardar: " + e.message)); };
+    $("fxQEdit").addEventListener("click", (e) => { const b = e.target.closest("[data-qrm]"); if (!b) return; saveQuick(quick.filter((m) => m !== +b.dataset.qrm)).catch((er) => ($("fxNote").textContent = "No se pudo guardar: " + er.message)); });
+    $("fxQReset").onclick = () => saveQuick(QDEF).catch((e) => ($("fxNote").textContent = "No se pudo guardar: " + e.message));
     const setLive = (on) => { fxv.live = on; clearInterval(fxTimer); fxTimer = null; if (on) fxTimer = setInterval(liveTick, 60000); };
     $("fxRange").addEventListener("click", (e) => { const b = e.target.closest("[data-d]"); if (!b) return; document.querySelectorAll("#fxRange .on").forEach((x) => x.classList.remove("on")); b.classList.add("on");
       Object.assign(fxv, { days: +b.dataset.d, from: null, to: null, custom: false }); setLive(false); drawFx(); });
@@ -785,7 +805,7 @@
       drawFx(); });
     $("fxCustomBtn").onclick = () => { const c = $("fxCustom"); c.hidden = !c.hidden; $("fxCustomBtn").setAttribute("aria-expanded", String(!c.hidden)); };
     $("fxCApply").onclick = () => {
-      const m = Math.max(1, Math.round(+$("fxCN").value || 1)) * +$("fxCU").value;
+      const m = customStep();
       const f = $("fxFrom").value ? new Date($("fxFrom").value).getTime() : null, t = $("fxTo").value ? new Date($("fxTo").value).getTime() : null;
       if (f && t && t <= f) return ($("fxNote").textContent = "La fecha \"Hasta\" tiene que ser posterior a \"Desde\".");
       Object.assign(fxv, { step: m, from: f, to: t, custom: true }); if (f && !t) fxv.to = Date.now(); setLive(false);

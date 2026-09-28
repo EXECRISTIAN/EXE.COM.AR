@@ -309,3 +309,6 @@
 .fx-custom .field { margin: 0; }
 .fx-custom input, .fx-custom select { padding: 7px 9px; border: 1px solid var(--c6); border-radius: 8px; background: var(--surface); color: inherit; font: inherit; }
 .fx-custom #fxCN { width: 80px; }
+.fx-qedit { flex-basis: 100%; display: grid; gap: 6px; }
+.fx-qchip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 4px 3px 10px; border: 1px solid var(--c6); border-radius: 999px; font-size: .82rem; }
+.fx-qchip button { border: 0; background: none; cursor: pointer; color: var(--err); font-size: .8rem; padding: 2px 4px; }
