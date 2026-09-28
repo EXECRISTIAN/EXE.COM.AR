@@ -446,3 +446,16 @@ body.no-scroll { overflow: hidden; }
 .fp-actions .btn { padding: 8px 16px; font-size: .88rem; }
 .fp-price input { -moz-appearance: textfield; appearance: textfield; }
 .fp-price input::-webkit-outer-spin-button, .fp-price input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* ---------- Etiqueta de marca y logos clicables ---------- */
+.tag-brand { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border: 1px solid var(--c6); border-radius: 999px;
+  background: none; color: var(--muted); font: 700 .68rem/1.4 var(--font); letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+  transition: border-color .2s, color .2s; }
+.tag-brand:hover, .tag-brand:focus-visible { border-color: var(--c0); color: var(--c0); }
+.pd-info .tag-brand { margin-bottom: 6px; }
+.logo-btn { flex: none; padding: 0; border: 0; background: none; cursor: pointer; }
+.logo-btn:focus-visible { outline: 2px solid var(--c0); outline-offset: -4px; }
+.logo-btn:hover img, .logo-btn:focus-visible img { filter: var(--brand-filter-hover); opacity: 1; }
+.active-brand { display: flex; justify-content: center; margin: -6px 0 16px; }
+.active-brand[hidden] { display: none; }
+.active-brand .chip span { margin-left: 4px; }

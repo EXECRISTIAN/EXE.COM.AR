@@ -15,7 +15,12 @@
   let filter = "Todos";
   let query = "";
   let sortBy = "";
-  const fp = { brands: new Set(), min: null, max: null, stock: false };   // panel "Filtros"
+  const fp = { brands: new Set(), min: null, max: null, stock: false, logo: null };   // panel "Filtros" (+ logo de marca elegido abajo)
+  // Marca por logo: busca sus palabras en la marca o el nombre (ej. el logo NVIDIA encuentra las placas "GeForce" de MSI)
+  const brandMatches = (p, bf) => {
+    const hay = ` ${`${p.brand || ""} ${p.name || ""}`.toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g, " ")} `;
+    return bf.match.some((m) => hay.includes(` ${m} `));
+  };
   let cart = load();
 
   function load() {
@@ -56,7 +61,8 @@
         (!fp.brands.size || fp.brands.has(p.brand)) &&
         (fp.min == null || (p.price > 0 && p.price >= fp.min)) &&
         (fp.max == null || (p.price > 0 && p.price <= fp.max)) &&
-        (!fp.stock || (tracksStock(p) && available(p) > 0))
+        (!fp.stock || (tracksStock(p) && available(p) > 0)) &&
+        (!fp.logo || brandMatches(p, fp.logo))
     );
     const byPrice = (p) => (p.price > 0 ? p.price : Infinity);   // "Consultar" siempre al final
     if (sortBy === "price-asc") list.sort((a, b) => byPrice(a) - byPrice(b));
@@ -75,7 +81,7 @@
               ${p.images && p.images.length > 1 ? `<span class="img-count" aria-hidden="true">${p.images.length} fotos</span>` : ""}
             </a>
             <div class="card-body">
-              ${p.brand ? `<span class="card-brand">${esc(p.brand)}</span>` : ""}
+              ${p.brand ? `<button class="tag-brand" type="button" data-brand-tag="${esc(p.brand)}" title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
               <h3><a href="#producto/${encodeURIComponent(p.id)}">${esc(p.name)}</a></h3>
               <div class="price">${priceLabel(p)}</div>
               ${stockBadge(p)}
@@ -85,7 +91,9 @@
             </div>
           </article>`;
         }).join("")
-      : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
+      : fp.logo
+        ? `<p class="empty-state">Todavía no tenemos productos ${esc(fp.logo.brand)} publicados.<br><a href="${esc(waLink(`Hola EXE! Busco productos ${fp.logo.brand}. ¿Qué tienen disponible?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te conseguimos lo que buscás.</p>`
+        : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
     observeReveals();
   }
 
@@ -121,7 +129,7 @@
         ${imgs.length > 1 ? `<div class="pd-thumbs">${imgs.map((src, k) => `<button data-pd-img="${k}" aria-label="Ver foto ${k + 1}"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}
       </div>
       <div class="pd-info">
-        ${p.brand ? `<span class="card-brand">${esc(p.brand)}</span>` : ""}
+        ${p.brand ? `<button class="tag-brand" type="button" data-brand-tag="${esc(p.brand)}" title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
         <h2 id="pdName">${esc(p.name)}</h2>
         <div class="price">${priceLabel(p)}</div>
         ${stockBadge(p)}
@@ -352,7 +360,9 @@
       `<label class="fp-check"><input type="checkbox" value="${esc(b)}"${fp.brands.has(b) ? " checked" : ""}> ${esc(b)}</label>`).join("");
   }
   function updateFilters() {
-    const n = fp.brands.size + (fp.min != null || fp.max != null ? 1 : 0) + (fp.stock ? 1 : 0);
+    const n = fp.brands.size + (fp.min != null || fp.max != null ? 1 : 0) + (fp.stock ? 1 : 0) + (fp.logo ? 1 : 0);
+    $("activeBrand").hidden = !fp.logo;
+    $("activeBrand").innerHTML = fp.logo ? `<button type="button" class="chip active" id="clearLogo" aria-label="Quitar filtro de marca ${esc(fp.logo.brand)}">Marca: ${esc(fp.logo.brand)} <span aria-hidden="true">✕</span></button>` : "";
     $("filtersCount").hidden = !n; $("filtersCount").textContent = n;
     renderProducts();
   }
@@ -371,10 +381,28 @@
     updateFilters();
   });
   $("fpClear").onclick = () => {
-    fp.brands.clear(); fp.min = fp.max = null; fp.stock = false;
+    fp.brands.clear(); fp.min = fp.max = null; fp.stock = false; fp.logo = null;
     $("fpMin").value = $("fpMax").value = ""; $("fpStock").checked = false;
     renderBrandOptions(); updateFilters();
   };
+  // Etiquetas "Marca: X" y logos de marcas: muestran solo esa marca y llevan al catálogo
+  function showBrand(name) {
+    const logo = (cfg.brandLogos || []).find((l) => (l.brand || l.name) === name);
+    const known = products.some((p) => p.brand === name);
+    fp.brands.clear(); fp.logo = null; filter = "Todos"; query = ""; $("search").value = "";
+    if (known) fp.brands.add(name);
+    else fp.logo = { brand: name, match: logo && logo.match ? logo.match : [name.toLowerCase()] };
+    renderFilters(); renderBrandOptions(); updateFilters();
+    $("productos").scrollIntoView({ behavior: "smooth" });
+  }
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-brand-tag], #clearLogo");
+    if (!t) return;
+    if (t.id === "clearLogo") { fp.logo = null; return updateFilters(); }
+    if (!$("pdOverlay").hidden) closeProduct();
+    showBrand(t.dataset.brandTag);
+  });
+
   // Menú "Ordenar por" con el estilo del sitio (reemplaza el <select> nativo)
   const sortBtn = $("sortBtn"), sortMenu = $("sortMenu");
   const sortOpts = [...sortMenu.querySelectorAll("[role=option]")];
@@ -502,7 +530,7 @@
   /* ---------- Contenido de config ---------- */
   const logos = cfg.brandLogos || [];
   $("logos").innerHTML = [...logos, ...logos]
-    .map((l) => `<img src="${esc(l.src)}" alt="${esc(l.name)}" title="${esc(l.name)}" loading="lazy">`).join("");
+    .map((l, i) => `<button type="button" class="logo-btn" data-brand-tag="${esc(l.brand || l.name)}"${i >= logos.length ? ' tabindex="-1" aria-hidden="true"' : ""} title="Ver productos ${esc(l.brand || l.name)}" aria-label="Ver productos ${esc(l.brand || l.name)}"><img src="${esc(l.src)}" alt="${esc(l.name)}" loading="lazy"></button>`).join("");
   const waHello = waLink("Hola EXE! Quería hacer una consulta.");
   $("waDirect").href = waHello; $("waFloat").href = waHello; $("waFooter").href = waHello;
   $("mailFooter").href = `mailto:${cfg.email}`; $("mailFooter").textContent = cfg.email;
