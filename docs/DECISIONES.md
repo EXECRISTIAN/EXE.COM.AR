@@ -73,3 +73,7 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 48. **Ficha de producto**: tocando la foto, el nombre o "Ver detalles" se abre una ficha con todas las fotos (flechas, miniaturas, teclado y deslizar con el dedo), precio, stock, variante, agregar al carrito, consultar por WhatsApp y especificaciones por secciones. Link compartible: `#producto/<id>`.
 49. **Especificaciones reales** de WordPress (7 productos). No se muestran las de 3 productos cuyo texto en WordPress era de otro modelo (ver `docs/PENDIENTES.md`); en su lugar dice que la ficha está en revisión.
 
+
+## Legal y seguridad
+50. **Copyright**: `LICENSE` con todos los derechos reservados (el repo es público solo por GitHub Pages), meta `copyright` en las páginas y leyenda en el pie. Las marcas y fotos de terceros son de sus dueños.
+51. **Sin enlaces de sesión**: las descripciones de PR y los commits nuevos no incluyen enlaces a la conversación de Claude.
