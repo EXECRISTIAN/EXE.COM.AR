@@ -77,12 +77,6 @@
         ${rows.map((o) => `<tr><td>${o.id}</td><td>${esc(o.created_at).slice(0, 10)}</td><td>${esc(o.customer)}</td><td><span class="pill ${esc(o.status)}">${esc(o.status)}</span></td><td>${money(o.total)}</td><td>${shipCell(o)}</td></tr>`).join("")}
         </table></div><p class="notice info">"Pagado" lo marca solamente el sistema al recibir la confirmación de Mercado Pago (o un administrador con el permiso <b>orders.mark_paid</b>, quedando registrado quién y cuándo).</p>`;
     },
-    async productos() {
-      const rows = await load("products");
-      return `<div class="panel"><table class="table"><tr><th>Producto</th><th>Precio</th><th>Stock</th><th>Mostrar stock</th><th>Activo</th></tr>
-        ${rows.map((p) => `<tr><td>${esc(p.name)}</td><td>${p.price ? money(p.price) : "Consultar"}</td><td>${p.stock}</td><td>${p.show_stock ? "Sí" : "No"}</td><td>${p.active ? "Sí" : "No"}</td></tr>`).join("")}
-        </table></div>`;
-    },
     async usuarios() {
       const rows = await load("users");
       return `<div class="panel"><table class="table"><tr><th>Usuario</th><th>Email</th><th>Roles</th></tr>
@@ -144,16 +138,23 @@
     return kind === "orders" ? data.map((o) => ({ ...o, customer: o.customer?.full_name })) : data;
   }
 
+  // Vistas extra sin link en el menú (ej. #editar/<id>): { perm, parent, title }
+  const subviews = {};
   async function route() {
-    const key = (location.hash || "#resumen").slice(1);
-    const link = document.querySelector(`[href="#${key}"]`);
-    if (!views[key] || !link || !perms.has(link.dataset.perm)) return (location.hash = "#resumen");
+    const [key, ...args] = (location.hash || "#resumen").slice(1).split("/");
+    const sub = subviews[key];
+    const link = document.querySelector(`.side-nav [href="#${sub ? sub.parent : key}"]`);
+    const perm = sub ? sub.perm : link && link.dataset.perm;
+    if (!views[key] || !link || !perms.has(perm)) return (location.hash = "#resumen");
     document.querySelectorAll(".side-nav a").forEach((a) => a.classList.toggle("active", a === link));
-    $("viewTitle").textContent = link.textContent.replace(/^\S+\s/, "");
-    try { $("view").innerHTML = await views[key](); }
+    $("viewTitle").textContent = sub ? sub.title(args) : link.textContent.replace(/^\S+\s/, "");
+    try { $("view").innerHTML = await views[key](...args.map(decodeURIComponent)); if (views[key].after) views[key].after(...args.map(decodeURIComponent)); }
     catch (e) { $("view").innerHTML = `<p class="notice error">${esc(e.message)}</p>`; }
   }
+  // API para los módulos del panel (admin-productos.js)
+  window.EXE_ADMIN = { views, subviews, route, esc, money, $, get perms() { return perms; }, demo, be, DEMO, alertView: (m) => alertView(m) };
 
   $("logout").onclick = async () => { if (be) await be.sb.auth.signOut(); location.href = "../index.html"; };
-  boot();
+  // boot() arranca cuando cargaron los módulos (admin-productos.js llama a EXE_ADMIN.start())
+  window.EXE_ADMIN.start = boot;
 })();

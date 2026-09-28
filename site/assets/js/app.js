@@ -587,8 +587,22 @@
   $("year").textContent = new Date().getFullYear();
 
   /* ---------- Datos ---------- */
-  fetch("data/products.json", { cache: "no-cache" })   // siempre revalida precios y stock
-    .then((r) => r.json())
-    .then((data) => { products = data.filter((p) => p.active !== false); /* "active": false = sin stock en proveedores: no se muestra ni se puede pedir */ renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); })
+  // Catálogo: primero Supabase (lo que se edita en el panel se ve al instante); si falla, la copia products.json.
+  const fromDb = (r) => ({
+    id: r.id, name: r.name, brand: r.brand, category: r.category, description: r.description, price: Number(r.price) || 0,
+    ...(r.show_stock ? { stock: r.stock } : {}), images: r.images && r.images.length ? r.images : (r.image ? [r.image] : []),
+    specs: r.specs && r.specs.length ? r.specs : undefined, outlet: r.outlet, condition: r.condition, weightKg: Number(r.weight_kg) || 1,
+    variants: r.variants && r.variants.length ? r.variants : undefined,
+  });
+  const loadDb = () => {
+    if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) return Promise.reject();
+    const cols = "id,name,brand,category,description,price,stock,show_stock,image,images,specs,outlet,condition,weight_kg,variants";
+    return fetch(`${cfg.supabaseUrl}/rest/v1/products?select=${cols}&active=eq.true&order=sort.asc,name.asc`, { headers: { apikey: cfg.supabaseAnonKey } })
+      .then((r) => (r.ok ? r.json() : Promise.reject())).then((rows) => (rows.length ? rows.map(fromDb) : Promise.reject()));
+  };
+  const loadJson = () => fetch("data/products.json", { cache: "no-cache" }).then((r) => r.json())
+    .then((data) => data.filter((p) => p.active !== false));   // "active": false = sin stock: no se muestra ni se puede pedir
+  loadDb().catch(loadJson)
+    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();

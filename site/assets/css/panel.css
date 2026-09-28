@@ -138,3 +138,72 @@
               0 0 0 3px color-mix(in srgb, var(--ok) 35%, transparent);
 }
 .btn-back:focus-visible { outline: 2px solid var(--c0); outline-offset: 4px; }
+
+/* ---------- Panel → Productos ---------- */
+.pr-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+.pr-toolbar input[type=search], .pr-toolbar select, .pr-in { height: 38px; padding: 0 10px; border: 1px solid var(--c6); border-radius: 8px; background: var(--surface); color: var(--c2); font: inherit; font-size: .9rem; }
+.pr-toolbar input[type=search] { flex: 1 1 240px; }
+.pr-bulk { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--c0); }
+.pr-bulk .btn { padding: 7px 12px; font-size: .85rem; }
+.btn.danger { border-color: var(--err); color: var(--err); }
+.btn.danger:hover { background: var(--err); color: #fff; }
+.link-btn { border: 0; background: none; color: var(--c0); cursor: pointer; font: inherit; padding: 2px 4px; }
+.pr-table td { vertical-align: middle; padding: 8px 8px; }
+.pr-table tr.is-off td { opacity: .55; }
+.pr-thumb { width: 44px; height: 44px; object-fit: contain; border-radius: 6px; background: #fff; display: grid; place-items: center; border: 1px solid var(--line); }
+.pr-nophoto { font-size: 1.1rem; opacity: .6; }
+.pr-name { font-weight: 700; color: var(--c2); text-decoration: none; }
+.pr-name:hover { color: var(--c0); }
+.pr-meta { display: block; color: var(--muted); font-size: .78rem; margin-top: 2px; }
+.pr-in { width: 110px; height: 34px; font-variant-numeric: tabular-nums; }
+.pr-in-sm { width: 70px; }
+.pr-in.ok { animation: prOk 1.2s; } .pr-in.err { animation: prErr 1.2s; border-color: var(--err); }
+@keyframes prOk { from { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 50%, transparent); } }
+@keyframes prErr { from { box-shadow: 0 0 0 3px color-mix(in srgb, var(--err) 50%, transparent); } }
+.pr-low { color: var(--err); font-weight: 700; }
+.pr-actions { white-space: nowrap; } .pr-actions a, .pr-actions button { text-decoration: none; margin: 0 3px; font-size: 1rem; }
+.pr-empty { text-align: center; color: var(--muted); padding: 30px !important; }
+.switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch span { position: absolute; inset: 0; border-radius: 999px; background: var(--c6); cursor: pointer; transition: background .2s; }
+.switch span::before { content: ""; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.switch input:checked + span { background: var(--ok); }
+.switch input:checked + span::before { transform: translateX(18px); }
+.switch input:focus-visible + span { outline: 2px solid var(--c0); outline-offset: 2px; }
+.pr-dialog-in { width: 100%; margin-bottom: 14px; }
+/* Editor */
+.ed { display: grid; gap: 0; }
+.ed-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; position: sticky; top: 0; z-index: 5; padding: 10px 0; background: var(--c4); }
+.ed-bar-bottom { position: static; }
+.ed-spacer { flex: 1; }
+.ed-sec h3 { margin: 0 0 14px; font-size: 1.05rem; color: var(--c2); }
+.ed-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.ed-grid-4 { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); align-items: end; }
+.ed-wide { grid-column: 1 / -1; }
+.ed .field input, .ed .field textarea, .ed .field select { width: 100%; box-sizing: border-box; }
+.ed .field small { color: var(--muted); font-size: .75rem; }
+.ed-check { display: flex !important; align-items: center; gap: 8px; }
+.ed-check input { width: 18px !important; height: 18px; accent-color: var(--c0); }
+.ed-hint { color: var(--muted); font-size: .85rem; margin: 8px 0 10px; }
+.ed-photos { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+.ed-photo { position: relative; margin: 0; width: 130px; height: 130px; border: 1px solid var(--line); border-radius: 10px; background: #fff; overflow: hidden; }
+.ed-photo img { width: 100%; height: 100%; object-fit: contain; }
+.ed-main { position: absolute; top: 6px; left: 6px; padding: 2px 7px; border-radius: 4px; background: var(--accent-bg); color: #fff; font-size: .68rem; font-weight: 700; }
+.ed-photo-btns { position: absolute; inset: auto 0 0 0; display: flex; justify-content: space-around; background: #000a; }
+.ed-photo-btns button { border: 0; background: none; color: #fff; cursor: pointer; padding: 5px; font-size: .85rem; }
+.ed-photo-btns button:disabled { opacity: .3; cursor: default; }
+.ed-drop { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 14px; border: 2px dashed var(--c6); border-radius: 10px; color: var(--muted); margin-bottom: 8px; }
+.ed-drop.over { border-color: var(--c0); background: color-mix(in srgb, var(--c0) 8%, transparent); }
+.ed-url { width: min(320px, 100%); }
+.ed-quick { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: .85rem; color: var(--muted); margin-top: 8px; }
+.ed-spec { border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 12px; display: grid; gap: 8px; }
+.ed-spec-head { display: flex; gap: 10px; align-items: center; } .ed-spec-head .pr-in { flex: 1; width: auto; font-weight: 700; }
+.ed-spec-row { display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 8px; } .ed-spec-row .pr-in { width: auto; }
+.ed-row-btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.ed-src { display: grid; grid-template-columns: 1fr 2fr 130px 1fr auto auto; gap: 8px; align-items: center; margin-bottom: 8px; } .ed-src .pr-in { width: auto; }
+.ed-paste textarea { width: 100%; box-sizing: border-box; margin-bottom: 14px; padding: 10px; border: 1px solid var(--c6); border-radius: 8px; background: var(--bg); color: var(--c2); font: inherit; }
+.ed-paste { width: min(560px, calc(100vw - 32px)); text-align: left; }
+@media (max-width: 760px) {
+  .ed-src { grid-template-columns: 1fr 1fr; }
+  .ed-spec-row { grid-template-columns: 1fr 1fr auto; }
+}
