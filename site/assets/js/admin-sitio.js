@@ -19,6 +19,7 @@
     texto: { name: "Texto con botón", create: true, fields: [{ k: "title", l: "Título" }, { k: "text", t: "textarea", l: "Texto" }, { k: "button_text", l: "Texto del botón (opcional)" }, { k: "button_link", l: "Link del botón (vacío = ir a productos)" }] },
     imagen: { name: "Imagen / banner", create: true, fields: [{ k: "img", t: "image", l: "Imagen" }, { k: "alt", l: "Descripción" }, { k: "link", l: "Link al tocar (opcional)" }, { k: "filter", l: "…o mostrar la categoría" }] },
     imagen_texto: { name: "Imagen + texto", create: true, fields: [{ k: "img", t: "image", l: "Imagen" }, { k: "alt", l: "Descripción de la imagen" }, { k: "title", l: "Título" }, { k: "text", t: "textarea", l: "Texto" }, { k: "button_text", l: "Texto del botón (opcional)" }, { k: "button_link", l: "Link del botón" }, { k: "side", t: "select", o: ["izquierda", "derecha"], l: "Imagen a la…" }] },
+    espaciador: { name: "Espacio / separador", create: true, fields: [{ k: "height", t: "number", l: "Alto en computadora (px)", ph: "40" }, { k: "height_mobile", t: "number", l: "Alto en celular (px)", ph: "24" }, { k: "line", t: "select", o: ["no", "si"], l: "Línea divisoria en el medio" }, { k: "line_color", t: "color", l: "Color de la línea (opcional)" }] },
     aviso: { name: "Barra de aviso", create: true, fields: [{ k: "text", l: "Texto (ej: ¡Envío gratis en compras de más de $500.000!)" }, { k: "link", l: "Link (opcional)" }] },
   };
 
@@ -133,17 +134,70 @@
         ${T.note ? `<p class="ed-hint">${esc(T.note)}</p>` : ""}
         <div id="stFields"></div>
       </section>
+      ${styleSection(cur.data.style || {}, b.type)}
       <div class="ed-bar ed-bar-bottom"><span class="ed-spacer"></span><button class="btn btn-primary" type="submit">Guardar</button></div>
     </form>`;
   };
   A.views["sitio-editar"].after = () => { renderFields(); bind(); };
 
+  // Selector de color con opción "sin color" (vacío = el de la web)
+  const colorField = (label, val, attr) => `<div class="field st-color"><span>${esc(label)}</span><div class="st-color-row">
+      <input type="color" value="${/^#[0-9a-f]{6}$/i.test(val || "") ? val : "#ffffff"}" data-cpick>
+      <input class="pr-in" ${attr} value="${esc(val || "")}" placeholder="Sin color (el de la web)" maxlength="7">
+      <button type="button" class="link-btn" data-cclear>Quitar</button></div></div>`;
+  const PADS = [["Sin espacio", 0], ["Chico", 24], ["Mediano", 56], ["Grande", 96], ["Muy grande", 140]];
+  function styleSection(st, type) {
+    const a = (k) => `data-style="${k}"`;
+    return `<section class="panel ed-sec"><h3>Estilo de la sección</h3>
+      <p class="ed-hint">Todo es opcional: lo que dejes vacío usa el diseño normal de la web. En celular los espacios se achican solos (60 %).</p>
+      ${type === "espaciador" ? "" : `<div class="st-pads"><span>Espacio arriba y abajo:</span>${PADS.map(([n, v]) => `<button type="button" class="fx-rbtn" data-pad="${v}">${n}</button>`).join("")}</div>
+      <div class="ed-grid">
+        <label class="field">Espacio arriba (px)<input type="number" min="0" max="240" ${a("pt")} value="${esc(st.pt ?? "")}" placeholder="normal"></label>
+        <label class="field">Espacio abajo (px)<input type="number" min="0" max="240" ${a("pb")} value="${esc(st.pb ?? "")}" placeholder="normal"></label>
+        <label class="field">Ancho<select ${a("width")}>${[["", "Normal"], ["angosto", "Angosto (texto)"], ["completo", "Toda la pantalla"]].map(([v, n]) => `<option value="${v}" ${v === (st.width || "") ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+        <label class="field">Alineación del texto<select ${a("align")}>${[["", "Normal"], ["left", "Izquierda"], ["center", "Centro"], ["right", "Derecha"]].map(([v, n]) => `<option value="${v}" ${v === (st.align || "") ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+        <label class="field">Bordes redondeados (px)<input type="number" min="0" max="60" ${a("radius")} value="${esc(st.radius ?? "")}" placeholder="0"></label>
+      </div>`}
+      <div class="ed-grid">
+        ${colorField("Color de fondo (modo claro)", st.bg, a("bg"))}
+        ${colorField("Color de fondo (modo oscuro)", st.bg_dark, a("bg_dark"))}
+        ${colorField("Color del texto (claro) — vacío = automático", st.fg, a("fg"))}
+        ${colorField("Color del texto (oscuro) — vacío = automático", st.fg_dark, a("fg_dark"))}
+      </div>
+      <div class="ed-grid">
+        <label class="field ed-check"><input type="checkbox" ${a("hide_mobile")} ${st.hide_mobile ? "checked" : ""}> Ocultar en celular</label>
+        <label class="field ed-check"><input type="checkbox" ${a("hide_desktop")} ${st.hide_desktop ? "checked" : ""}> Ocultar en computadora</label>
+      </div>
+      <div class="st-preview" id="stPrev"><div><b>Vista rápida de colores</b><p>Así se ve el texto sobre el fondo elegido.</p></div><div><b>Modo oscuro</b><p>Así se ve el texto sobre el fondo elegido.</p></div></div>
+    </section>`;
+  }
+  function readStyle() {
+    const st = {};
+    document.querySelectorAll("[data-style]").forEach((el) => {
+      const k = el.dataset.style;
+      if (el.type === "checkbox") { if (el.checked) st[k] = true; return; }
+      const v = el.value.trim(); if (v === "") return;
+      if (["pt", "pb", "radius"].includes(k)) st[k] = Math.max(0, Math.min(k === "radius" ? 60 : 240, Math.round(+v) || 0));
+      else if (["bg", "bg_dark", "fg", "fg_dark"].includes(k)) { if (/^#[0-9a-f]{6}$/i.test(v)) st[k] = v.toLowerCase(); }
+      else st[k] = v;
+    });
+    return st;
+  }
+  const textOn = (c) => { const [r, g, b] = [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.4 ? "#111111" : "#ffffff"; };
+  function drawPrev() {
+    const p = $("stPrev"); if (!p) return; const st = readStyle(); const [l, d] = p.children;
+    const bl = st.bg, bd = st.bg_dark || st.bg;
+    l.style.background = bl || "#ffffff"; l.style.color = st.fg || (bl ? textOn(bl) : "#333333");
+    d.style.background = bd || "#0b0f16"; d.style.color = st.fg_dark || (bd ? textOn(bd) : "#cbd5e1");
+  }
   const fieldHtml = (f, val, path) => {
     const name = `data-path="${esc(path)}"`;
     if (f.t === "image") return `<div class="field st-img"><span>${esc(f.l)}</span><div class="st-img-row">
         ${val ? `<img src="${esc(imgUrl(val))}" alt="">` : `<span class="pr-thumb pr-nophoto">📷</span>`}
         <input class="pr-in" ${name} value="${esc(val || "")}" placeholder="link de la imagen o subí una">
         <button type="button" class="btn btn-outline" data-upload="${esc(path)}">Subir</button></div></div>`;
+    if (f.t === "number") return `<label class="field">${esc(f.l)}<input type="number" min="0" max="400" ${name} value="${esc(val ?? "")}" placeholder="${esc(f.ph || "")}"></label>`;
+    if (f.t === "color") return colorField(f.l, val, name);
     if (f.t === "textarea") return `<label class="field">${esc(f.l)}<textarea rows="4" ${name}>${esc(val || "")}</textarea></label>`;
     if (f.t === "select") return `<label class="field">${esc(f.l)}<select ${name}>${f.o.map((o) => `<option ${o === val ? "selected" : ""}>${o}</option>`).join("")}</select></label>`;
     return `<label class="field">${esc(f.l)}<input ${name} value="${esc(val || "")}"></label>`;
@@ -207,8 +261,23 @@
       if (mv) { const [k, i, d] = mv.dataset.lmv.split(":"); const a = cur.data[k], j = +i + +d; [a[+i], a[j]] = [a[j], a[+i]]; }
       renderFields();
     });
+    // Estilo: presets de espacio, selector de color sincronizado con el campo de texto, vista rápida
+    f.addEventListener("click", (e) => {
+      const pad = e.target.closest("[data-pad]");
+      if (pad) { f.querySelector('[data-style="pt"]').value = pad.dataset.pad; f.querySelector('[data-style="pb"]').value = pad.dataset.pad; }
+      const clr = e.target.closest("[data-cclear]");
+      if (clr) clr.closest(".st-color-row").querySelector(".pr-in").value = "";
+      drawPrev();
+    });
+    f.addEventListener("input", (e) => {
+      if (e.target.matches("[data-cpick]")) e.target.closest(".st-color-row").querySelector(".pr-in").value = e.target.value;
+      else if (e.target.closest(".st-color-row") && /^#[0-9a-f]{6}$/i.test(e.target.value)) e.target.closest(".st-color-row").querySelector("[data-cpick]").value = e.target.value;
+      drawPrev();
+    });
+    drawPrev();
     f.addEventListener("submit", async (e) => {
       e.preventDefault(); readFields();
+      const st = readStyle(); if (Object.keys(st).length) cur.data.style = st; else delete cur.data.style;
       try {
         await save([{ id: cur.id, type: cur.type, page: cur.page || "inicio", position: cur.position, builtin: cur.builtin, title: f.elements.title.value.trim() || TYPES[cur.type].name, description: f.elements.description.value.trim() || null, active: f.elements.active.checked, data: cur.data }]);
         msg("Guardado ✔ Recargá la página web para verlo.", "ok");

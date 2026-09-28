@@ -312,3 +312,12 @@
 .fx-qedit { flex-basis: 100%; display: grid; gap: 6px; }
 .fx-qchip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 4px 3px 10px; border: 1px solid var(--c6); border-radius: 999px; font-size: .82rem; }
 .fx-qchip button { border: 0; background: none; cursor: pointer; color: var(--err); font-size: .8rem; padding: 2px 4px; }
+/* Página web → Estilo de la sección */
+.st-pads { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0 10px; font-size: .9rem; }
+.st-color { display: grid; gap: 4px; }
+.st-color-row { display: flex; gap: 6px; align-items: center; }
+.st-color-row input[type="color"] { width: 42px; height: 38px; padding: 2px; border: 1px solid var(--c6); border-radius: 8px; background: var(--surface); cursor: pointer; flex: none; }
+.st-color-row .pr-in { flex: 1; min-width: 0; }
+.st-preview { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.st-preview > div { padding: 14px; border-radius: 10px; border: 1px solid var(--c6); }
+.st-preview p { margin: 4px 0 0; font-size: .88rem; }
