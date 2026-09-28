@@ -14,3 +14,8 @@ alter table public.email_templates enable row level security;
 create policy email_templates_admin on public.email_templates for all to authenticated
   using (public.has_perm('emails.manage')) with check (public.has_perm('emails.manage'));
 revoke all on public.email_templates from anon;
+
+-- Más eventos (recordatorio de pago, pedir opinión, bienvenida, cliente inactivo, volvió el stock, bajó el precio,
+-- ofertas, fechas especiales, reapertura, cierre temporal) y condiciones: delay_days, send_at, audience, min_total, category.
+-- Consentimiento para publicidad: profiles.marketing_opt_in (+ _at), editable por el propio usuario.
+-- (Aplicado en Supabase como migración email_eventos_condiciones.)

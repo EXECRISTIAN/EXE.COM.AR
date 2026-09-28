@@ -301,3 +301,5 @@
 .em-frame { display: block; width: 100%; height: 640px; border: 1px solid var(--c6); border-radius: 10px; background: #f5f7f9; margin: 0 auto; transition: width .2s; }
 .em-frame.mob { width: 375px; max-width: 100%; }
 .em-prev-dlg { width: min(760px, calc(100% - 24px)); }
+.em-cond { padding: 10px 12px; border: 1px dashed var(--c6); border-radius: 10px; margin: 8px 0 12px; } .em-cond [hidden] { display: none !important; }
+.acc-optin { display: flex; gap: 8px; align-items: flex-start; text-align: left; font-size: .88rem; margin: 4px 0 10px; }
