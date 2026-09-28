@@ -17,3 +17,6 @@ Idea base (a definir con Cristian antes de empezar):
 - **Protección de contraseñas filtradas** (HaveIBeenPwned) en Supabase Auth: es función del plan Pro (pago), queda apagada.
 - **Mercado Pago**: crear la cuenta de integración y el token para cobrar online.
 - **Dominio**: pasar exe.com.ar a GitHub Pages cuando se decida (hoy sigue el WordPress).
+
+## Recordar a Cristian (28/09)
+- Panel → Resumen sigue igual que antes. Opciones propuestas: Resumen más completo (productos activos, sin stock y sin foto, dólar del día, últimos pedidos, alertas) y/o links "Ir a la tienda" e "Ir a mi cuenta" en el menú lateral. Definir cuál quiere.
