@@ -24,6 +24,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # Evita que el navegador use CSS/JS viejos: cada deploy agrega ?v=<commit> a sus enlaces
+      - name: Versionar CSS y JS (cache busting)
+        run: |
+          v="${GITHUB_SHA::8}"
+          find site -name '*.html' -print0 | xargs -0 sed -i -E "s#((src|href)=\"[^\"?]*assets/(css|js)/[^\"?]+\.(css|js))\"#\1?v=$v\"#g"
+          grep -rhoE 'assets/(css|js)/[^"]+' site --include='*.html' | sort -u
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

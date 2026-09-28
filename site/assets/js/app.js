@@ -426,7 +426,7 @@
   $("year").textContent = new Date().getFullYear();
 
   /* ---------- Datos ---------- */
-  fetch("data/products.json")
+  fetch("data/products.json", { cache: "no-cache" })   // siempre revalida precios y stock
     .then((r) => r.json())
     .then((data) => { products = data; renderFilters(); renderProducts(); renderCart(); routeProduct(); })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
