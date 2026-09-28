@@ -212,12 +212,13 @@
     : Promise.resolve();
   async function adminSources(id) {
     await adminReady;
+    const cur = (v, c) => (c === "USD" ? "US$ " + Number(v).toLocaleString("es-AR") : money(v));
     const box = $("pdAdmin"); if (!box || !adminApi) return;
-    const { data } = await adminApi.from("product_sources").select("store,url,ref_price,margin,sale_price,delivery_note,checked_at").eq("product_id", id).order("ref_price");
+    const { data } = await adminApi.from("product_sources").select("store,url,ref_price,currency,ship_cost,ship_currency,margin,sale_price,delivery_note,checked_at").eq("product_id", id).order("ref_price");
     if (!data || !data.length) { box.innerHTML = `<b>Solo admins</b> · Sin precio de referencia cargado todavía.`; box.hidden = false; return; }
     box.innerHTML = `<b>Solo admins · precio de referencia</b>` + data.map((d) =>
-      `<div class="pd-admin-row"><a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">${esc(d.store)}</a>
-        <span>${money(d.ref_price)} → venta ${money(d.sale_price)} (+${Math.round(d.margin * 100)} %)</span>
+      `<div class="pd-admin-row">${d.url ? `<a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">${esc(d.store)}</a>` : `<b>${esc(d.store)}</b>`}
+        <span>Compra ${cur(d.ref_price, d.currency)}${d.ship_cost != null ? ` + envío ${cur(d.ship_cost, d.ship_currency)}` : ""}${d.sale_price ? ` → venta ${money(d.sale_price)} (+${Math.round(d.margin * 100)} %)` : ""}</span>
         <small>${d.delivery_note ? esc(d.delivery_note) + " · " : ""}revisado ${new Date(d.checked_at).toLocaleDateString("es-AR")}</small></div>`).join("");
     box.hidden = false;
   }
