@@ -84,6 +84,7 @@
               ${p.brand ? `<button class="tag-brand" type="button" data-brand-tag="${esc(p.brand)}" title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
               <h3><a href="#producto/${encodeURIComponent(p.id)}">${esc(p.name)}</a></h3>
               <div class="price">${priceLabel(p)}</div>
+              ${p.price > 0 ? `<span class="price-note">Consultar precio final</span>` : ""}
               ${stockBadge(p)}
               ${p.variants ? `<select data-variant="${esc(p.id)}" aria-label="Variante">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select>` : ""}
               <button class="btn btn-primary" data-add="${esc(p.id)}" ${out ? "disabled" : ""}>${out ? "Sin stock" : "Agregar al carrito"}</button>
@@ -132,6 +133,8 @@
         ${p.brand ? `<button class="tag-brand" type="button" data-brand-tag="${esc(p.brand)}" title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
         <h2 id="pdName">${esc(p.name)}</h2>
         <div class="price">${priceLabel(p)}</div>
+        ${p.price > 0 ? `<span class="price-note">Consultá el precio final actualizado</span>` : ""}
+        <div class="pd-admin" id="pdAdmin" hidden></div>
         ${stockBadge(p)}
         ${p.variants ? `<label class="field">Variante<select id="pdVariant">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select></label>` : ""}
         <div class="pd-actions">
@@ -151,7 +154,7 @@
               <table>${s.rows.map(([key, val]) => `<tr><th>${esc(key)}</th><td>${esc(val)}</td></tr>`).join("")}</table></details>`).join("")
           : `<p class="pd-nospecs">La ficha técnica de este producto está en revisión. Consultanos por WhatsApp y te pasamos todos los datos.</p>`}
       </div>`;
-    pdSetImage(0); pdSetQty(1);
+    pdSetImage(0); pdSetQty(1); adminSources(p.id);
     $("pdOverlay").hidden = false;
     requestAnimationFrame(() => $("pdOverlay").classList.add("show"));
     document.body.classList.add("no-scroll");
@@ -174,6 +177,33 @@
     if (m) openProduct(decodeURIComponent(m[1])); else closeProduct(true);
   }
   window.addEventListener("hashchange", routeProduct);
+
+  /* ---------- Solo administradores: precio de referencia y link de compra ----------
+     Los links NO están en products.json (es público): viven en Supabase (tabla product_sources, RLS products.write).
+     Supabase solo se carga si hay una sesión iniciada en este navegador. */
+  let adminApi = null;
+  const hasSession = (() => { try { return Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k)); } catch { return false; } })();
+  const loadScript = (src) => new Promise((ok, fail) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = fail; document.head.appendChild(s); });
+  const adminReady = hasSession && cfg.supabaseUrl
+    ? loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js")
+        .then(() => loadScript("assets/js/backend.js"))
+        .then(async () => {
+          const be = window.EXE_BACKEND; if (!be) return;
+          const perms = await be.permissions();
+          if (perms.has("products.write")) adminApi = be.sb;
+        }).catch(() => {})
+    : Promise.resolve();
+  async function adminSources(id) {
+    await adminReady;
+    const box = $("pdAdmin"); if (!box || !adminApi) return;
+    const { data } = await adminApi.from("product_sources").select("store,url,ref_price,sale_price,delivery_note,checked_at").eq("product_id", id).order("ref_price");
+    if (!data || !data.length) { box.innerHTML = `<b>Solo admins</b> · Sin precio de referencia cargado todavía.`; box.hidden = false; return; }
+    box.innerHTML = `<b>Solo admins · precio de referencia</b>` + data.map((d) =>
+      `<div class="pd-admin-row"><a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">${esc(d.store)}</a>
+        <span>${money(d.ref_price)} → venta ${money(d.sale_price)} (+30 %)</span>
+        <small>${d.delivery_note ? esc(d.delivery_note) + " · " : ""}revisado ${new Date(d.checked_at).toLocaleDateString("es-AR")}</small></div>`).join("");
+    box.hidden = false;
+  }
 
   // Cantidad en la ficha: entre 1 y el stock disponible (máx. 99)
   const pdQty = () => { const i = $("pdQty"); return i ? Math.max(1, parseInt(i.value, 10) || 1) : 1; };
@@ -542,6 +572,6 @@
   /* ---------- Datos ---------- */
   fetch("data/products.json", { cache: "no-cache" })   // siempre revalida precios y stock
     .then((r) => r.json())
-    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); })
+    .then((data) => { products = data.filter((p) => p.active !== false); /* "active": false = sin stock en proveedores: no se muestra ni se puede pedir */ renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();
