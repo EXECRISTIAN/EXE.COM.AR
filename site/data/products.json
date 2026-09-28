@@ -4,7 +4,7 @@
     "name": "Procesador Intel Core i5 13400 4.6GHz Turbo Socket 1700",
     "brand": "Intel",
     "category": "Procesadores",
-    "price": 418500,
+    "price": 0,
     "weightKg": 1,
     "images": [
       "assets/img/products/producto-1.webp"
@@ -85,7 +85,7 @@
     "name": "Procesador Intel Core i7 13700 5.3GHz Turbo Socket 1700",
     "brand": "Intel",
     "category": "Procesadores",
-    "price": 662769,
+    "price": 0,
     "weightKg": 1,
     "images": [
       "assets/img/products/producto-2.webp"
@@ -174,7 +174,7 @@
     "name": "Procesador AMD Ryzen 7 5800X 4.7GHz Turbo AM4 - Sin Cooler",
     "brand": "AMD",
     "category": "Procesadores",
-    "price": 309850,
+    "price": 0,
     "weightKg": 1,
     "images": [
       "assets/img/products/producto-3.webp"
@@ -255,7 +255,7 @@
     "name": "Procesador AMD Ryzen 5 8500G 5.0GHz Turbo AM5",
     "brand": "AMD",
     "category": "Procesadores",
-    "price": 359100,
+    "price": 0,
     "weightKg": 1,
     "images": [
       "assets/img/products/producto-4.webp",
@@ -337,7 +337,7 @@
     "name": "Mother ASUS PRIME A620M-A - AM5 - CSM",
     "brand": "ASUS",
     "category": "Motherboards",
-    "price": 253000,
+    "price": 0,
     "weightKg": 1,
     "images": [
       "assets/img/products/producto-5.webp",
@@ -523,7 +523,7 @@
     "name": "Placa de Video MSI GeForce GTX 1650 4GB GDDR6 Ventus XS OC",
     "brand": "MSI",
     "category": "Placas de video",
-    "price": 305100,
+    "price": 0,
     "stock": 10,
     "weightKg": 0.999,
     "images": [
@@ -616,7 +616,7 @@
     "name": "Gabinete ANTEC NX200M WHITE",
     "brand": "Antec",
     "category": "Gabinetes",
-    "price": 63450,
+    "price": 0,
     "images": [
       "assets/img/products/gabinete-antec-01.webp",
       "assets/img/products/gabinete-antec-02.webp",
@@ -700,7 +700,7 @@
     "name": "Fuente Aerocool Cylon 600W Full Range RGB 80 Plus Bronze",
     "brand": "Aerocool",
     "category": "Fuentes",
-    "price": 108000,
+    "price": 0,
     "images": [
       "assets/img/products/fuente-aerocool-01.webp",
       "assets/img/products/fuente-aerocool-02.webp",
@@ -812,7 +812,7 @@
     "name": "Memoria Team DDR4 8GB 3600MHz T-Force Delta RGB Black CL18",
     "brand": "Team Group",
     "category": "Memorias RAM",
-    "price": 52380,
+    "price": 0,
     "images": [
       "assets/img/products/memoria-tforce-delta.webp"
     ],
@@ -913,7 +913,7 @@
     "name": "Cooler CPU DeepCool AG400 PLUS",
     "brand": "DeepCool",
     "category": "Refrigeración",
-    "price": 51150,
+    "price": 0,
     "images": [
       "assets/img/products/cooler-deepcool-02.webp",
       "assets/img/products/cooler-deepcool-03.webp",
