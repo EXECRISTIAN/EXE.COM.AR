@@ -93,17 +93,20 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
               Filtros<span class="tool-count" id="filtersCount" hidden></span>
             </button>
-            <label class="tool-btn tool-sort">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M4 17l3 3 3-3M17 20V4M14 7l3-3 3 3"/></svg>
-              <span class="sr-only">Ordenar por</span>
-              <select id="sortSel" aria-label="Ordenar por">
-                <option value="">Ordenar por: Destacados</option>
-                <option value="price-asc">Menor precio</option>
-                <option value="price-desc">Mayor precio</option>
-                <option value="name-asc">Nombre (A–Z)</option>
-                <option value="name-desc">Nombre (Z–A)</option>
-              </select>
-            </label>
+            <div class="sort-wrap">
+              <button class="tool-btn" id="sortBtn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="sortMenu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M4 17l3 3 3-3M17 20V4M14 7l3-3 3 3"/></svg>
+                <span id="sortLabel">Ordenar por</span>
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <ul class="sort-menu" id="sortMenu" role="listbox" aria-label="Ordenar por" tabindex="-1" hidden>
+                <li role="option" data-sort="" aria-selected="true">Destacados</li>
+                <li role="option" data-sort="price-asc" aria-selected="false">Menor precio</li>
+                <li role="option" data-sort="price-desc" aria-selected="false">Mayor precio</li>
+                <li role="option" data-sort="name-asc" aria-selected="false">Nombre (A–Z)</li>
+                <li role="option" data-sort="name-desc" aria-selected="false">Nombre (Z–A)</li>
+              </ul>
+            </div>
           </div>
         </div>
         <div class="filters-panel" id="filtersPanel" hidden>
