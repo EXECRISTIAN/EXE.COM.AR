@@ -116,6 +116,12 @@
         ${stockBadge(p)}
         ${p.variants ? `<label class="field">Variante<select id="pdVariant">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select></label>` : ""}
         <div class="pd-actions">
+          ${out ? "" : `<div class="pd-qty-row"><label for="pdQty">Cantidad</label>
+            <div class="qty-stepper">
+              <button type="button" data-pd-qty="-1" aria-label="Restar una unidad">−</button>
+              <input id="pdQty" type="number" inputmode="numeric" min="1" max="${Math.min(99, available(p))}" value="1" aria-label="Cantidad de unidades">
+              <button type="button" data-pd-qty="1" aria-label="Sumar una unidad">+</button>
+            </div></div>`}
           <button class="btn btn-primary" data-pd-add="${esc(p.id)}" ${out ? "disabled" : ""}>${out ? "Sin stock" : "Agregar al carrito"}</button>
           <a class="btn btn-outline" href="${esc(waAsk)}" target="_blank" rel="noopener">Consultar por WhatsApp</a>
         </div>
@@ -126,7 +132,7 @@
               <table>${s.rows.map(([key, val]) => `<tr><th>${esc(key)}</th><td>${esc(val)}</td></tr>`).join("")}</table></details>`).join("")
           : `<p class="pd-nospecs">La ficha técnica de este producto está en revisión. Consultanos por WhatsApp y te pasamos todos los datos.</p>`}
       </div>`;
-    pdSetImage(0);
+    pdSetImage(0); pdSetQty(1);
     $("pdOverlay").hidden = false;
     requestAnimationFrame(() => $("pdOverlay").classList.add("show"));
     document.body.classList.add("no-scroll");
@@ -149,12 +155,24 @@
     if (m) openProduct(decodeURIComponent(m[1])); else closeProduct(true);
   }
   window.addEventListener("hashchange", routeProduct);
+
+  // Cantidad en la ficha: entre 1 y el stock disponible (máx. 99)
+  const pdQty = () => { const i = $("pdQty"); return i ? Math.max(1, parseInt(i.value, 10) || 1) : 1; };
+  function pdSetQty(n) {
+    const i = $("pdQty"); if (!i) return;
+    const max = Number(i.max) || 99;
+    i.value = Math.min(max, Math.max(1, Math.round(n) || 1));
+    i.previousElementSibling.disabled = i.value <= 1;
+    i.nextElementSibling.disabled = i.value >= max;
+  }
+  $("pdOverlay").addEventListener("change", (e) => { if (e.target.id === "pdQty") pdSetQty(pdQty()); });
   $("pdOverlay").addEventListener("click", (e) => {
     if (e.target === $("pdOverlay") || e.target.closest("#pdClose")) return closeProduct();
     const step = e.target.closest("[data-pd-step]"); if (step) return pdSetImage(pdIndex + Number(step.dataset.pdStep));
     const th = e.target.closest("[data-pd-img]"); if (th) return pdSetImage(Number(th.dataset.pdImg));
+    const q = e.target.closest("[data-pd-qty]"); if (q) return pdSetQty(pdQty() + Number(q.dataset.pdQty));
     const addBtn = e.target.closest("[data-pd-add]");
-    if (addBtn) { add(addBtn.dataset.pdAdd, $("pdVariant") ? $("pdVariant").value : null); renderProducts(); }
+    if (addBtn) { add(addBtn.dataset.pdAdd, $("pdVariant") ? $("pdVariant").value : null, pdQty()); pdSetQty(1); renderProducts(); }
   });
   document.addEventListener("keydown", (e) => {
     if ($("pdOverlay").hidden) return;
@@ -173,17 +191,19 @@
   document.addEventListener("click", (e) => { if (e.target.closest('a[href^="#producto/"]')) pdOpenedByClick = true; }, true);
 
   /* ---------- Carrito ---------- */
-  function add(id, variant) {
+  function add(id, variant, qty = 1) {
     const p = products.find((x) => x.id === id);
     if (!p) return;
     if (available(p) <= 0) return toast("No hay más stock disponible de este producto");
+    const n = Math.min(qty, available(p));
     const line = cart.find((l) => l.id === id && l.variant === variant);
-    if (line) line.qty++;
-    else cart.push({ id, variant, qty: 1 });
+    if (line) line.qty += n;
+    else cart.push({ id, variant, qty: n });
+    if (n < qty) { save(); renderCart(); return toast(`Solo había ${n} disponible${n > 1 ? "s" : ""}: se agregó${n > 1 ? "ron" : ""} al carrito`); }
     save(); renderCart();
     const badge = $("cartCount");
     badge.classList.remove("bump"); void badge.offsetWidth; badge.classList.add("bump");
-    toast("Agregado al carrito");
+    toast(n > 1 ? `${n} unidades agregadas al carrito` : "Agregado al carrito");
   }
 
   function renderCart() {
