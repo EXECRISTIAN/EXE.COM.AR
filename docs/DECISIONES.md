@@ -77,3 +77,4 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 ## Legal y seguridad
 50. **Copyright**: `LICENSE` con todos los derechos reservados (el repo es público solo por GitHub Pages), meta `copyright` en las páginas y leyenda en el pie. Las marcas y fotos de terceros son de sus dueños.
 51. **Sin enlaces de sesión**: las descripciones de PR y los commits nuevos no incluyen enlaces a la conversación de Claude.
+52. **Botones de Mi cuenta**: "Panel de administración" queda fijo con el aspecto de hover (relleno del color de títulos, se adapta a claro/oscuro); "Cerrar sesión" se pone rojo (`--danger-bg`) al pasar el mouse o con foco de teclado.

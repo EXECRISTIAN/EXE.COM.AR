@@ -49,3 +49,9 @@
 /* Botones de "Mi cuenta": centrados, uno debajo del otro, mismo ancho */
 .account-actions { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 22px; }
 .account-actions .btn { width: min(280px, 100%); }
+
+/* Panel de administración: siempre con el aspecto de hover del botón contorno (sigue el tema) */
+.btn-outline.btn-solid, .btn-outline.btn-solid:hover { background: var(--c2); color: var(--bg); border-color: var(--c2); }
+.btn-outline.btn-solid:hover { opacity: .88; }
+/* Cerrar sesión: rojo al pasar el mouse o con foco de teclado */
+.btn-logout:hover, .btn-logout:focus-visible { background: var(--danger-bg); border-color: var(--danger-bg); color: #fff; }
