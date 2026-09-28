@@ -1,31 +1,34 @@
 [
  {
+  "mode": "candidatas"
+ },
+ {
   "id": "outlet-rtx3090-zotac-trinity",
-  "q": "ZOTAC GAMING GeForce RTX 3090 Trinity ZT-A30900D-10P"
+  "q": "ZOTAC GAMING GeForce RTX 3090 Trinity"
  },
  {
   "id": "outlet-pentium-g5420",
-  "q": "Intel Pentium Gold G5420 processor box BX80684G5420"
+  "q": "Intel Pentium Gold G5420 box"
  },
  {
   "id": "outlet-celeron-g5925",
-  "q": "Intel Celeron G5925 processor box BX80701G5925"
+  "q": "Intel Celeron G5925 box"
  },
  {
   "id": "outlet-celeron-g5905",
-  "q": "Intel Celeron G5905 processor box BX80701G5905"
+  "q": "Intel Celeron G5905 box"
  },
  {
   "id": "outlet-i3-10100",
-  "q": "Intel Core i3-10100 processor box BX8070110100"
+  "q": "Intel Core i3-10100 box"
  },
  {
   "id": "outlet-i5-10400",
-  "q": "Intel Core i5-10400 processor box BX8070110400"
+  "q": "Intel Core i5-10400 box"
  },
  {
   "id": "outlet-i3-12100f",
-  "q": "Intel Core i3-12100F processor box BX8071512100F"
+  "q": "Intel Core i3-12100F box"
  },
  {
   "id": "outlet-z390-aorus-elite",
@@ -33,11 +36,11 @@
  },
  {
   "id": "outlet-biostar-z490a-silver",
-  "q": "Biostar Racing Z490A-SILVER motherboard"
+  "q": "Biostar Racing Z490A-SILVER"
  },
  {
   "id": "outlet-gigabyte-b460m-ds3h-v2",
-  "q": "Gigabyte B460M DS3H V2 motherboard"
+  "q": "Gigabyte B460M DS3H V2"
  },
  {
   "id": "outlet-msi-h510m-a-pro",
@@ -45,46 +48,50 @@
  },
  {
   "id": "outlet-msi-mpg-z490-gaming-plus",
-  "q": "MSI MPG Z490 GAMING PLUS motherboard"
+  "q": "MSI MPG Z490 GAMING PLUS"
  },
  {
   "id": "outlet-thermaltake-smart-700w",
-  "q": "Thermaltake Smart 700W 80 PLUS PS-SPD-0700NPCWUS-W"
+  "q": "Thermaltake Smart 700W 80 Plus White power supply"
  },
  {
   "id": "outlet-gigabyte-p650b",
-  "q": "Gigabyte P650B power supply GP-P650B"
+  "q": "Gigabyte P650B power supply"
  },
  {
   "id": "outlet-gigabyte-p750gm",
-  "q": "Gigabyte P750GM power supply GP-P750GM"
+  "q": "Gigabyte P750GM power supply"
  },
  {
   "id": "outlet-gigabyte-p850gm",
-  "q": "Gigabyte P850GM power supply GP-P850GM"
+  "q": "Gigabyte P850GM power supply"
  },
  {
   "id": "outlet-gigabyte-p1000gm",
-  "q": "Gigabyte P1000GM power supply GP-P1000GM"
+  "q": "Gigabyte P1000GM power supply"
  },
  {
   "id": "outlet-thermaltake-smart-rgb-700w",
-  "q": "Thermaltake Smart RGB 700W power supply"
+  "q": "Thermaltake Smart RGB 700W"
  },
  {
   "id": "outlet-aorus-p750w",
-  "q": "Gigabyte AORUS P750W GP-AP750GM power supply"
+  "q": "AORUS P750W GP-AP750GM"
+ },
+ {
+  "id": "outlet-redragon-850w",
+  "q": "Redragon RGPS 850W power supply"
  },
  {
   "id": "outlet-sentey-r20",
-  "q": "Gabinete Sentey R20 RGB"
+  "q": "gabinete Sentey R20"
  },
  {
   "id": "outlet-sentey-x10",
-  "q": "Gabinete Sentey X10 Rainbow"
+  "q": "gabinete Sentey X10"
  },
  {
   "id": "outlet-steam-deck-512",
-  "q": "Valve Steam Deck 512GB handheld"
+  "q": "Steam Deck 512GB console"
  }
 ]

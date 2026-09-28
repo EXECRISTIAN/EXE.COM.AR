@@ -41,6 +41,31 @@ def bing_candidates(q):
     bad = re.compile(r"pinterest|pinimg|youtube|ytimg|facebook|fbcdn|instagram|tiktok|reddit|redd\.it|wikia|aliexpress|alicdn", re.I)
     urls = [u for u in urls if u.startswith("https://") and not bad.search(u)]
     return (sorted(urls, key=lambda u: 0 if PREFER.search(u) else 1))[:10]   # primero Amazon/Newegg
+def candidates_mode(items):
+    """Baja hasta 4 fotos candidatas por producto (sin exigir fondo blanco) para elegir a mano."""
+    out = pathlib.Path("tools/candidatas"); out.mkdir(exist_ok=True)
+    rep = []
+    for it in items:
+        html = _get("https://www.bing.com/images/search?form=HDRSC2&first=1&q=" + urllib.parse.quote(it["q"])).decode("utf-8", "ignore")
+        urls = [urllib.parse.unquote(u).replace("&amp;", "&") for u in re.findall(r'murl&quot;:&quot;(.*?)&quot;', html)]
+        bad = re.compile(r"pinterest|pinimg|youtube|ytimg|facebook|fbcdn|instagram|tiktok|reddit|redd\\.it|aliexpress|alicdn|wallpaper|shutterstock|alamy|dreamstime|123rf|istock|gettyimages|depositphotos", re.I)
+        urls = [u for u in urls if u.startswith("http") and not bad.search(u)]
+        got = []
+        for u in urls:
+            if len(got) >= 4: break
+            try:
+                raw = pathlib.Path("/tmp") / "c.src"; raw.write_bytes(_get(u))
+                dst = out / f"{it['id']}-{len(got)}.webp"
+                subprocess.run(["convert", str(raw) + "[0]", "-background", "white", "-alpha", "remove", "-alpha", "off", "-resize", "800x800>", "-quality", "82", str(dst)], check=True, timeout=60)
+                if dst.stat().st_size < 6000: dst.unlink(); continue
+                got.append({"file": dst.name, "src": u})
+            except Exception: pass
+        rep.append({"id": it["id"], "n": len(got), "cands": got, "found": len(urls)})
+    json.dump(rep, open("tools/candidatas/report.json", "w"), indent=1)
+    print(json.dumps(rep, indent=1))
+items_all = json.load(open("tools/images.json"))
+if items_all and items_all[0].get("mode") == "candidatas":
+    candidates_mode(items_all[1:]); sys.exit(0)
 report = []
 for it in json.load(open("tools/images.json")):
     pid, src = it["id"], it.get("img")
