@@ -79,16 +79,13 @@
 @media (prefers-reduced-motion: reduce) { .btn-outline.btn-solid { animation: none; } }
 
 /* ---------- Selector de tema mini (Mi cuenta) ----------
-   Interruptor deslizante de 3 posiciones, chico, abajo a la derecha: medio escondido y casi transparente.
-   Asoma al pasar el mouse o con Tab. Íconos: claro = sol blanco, automático = "A" en negrita, oscuro = luna negra. */
+   Interruptor deslizante de 3 posiciones, chico, fijo abajo a la derecha (siempre visible). Íconos: claro = sol blanco, automático = "A" en negrita, oscuro = luna negra. */
 .theme-mini {
-  position: fixed; right: 0; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 50;
+  position: fixed; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); z-index: 50;
   display: grid; grid-template-columns: repeat(3, 20px); padding: 2px; border-radius: 999px;
   background: var(--c6); box-shadow: 0 1px 4px var(--shadow);
-  transform: translateX(62%); opacity: .3;
-  transition: transform .3s var(--ease), opacity .3s;
+  right: 8px;   /* separado del borde */
 }
-.theme-mini:hover, .theme-mini:focus-within { transform: translateX(-8px); opacity: 1; }
 .theme-mini .tm-thumb {
   position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%;
   background: #0084d6; transition: transform .25s var(--ease);
@@ -113,4 +110,4 @@
 }
 .theme-mini.show-tip .tm-tip { opacity: 1; visibility: visible; }
 .theme-mini.tip-long .tm-tip { max-width: min(290px, calc(100vw - 32px)); white-space: pre-line; line-height: 1.5; }
-@media (prefers-reduced-motion: reduce) { .theme-mini, .theme-mini .tm-thumb { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .theme-mini .tm-thumb { transition: none; } }
