@@ -15,7 +15,7 @@
   let filter = "Todos";
   let query = "";
   let sortBy = "";
-  const fp = { brands: new Set(), min: null, max: null, stock: false, logo: null };   // panel "Filtros" (+ logo de marca elegido abajo)
+  const fp = { brands: new Set(), tags: new Set(), min: null, max: null, stock: false, logo: null };   // panel "Filtros" (+ logo de marca elegido abajo)
   // Marca por logo: busca sus palabras en la marca o el nombre (ej. el logo NVIDIA encuentra las placas "GeForce" de MSI)
   const brandMatches = (p, bf) => {
     const hay = ` ${`${p.brand || ""} ${p.name || ""}`.toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g, " ")} `;
@@ -57,8 +57,9 @@
     const q = query.toLowerCase();
     const list = products.filter(
       (p) => (filter === "Todos" || p.category === filter) &&
-        (!q || `${p.name} ${p.brand || ""} ${p.category || ""}`.toLowerCase().includes(q)) &&
+        (!q || `${p.name} ${p.brand || ""} ${p.category || ""} ${(p.tags || []).join(" ")}`.toLowerCase().includes(q)) &&
         (!fp.brands.size || fp.brands.has(p.brand)) &&
+        (!fp.tags.size || (p.tags || []).some((t) => fp.tags.has(t))) &&
         (fp.min == null || (p.price > 0 && p.price >= fp.min)) &&
         (fp.max == null || (p.price > 0 && p.price <= fp.max)) &&
         (!fp.stock || (tracksStock(p) && available(p) > 0)) &&
@@ -87,6 +88,7 @@
               <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>
               ${p.price > 0 ? `<span class="price-note">Consultar precio final</span>` : ""}
               ${p.condition ? `<span class="condition">Estado: ${esc(p.condition)}</span>` : ""}
+              ${(p.tags || []).length ? `<div class="p-tags">${p.tags.filter((t) => t !== "Outlet").map((t) => `<button type="button" class="p-tag" data-tag="${esc(t)}">${esc(t)}</button>`).join("")}</div>` : ""}
               ${stockBadge(p)}
               ${p.variants ? `<select data-variant="${esc(p.id)}" aria-label="Variante">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select>` : ""}
               <button class="btn btn-primary" data-add="${esc(p.id)}" ${out ? "disabled" : ""}>${out ? "Sin stock" : "Agregar al carrito"}</button>
@@ -137,6 +139,7 @@
         <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>
         ${p.price > 0 ? `<span class="price-note">Consultá el precio final actualizado</span>` : ""}
         ${p.outlet ? `<p class="pd-condition"><span class="tag-outlet">Outlet</span> ${esc(p.condition || "")}</p>` : ""}
+        ${(p.tags || []).length ? `<div class="p-tags">${p.tags.map((t) => `<button type="button" class="p-tag" data-tag="${esc(t)}" data-close-pd>${esc(t)}</button>`).join("")}</div>` : ""}
         <div class="pd-admin" id="pdAdmin" hidden></div>
         ${stockBadge(p)}
         ${p.variants ? `<label class="field">Variante<select id="pdVariant">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select></label>` : ""}
@@ -387,13 +390,19 @@
   $("search").addEventListener("input", (e) => { query = e.target.value.trim(); renderProducts(); });
 
   /* ---------- Filtros y orden ---------- */
+  function renderTagOptions() {
+    const tags = [...new Set(products.flatMap((p) => p.tags || []))].sort((a, b) => a.localeCompare(b, "es"));
+    $("fpTagsBox").hidden = !tags.length;
+    $("fpTags").innerHTML = tags.map((t) => `<label class="fp-check"><input type="checkbox" value="${esc(t)}"${fp.tags.has(t) ? " checked" : ""}> ${esc(t)}</label>`).join("");
+  }
   function renderBrandOptions() {
+    renderTagOptions();
     const brands = [...new Set(products.map((p) => p.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"));
     $("fpBrands").innerHTML = brands.map((b) =>
       `<label class="fp-check"><input type="checkbox" value="${esc(b)}"${fp.brands.has(b) ? " checked" : ""}> ${esc(b)}</label>`).join("");
   }
   function updateFilters() {
-    const n = fp.brands.size + (fp.min != null || fp.max != null ? 1 : 0) + (fp.stock ? 1 : 0) + (fp.logo ? 1 : 0);
+    const n = fp.brands.size + fp.tags.size + (fp.min != null || fp.max != null ? 1 : 0) + (fp.stock ? 1 : 0) + (fp.logo ? 1 : 0);
     $("activeBrand").hidden = !fp.logo;
     $("activeBrand").innerHTML = fp.logo ? `<button type="button" class="chip active" id="clearLogo" aria-label="Quitar filtro de marca ${esc(fp.logo.brand)}">Marca: ${esc(fp.logo.brand)} <span aria-hidden="true">✕</span></button>` : "";
     $("filtersCount").hidden = !n; $("filtersCount").textContent = n;
@@ -408,13 +417,14 @@
   $("filtersPanel").addEventListener("input", (e) => {
     const t = e.target;
     if (t.closest("#fpBrands")) t.checked ? fp.brands.add(t.value) : fp.brands.delete(t.value);
+    if (t.closest("#fpTags")) t.checked ? fp.tags.add(t.value) : fp.tags.delete(t.value);
     if (t.id === "fpMin") fp.min = numOrNull(t.value);
     if (t.id === "fpMax") fp.max = numOrNull(t.value);
     if (t.id === "fpStock") fp.stock = t.checked;
     updateFilters();
   });
   $("fpClear").onclick = () => {
-    fp.brands.clear(); fp.min = fp.max = null; fp.stock = false; fp.logo = null;
+    fp.brands.clear(); fp.tags.clear(); fp.min = fp.max = null; fp.stock = false; fp.logo = null;
     $("fpMin").value = $("fpMax").value = ""; $("fpStock").checked = false;
     renderBrandOptions(); updateFilters();
   };
@@ -429,6 +439,12 @@
     $("productos").scrollIntoView({ behavior: "smooth" });
   }
   document.addEventListener("click", (e) => {
+    const tg = e.target.closest("[data-tag]");
+    if (tg) {
+      if (!$("pdOverlay").hidden) closeProduct();
+      fp.tags.clear(); fp.tags.add(tg.dataset.tag); renderBrandOptions(); updateFilters();
+      return $("productos").scrollIntoView({ behavior: "smooth" });
+    }
     const t = e.target.closest("[data-brand-tag], #clearLogo");
     if (!t) return;
     if (t.id === "clearLogo") { fp.logo = null; return updateFilters(); }
@@ -665,11 +681,11 @@
     id: r.id, name: r.name, brand: r.brand, category: r.category, description: r.description, price: Number(r.price) || 0,
     ...(r.show_stock ? { stock: r.stock } : {}), images: r.images && r.images.length ? r.images : (r.image ? [r.image] : []),
     specs: r.specs && r.specs.length ? r.specs : undefined, outlet: r.outlet, condition: r.condition, weightKg: Number(r.weight_kg) || 1,
-    variants: r.variants && r.variants.length ? r.variants : undefined,
+    variants: r.variants && r.variants.length ? r.variants : undefined, tags: r.tags || [],
   });
   const loadDb = () => {
     if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) return Promise.reject();
-    const cols = "id,name,brand,category,description,price,stock,show_stock,image,images,specs,outlet,condition,weight_kg,variants";
+    const cols = "id,name,brand,category,description,price,stock,show_stock,image,images,specs,outlet,condition,weight_kg,variants,tags";
     return fetch(`${cfg.supabaseUrl}/rest/v1/products?select=${cols}&active=eq.true&order=sort.asc,name.asc`, { headers: { apikey: cfg.supabaseAnonKey } })
       .then((r) => (r.ok ? r.json() : Promise.reject())).then((rows) => (rows.length ? rows.map(fromDb) : Promise.reject()));
   };

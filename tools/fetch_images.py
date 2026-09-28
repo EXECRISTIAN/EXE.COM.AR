@@ -41,6 +41,36 @@ def bing_candidates(q):
     bad = re.compile(r"pinterest|pinimg|youtube|ytimg|facebook|fbcdn|instagram|tiktok|reddit|redd\.it|wikia|aliexpress|alicdn", re.I)
     urls = [u for u in urls if u.startswith("https://") and not bad.search(u)]
     return (sorted(urls, key=lambda u: 0 if PREFER.search(u) else 1))[:10]   # primero Amazon/Newegg
+def commons_urls(q):
+    api = "https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|mime&iiurlwidth=900&gsrsearch=" + urllib.parse.quote(q)
+    data = json.loads(_get(api).decode("utf-8"))
+    pages = sorted((data.get("query") or {}).get("pages", {}).values(), key=lambda p: p.get("index", 99))
+    return [p["imageinfo"][0].get("thumburl") or p["imageinfo"][0]["url"] for p in pages if p.get("imageinfo") and p["imageinfo"][0].get("mime", "").startswith("image/")]
+def candidates_mode(items):
+    """Baja hasta 4 fotos candidatas por producto (sin exigir fondo blanco) para elegir a mano."""
+    out = pathlib.Path("tools/candidatas"); out.mkdir(exist_ok=True)
+    rep = []
+    for it in items:
+        try: urls = commons_urls(it["q"])
+        except Exception: urls = []
+        bad = re.compile(r"pinterest|pinimg|youtube|ytimg|facebook|fbcdn|instagram|tiktok|reddit|redd\\.it|aliexpress|alicdn|wallpaper|shutterstock|alamy|dreamstime|123rf|istock|gettyimages|depositphotos", re.I)
+        urls = [u for u in urls if u.startswith("http") and not bad.search(u)]
+        got = []
+        for u in urls:
+            if len(got) >= 3: break
+            try:
+                raw = pathlib.Path("/tmp") / "c.src"; raw.write_bytes(_get(u))
+                dst = out / f"{it['id']}-{len(got)}.webp"
+                subprocess.run(["convert", str(raw) + "[0]", "-background", "white", "-alpha", "remove", "-alpha", "off", "-resize", "800x800>", "-quality", "82", str(dst)], check=True, timeout=60)
+                if dst.stat().st_size < 6000: dst.unlink(); continue
+                got.append({"file": dst.name, "src": u})
+            except Exception: pass
+        rep.append({"id": it["id"], "n": len(got), "cands": got, "found": len(urls)})
+    json.dump(rep, open("tools/candidatas/report.json", "w"), indent=1)
+    print(json.dumps(rep, indent=1))
+items_all = json.load(open("tools/images.json"))
+if items_all and items_all[0].get("mode") == "candidatas":
+    candidates_mode(items_all[1:]); sys.exit(0)
 report = []
 for it in json.load(open("tools/images.json")):
     pid, src = it["id"], it.get("img")
