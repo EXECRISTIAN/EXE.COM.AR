@@ -17,8 +17,8 @@ Fuente: backup del hosting en Google Drive (home de cPanel: `exe.com.ar/`, `Mail
 
 Todas las imágenes están en WebP (≈800 KB en total).
 
-## Pendiente (falta la base de datos del WordPress)
-El backup **no incluye el volcado SQL**, donde WordPress guarda textos, precios, menús y los colores exactos de Astra. Ver `DECISIONES.md` para lo que se completó provisoriamente. Con un export `.sql` (phpMyAdmin → Exportar) se reemplaza todo por los valores reales.
+## Base de datos del WordPress (resuelto)
+Se usaron el backup de base de datos de UpdraftPlus (25/09/2026) y la exportación XML (26/09/2026): paleta y tipografía reales de Astra, textos, precios y fichas. Las fichas que eran de otro modelo se completaron con las especificaciones oficiales (decisión 58).
 
 ## Descartado (no hace falta en un sitio estático)
 Elementor, Essential Addons, Otter, Spectra, Astra, LiteSpeed Cache, UpdraftPlus, Akismet, WPS Hide Login, Admin Custom Login, White Label CMS, LightStart, Code Snippets, Query Monitor, WPForms, WP Mail SMTP, YayCurrency, CartFlows, Cart Abandonment, Variation Swatches, Google/Reddit for WooCommerce. Las funciones que sí importan se reemplazaron según `ARQUITECTURA.md`.
