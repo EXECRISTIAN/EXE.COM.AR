@@ -86,7 +86,34 @@
           <span class="divider"></span>
           <p>Agregá lo que quieras al carrito y envianos el pedido por WhatsApp. Te confirmamos stock, precio final y envío.</p>
         </div>
-        <input class="search reveal" id="search" type="search" placeholder="Buscar producto o marca…" aria-label="Buscar">
+        <div class="catalog-tools reveal">
+          <input class="search" id="search" type="search" placeholder="Buscar producto o marca…" aria-label="Buscar">
+          <div class="tool-btns">
+            <button class="tool-btn" id="filtersBtn" type="button" aria-expanded="false" aria-controls="filtersPanel">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+              Filtros<span class="tool-count" id="filtersCount" hidden></span>
+            </button>
+            <label class="tool-btn tool-sort">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M4 17l3 3 3-3M17 20V4M14 7l3-3 3 3"/></svg>
+              <span class="sr-only">Ordenar por</span>
+              <select id="sortSel" aria-label="Ordenar por">
+                <option value="">Ordenar por: Destacados</option>
+                <option value="price-asc">Menor precio</option>
+                <option value="price-desc">Mayor precio</option>
+                <option value="name-asc">Nombre (A–Z)</option>
+                <option value="name-desc">Nombre (Z–A)</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="filters-panel" id="filtersPanel" hidden>
+          <fieldset><legend>Marca</legend><div class="fp-options" id="fpBrands"></div></fieldset>
+          <fieldset><legend>Precio</legend>
+            <div class="fp-price"><input type="number" id="fpMin" inputmode="numeric" min="0" placeholder="Mínimo" aria-label="Precio mínimo"><span>–</span><input type="number" id="fpMax" inputmode="numeric" min="0" placeholder="Máximo" aria-label="Precio máximo"></div>
+          </fieldset>
+          <fieldset><legend>Disponibilidad</legend><label class="fp-check"><input type="checkbox" id="fpStock"> Solo con stock confirmado</label></fieldset>
+          <button class="btn btn-outline fp-clear" id="fpClear" type="button">Limpiar filtros</button>
+        </div>
         <div class="filters reveal" id="filters"></div>
         <div class="grid" id="productGrid"></div>
       </div>
