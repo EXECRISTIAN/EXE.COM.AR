@@ -35,3 +35,6 @@ exe.com.ar/
 
 Más detalle en [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md).
 - `docs/ENVIOS.md` — envíos con Envia.com (Andreani, Correo Argentino, OCA…)
+
+## Copyright
+© 2026 EXE (exe.com.ar). Todos los derechos reservados. El repositorio es público solo para GitHub Pages; no es código abierto. Ver [LICENSE](LICENSE).
