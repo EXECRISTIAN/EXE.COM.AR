@@ -10,6 +10,8 @@ export const BRAND = {
   phone: "+54 9 11 3009 5254",
   email: "ventas@exe.com.ar",
   accent: "#0084d6",
+  storeAddress: "",   // dirección del local para retiros (vacío = "te la confirmamos por WhatsApp")
+  storeHours: "",     // horario del local (ej: "lunes a viernes de 10 a 18 h")
 };
 
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -183,12 +185,14 @@ export const TEMPLATE_VARS = {
   link_seguimiento: "Link de seguimiento del envío", link_whatsapp: "Link a WhatsApp", link_panel: "Link al panel",
   producto: "Nombre del producto (stock / precio)", precio: "Precio actual del producto", link_producto: "Link al producto",
   link_tienda: "Link a la tienda", link_baja: "Link para dejar de recibir ofertas",
+  punto_retiro: "Punto de retiro elegido", direccion_local: "Dirección del local", horario_local: "Horario del local",
 };
 export const SAMPLE_ORDER = {
   id: 1042, name: "Juan Pérez", email: "juan@mail.com", phone: "+54 9 11 5555-5555", total: 452000, note: "Entregar por la tarde",
   items: [{ qty: 1, name: "Procesador AMD Ryzen 5 8500G", unit_price: 359100 }, { qty: 2, name: "Memoria Team DDR4 8GB 3600MHz", variant: "Negra", unit_price: 46450 }],
   shipping: { cost: 0, label: "Andreani · Estándar" }, carrier: "andreani", tracking: "360000012345670",
   trackUrl: "https://envia.com/es-AR/rastreo?label=360000012345670", reason: "Sin stock del producto",
+  pickup: "Sucursal Andreani Palermo — Av. Santa Fe 3200, CABA",
   product: { id: "procesador-amd-ryzen-5", name: "Procesador AMD Ryzen 5 8500G", price: 359100 },
 };
 function templateValues(o) {
@@ -202,6 +206,8 @@ function templateValues(o) {
     producto: o.product?.name || "", precio: o.product?.price ? money(o.product.price) : "",
     link_producto: o.product?.id ? `${BRAND.site}#producto/${encodeURIComponent(o.product.id)}` : BRAND.site,
     link_tienda: BRAND.site, link_baja: BRAND.site + "cuenta.html#configuracion",
+    punto_retiro: o.pickup || "el punto de retiro elegido", direccion_local: BRAND.storeAddress || "te la confirmamos por WhatsApp",
+    horario_local: BRAND.storeHours || "coordinamos el horario por WhatsApp",
   };
 }
 const fill = (text, v) => String(text ?? "").replace(/\{\{\s*([a-z_]+)\s*\}\}/g, (m, k) => (k in v ? String(v[k]) : m));
