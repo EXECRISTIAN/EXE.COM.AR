@@ -462,13 +462,16 @@
       ${ro ? "" : `<button type="button" class="link-btn" data-radd>＋ Agregar fila</button>`}
     </div>`).join("") || `<p class="ed-hint">Sin especificaciones. Agregá una sección o pegá la ficha técnica como texto.</p>`;
   }
+  // Envío de la referencia: vacío = a consultar, 0 = gratis, > 0 = con costo
+  const shipMode = (s) => s.ship_mode || (s.ship_cost == null || s.ship_cost === "" ? "ask" : Number(s.ship_cost) === 0 ? "free" : "cost");
   function renderSources() {
     const box = $("edSources"); if (!box) return;
     box.innerHTML = ed.sources.map((s, i) => `<div class="ed-src" data-x="${i}">
       <input class="pr-in" data-sf="store" value="${esc(s.store || "")}" placeholder="Tienda (ej: CompraGamer)">
       <input class="pr-in" data-sf="url" value="${esc(s.url || "")}" placeholder="https://… link del producto">
       <span class="ed-src-money"><input class="pr-in" data-sf="ref_price" inputmode="decimal" value="${s.ref_price ?? ""}" placeholder="Precio de compra" title="Precio de compra del producto"><select class="pr-in pr-cur" data-sf="currency" title="Moneda">${["ARS", "USD"].map((c) => `<option ${(s.currency || "ARS") === c ? "selected" : ""}>${c}</option>`).join("")}</select></span>
-      <span class="ed-src-money"><input class="pr-in" data-sf="ship_cost" inputmode="decimal" value="${s.ship_cost ?? ""}" placeholder="Costo de envío" title="Costo del envío (vacío = sin dato; 0 = gratis)"><select class="pr-in pr-cur" data-sf="ship_currency" title="Moneda">${["ARS", "USD"].map((c) => `<option ${(s.ship_currency || "ARS") === c ? "selected" : ""}>${c}</option>`).join("")}</select></span>
+      <span class="ed-src-money"><select class="pr-in pr-ship" data-sf="ship_mode" title="Envío">${[["ask", "Envío: a consultar"], ["free", "Envío gratis"], ["cost", "Envío con costo"]].map(([v, t]) => `<option value="${v}" ${shipMode(s) === v ? "selected" : ""}>${t}</option>`).join("")}</select></span>
+      <span class="ed-src-money" ${shipMode(s) === "cost" ? "" : "hidden"} data-shipbox><input class="pr-in" data-sf="ship_cost" inputmode="decimal" value="${s.ship_cost > 0 ? s.ship_cost : ""}" placeholder="Costo de envío" title="Costo del envío"><select class="pr-in pr-cur" data-sf="ship_currency" title="Moneda">${["ARS", "USD"].map((c) => `<option ${(s.ship_currency || "ARS") === c ? "selected" : ""}>${c}</option>`).join("")}</select></span>
       <input class="pr-in" data-sf="delivery_note" value="${esc(s.delivery_note || "")}" placeholder="Demora (ej: 48 h)">
       ${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer" title="Abrir">↗</a>` : ""}<button type="button" class="link-btn" data-xrm title="Quitar">✕</button></div>`).join("") || `<p class="ed-hint">Sin referencias.</p>`;
   }
@@ -587,7 +590,8 @@
         renderSpecs();
       });
       // Referencias
-      $("edAddSrc").onclick = () => { readSources(); ed.sources.push({ store: "", url: "", ref_price: "", currency: "ARS", ship_cost: "", ship_currency: "ARS", delivery_note: "" }); renderSources(); };
+      $("edSources").addEventListener("change", (e) => { if (e.target.dataset.sf !== "ship_mode") return; const row = e.target.closest(".ed-src"); row.querySelector("[data-shipbox]").hidden = e.target.value !== "cost"; if (e.target.value === "cost") row.querySelector("[data-sf=ship_cost]").focus(); });
+      $("edAddSrc").onclick = () => { readSources(); ed.sources.push({ store: "", url: "", ref_price: "", currency: "ARS", ship_cost: "", ship_mode: "ask", ship_currency: "ARS", delivery_note: "" }); renderSources(); };
       $("edSources").addEventListener("click", (e) => { const b = e.target.closest("[data-xrm]"); if (!b) return; readSources(); const [x] = ed.sources.splice(+b.closest(".ed-src").dataset.x, 1); if (x && x.id) ed.removedSources.push(x.id); renderSources(); });
       if ($("edDelete")) $("edDelete").onclick = async () => {
         if (!(await confirmBox("¿Eliminar este producto?", "Se borra de la tienda y del panel. No se puede deshacer. Si solo querés ocultarlo, destildá \"Visible en la tienda\"."))) return;
@@ -623,6 +627,8 @@
       const dec = (v) => { const x = Number(String(v ?? "").replace(/[^\d.,]/g, "").replace(/\.(?=\d{3}(\D|$))/g, "").replace(",", ".")); return isFinite(x) ? x : 0; };
       const bad = ed.sources.find((s) => (s.store || "").trim() && !(dec(s.ref_price) > 0));
       if (bad) return msg(`Falta el precio de compra en la referencia "${bad.store}".`, "error");
+      const noShip = ed.sources.find((s) => (s.store || "").trim() && shipMode(s) === "cost" && !(dec(s.ship_cost) > 0));
+      if (noShip) return msg(`Poné el costo de envío de "${noShip.store}" o elegí "a consultar" / "gratis".`, "error");
       const badUrl = ed.sources.find((s) => (s.url || "").trim() && !/^https?:\/\//i.test(s.url.trim()));
       if (badUrl) return msg(`El link de "${badUrl.store || "la referencia"}" tiene que empezar con https://`, "error");
       try {
@@ -634,7 +640,7 @@
           for (const s of ed.sources.filter((s) => (s.store || "").trim() && dec(s.ref_price) > 0)) {
             const u = (s.url || "").trim();
             const row = { product_id: id, store: s.store.trim(), url: u || null, ref_price: dec(s.ref_price), currency: s.currency || "ARS",
-              ship_cost: String(s.ship_cost ?? "").trim() === "" ? null : dec(s.ship_cost), ship_currency: s.ship_currency || "ARS",
+              ship_cost: shipMode(s) === "free" ? 0 : shipMode(s) === "cost" && dec(s.ship_cost) > 0 ? dec(s.ship_cost) : null, ship_currency: s.ship_currency || "ARS",
               delivery_note: s.delivery_note || null, checked_at: new Date().toISOString() };
             const r = s.id ? await sb().from("product_sources").update(row).eq("id", s.id) : await sb().from("product_sources").upsert(row, { onConflict: "product_id,store" });
             if (r.error) throw r.error;

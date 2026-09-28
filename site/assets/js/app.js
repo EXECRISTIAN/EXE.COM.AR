@@ -218,7 +218,7 @@
     if (!data || !data.length) { box.innerHTML = `<b>Solo admins</b> · Sin precio de referencia cargado todavía.`; box.hidden = false; return; }
     box.innerHTML = `<b>Solo admins · precio de referencia</b>` + data.map((d) =>
       `<div class="pd-admin-row">${d.url ? `<a href="${esc(d.url)}" target="_blank" rel="noopener noreferrer">${esc(d.store)}</a>` : `<b>${esc(d.store)}</b>`}
-        <span>Compra ${cur(d.ref_price, d.currency)}${d.ship_cost != null ? ` + envío ${cur(d.ship_cost, d.ship_currency)}` : ""}${d.sale_price ? ` → venta ${money(d.sale_price)} (+${Math.round(d.margin * 100)} %)` : ""}</span>
+        <span>Compra ${cur(d.ref_price, d.currency)}${d.ship_cost == null ? " · envío a consultar" : Number(d.ship_cost) === 0 ? " · envío gratis" : ` + envío ${cur(d.ship_cost, d.ship_currency)}`}${d.sale_price ? ` → venta ${money(d.sale_price)} (+${Math.round(d.margin * 100)} %)` : ""}</span>
         <small>${d.delivery_note ? esc(d.delivery_note) + " · " : ""}revisado ${new Date(d.checked_at).toLocaleDateString("es-AR")}</small></div>`).join("");
     box.hidden = false;
   }
