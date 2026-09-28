@@ -40,6 +40,18 @@
   // Volvió desde el link de confirmación de email.
   const cameFromEmail = /type=(signup|magiclink|invite|email_change)/.test(location.hash);
 
+  // Errores de Supabase Auth → mensajes claros en español (sin revelar si un email ya tiene cuenta)
+  function authError(e, fallback) {
+    const m = String(e?.message || e || "").toLowerCase();
+    if (/rate limit|too many|security purposes|only request this after/.test(m)) return "Hiciste varios intentos seguidos. Esperá un minuto y probá de nuevo.";
+    if (/captcha/.test(m)) return "No pudimos verificar que no sos un robot. Recargá la página y probá de nuevo.";
+    if (/password.*(at least|should be|weak|short)|weak password|pwned|leaked/.test(m)) return "La contraseña es muy débil: usá al menos 8 caracteres, con letras y números.";
+    if (/same.*password|different from the old/.test(m)) return "La contraseña nueva tiene que ser distinta de la anterior.";
+    if (/invalid.*email|email.*invalid|unable to validate email/.test(m)) return "El email no es válido. Revisalo.";
+    if (/network|failed to fetch|load failed/.test(m)) return "No hay conexión. Revisá tu internet y probá de nuevo.";
+    return fallback;
+  }
+
   // ---------- Antibots (Cloudflare Turnstile, en español) ----------
   // Supabase valida el token del lado del servidor cuando el captcha está activado en Attack Protection.
   const siteKey = window.SITE_CONFIG?.turnstileSiteKey;
@@ -68,7 +80,7 @@
     const c = captcha("login"); if (!c) return needCaptcha();
     const { error } = await sb.auth.signInWithPassword({ email: f.get("email"), password: f.get("password"), options: c });
     resetCaptcha("login");
-    if (error) return show(/confirm/i.test(error.message) ? "Tenés que confirmar tu email: revisá tu bandeja de entrada (y spam)." : "Email o contraseña incorrectos.");
+    if (error) return show(/confirm/i.test(error.message) ? "Tenés que confirmar tu email: revisá tu bandeja de entrada (y spam)." : authError(error, "Email o contraseña incorrectos."));
     if (await afterAuth()) return;
     render();
   });
@@ -83,7 +95,7 @@
       options: { data: { full_name: f.get("full_name"), phone: f.get("phone") }, emailRedirectTo: location.href, ...c },
     });
     resetCaptcha("register");
-    if (error) return show("No pudimos crear la cuenta. Revisá los datos e intentá de nuevo.");
+    if (error) return show(authError(error, "No pudimos crear la cuenta. Revisá los datos e intentá de nuevo."));
     show("¡Listo! Te enviamos un email para confirmar tu cuenta.", "ok");
   });
 
@@ -105,7 +117,7 @@
     e.preventDefault();
     const { error } = await sb.auth.updateUser({ password: new FormData(e.target).get("password") });
     const m = $("recoveryMsg"); m.hidden = false;
-    if (error) { m.className = "notice error"; m.textContent = "No se pudo guardar. Probá con otra contraseña (mínimo 8 caracteres)."; return; }
+    if (error) { m.className = "notice error"; m.textContent = authError(error, "No se pudo guardar. Probá con otra contraseña (mínimo 8 caracteres)."); return; }
     m.className = "notice ok"; m.textContent = "¡Listo! Contraseña guardada.";
     setTimeout(async () => { $("recovery").hidden = true; if (!(await afterAuth())) render(); }, 1200);
   });
