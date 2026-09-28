@@ -136,10 +136,10 @@
     $("settings").hidden = !(on && user);
     if (user) $("logged").hidden = on;
     if (!on || !user) return;
-    const { data: prof } = await sb.from("profiles").select("full_name, phone, email, created_at, email_verified_at").eq("id", user.id).maybeSingle();
+    const { data: prof } = await sb.from("profiles").select("full_name, phone, email, created_at, email_verified_at, marketing_opt_in").eq("id", user.id).maybeSingle();
     const { count } = await sb.from("orders").select("id", { count: "exact", head: true }).eq("user_id", user.id);
     accForm.full_name.value = prof?.full_name || user.user_metadata?.full_name || "";
-    accForm.phone.value = prof?.phone || ""; accForm.email.value = user.email;
+    accForm.phone.value = prof?.phone || ""; accForm.marketing_opt_in.checked = !!prof?.marketing_opt_in; accForm.email.value = user.email;
     $("accInitials").textContent = initials(accForm.full_name.value || user.email);
     $("accSince").textContent = `Cliente desde ${new Date(prof?.created_at || user.created_at).toLocaleDateString("es-AR", { month: "long", year: "numeric" })}`;
     $("accOrders").textContent = count || 0;
@@ -153,7 +153,7 @@
     e.preventDefault();
     const user = await be.user(); if (!user) return;
     const full_name = accForm.full_name.value.trim().slice(0, 80), phone = accForm.phone.value.trim().slice(0, 30);
-    const { error } = await sb.from("profiles").update({ full_name, phone }).eq("id", user.id);
+    const { error } = await sb.from("profiles").update({ full_name, phone, marketing_opt_in: accForm.marketing_opt_in.checked }).eq("id", user.id);
     if (error) return accMsg("No se pudo guardar. Probá de nuevo.", "error");
     await sb.auth.updateUser({ data: { full_name } }).catch(() => {});
     accMsg("¡Datos guardados!", "ok");

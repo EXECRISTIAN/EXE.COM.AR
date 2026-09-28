@@ -181,12 +181,15 @@ export const TEMPLATE_VARS = {
   telefono: "Teléfono del cliente", nota: "Nota del pedido", transportista: "Empresa de envío", seguimiento: "Número de seguimiento",
   motivo: "Motivo de cancelación", resumen: "Tabla con los productos (en una línea sola)", link_cuenta: "Link a Mi cuenta",
   link_seguimiento: "Link de seguimiento del envío", link_whatsapp: "Link a WhatsApp", link_panel: "Link al panel",
+  producto: "Nombre del producto (stock / precio)", precio: "Precio actual del producto", link_producto: "Link al producto",
+  link_tienda: "Link a la tienda", link_baja: "Link para dejar de recibir ofertas",
 };
 export const SAMPLE_ORDER = {
   id: 1042, name: "Juan Pérez", email: "juan@mail.com", phone: "+54 9 11 5555-5555", total: 452000, note: "Entregar por la tarde",
   items: [{ qty: 1, name: "Procesador AMD Ryzen 5 8500G", unit_price: 359100 }, { qty: 2, name: "Memoria Team DDR4 8GB 3600MHz", variant: "Negra", unit_price: 46450 }],
   shipping: { cost: 0, label: "Andreani · Estándar" }, carrier: "andreani", tracking: "360000012345670",
   trackUrl: "https://envia.com/es-AR/rastreo?label=360000012345670", reason: "Sin stock del producto",
+  product: { id: "procesador-amd-ryzen-5", name: "Procesador AMD Ryzen 5 8500G", price: 359100 },
 };
 function templateValues(o) {
   const first = o.name ? String(o.name).split(" ")[0] : "";
@@ -196,6 +199,9 @@ function templateValues(o) {
     motivo: o.reason || "", link_cuenta: BRAND.site + "cuenta.html", link_seguimiento: o.trackUrl || BRAND.site + "cuenta.html",
     link_whatsapp: `https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(`Hola EXE, consulta por mi pedido #${o.id ?? ""}`)}`,
     link_panel: BRAND.site + "admin/#pedidos",
+    producto: o.product?.name || "", precio: o.product?.price ? money(o.product.price) : "",
+    link_producto: o.product?.id ? `${BRAND.site}#producto/${encodeURIComponent(o.product.id)}` : BRAND.site,
+    link_tienda: BRAND.site, link_baja: BRAND.site + "cuenta.html#configuracion",
   };
 }
 const fill = (text, v) => String(text ?? "").replace(/\{\{\s*([a-z_]+)\s*\}\}/g, (m, k) => (k in v ? String(v[k]) : m));

@@ -9,12 +9,38 @@
   let lib = null;
   const loadLib = async () => (lib ||= await import("./emails.mjs"));
 
-  const EVENTS = {
-    order_created: "Al crear un pedido", order_paid: "Al confirmar el pago", order_shipped: "Al despachar el pedido",
-    order_delivered: "Al entregar el pedido", order_cancelled: "Al cancelar el pedido", admin_new_order: "Aviso interno (a ventas@)",
-    manual: "Manual (no se envía solo)",
-  };
-  const COLS = "id,name,event,subject,preheader,title,body,button_label,button_url,show_items,why,active,system,updated_at";
+  // Cuándo se envía cada plantilla y qué condiciones admite.
+  // cond: d = días (demora/antigüedad), at = fecha y hora, aud = a quién, min = compra mínima, cat = categoría.
+  // mk = publicitario: solo a quien aceptó recibir ofertas y con link de baja (Ley 25.326).
+  const EV = [
+    ["Pedidos", [
+      ["order_created", "Al crear un pedido", "Apenas el cliente confirma el pedido.", ""],
+      ["order_paid", "Al confirmar el pago", "Cuando el pedido se marca como pagado.", ""],
+      ["order_shipped", "Al despachar el pedido", "Cuando se carga el número de seguimiento.", ""],
+      ["order_delivered", "Al entregar el pedido", "Cuando el envío figura como entregado.", ""],
+      ["order_cancelled", "Al cancelar el pedido", "Cuando el pedido se cancela (usa {{motivo}}).", ""],
+      ["payment_reminder", "Recordatorio de pago", "Si el pedido sigue sin pagar N días después de creado. Se manda una sola vez.", "d"],
+      ["review_request", "Pedir opinión", "N días después de entregado, para que cuente cómo le fue.", "d"],
+      ["admin_new_order", "Aviso interno de pedido nuevo", "Le llega a ventas@ con los datos del cliente.", ""],
+    ]],
+    ["Clientes", [
+      ["account_welcome", "Bienvenida", "Al confirmar el email de una cuenta nueva.", ""],
+      ["inactive_customer", "Cliente inactivo", "A quien compró alguna vez y no volvió a comprar en N días.", "d mk"],
+      ["back_in_stock", "Volvió el stock", "A quien pidió que le avisen cuando un producto vuelva a tener stock (usa {{producto}}).", "cat"],
+      ["price_drop", "Bajó el precio", "Cuando baja el precio de un producto que el cliente compró o pidió que le avisen.", "cat mk"],
+    ]],
+    ["Campañas", [
+      ["promo", "Ofertas y promociones", "Se envía en la fecha y hora elegidas a la audiencia elegida.", "at aud min cat mk"],
+      ["special_date", "Fechas especiales (Hot Sale, Cyber Monday, Black Friday, Navidad)", "Se envía en la fecha elegida.", "at aud mk"],
+      ["reopening", "Reapertura / vuelta de vacaciones", "Avisa que la tienda vuelve a atender. Se envía en la fecha elegida.", "at aud"],
+      ["closing_notice", "Cierre temporal / vacaciones / feriados", "Avisa demoras o días sin atención. Se envía en la fecha elegida.", "at aud"],
+      ["manual", "Manual (no se envía sola)", "Queda guardada para usarla cuando quieras.", ""],
+    ]],
+  ];
+  const EVENTS = Object.fromEntries(EV.flatMap(([, l]) => l.map(([k, n]) => [k, n])));
+  const EVINFO = Object.fromEntries(EV.flatMap(([, l]) => l.map(([k, n, d, c]) => [k, { n, d, c: c.split(" ") }])));
+  const AUD = { order_customer: "El cliente del pedido", buyers: "Clientes que compraron alguna vez", all_customers: "Todos los clientes registrados", consent: "Solo quienes aceptaron recibir ofertas", admin: "Solo al equipo (ventas@)" };
+  const COLS = "id,name,event,subject,preheader,title,body,button_label,button_url,show_items,why,active,system,updated_at,delay_days,send_at,audience,min_total,category";
 
   let demoRows = null;
   async function list() {
@@ -40,7 +66,7 @@
         <tr><th>Plantilla</th><th>Cuándo se envía</th><th>Asunto</th><th>Activa</th><th></th></tr>
         ${rows.map((t) => `<tr data-id="${esc(t.id)}" class="${t.active ? "" : "is-off"}">
           <td><a href="#email/${encodeURIComponent(t.id)}"><b>${esc(t.name)}</b></a>${t.system ? ` <small class="pr-meta">del sistema</small>` : ""}</td>
-          <td>${esc(EVENTS[t.event] || t.event)}</td><td>${esc(t.subject)}</td>
+          <td>${esc(EVENTS[t.event] || t.event)}${condText(t) ? `<small class="pr-meta">${esc(condText(t))}</small>` : ""}</td><td>${esc(t.subject)}</td>
           <td><label class="switch"><input type="checkbox" data-act ${t.active ? "checked" : ""}><span></span></label></td>
           <td class="pr-actions"><a href="#email/${encodeURIComponent(t.id)}" title="Editar y ver">✏️ Editar</a>
             <button class="link-btn" data-prev title="Ver como el cliente">👁 Ver</button>
@@ -110,7 +136,18 @@
         <div class="panel ed-sec">
           <div class="ed-grid">
             <label class="field">Nombre (para vos)<input name="name" value="${esc(t.name)}" required maxlength="80" ${ro}></label>
-            <label class="field">Cuándo se envía<select name="event" ${t.system ? "disabled" : ro}>${Object.entries(EVENTS).map(([v, n]) => `<option value="${v}" ${v === t.event ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+            <label class="field">Cuándo se envía<select name="event" ${t.system ? "disabled" : ro}>${EV.map(([g, l]) => `<optgroup label="${g}">${l.map(([v, n]) => `<option value="${v}" ${v === t.event ? "selected" : ""}>${n}</option>`).join("")}</optgroup>`).join("")}</select></label>
+          </div>
+          <div class="em-cond" id="emCond">
+            <p class="ed-hint" id="emEvDesc"></p>
+            <div class="ed-grid">
+              <label class="field" data-c="d">Días<input name="delay_days" type="number" min="0" max="365" value="${t.delay_days ?? ""}" placeholder="Ej: 3" ${ro}></label>
+              <label class="field" data-c="at">Fecha y hora de envío<input name="send_at" type="datetime-local" value="${t.send_at ? new Date(new Date(t.send_at) - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 16) : ""}" ${ro}></label>
+              <label class="field" data-c="aud" ${"" }>A quién<select name="audience" ${ro}>${Object.entries(AUD).filter(([k]) => k !== "order_customer" && k !== "admin").map(([k, n]) => `<option value="${k}" ${k === t.audience ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+              <label class="field" data-c="min">Solo si compraron más de $ (opcional)<input name="min_total" inputmode="numeric" value="${t.min_total ?? ""}" ${ro}></label>
+              <label class="field" data-c="cat">Solo categoría (opcional)<input name="category" value="${esc(t.category || "")}" placeholder="Ej: Placas de video" ${ro}></label>
+            </div>
+            <p class="notice info" data-c="mk">Es un email <b>publicitario</b>: solo se envía a quienes aceptaron recibir ofertas en Mi cuenta, y lleva al pie el link para darse de baja ({{link_baja}}).</p>
           </div>
           <label class="field">Asunto<input name="subject" value="${esc(t.subject)}" required maxlength="150" ${ro}></label>
           <label class="field">Texto de vista previa en la bandeja (opcional)<input name="preheader" value="${esc(t.preheader || "")}" maxlength="150" ${ro}></label>
@@ -142,7 +179,15 @@
     const f = $("emForm"); if (!f) return;
     const read = () => ({ ...cur, name: f.name.value.trim(), event: cur.system ? cur.event : f.event.value, subject: f.subject.value.trim(), preheader: f.preheader.value.trim() || null,
       title: f.title.value.trim(), body: f.body.value, button_label: f.button_label.value.trim() || null, button_url: f.button_url.value.trim() || null,
-      show_items: f.show_items.checked, why: f.why.value.trim() || null, active: f.active.checked });
+      show_items: f.show_items.checked, why: f.why.value.trim() || null, active: f.active.checked, ...readCond(f) });
+    const ev = () => (cur.system ? cur.event : f.event.value);
+    const showCond = () => { const i = EVINFO[ev()] || { d: "", c: [] }; $("emEvDesc").textContent = i.d;
+      f.querySelectorAll("[data-c]").forEach((x) => (x.hidden = !i.c.includes(x.dataset.c)));
+      // Publicitario: siempre con consentimiento (se puede acotar a quienes además compraron)
+      const mk = i.c.includes("mk"); const o = f.audience.querySelector('[value="all_customers"]'); if (o) { o.hidden = mk; o.disabled = mk; }
+      const ob = f.audience.querySelector('[value="buyers"]'); if (ob) ob.textContent = mk ? "Clientes que compraron y aceptaron ofertas" : "Clientes que compraron alguna vez";
+      if (mk && f.audience.value === "all_customers") f.audience.value = "consent"; };
+    f.event.addEventListener("change", showCond); showCond();
     let tmr;
     const draw = async () => { const { renderTemplate } = await loadLib(); const r = renderTemplate(read()); $("emSubj").textContent = "Asunto: " + r.subject; $("emFrame").srcdoc = r.html; };
     f.addEventListener("input", () => { clearTimeout(tmr); tmr = setTimeout(draw, 250); });
@@ -167,6 +212,10 @@
       if (!t.name || !t.subject || !t.title || !t.body.trim()) return msg("Completá nombre, asunto, título y mensaje.", "error");
       if (t.button_label && !t.button_url) return msg("El botón necesita un link.", "error");
       if (t.button_url && !/^(https?:\/\/|\{\{\s*link_[a-z]+\s*\}\})/.test(t.button_url)) return msg("El link del botón tiene que empezar con https:// o ser una variable como {{link_cuenta}}.", "error");
+      const ci = (EVINFO[t.event] || { c: [] }).c;
+      if (ci.includes("d") && !(t.delay_days >= 0 && t.delay_days !== null)) return msg("Poné la cantidad de días.", "error");
+      if (ci.includes("at") && t.active && !t.send_at) return msg("Elegí la fecha y hora de envío.", "error");
+      if (ci.includes("mk") && !/\{\{\s*link_baja\s*\}\}/.test(t.body + (t.why || ""))) t.why = ((t.why || "") + " Si no querés recibir más ofertas: {{link_baja}}").trim();
       if (cur.isNew) t.id = newId(t.name);
       try { await save(t, cur.isNew); msg("Guardado ✔", "ok"); if (cur.isNew) location.hash = `#email/${encodeURIComponent(t.id)}`; else cur = { ...t, isNew: false }; }
       catch (err) { msg("No se pudo guardar: " + err.message, "error"); }
@@ -175,6 +224,25 @@
   };
 
   /* ---------- Utilidades ---------- */
+  function readCond(f) {
+    const c = (EVINFO[cur.system ? cur.event : f.event.value] || { c: [] }).c;
+    const n = (v) => (String(v).trim() === "" ? null : Number(String(v).replace(/\D/g, "")));
+    return {
+      delay_days: c.includes("d") ? n(f.delay_days.value) : null,
+      send_at: c.includes("at") && f.send_at.value ? new Date(f.send_at.value).toISOString() : null,
+      audience: c.includes("mk") ? (f.audience.value === "buyers" ? "buyers" : "consent") : c.includes("aud") ? f.audience.value : cur.event === "admin_new_order" ? "admin" : "order_customer",
+      min_total: c.includes("min") ? n(f.min_total.value) : null,
+      category: c.includes("cat") ? f.category.value.trim() || null : null,
+    };
+  }
+  function condText(t) {
+    const out = [];
+    if (t.delay_days != null) out.push(`${t.delay_days} día${t.delay_days === 1 ? "" : "s"}`);
+    if (t.send_at) out.push(new Date(t.send_at).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" }));
+    if (t.audience && !["order_customer", "admin"].includes(t.audience)) out.push(AUD[t.audience]);
+    if (t.category) out.push(t.category);
+    return out.join(" · ");
+  }
   function newId(base) {
     let id = String(base || "plantilla").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 30) || "plantilla";
     const taken = new Set((demoRows || []).map((x) => x.id).concat(A._emailIds || []));
@@ -183,7 +251,8 @@
   }
   async function save(t, insert) {
     const row = { id: t.id, name: t.name, event: t.event, subject: t.subject, preheader: t.preheader, title: t.title, body: t.body,
-      button_label: t.button_label, button_url: t.button_url, show_items: t.show_items, why: t.why, active: t.active };
+      button_label: t.button_label, button_url: t.button_url, show_items: t.show_items, why: t.why, active: t.active,
+      delay_days: t.delay_days ?? null, send_at: t.send_at ?? null, audience: t.audience || "order_customer", min_total: t.min_total ?? null, category: t.category || null };
     if (A.demo) { const i = demoRows.findIndex((x) => x.id === t.id); if (i >= 0) demoRows[i] = { ...demoRows[i], ...row }; else demoRows.push({ ...row, system: false }); return; }
     const r = insert ? await sb().from("email_templates").insert(row) : await sb().from("email_templates").update(row).eq("id", t.id);
     if (r.error) throw r.error;
