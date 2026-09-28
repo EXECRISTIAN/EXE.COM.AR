@@ -357,10 +357,11 @@
     renderProducts();
   }
   const numOrNull = (v) => (v === "" || isNaN(+v) ? null : Math.max(0, +v));
-  $("filtersBtn").onclick = () => {
-    const open = $("filtersPanel").hidden;
+  function toggleFilters(open) {
     $("filtersPanel").hidden = !open; $("filtersBtn").setAttribute("aria-expanded", open);
-  };
+  }
+  $("filtersBtn").onclick = () => toggleFilters($("filtersPanel").hidden);
+  $("fpDone").onclick = () => { toggleFilters(false); $("filtersBtn").focus(); };   // "Listo" = cerrar el panel (los filtros quedan aplicados)
   $("filtersPanel").addEventListener("input", (e) => {
     const t = e.target;
     if (t.closest("#fpBrands")) t.checked ? fp.brands.add(t.value) : fp.brands.delete(t.value);
