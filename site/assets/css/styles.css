@@ -459,3 +459,12 @@ body.no-scroll { overflow: hidden; }
 .active-brand { display: flex; justify-content: center; margin: -6px 0 16px; }
 .active-brand[hidden] { display: none; }
 .active-brand .chip span { margin-left: 4px; }
+
+/* Nota de precio y bloque solo para administradores en la ficha */
+.price-note { display: block; margin-top: -4px; font-size: .78rem; color: var(--muted); }
+.pd-admin { margin: 8px 0 4px; padding: 10px 12px; border: 1px dashed var(--warn); border-radius: 10px; font-size: .85rem; color: var(--c3); display: grid; gap: 6px; }
+.pd-admin[hidden] { display: none; }
+.pd-admin b { color: var(--warn); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+.pd-admin-row { display: grid; gap: 2px; }
+.pd-admin-row a { color: var(--c0); font-weight: 700; }
+.pd-admin-row small { color: var(--muted); }
