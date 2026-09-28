@@ -111,3 +111,8 @@
 .theme-mini.show-tip .tm-tip { opacity: 1; visibility: visible; }
 .theme-mini.tip-long .tm-tip { max-width: min(290px, calc(100vw - 32px)); white-space: pre-line; line-height: 1.5; }
 @media (prefers-reduced-motion: reduce) { .theme-mini .tm-thumb { transition: none; } }
+
+/* Mi cuenta con sesión: saludo, texto y aviso centrados (igual que los botones) */
+#logged { text-align: center; }
+#logged .notice { text-align: center; }
+#logged .table { text-align: left; }   /* el historial de pedidos sigue alineado como tabla */
