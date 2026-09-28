@@ -63,3 +63,8 @@ Registro de lo que decidí sin consultarte, para que puedas revisarlo o cambiarl
 42. **Después de entrar**: los clientes van a la página de inicio (o a `cuenta.html?next=…` si un evento los mandó a loguearse). Administradores y moderadores se quedan en "Mi cuenta". Solo después de ingresar, confirmar email o elegir contraseña nueva; abrir "Mi cuenta" a propósito no redirige. `next` solo acepta rutas internas.
 43. **Botones de "Mi cuenta"** centrados, uno debajo del otro, mismo ancho.
 
+## Emails
+44. **Remitente**: `EXE <ventas@exe.com.ar>` (dominio verificado en Resend, región São Paulo). Las respuestas van a ventas@.
+45. **Plantillas en un solo archivo** (`supabase/functions/_shared/emails.js`), en español, con el look del sitio: franja negra con logo blanco, azul `#0084d6`, Lato, pie con WhatsApp y el motivo del envío. Vistas previas en `docs/emails/` (`node scripts/build-emails.mjs`).
+46. **9 plantillas**: cuenta (confirmar, restablecer contraseña, cambio de email) y pedido (recibido, pago confirmado, enviado con seguimiento, entregado, cancelado) + aviso interno de nuevo pedido a ventas@. Solo transaccionales: nada de publicidad.
+

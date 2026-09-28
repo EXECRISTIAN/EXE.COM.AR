@@ -1,56 +1,59 @@
-// Emails automáticos a usuarios (vía Resend, plan gratis: 3.000 emails/mes).
-// Se invoca desde otras funciones o desde un Database Webhook de Supabase.
+// Emails automáticos de pedidos (vía Resend). Las plantillas están en ../_shared/emails.js.
+// Se invoca desde otras funciones o desde un Database Webhook de Supabase:
+//   POST { template: "order_created" | "order_paid" | "order_shipped" | "order_delivered" | "order_cancelled", order_id, reason? }
+// "order_created" además avisa al equipo (ADMIN_EMAIL) con la plantilla admin_new_order.
 //
-// Secrets: RESEND_API_KEY, EMAIL_FROM (ej: "EXE <ventas@exe.com.ar>"), SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+// Secrets: RESEND_API_KEY, EMAIL_FROM ("EXE <ventas@exe.com.ar>"), ADMIN_EMAIL (ej. ventas@exe.com.ar),
+//          SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 // Deploy: supabase functions deploy send-email
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { orderTemplates } from "../_shared/emails.js";
 
-const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+const env = (k: string) => Deno.env.get(k) ?? "";
+const db = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"));
 
-const money = (n: number) => "$" + Number(n).toLocaleString("es-AR");
-
-const templates: Record<string, (o: any) => { subject: string; html: string }> = {
-  order_created: (o) => ({
-    subject: `Recibimos tu pedido #${o.id}`,
-    html: `<h2>¡Gracias, ${o.name}!</h2><p>Recibimos tu pedido #${o.id} por ${money(o.total)}.</p>${o.itemsHtml}<p>Te avisamos cuando se acredite el pago.</p>`,
-  }),
-  order_paid: (o) => ({
-    subject: `Pago confirmado — pedido #${o.id}`,
-    html: `<h2>¡Pago acreditado!</h2><p>Tu pedido #${o.id} ya está confirmado y lo estamos preparando.</p>${o.itemsHtml}`,
-  }),
-  order_shipped: (o) => ({
-    subject: `Tu pedido #${o.id} está en camino`,
-    html: `<h2>¡Salió tu pedido!</h2><p>Tu pedido #${o.id} fue despachado.</p>`,
-  }),
-};
+async function send(to: string, subject: string, html: string) {
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env("RESEND_API_KEY")}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from: env("EMAIL_FROM"), reply_to: env("ADMIN_EMAIL") || undefined, to, subject, html }),
+  });
+  return { status: r.status, body: await r.text() };
+}
 
 Deno.serve(async (req) => {
   // Solo llamadas internas (service role)
-  if (req.headers.get("Authorization") !== `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`) {
+  if (req.headers.get("Authorization") !== `Bearer ${env("SUPABASE_SERVICE_ROLE_KEY")}`) {
     return new Response("forbidden", { status: 403 });
   }
-  const { template, order_id } = await req.json();
-  const tpl = templates[template];
-  if (!tpl) return new Response("unknown template", { status: 400 });
+  const { template, order_id, reason } = await req.json();
+  const tpl = (orderTemplates as any)[template];
+  if (!tpl || template === "admin_new_order") return new Response("unknown template", { status: 400 });
 
   const { data: o } = await db
     .from("orders")
-    .select("id, total, profiles(email, full_name), order_items(qty, unit_price, products(name))")
+    .select("id, total, note, shipping, shipping_cost, carrier, tracking_number, profiles(email, full_name, phone, email_verified_at), order_items(qty, variant, unit_price, products(name))")
     .eq("id", order_id).single();
   if (!o) return new Response("order not found", { status: 404 });
+  const p: any = o.profiles || {};
 
   // Solo se escribe a cuentas con el email confirmado (evita mandar correo a direcciones falsas).
-  const { data: prof } = await db.from("orders").select("profiles(email_verified_at)").eq("id", order_id).single();
-  if (!(prof as any)?.profiles?.email_verified_at) return new Response("email no verificado", { status: 409 });
+  if (!p.email_verified_at) return new Response("email no verificado", { status: 409 });
 
-  const itemsHtml = "<ul>" + o.order_items
-    .map((i: any) => `<li>${i.qty} x ${i.products.name} — ${money(i.qty * i.unit_price)}</li>`).join("") + "</ul>";
-  const { subject, html } = tpl({ id: o.id, total: o.total, name: o.profiles.full_name ?? "", itemsHtml });
+  const s: any = o.shipping || {};
+  const data = {
+    id: o.id, total: o.total, name: p.full_name, email: p.email, phone: p.phone, note: o.note, reason,
+    items: (o.order_items || []).map((i: any) => ({ qty: i.qty, variant: i.variant, unit_price: i.unit_price, name: i.products?.name })),
+    shipping: o.shipping_cost ? { cost: o.shipping_cost, label: [o.carrier, s.service].filter(Boolean).join(" · ") } : null,
+    carrier: o.carrier, tracking: o.tracking_number,
+    trackUrl: o.tracking_number ? `https://envia.com/es-AR/rastreo?label=${encodeURIComponent(o.tracking_number)}` : null,
+  };
 
-  const r = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: Deno.env.get("EMAIL_FROM"), to: o.profiles.email, subject, html }),
-  });
-  return new Response(await r.text(), { status: r.status });
+  const { subject, html } = tpl(data);
+  const res = await send(p.email, subject, html);
+  if (template === "order_created" && env("ADMIN_EMAIL")) {
+    const a = orderTemplates.admin_new_order(data);
+    await send(env("ADMIN_EMAIL"), a.subject, a.html);
+  }
+  return new Response(res.body, { status: res.status });
 });
