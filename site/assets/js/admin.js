@@ -148,8 +148,24 @@
     if (!views[key] || !link || !perms.has(perm)) return (location.hash = "#resumen");
     document.querySelectorAll(".side-nav a").forEach((a) => a.classList.toggle("active", a === link));
     $("viewTitle").textContent = sub ? sub.title(args) : link.textContent.replace(/^\S+\s/, "");
-    try { $("view").innerHTML = await views[key](...args.map(decodeURIComponent)); if (views[key].after) views[key].after(...args.map(decodeURIComponent)); }
+    try { $("view").innerHTML = await views[key](...args.map(decodeURIComponent)); if (views[key].after) views[key].after(...args.map(decodeURIComponent)); labelize(); }
     catch (e) { $("view").innerHTML = `<p class="notice error">${esc(e.message)}</p>`; }
+  }
+  // Accesibilidad: todo campo sin etiqueta visible recibe un nombre para lectores de pantalla
+  // (placeholder, encabezado de la columna + producto en tablas, o el texto de la opción vacía de un select).
+  function labelize() {
+    const run = () => document.querySelectorAll("#view input:not([type=hidden]), #view select, #view textarea").forEach((el) => {
+      if (el.labels?.length || el.getAttribute("aria-label") || el.getAttribute("aria-labelledby")) return;
+      let t = el.placeholder && el.placeholder !== "—" ? el.placeholder : "";
+      const td = el.closest("td");
+      if (td) { const th = td.closest("table")?.querySelectorAll("th")[td.cellIndex]; const row = td.closest("tr")?.querySelector(".pr-name, b"); t = [th?.textContent.trim(), row?.textContent.trim()].filter(Boolean).join(" — ") || t; }
+      if (!t && el.tagName === "SELECT") t = el.options[0]?.textContent.trim() || "";
+      if (!t && el.type === "color") t = "Elegir color";
+      if (!t && el.type === "number") t = el.closest(".field, label")?.textContent.trim() || "Número";
+      if (!t) t = el.closest(".fx-vol-row, .field")?.textContent.replace(/\s+/g, " ").trim().slice(0, 80) || el.name || "Campo";
+      el.setAttribute("aria-label", t);
+    });
+    run(); if (!labelize.obs) { labelize.obs = new MutationObserver(run); labelize.obs.observe($("view"), { childList: true, subtree: true }); }
   }
   // API para los módulos del panel (admin-productos.js)
   window.EXE_ADMIN = { views, subviews, route, esc, money, $, get perms() { return perms; }, demo, be, DEMO, alertView: (m) => alertView(m) };
