@@ -504,3 +504,10 @@ body.no-scroll { overflow: hidden; }
 .p-tag { padding: 2px 8px; border-radius: 999px; border: 1px solid var(--c6); background: var(--c4); color: var(--c3); font: 600 .7rem/1.5 var(--font); cursor: pointer; }
 .p-tag:hover { border-color: var(--c0); color: var(--c0); }
 .stock.ask { color: var(--c1, #0084d6); }
+/* Celular: etiquetas de la foto sin superponerse y "Consultar precio" más compacto */
+.card-media .tag { max-width: calc(100% - 20px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 560px) {
+  .card-media .tag.tag-outlet { left: 10px; right: auto; top: 36px; }
+  .card .price.price-ask { font-size: .88rem; line-height: 1.3; }
+}
+.pd-close { background: var(--surface); box-shadow: 0 1px 6px rgba(0,0,0,.25); border-radius: 50%; color: var(--c2); z-index: 3; }
