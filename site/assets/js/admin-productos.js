@@ -276,9 +276,11 @@
       ? patchProduct(p.id, { price_usd: Math.max(0, Math.round(calc(Number(p.price_usd)) * 100) / 100) })
       : (p.price > 0 ? patchProduct(p.id, { price: Math.max(0, round100(calc(p.price))) }) : null);
     if (action === "ref") {
-      const v = await ask("Precio según referencia de compra", "Precio = referencia más barata cargada × (1 + %). Ej: 50. Solo cambia los que tienen referencia (en pesos).", String(DEFAULT_MARGIN));
+      const v = await ask("Precio según referencia de compra", "Precio = (compra + envío) de la referencia más barata, en pesos (las de dólares se pasan con la cotización actual) × (1 + %). Ej: 50.", String(DEFAULT_MARGIN));
       if (v === null) return; const f = 1 + num(v) / 100;
-      fn = (p) => { const refs = (cache.sources.get(p.id) || []).map((r) => Number(r.ref_price)).filter((x) => x > 0); return refs.length ? patchProduct(p.id, { price: round100(Math.min(...refs) * f), price_usd: null }) : null; };
+      const fx = A.demo ? 1550 : (await sb().from("fx_settings").select("effective_rate").eq("id", 1).single()).data?.effective_rate || 0;
+      const ars = (v, c) => (c === "USD" ? (fx > 0 ? v * fx : NaN) : v);
+      fn = (p) => { const refs = (cache.sources.get(p.id) || []).map((r) => ars(Number(r.ref_price), r.currency) + (r.ship_cost ? ars(Number(r.ship_cost), r.ship_currency) : 0)).filter((x) => x > 0); return refs.length ? patchProduct(p.id, { price: round100(Math.min(...refs) * f), price_usd: null }) : null; };
     }
     if (action === "tousd" || action === "toars") {
       const fx = A.demo ? 1550 : (await sb().from("fx_settings").select("effective_rate").eq("id", 1).single()).data?.effective_rate;
@@ -465,8 +467,9 @@
     box.innerHTML = ed.sources.map((s, i) => `<div class="ed-src" data-x="${i}">
       <input class="pr-in" data-sf="store" value="${esc(s.store || "")}" placeholder="Tienda (ej: CompraGamer)">
       <input class="pr-in" data-sf="url" value="${esc(s.url || "")}" placeholder="https://… link del producto">
-      <input class="pr-in" data-sf="ref_price" inputmode="numeric" value="${s.ref_price ?? ""}" placeholder="Precio ref. $">
-      <input class="pr-in" data-sf="delivery_note" value="${esc(s.delivery_note || "")}" placeholder="Envío (ej: 48 h)">
+      <span class="ed-src-money"><input class="pr-in" data-sf="ref_price" inputmode="decimal" value="${s.ref_price ?? ""}" placeholder="Precio de compra" title="Precio de compra del producto"><select class="pr-in pr-cur" data-sf="currency" title="Moneda">${["ARS", "USD"].map((c) => `<option ${(s.currency || "ARS") === c ? "selected" : ""}>${c}</option>`).join("")}</select></span>
+      <span class="ed-src-money"><input class="pr-in" data-sf="ship_cost" inputmode="decimal" value="${s.ship_cost ?? ""}" placeholder="Costo de envío" title="Costo del envío (vacío = sin dato; 0 = gratis)"><select class="pr-in pr-cur" data-sf="ship_currency" title="Moneda">${["ARS", "USD"].map((c) => `<option ${(s.ship_currency || "ARS") === c ? "selected" : ""}>${c}</option>`).join("")}</select></span>
+      <input class="pr-in" data-sf="delivery_note" value="${esc(s.delivery_note || "")}" placeholder="Demora (ej: 48 h)">
       ${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer" title="Abrir">↗</a>` : ""}<button type="button" class="link-btn" data-xrm title="Quitar">✕</button></div>`).join("") || `<p class="ed-hint">Sin referencias.</p>`;
   }
   // Toma los valores escritos en las especificaciones antes de re-dibujar
@@ -584,7 +587,7 @@
         renderSpecs();
       });
       // Referencias
-      $("edAddSrc").onclick = () => { readSources(); ed.sources.push({ store: "", url: "", ref_price: "", delivery_note: "" }); renderSources(); };
+      $("edAddSrc").onclick = () => { readSources(); ed.sources.push({ store: "", url: "", ref_price: "", currency: "ARS", ship_cost: "", ship_currency: "ARS", delivery_note: "" }); renderSources(); };
       $("edSources").addEventListener("click", (e) => { const b = e.target.closest("[data-xrm]"); if (!b) return; readSources(); const [x] = ed.sources.splice(+b.closest(".ed-src").dataset.x, 1); if (x && x.id) ed.removedSources.push(x.id); renderSources(); });
       if ($("edDelete")) $("edDelete").onclick = async () => {
         if (!(await confirmBox("¿Eliminar este producto?", "Se borra de la tienda y del panel. No se puede deshacer. Si solo querés ocultarlo, destildá \"Visible en la tienda\"."))) return;
@@ -616,14 +619,23 @@
       if (!w) { delete prod.name; }   // moderador (stock.write): solo stock / visibilidad
       const costV = el("cost").value.trim() === "" ? null : val("cost");
       const cost = w ? { ...(isUsd() ? { cost_usd: costV, cost: costV != null && rate() ? Math.round(costV * rate()) : null } : { cost: costV, cost_usd: null }), supplier: el("supplier").value.trim() || null, notes: el("notes").value.trim() || null } : null;
+      // Referencias de compra: precio obligatorio (con decimales), link opcional pero válido
+      const dec = (v) => { const x = Number(String(v ?? "").replace(/[^\d.,]/g, "").replace(/\.(?=\d{3}(\D|$))/g, "").replace(",", ".")); return isFinite(x) ? x : 0; };
+      const bad = ed.sources.find((s) => (s.store || "").trim() && !(dec(s.ref_price) > 0));
+      if (bad) return msg(`Falta el precio de compra en la referencia "${bad.store}".`, "error");
+      const badUrl = ed.sources.find((s) => (s.url || "").trim() && !/^https?:\/\//i.test(s.url.trim()));
+      if (badUrl) return msg(`El link de "${badUrl.store || "la referencia"}" tiene que empezar con https://`, "error");
       try {
         msg("Guardando…", "info");
         if (w) await saveProduct(prod, cost);
         else await patchProduct(ed.orig, { show_stock: prod.show_stock, stock: prod.stock, active: prod.active });
         if (w && !A.demo) {
           for (const sid of ed.removedSources) await sb().from("product_sources").delete().eq("id", sid);
-          for (const s of ed.sources.filter((s) => s.url && s.store && num(s.ref_price) > 0)) {
-            const row = { product_id: id, store: s.store.trim(), url: s.url.trim(), ref_price: num(s.ref_price), delivery_note: s.delivery_note || null, checked_at: new Date().toISOString() };
+          for (const s of ed.sources.filter((s) => (s.store || "").trim() && dec(s.ref_price) > 0)) {
+            const u = (s.url || "").trim();
+            const row = { product_id: id, store: s.store.trim(), url: u || null, ref_price: dec(s.ref_price), currency: s.currency || "ARS",
+              ship_cost: String(s.ship_cost ?? "").trim() === "" ? null : dec(s.ship_cost), ship_currency: s.ship_currency || "ARS",
+              delivery_note: s.delivery_note || null, checked_at: new Date().toISOString() };
             const r = s.id ? await sb().from("product_sources").update(row).eq("id", s.id) : await sb().from("product_sources").upsert(row, { onConflict: "product_id,store" });
             if (r.error) throw r.error;
           }
