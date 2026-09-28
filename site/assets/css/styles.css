@@ -398,3 +398,15 @@ body.no-scroll { overflow: hidden; }
   .card .btn { padding: 10px 8px; font-size: .85rem; }
   .logos-track img { width: 40vw; }
 }
+
+/* Cantidad en la ficha de producto: − [n] + */
+.pd-qty-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pd-qty-row label { font-weight: 700; color: var(--c2); }
+.qty-stepper { display: inline-flex; align-items: center; border: 1px solid var(--c6); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.qty-stepper button { width: 40px; height: 40px; border: 0; background: none; color: var(--c2); font-size: 1.25rem; cursor: pointer; }
+.qty-stepper button:hover:not(:disabled) { background: var(--c4); color: var(--c0); }
+.qty-stepper button:disabled { opacity: .35; cursor: default; }
+.qty-stepper input { width: 52px; height: 40px; border: 0; border-inline: 1px solid var(--c6); background: none; color: var(--c2);
+  text-align: center; font: 700 1rem var(--font); -moz-appearance: textfield; appearance: textfield; }
+.qty-stepper input::-webkit-outer-spin-button, .qty-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.qty-stepper input:focus { outline: 2px solid var(--c0); outline-offset: -2px; }
