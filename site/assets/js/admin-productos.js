@@ -198,7 +198,7 @@
         <td>${sw ? `<input class="pr-in pr-in-sm" data-f="stock" inputmode="numeric" value="${p.show_stock ? p.stock : ""}" placeholder="∞" title="Vacío = sin control de stock">` : (p.show_stock ? p.stock : "∞")}</td>
         <td>${sw ? `<label class="switch"><input type="checkbox" data-f="active" ${p.active ? "checked" : ""}><span></span></label>` : (p.active ? "Sí" : "No")}</td>
         <td class="pr-flags">${FLAGS.map(([f, ic, n, d]) => `<button type="button" class="pr-flag ${flagOn(p, f) ? "on" : ""}" data-flag="${f}" title="${esc(n + ": " + d)}" aria-pressed="${flagOn(p, f)}" ${w ? "" : "disabled"}>${ic}</button>`).join("")}</td>
-        <td class="pr-actions"><a href="#editar/${encodeURIComponent(p.id)}" title="Editar">✏️</a>${w ? `<button class="link-btn" data-dup title="Duplicar">⧉</button>` : ""}<a href="../index.html#producto/${encodeURIComponent(p.id)}" target="_blank" rel="noopener" title="Ver en la tienda">↗</a></td>
+        <td class="pr-actions"><a href="#editar/${encodeURIComponent(p.id)}" title="Editar">✏️</a>${w ? `<button class="link-btn" data-dup title="Duplicar">⧉</button>` : ""}<a class="pr-view" href="../index.html#producto/${encodeURIComponent(p.id)}" target="_blank" rel="noopener" title="${p.active ? "Ver el producto como lo ve un cliente" : "Está oculto: los clientes no lo ven. Activalo para verlo en la tienda."}">👁 Ver</a></td>
       </tr>`;
     }).join("") || `<tr><td colspan="11" class="pr-empty">No hay productos con ese filtro.</td></tr>`;
     $("prCount").textContent = `${rows.length} de ${cache.products.length} productos`;
@@ -363,7 +363,7 @@
       <form id="edForm" class="ed" autocomplete="off">
         <div class="ed-bar">
           <a class="btn btn-outline" href="#productos">← Volver a productos</a>
-          ${isNew ? "" : `<a class="btn btn-outline" href="../index.html#producto/${encodeURIComponent(p.id)}" target="_blank" rel="noopener">Ver en la tienda ↗</a>`}
+          ${isNew ? "" : `<a class="btn btn-outline" href="../index.html#producto/${encodeURIComponent(p.id)}" target="_blank" rel="noopener" title="${p.active ? "Abre la ficha tal como la ve un cliente" : "Está oculto: guardalo como visible para verlo en la tienda"}">👁 Ver como cliente${p.active ? "" : " (oculto)"}</a>`}
           <span class="ed-spacer"></span>
           ${w && !isNew ? `<button class="btn btn-outline danger" type="button" id="edDelete">Eliminar</button>` : ""}
           ${w ? `<button class="btn btn-outline" type="submit" data-next="new">Guardar y crear otro</button>` : ""}

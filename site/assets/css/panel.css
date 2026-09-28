@@ -279,3 +279,5 @@
 .ed-flag span { display: grid; gap: 2px; }
 .ed-flag small { color: var(--muted); font-size: .78rem; }
 .ed-flag:has(input:checked) { border-color: var(--c1, #0084d6); background: rgba(0, 132, 214, .06); }
+.pr-view { white-space: nowrap; font-size: .82rem; padding: 3px 8px; border: 1px solid var(--c6); border-radius: 8px; text-decoration: none; }
+.is-off .pr-view { opacity: .6; }

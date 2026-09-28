@@ -7,7 +7,6 @@ panel en `?demo`), hace PR + merge y lo tilda con la fecha. Reglas:
 - No tocar precios de venta outlet ni costos. No publicar links/costos en el repo.
 
 ## Pendiente
-- [ ] Tienda en celular (390 px): header, buscador, filtros, tarjetas, ficha de producto, carrito, footer — sin desbordes ni textos cortados.
 - [ ] Modo oscuro: contraste de todos los textos, badges y botones (tienda, Mi cuenta, panel).
 - [ ] Accesibilidad: alt de imágenes, labels de formularios, foco visible, navegación con teclado en ficha/carrito/diálogos.
 - [ ] Carrito y pedido por WhatsApp: cantidades, variantes, productos "a pedido"/"consultar", total y mensaje.
@@ -21,5 +20,6 @@ panel en `?demo`), hace PR + merge y lo tilda con la fecha. Reglas:
 - [ ] Fotos: productos sin foto (seguir con la tanda de precios/fotos).
 
 ## Hecho
+- [x] 28/09 — Tienda en celular: sin desplazamiento horizontal; etiqueta de categoría y "Outlet" ya no se pisan; "Consultar precio" más compacto; "¡Última unidad!" en singular; la X de la ficha se ve en modo oscuro.
 
 ## Propuestas para Cristian (no se aplican sin su OK)

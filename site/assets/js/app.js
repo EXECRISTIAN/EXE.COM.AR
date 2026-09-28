@@ -53,7 +53,7 @@
     if (p.stock <= 0) return `<span class="stock out">Sin stock</span>`;
     if (!showsStock(p)) return `<span class="stock ok">En stock</span>`;
     const cls = p.stock <= cfg.lowStockThreshold ? "low" : "ok";
-    return `<span class="stock ${cls}">${p.stock <= cfg.lowStockThreshold ? "¡Últimas " + p.stock + " unidades!" : p.stock + " disponibles"}</span>`;
+    return `<span class="stock ${cls}">${p.stock <= cfg.lowStockThreshold ? (p.stock === 1 ? "¡Última unidad!" : "¡Últimas " + p.stock + " unidades!") : p.stock + " disponibles"}</span>`;
   }
 
   /* ---------- Catálogo ---------- */
