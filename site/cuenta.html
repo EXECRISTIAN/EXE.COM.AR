@@ -63,13 +63,35 @@
         <p style="color:var(--c3)">Desde acá vas a ver tu historial de pedidos.</p>
         <div id="orders"></div>
         <div class="account-actions">
-          <a class="btn btn-primary" href="index.html">Ir a la tienda</a>
           <a class="btn btn-outline btn-solid" id="dashLink" href="admin/" hidden>Panel de administración</a>
+          <a class="btn btn-primary" href="index.html">Ir a la tienda</a>
+          <button class="btn my-acc" id="myAccBtn" type="button" aria-haspopup="dialog">
+            <span class="my-acc-orbit" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="my-acc-avatar" id="myAccInitials" aria-hidden="true">?</span>
+            <span class="my-acc-text"><b>Ir a mi cuenta</b><small id="myAccHint" aria-hidden="true">Tus datos</small></span>
+          </button>
           <button class="btn btn-outline btn-logout" id="logout">Cerrar sesión</button>
         </div>
       </section>
     </div>
   </main>
+
+  <!-- Mi cuenta: datos personales y seguridad -->
+  <dialog class="confirm acc-dlg" id="accDialog" aria-labelledby="accTitle">
+    <form id="accForm">
+      <div class="acc-head"><span class="my-acc-avatar big" id="accInitials" aria-hidden="true">?</span><div><h2 id="accTitle">Mi cuenta</h2><small id="accSince"></small></div></div>
+      <label class="field">Nombre y apellido<input name="full_name" autocomplete="name" maxlength="80"></label>
+      <label class="field">Teléfono / WhatsApp<input name="phone" autocomplete="tel" inputmode="tel" maxlength="30"></label>
+      <label class="field">Email<input name="email" readonly></label>
+      <div class="acc-stats"><div><b id="accOrders">0</b><small>pedidos</small></div><div><b id="accVerified">—</b><small>email</small></div></div>
+      <p class="notice" id="accMsg" hidden></p>
+      <div class="confirm-actions">
+        <button class="btn btn-outline" type="button" id="accReset">Cambiar contraseña</button>
+        <button class="btn btn-primary" type="submit">Guardar</button>
+      </div>
+      <button class="acc-close" type="button" id="accClose" aria-label="Cerrar">✕</button>
+    </form>
+  </dialog>
 
   <!-- Confirmación de cierre de sesión -->
   <dialog class="confirm" id="logoutDialog" aria-labelledby="logoutTitle">
