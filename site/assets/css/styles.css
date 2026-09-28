@@ -511,3 +511,24 @@ body.no-scroll { overflow: hidden; }
   .card .price.price-ask { font-size: .88rem; line-height: 1.3; }
 }
 .pd-close { background: var(--surface); box-shadow: 0 1px 6px rgba(0,0,0,.25); border-radius: 50%; color: var(--c2); z-index: 3; }
+
+/* ---------- Estilos de sección elegidos en el panel (Página web → Estilo) ---------- */
+.cms-styled.has-pad { padding-top: calc(var(--sec-pt) * var(--pad-k, 1)) !important; padding-bottom: calc(var(--sec-pb) * var(--pad-k, 1)) !important; }
+@media (max-width: 767px) { .cms-styled { --pad-k: .6; } }
+.cms-styled { --sec-bg: var(--sec-bg-l); --sec-fg: var(--sec-fg-l); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cms-styled { --sec-bg: var(--sec-bg-d); --sec-fg: var(--sec-fg-d); } }
+:root[data-theme="dark"] .cms-styled { --sec-bg: var(--sec-bg-d); --sec-fg: var(--sec-fg-d); }
+.cms-styled.has-bg { background: var(--sec-bg) !important; color: var(--sec-fg); }
+.cms-styled.has-bg :is(h1, h2, h3, h4, p, small, .section-head p) { color: var(--sec-fg); }
+.cms-styled.cms-full .container { max-width: none; }
+.cms-styled.cms-narrow .container { max-width: 760px; }
+.cms-styled.cms-round { border-radius: var(--sec-r); margin-inline: 16px; overflow: hidden; }
+.cms-styled.al-left :is(.container, .section-head, .cms-text) { text-align: left; }
+.cms-styled.al-center :is(.container, .section-head, .cms-text) { text-align: center; }
+.cms-styled.al-right :is(.container, .section-head, .cms-text) { text-align: right; }
+@media (max-width: 767px) { .hide-mob { display: none !important; } }
+@media (min-width: 768px) { .hide-desk { display: none !important; } }
+.cms-spacer { height: var(--sp-h, 40px); position: relative; }
+@media (max-width: 767px) { .cms-spacer { height: var(--sp-hm, 24px); } }
+.cms-spacer.line::after { content: ""; position: absolute; left: 50%; top: 50%; width: min(1100px, calc(100% - 32px)); height: 1px; transform: translateX(-50%); background: var(--sp-line, var(--line)); }
+section.cms-block:has(> .cms-spacer) { padding: 0; }

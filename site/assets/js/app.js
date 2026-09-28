@@ -629,8 +629,31 @@
     texto: (d) => `<div class="container cms-text reveal">${d.title ? `<h2>${esc(d.title)}</h2><span class="divider"></span>` : ""}${d.text ? `<p>${esc(d.text)}</p>` : ""}${d.button_text ? `<a class="btn btn-primary" ${linkOf({ link: d.button_link }) || 'href="#productos"'}>${esc(d.button_text)}</a>` : ""}</div>`,
     imagen: (d) => `<div class="container cms-img reveal">${d.img ? `${d.link ? `<a ${linkOf(d)}>` : ""}<img src="${src(d.img)}" alt="${esc(d.alt || "")}" loading="lazy">${d.link ? "</a>" : ""}` : ""}</div>`,
     imagen_texto: (d) => `<div class="container cms-it reveal${d.side === "derecha" ? " rev" : ""}"><div>${d.img ? `<img src="${src(d.img)}" alt="${esc(d.alt || "")}" loading="lazy">` : ""}</div><div>${d.title ? `<h2>${esc(d.title)}</h2>` : ""}${d.text ? `<p>${esc(d.text)}</p>` : ""}${d.button_text ? `<a class="btn btn-primary" ${linkOf({ link: d.button_link }) || 'href="#productos"'}>${esc(d.button_text)}</a>` : ""}</div></div>`,
+    espaciador: (d) => `<div class="cms-spacer${d.line === "si" ? " line" : ""}" aria-hidden="true"></div>`,
     aviso: (d) => `<div class="cms-aviso">${d.link ? `<a ${linkOf(d)}>` : ""}${esc(d.text || "")}${d.link ? "</a>" : ""}</div>`,
   };
+  // Estilo de cada sección (panel → Página web → Estilo). Todo validado: colores #rrggbb y números acotados.
+  const hex = (c) => (/^#[0-9a-f]{6}$/i.test(c || "") ? c : "");
+  const num = (v, a, b) => { const n = Number(v); return Number.isFinite(n) ? Math.min(b, Math.max(a, Math.round(n))) : null; };
+  const textOn = (c) => { const [r, g, b] = [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.4 ? "#111111" : "#ffffff"; };
+  function applyStyle(el, d, type) {
+    const st = d.style || {}, css = el.style;
+    ["--sec-pt", "--sec-pb", "--sec-bg-l", "--sec-bg-d", "--sec-fg-l", "--sec-fg-d", "--sec-r", "--sp-h", "--sp-hm", "--sp-line"].forEach((k) => css.removeProperty(k));
+    el.classList.remove("cms-styled", "has-pad", "has-bg", "cms-full", "cms-narrow", "cms-round", "al-left", "al-center", "al-right", "hide-mob", "hide-desk");
+    const pt = num(st.pt, 0, 240), pb = num(st.pb, 0, 240);
+    if (pt != null || pb != null) { el.classList.add("cms-styled", "has-pad"); css.setProperty("--sec-pt", `${pt ?? 0}px`); css.setProperty("--sec-pb", `${pb ?? 0}px`); }
+    const bl = hex(st.bg), bd = hex(st.bg_dark) || bl;
+    if (bl || bd) { el.classList.add("cms-styled", "has-bg"); css.setProperty("--sec-bg-l", bl || "transparent"); css.setProperty("--sec-bg-d", bd || "transparent");
+      css.setProperty("--sec-fg-l", hex(st.fg) || (bl ? textOn(bl) : "inherit")); css.setProperty("--sec-fg-d", hex(st.fg_dark) || (bd ? textOn(bd) : "inherit")); }
+    if (st.width === "completo") el.classList.add("cms-styled", "cms-full");
+    if (st.width === "angosto") el.classList.add("cms-styled", "cms-narrow");
+    const r = num(st.radius, 0, 60); if (r) { el.classList.add("cms-styled", "cms-round"); css.setProperty("--sec-r", `${r}px`); }
+    if (["left", "center", "right"].includes(st.align)) el.classList.add("cms-styled", `al-${st.align}`);
+    if (st.hide_mobile) el.classList.add("hide-mob");
+    if (st.hide_desktop) el.classList.add("hide-desk");
+    if (type === "espaciador") { css.setProperty("--sp-h", `${num(d.height, 0, 400) ?? 40}px`); css.setProperty("--sp-hm", `${num(d.height_mobile, 0, 400) ?? num(d.height, 0, 400) ?? 24}px`);
+      if (hex(d.line_color)) css.setProperty("--sp-line", hex(d.line_color)); }
+  }
   function applySite(blocks) {
     const main = document.querySelector("main");
     document.querySelectorAll("[data-block-cms]").forEach((el) => el.remove());
@@ -642,6 +665,7 @@
         el.innerHTML = creators[b.type](b.data || {});
       } else if (el && renderers[b.type]) { try { renderers[b.type](el, b.data || {}); } catch (e) { /* si un bloque falla, queda el contenido original */ } }
       if (!el) return;
+      try { applyStyle(el, b.data || {}, b.type); } catch (e) { /* estilo inválido: se ignora */ }
       el.hidden = !b.active;
       main.appendChild(el);   // reordena según la posición
     });
