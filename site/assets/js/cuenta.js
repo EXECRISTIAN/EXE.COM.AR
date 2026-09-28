@@ -110,7 +110,13 @@
     setTimeout(async () => { $("recovery").hidden = true; if (!(await afterAuth())) render(); }, 1200);
   });
 
-  $("logout").addEventListener("click", async () => { await sb.auth.signOut(); render(); });
+  // Pide confirmación antes de cerrar sesión
+  const logoutDialog = $("logoutDialog");
+  $("logout").addEventListener("click", () => { logoutDialog.returnValue = ""; logoutDialog.showModal(); });
+  logoutDialog.addEventListener("click", (e) => { if (e.target === logoutDialog) logoutDialog.close("cancel"); });   // clic afuera = cancelar
+  logoutDialog.addEventListener("close", async () => {
+    if (logoutDialog.returnValue === "ok") { await sb.auth.signOut(); render(); }
+  });
 
   async function render() {
     const user = await be.user();
