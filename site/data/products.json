@@ -56,7 +56,7 @@
         "rows": [
           [
             "Tdp",
-            "120 w"
+            "65 W (máx. 148 W)"
           ],
           [
             "Incluye cooler cpu",
@@ -77,7 +77,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "description": "10 núcleos (6 Performance + 4 Efficient) y 16 hilos para jugar, estudiar y trabajar con fluidez. Hasta 4,6 GHz en turbo, gráficos integrados UHD 730 y cooler incluido: listo para armar una PC equilibrada sin placa de video."
   },
   {
     "id": "procesador-intel-core-i7",
@@ -88,7 +89,85 @@
     "weightKg": 1,
     "images": [
       "assets/img/products/producto-2.webp"
-    ]
+    ],
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "Core i7-13700"
+          ],
+          [
+            "Socket",
+            "LGA 1700 (Raptor Lake)"
+          ],
+          [
+            "Núcleos",
+            "16 (8 Performance + 8 Efficient)"
+          ],
+          [
+            "Hilos",
+            "24"
+          ],
+          [
+            "Frecuencia base",
+            "2,1 GHz (P-cores) / 1,5 GHz (E-cores)"
+          ],
+          [
+            "Frecuencia turbo",
+            "Hasta 5,2 GHz"
+          ],
+          [
+            "Proceso de fabricación",
+            "Intel 7 (10 nm)"
+          ],
+          [
+            "Gráficos integrados",
+            "Intel UHD Graphics 770"
+          ],
+          [
+            "Familia",
+            "Intel Core i7 13.ª gen"
+          ]
+        ]
+      },
+      {
+        "title": "Energía y refrigeración",
+        "rows": [
+          [
+            "TDP base",
+            "65 W"
+          ],
+          [
+            "Potencia turbo máxima",
+            "219 W"
+          ],
+          [
+            "Incluye cooler",
+            "Sí (Intel Laminar RM1)"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Caché L2",
+            "24 MB"
+          ],
+          [
+            "Caché L3",
+            "30 MB"
+          ],
+          [
+            "Memoria compatible",
+            "DDR5 hasta 5600 MT/s y DDR4 hasta 3200 MT/s"
+          ]
+        ]
+      }
+    ],
+    "description": "16 núcleos y 24 hilos con arquitectura híbrida de Intel: los núcleos Performance se ocupan de los juegos y las tareas pesadas, y los Efficient del trabajo en segundo plano. Hasta 5,2 GHz, gráficos UHD 770 y compatible con DDR4 y DDR5."
   },
   {
     "id": "procesador-amd-ryzen-7",
@@ -168,7 +247,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "description": "8 núcleos y 16 hilos Zen 3 con hasta 4,7 GHz: un clásico para gaming y creación de contenido en plataforma AM4. No trae cooler ni gráficos integrados: combinalo con un disipador y una placa de video."
   },
   {
     "id": "procesador-amd-ryzen-5",
@@ -249,7 +329,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "description": "6 núcleos y 12 hilos Zen 4 en 4 nm con gráficos AMD Radeon integrados: ideal para armar una PC gamer de entrada sin placa de video y actualizar después. Plataforma AM5 con DDR5 y cooler incluido."
   },
   {
     "id": "motherboard-asus-prime",
@@ -434,7 +515,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "description": "Motherboard Micro-ATX para Ryzen 7000/8000 (AM5) con chipset A620, DDR5, 2 ranuras M.2 y BIOS FlashBack para actualizar sin procesador. Salidas HDMI, DisplayPort y VGA para usar los gráficos integrados."
   },
   {
     "id": "placa-msi-geforce-gtx-ventus",
@@ -448,7 +530,86 @@
       "assets/img/products/asus-gtx1660-01.webp",
       "assets/img/products/asus-gtx1660-02.webp",
       "assets/img/products/asus-gtx1660-03.webp"
-    ]
+    ],
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "MSI GeForce GTX 1650 D6 VENTUS XS OC"
+          ],
+          [
+            "GPU",
+            "NVIDIA GeForce GTX 1650 (Turing)"
+          ],
+          [
+            "Núcleos CUDA",
+            "896"
+          ],
+          [
+            "Frecuencia boost",
+            "1620 MHz"
+          ],
+          [
+            "Interfaz",
+            "PCI Express x16 3.0"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Capacidad",
+            "4 GB GDDR6"
+          ],
+          [
+            "Bus",
+            "128 bits"
+          ],
+          [
+            "Velocidad",
+            "12 Gbps"
+          ]
+        ]
+      },
+      {
+        "title": "Conectividad",
+        "rows": [
+          [
+            "Salidas",
+            "1 × DisplayPort 1.4, 1 × HDMI 2.0b, 1 × DL-DVI-D"
+          ],
+          [
+            "Monitores simultáneos",
+            "Hasta 3"
+          ]
+        ]
+      },
+      {
+        "title": "Energía y refrigeración",
+        "rows": [
+          [
+            "Consumo",
+            "75 W"
+          ],
+          [
+            "Fuente recomendada",
+            "300 W"
+          ],
+          [
+            "Conector de alimentación",
+            "No necesita (se alimenta del slot PCIe)"
+          ],
+          [
+            "Refrigeración",
+            "2 ventiladores"
+          ]
+        ]
+      }
+    ],
+    "description": "Placa de video compacta de doble ventilador, pensada para jugar en 1080p en gabinetes chicos. Consume solo 75 W y no necesita cable de alimentación extra: funciona con fuentes desde 300 W."
   },
   {
     "id": "gabinete-antec-nx200m-white",
@@ -531,7 +692,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "description": "Gabinete Micro-ATX blanco con panel lateral de vidrio templado, espacio para hasta 5 ventiladores y soporte para refrigeración líquida. Frente con USB 3.0 y 2 × USB 2.0."
   },
   {
     "id": "fuente-aerocool-cylon-600w",
@@ -642,7 +804,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "description": "Fuente ATX de 600 W con certificación 80 Plus Bronze, PFC activo y ventilador con iluminación RGB. Rango completo 100–240 V, 2 conectores PCIe y 5 SATA: suficiente para una PC gamer de gama media."
   },
   {
     "id": "memoria-tforce-delta-ddr4-8gb",
@@ -742,7 +905,8 @@
           ]
         ]
       }
-    ]
+    ],
+    "description": "Módulo DDR4 de 8 GB a 3600 MHz CL18 con disipador negro e iluminación RGB de 120°. Ideal para sumar velocidad a Ryzen e Intel; combinalo con otro igual para tener Dual Channel."
   },
   {
     "id": "cooler-deepcool-ag400-plus",
@@ -754,6 +918,68 @@
       "assets/img/products/cooler-deepcool-02.webp",
       "assets/img/products/cooler-deepcool-03.webp",
       "assets/img/products/cooler-deepcool-04.webp"
-    ]
+    ],
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "DeepCool AG400 PLUS"
+          ],
+          [
+            "Tipo",
+            "Disipador por aire de torre, doble ventilador"
+          ],
+          [
+            "Disipación",
+            "Hasta 220 W"
+          ],
+          [
+            "Heat pipes",
+            "4 de contacto directo"
+          ],
+          [
+            "Dimensiones",
+            "125 × 107 × 150 mm"
+          ]
+        ]
+      },
+      {
+        "title": "Ventiladores",
+        "rows": [
+          [
+            "Cantidad",
+            "2 × 120 mm (preinstalados)"
+          ],
+          [
+            "Velocidad",
+            "500–2000 RPM, PWM"
+          ],
+          [
+            "Rodamiento",
+            "Hidráulico"
+          ]
+        ]
+      },
+      {
+        "title": "Compatibilidad",
+        "rows": [
+          [
+            "Intel",
+            "LGA 1700 / 1200 / 1151 / 1150 / 1155"
+          ],
+          [
+            "AMD",
+            "AM5 / AM4"
+          ],
+          [
+            "Memoria RAM",
+            "Sin interferencia con los módulos (100 % de espacio libre)"
+          ]
+        ]
+      }
+    ],
+    "description": "Disipador de torre con dos ventiladores de 120 mm y 4 heat pipes de contacto directo que disipa hasta 220 W. Silencioso gracias a los rodamientos hidráulicos y compatible con Intel LGA 1700/1200 y AMD AM5/AM4 sin tapar la memoria RAM."
   }
 ]
