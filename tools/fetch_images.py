@@ -5,10 +5,16 @@ import json, re, subprocess, sys, urllib.request, urllib.parse, pathlib
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36"
 OUT = pathlib.Path("site/assets/img/products")
-def get(url):
+PROXY = "https://tmp-exe-img.execomar.workers.dev/?u="   # Worker temporal (solo dominios de fabricantes) por si el sitio bloquea a GitHub
+def _get(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "es-AR,es;q=0.9,en;q=0.8"})
     with urllib.request.urlopen(req, timeout=30) as r:
         return r.read()
+def get(url):
+    try:
+        return _get(url)
+    except Exception:
+        return _get(PROXY + urllib.parse.quote(url, safe=""))
 def og_image(page):
     html = get(page).decode("utf-8", "ignore")
     for pat in (r'<meta[^>]+property=["\']og:image(?::secure_url)?["\'][^>]+content=["\']([^"\']+)',
@@ -16,6 +22,11 @@ def og_image(page):
                 r'<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\']([^"\']+)'):
         m = re.search(pat, html, re.I)
         if m: return urllib.parse.urljoin(page, m.group(1).replace("&amp;", "&"))
+    # sin og:image: primera imagen de producto grande de la página
+    for m in re.finditer(r'<img[^>]+(?:data-src|src)=["\']([^"\']+\.(?:jpe?g|png|webp)[^"\']*)', html, re.I):
+        u = m.group(1)
+        if re.search(r"product|catalog|image/cache|gallery|upload", u, re.I) and not re.search(r"logo|icon|banner|sprite", u, re.I):
+            return urllib.parse.urljoin(page, u.replace("&amp;", "&"))
     return None
 def corners_white(path):
     # promedio de brillo de las 4 esquinas (0-255)
