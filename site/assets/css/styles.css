@@ -532,3 +532,4 @@ body.no-scroll { overflow: hidden; }
 @media (max-width: 767px) { .cms-spacer { height: var(--sp-hm, 24px); } }
 .cms-spacer.line::after { content: ""; position: absolute; left: 50%; top: 50%; width: min(1100px, calc(100% - 32px)); height: 1px; transform: translateX(-50%); background: var(--sp-line, var(--line)); }
 section.cms-block:has(> .cms-spacer) { padding: 0; }
+.chip:focus-visible, .fx-rbtn:focus-visible, .p-tag:focus-visible, .tag-brand:focus-visible { outline: 2px solid var(--c0); outline-offset: 2px; }
