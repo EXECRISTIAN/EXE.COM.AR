@@ -78,6 +78,7 @@
               <img src="${esc(mainImg(p))}" alt="${esc(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
               ${p.images && p.images[1] ? `<img class="alt" src="${esc(p.images[1])}" alt="" loading="lazy">` : ""}
               ${p.category ? `<span class="tag">${esc(p.category)}</span>` : ""}
+              ${p.outlet ? `<span class="tag tag-outlet">Outlet</span>` : ""}
               ${p.images && p.images.length > 1 ? `<span class="img-count" aria-hidden="true">${p.images.length} fotos</span>` : ""}
             </a>
             <div class="card-body">
@@ -85,6 +86,7 @@
               <h3><a href="#producto/${encodeURIComponent(p.id)}">${esc(p.name)}</a></h3>
               <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>
               ${p.price > 0 ? `<span class="price-note">Consultar precio final</span>` : ""}
+              ${p.condition ? `<span class="condition">Estado: ${esc(p.condition)}</span>` : ""}
               ${stockBadge(p)}
               ${p.variants ? `<select data-variant="${esc(p.id)}" aria-label="Variante">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select>` : ""}
               <button class="btn btn-primary" data-add="${esc(p.id)}" ${out ? "disabled" : ""}>${out ? "Sin stock" : "Agregar al carrito"}</button>
@@ -134,6 +136,7 @@
         <h2 id="pdName">${esc(p.name)}</h2>
         <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>
         ${p.price > 0 ? `<span class="price-note">Consultá el precio final actualizado</span>` : ""}
+        ${p.outlet ? `<p class="pd-condition"><span class="tag-outlet">Outlet</span> ${esc(p.condition || "")}</p>` : ""}
         <div class="pd-admin" id="pdAdmin" hidden></div>
         ${stockBadge(p)}
         ${p.variants ? `<label class="field">Variante<select id="pdVariant">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select></label>` : ""}
@@ -584,8 +587,22 @@
   $("year").textContent = new Date().getFullYear();
 
   /* ---------- Datos ---------- */
-  fetch("data/products.json", { cache: "no-cache" })   // siempre revalida precios y stock
-    .then((r) => r.json())
-    .then((data) => { products = data.filter((p) => p.active !== false); /* "active": false = sin stock en proveedores: no se muestra ni se puede pedir */ renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); })
+  // Catálogo: primero Supabase (lo que se edita en el panel se ve al instante); si falla, la copia products.json.
+  const fromDb = (r) => ({
+    id: r.id, name: r.name, brand: r.brand, category: r.category, description: r.description, price: Number(r.price) || 0,
+    ...(r.show_stock ? { stock: r.stock } : {}), images: r.images && r.images.length ? r.images : (r.image ? [r.image] : []),
+    specs: r.specs && r.specs.length ? r.specs : undefined, outlet: r.outlet, condition: r.condition, weightKg: Number(r.weight_kg) || 1,
+    variants: r.variants && r.variants.length ? r.variants : undefined,
+  });
+  const loadDb = () => {
+    if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) return Promise.reject();
+    const cols = "id,name,brand,category,description,price,stock,show_stock,image,images,specs,outlet,condition,weight_kg,variants";
+    return fetch(`${cfg.supabaseUrl}/rest/v1/products?select=${cols}&active=eq.true&order=sort.asc,name.asc`, { headers: { apikey: cfg.supabaseAnonKey } })
+      .then((r) => (r.ok ? r.json() : Promise.reject())).then((rows) => (rows.length ? rows.map(fromDb) : Promise.reject()));
+  };
+  const loadJson = () => fetch("data/products.json", { cache: "no-cache" }).then((r) => r.json())
+    .then((data) => data.filter((p) => p.active !== false));   // "active": false = sin stock: no se muestra ni se puede pedir
+  loadDb().catch(loadJson)
+    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();

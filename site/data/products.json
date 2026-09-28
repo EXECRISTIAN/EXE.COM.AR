@@ -981,5 +981,2007 @@
       }
     ],
     "description": "Disipador de torre con dos ventiladores de 120 mm y 4 heat pipes de contacto directo que disipa hasta 220 W. Silencioso gracias a los rodamientos hidráulicos y compatible con Intel LGA 1700/1200 y AMD AM5/AM4 sin tapar la memoria RAM."
+  },
+  {
+    "id": "outlet-rtx3090-zotac-trinity",
+    "name": "Placa de Video ZOTAC GAMING GeForce RTX 3090 Trinity 24GB GDDR6X",
+    "brand": "ZOTAC",
+    "category": "Placas de video",
+    "price": 951000,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Full, en caja. Uso gaming",
+    "weightKg": 2.5,
+    "images": [],
+    "description": "Una de las placas más potentes de su generación: 24 GB de GDDR6X para jugar en 4K con ray tracing y DLSS, editar video y trabajar con IA o renderizado. Refrigeración IceStorm 2.0 de triple ventilador y luces SPECTRA RGB.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "GPU",
+            "NVIDIA GeForce RTX 3090 (Ampere)"
+          ],
+          [
+            "Núcleos CUDA",
+            "10496"
+          ],
+          [
+            "Frecuencia boost",
+            "1695 MHz"
+          ],
+          [
+            "Interfaz",
+            "PCI Express 4.0 x16"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Capacidad",
+            "24 GB GDDR6X"
+          ],
+          [
+            "Bus",
+            "384 bits"
+          ],
+          [
+            "Velocidad",
+            "19,5 Gbps"
+          ]
+        ]
+      },
+      {
+        "title": "Conectividad",
+        "rows": [
+          [
+            "Salidas",
+            "3 × DisplayPort 1.4a, 1 × HDMI 2.1"
+          ]
+        ]
+      },
+      {
+        "title": "Energía",
+        "rows": [
+          [
+            "Consumo",
+            "350 W"
+          ],
+          [
+            "Fuente recomendada",
+            "750 W"
+          ],
+          [
+            "Conectores",
+            "2 × 8 pines"
+          ]
+        ]
+      },
+      {
+        "title": "Dimensiones",
+        "rows": [
+          [
+            "Largo",
+            "317,8 mm"
+          ],
+          [
+            "Ranuras",
+            "2,5"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-pentium-g5420",
+    "name": "Procesador Intel Pentium Gold G5420 3.8GHz LGA1151 (8.ª/9.ª gen)",
+    "brand": "Intel",
+    "category": "Procesadores",
+    "price": 39625,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Sin caja, con cooler",
+    "weightKg": 0.3,
+    "images": [],
+    "description": "Procesador económico de 2 núcleos y 4 hilos para PC de oficina, estudio o multimedia, con gráficos integrados UHD 610. Compatible con motherboards de 8.ª y 9.ª generación (chipsets 300).\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "Pentium Gold G5420"
+          ],
+          [
+            "Socket",
+            "LGA 1151 (serie 300)"
+          ],
+          [
+            "Generación",
+            "8.ª/9.ª gen (Coffee Lake)"
+          ],
+          [
+            "Núcleos / hilos",
+            "2 / 4"
+          ],
+          [
+            "Frecuencia base",
+            "3,8 GHz"
+          ],
+          [
+            "Gráficos integrados",
+            "Intel UHD Graphics 610"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria y energía",
+        "rows": [
+          [
+            "Caché",
+            "4 MB"
+          ],
+          [
+            "TDP",
+            "54 W"
+          ],
+          [
+            "Memoria compatible",
+            "DDR4"
+          ]
+        ]
+      },
+      {
+        "title": "Incluye",
+        "rows": [
+          [
+            "Cooler",
+            "Sí (cooler Intel)"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-celeron-g5925-sin-caja",
+    "name": "Procesador Intel Celeron G5925 3.6GHz LGA1200 (10.ª gen) - Sin caja",
+    "brand": "Intel",
+    "category": "Procesadores",
+    "price": 39625,
+    "stock": 2,
+    "outlet": true,
+    "condition": "Sin caja, sin cooler",
+    "weightKg": 0.2,
+    "images": [],
+    "description": "El procesador más accesible para LGA1200: 2 núcleos para una PC de oficina, caja registradora o uso básico, con gráficos integrados UHD 610. Se entrega sin cooler.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "Celeron G5925"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (series 400/500)"
+          ],
+          [
+            "Generación",
+            "10.ª gen (Comet Lake)"
+          ],
+          [
+            "Núcleos / hilos",
+            "2 / 2"
+          ],
+          [
+            "Frecuencia base",
+            "3,6 GHz"
+          ],
+          [
+            "Gráficos integrados",
+            "Intel UHD Graphics 610"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria y energía",
+        "rows": [
+          [
+            "Caché",
+            "4 MB"
+          ],
+          [
+            "TDP",
+            "58 W"
+          ],
+          [
+            "Memoria compatible",
+            "DDR4"
+          ]
+        ]
+      },
+      {
+        "title": "Incluye",
+        "rows": [
+          [
+            "Cooler",
+            "No"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-celeron-g5925-full",
+    "name": "Procesador Intel Celeron G5925 3.6GHz LGA1200 (10.ª gen) - En caja",
+    "brand": "Intel",
+    "category": "Procesadores",
+    "price": 47550,
+    "stock": 3,
+    "outlet": true,
+    "condition": "Full, en caja",
+    "weightKg": 0.3,
+    "images": [],
+    "description": "El procesador más accesible para LGA1200: 2 núcleos para una PC de oficina, caja registradora o uso básico, con gráficos integrados UHD 610. Completo, con su caja y cooler original.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "Celeron G5925"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (series 400/500)"
+          ],
+          [
+            "Generación",
+            "10.ª gen (Comet Lake)"
+          ],
+          [
+            "Núcleos / hilos",
+            "2 / 2"
+          ],
+          [
+            "Frecuencia base",
+            "3,6 GHz"
+          ],
+          [
+            "Gráficos integrados",
+            "Intel UHD Graphics 610"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria y energía",
+        "rows": [
+          [
+            "Caché",
+            "4 MB"
+          ],
+          [
+            "TDP",
+            "58 W"
+          ],
+          [
+            "Memoria compatible",
+            "DDR4"
+          ]
+        ]
+      },
+      {
+        "title": "Incluye",
+        "rows": [
+          [
+            "Cooler",
+            "Sí (cooler Intel)"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-celeron-g5905",
+    "name": "Procesador Intel Celeron G5905 3.5GHz LGA1200 (10.ª gen)",
+    "brand": "Intel",
+    "category": "Procesadores",
+    "price": 39625,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Sin caja, con cooler",
+    "weightKg": 0.3,
+    "images": [],
+    "description": "Procesador básico de 2 núcleos para LGA1200, ideal para una PC de oficina o de uso hogareño liviano. Gráficos integrados UHD 610 e incluye cooler.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "Celeron G5905"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (series 400/500)"
+          ],
+          [
+            "Generación",
+            "10.ª gen (Comet Lake)"
+          ],
+          [
+            "Núcleos / hilos",
+            "2 / 2"
+          ],
+          [
+            "Frecuencia base",
+            "3,5 GHz"
+          ],
+          [
+            "Gráficos integrados",
+            "Intel UHD Graphics 610"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria y energía",
+        "rows": [
+          [
+            "Caché",
+            "4 MB"
+          ],
+          [
+            "TDP",
+            "58 W"
+          ],
+          [
+            "Memoria compatible",
+            "DDR4"
+          ]
+        ]
+      },
+      {
+        "title": "Incluye",
+        "rows": [
+          [
+            "Cooler",
+            "Sí (cooler Intel)"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-i3-10100",
+    "name": "Procesador Intel Core i3-10100 4.3GHz Turbo LGA1200 (10.ª gen)",
+    "brand": "Intel",
+    "category": "Procesadores",
+    "price": 103025,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Full, en caja",
+    "weightKg": 0.3,
+    "images": [],
+    "description": "4 núcleos y 8 hilos con hasta 4,3 GHz: rinde muy bien en oficina, estudio y juegos livianos, y tiene gráficos integrados UHD 630 para arrancar sin placa de video. Completo, con caja y cooler.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "Core i3-10100"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (series 400/500)"
+          ],
+          [
+            "Generación",
+            "10.ª gen (Comet Lake)"
+          ],
+          [
+            "Núcleos / hilos",
+            "4 / 8"
+          ],
+          [
+            "Frecuencia base",
+            "3,6 GHz"
+          ],
+          [
+            "Frecuencia turbo",
+            "4,3 GHz"
+          ],
+          [
+            "Gráficos integrados",
+            "Intel UHD Graphics 630"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria y energía",
+        "rows": [
+          [
+            "Caché",
+            "6 MB"
+          ],
+          [
+            "TDP",
+            "65 W"
+          ],
+          [
+            "Memoria compatible",
+            "DDR4"
+          ]
+        ]
+      },
+      {
+        "title": "Incluye",
+        "rows": [
+          [
+            "Cooler",
+            "Sí (cooler Intel)"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-i3-10105",
+    "name": "Procesador Intel Core i3-10105 4.4GHz Turbo LGA1200 (10.ª gen)",
+    "brand": "Intel",
+    "category": "Procesadores",
+    "price": 103025,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Full, en caja",
+    "weightKg": 0.3,
+    "images": [],
+    "description": "Versión renovada del i3-10100 con 100 MHz más: 4 núcleos, 8 hilos, hasta 4,4 GHz y gráficos UHD 630. Ideal para una PC rápida de oficina o gamer de entrada. Completo, con caja y cooler.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "Core i3-10105"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (series 400/500)"
+          ],
+          [
+            "Generación",
+            "10.ª gen (Comet Lake Refresh)"
+          ],
+          [
+            "Núcleos / hilos",
+            "4 / 8"
+          ],
+          [
+            "Frecuencia base",
+            "3,7 GHz"
+          ],
+          [
+            "Frecuencia turbo",
+            "4,4 GHz"
+          ],
+          [
+            "Gráficos integrados",
+            "Intel UHD Graphics 630"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria y energía",
+        "rows": [
+          [
+            "Caché",
+            "6 MB"
+          ],
+          [
+            "TDP",
+            "65 W"
+          ],
+          [
+            "Memoria compatible",
+            "DDR4"
+          ]
+        ]
+      },
+      {
+        "title": "Incluye",
+        "rows": [
+          [
+            "Cooler",
+            "Sí (cooler Intel)"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-i3-10100f",
+    "name": "Procesador Intel Core i3-10100F 4.3GHz Turbo LGA1200 (10.ª gen, sin gráficos)",
+    "brand": "Intel",
+    "category": "Procesadores",
+    "price": 103025,
+    "stock": 3,
+    "outlet": true,
+    "condition": "Con",
+    "weightKg": 0.3,
+    "images": [],
+    "description": "4 núcleos y 8 hilos hasta 4,3 GHz para una PC gamer de entrada con placa de video. La versión F no trae gráficos integrados: necesita placa de video.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "Core i3-10100F"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (series 400/500)"
+          ],
+          [
+            "Generación",
+            "10.ª gen (Comet Lake)"
+          ],
+          [
+            "Núcleos / hilos",
+            "4 / 8"
+          ],
+          [
+            "Frecuencia base",
+            "3,6 GHz"
+          ],
+          [
+            "Frecuencia turbo",
+            "4,3 GHz"
+          ],
+          [
+            "Gráficos integrados",
+            "No (requiere placa de video)"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria y energía",
+        "rows": [
+          [
+            "Caché",
+            "6 MB"
+          ],
+          [
+            "TDP",
+            "65 W"
+          ],
+          [
+            "Memoria compatible",
+            "DDR4"
+          ]
+        ]
+      },
+      {
+        "title": "Incluye",
+        "rows": [
+          [
+            "Cooler",
+            "Consultar"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-i5-10400",
+    "name": "Procesador Intel Core i5-10400 4.3GHz Turbo LGA1200 (10.ª gen)",
+    "brand": "Intel",
+    "category": "Procesadores",
+    "price": 182275,
+    "stock": 2,
+    "outlet": true,
+    "condition": "Full, en caja",
+    "weightKg": 0.3,
+    "images": [],
+    "description": "6 núcleos y 12 hilos hasta 4,3 GHz: el clásico equilibrado para jugar y trabajar, con gráficos UHD 630 integrados. Completo, con caja y cooler.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "Core i5-10400"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (series 400/500)"
+          ],
+          [
+            "Generación",
+            "10.ª gen (Comet Lake)"
+          ],
+          [
+            "Núcleos / hilos",
+            "6 / 12"
+          ],
+          [
+            "Frecuencia base",
+            "2,9 GHz"
+          ],
+          [
+            "Frecuencia turbo",
+            "4,3 GHz"
+          ],
+          [
+            "Gráficos integrados",
+            "Intel UHD Graphics 630"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria y energía",
+        "rows": [
+          [
+            "Caché",
+            "12 MB"
+          ],
+          [
+            "TDP",
+            "65 W"
+          ],
+          [
+            "Memoria compatible",
+            "DDR4"
+          ]
+        ]
+      },
+      {
+        "title": "Incluye",
+        "rows": [
+          [
+            "Cooler",
+            "Sí (cooler Intel)"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-i3-12100f",
+    "name": "Procesador Intel Core i3-12100F 4.3GHz Turbo LGA1700 (12.ª gen, sin gráficos)",
+    "brand": "Intel",
+    "category": "Procesadores",
+    "price": 174350,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Sin caja, con cooler",
+    "weightKg": 0.3,
+    "images": [],
+    "description": "4 núcleos Performance y 8 hilos de 12.ª generación: rinde como un i5 de generaciones anteriores y entra en plataformas LGA1700 (series 600 y 700) con DDR4 o DDR5. Requiere placa de video. Incluye cooler.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "Core i3-12100F"
+          ],
+          [
+            "Socket",
+            "LGA 1700 (series 600/700)"
+          ],
+          [
+            "Generación",
+            "12.ª gen (Alder Lake)"
+          ],
+          [
+            "Núcleos / hilos",
+            "4 / 8"
+          ],
+          [
+            "Frecuencia base",
+            "3,3 GHz"
+          ],
+          [
+            "Frecuencia turbo",
+            "4,3 GHz"
+          ],
+          [
+            "Gráficos integrados",
+            "No (requiere placa de video)"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria y energía",
+        "rows": [
+          [
+            "Caché L3",
+            "12 MB"
+          ],
+          [
+            "TDP",
+            "58 W (máx. 89 W)"
+          ],
+          [
+            "Memoria compatible",
+            "DDR4-3200 / DDR5-4800"
+          ]
+        ]
+      },
+      {
+        "title": "Incluye",
+        "rows": [
+          [
+            "Cooler",
+            "Sí (cooler Intel)"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-z390-aorus-elite",
+    "name": "Motherboard Gigabyte Z390 AORUS ELITE LGA1151 (8.ª/9.ª gen)",
+    "brand": "Gigabyte",
+    "category": "Motherboards",
+    "price": 79250,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Sin caja",
+    "weightKg": 1.6,
+    "images": [],
+    "description": "Motherboard ATX gamer para Intel 8.ª y 9.ª generación con chipset Z390 (permite overclock en procesadores K), alimentación de 12+1 fases, doble M.2 con disipador e iluminación RGB Fusion.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Chipset",
+            "Intel Z390"
+          ],
+          [
+            "Socket",
+            "LGA 1151 (8.ª/9.ª gen)"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Soporte",
+            "4 × DDR4, hasta 64 GB, 4266 MHz (OC)"
+          ]
+        ]
+      },
+      {
+        "title": "Almacenamiento y conectividad",
+        "rows": [
+          [
+            "Ranuras M.2",
+            "2"
+          ],
+          [
+            "SATA",
+            "6"
+          ],
+          [
+            "Red",
+            "Intel Gigabit LAN"
+          ],
+          [
+            "Salida de video",
+            "HDMI"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-biostar-z490a-silver",
+    "name": "Motherboard Biostar RACING Z490A-SILVER LGA1200 (10.ª/11.ª gen)",
+    "brand": "Biostar",
+    "category": "Motherboards",
+    "price": 126800,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Con caja",
+    "weightKg": 1.6,
+    "images": [],
+    "description": "Motherboard ATX con chipset Z490 para Intel 10.ª y 11.ª generación, soporte de overclock en procesadores K, salidas VGA/HDMI/DisplayPort y diseño en tonos plateados.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Chipset",
+            "Intel Z490"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (10.ª/11.ª gen)"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Soporte",
+            "4 × DDR4, hasta 128 GB, hasta 4400 MHz (OC)"
+          ]
+        ]
+      },
+      {
+        "title": "Almacenamiento y conectividad",
+        "rows": [
+          [
+            "Ranuras M.2",
+            "2"
+          ],
+          [
+            "SATA",
+            "6"
+          ],
+          [
+            "Salidas de video",
+            "VGA, HDMI, DisplayPort"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-asus-prime-z590-p",
+    "name": "Motherboard ASUS PRIME Z590-P LGA1200 (10.ª/11.ª gen)",
+    "brand": "ASUS",
+    "category": "Motherboards",
+    "price": 142650,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Con caja",
+    "weightKg": 1.6,
+    "images": [
+      "assets/img/products/outlet-asus-prime-z590-p.webp"
+    ],
+    "description": "Motherboard ATX Z590 para Intel 10.ª y 11.ª generación con PCIe 4.0, tres ranuras M.2, red 2,5 Gb y Aura Sync. Base ideal para un i5/i7 K con overclock.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Chipset",
+            "Intel Z590"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (10.ª/11.ª gen)"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Soporte",
+            "4 × DDR4, hasta 128 GB, hasta 5133 MHz (OC)"
+          ]
+        ]
+      },
+      {
+        "title": "Almacenamiento y conectividad",
+        "rows": [
+          [
+            "Ranuras M.2",
+            "3 (una PCIe 4.0)"
+          ],
+          [
+            "SATA",
+            "6"
+          ],
+          [
+            "Red",
+            "Intel 2,5 Gb"
+          ],
+          [
+            "Salidas de video",
+            "HDMI, DisplayPort"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-asus-prime-b560-plus-ac-hes",
+    "name": "Motherboard ASUS PRIME B560-PLUS AC-HES LGA1200 con WiFi",
+    "brand": "ASUS",
+    "category": "Motherboards",
+    "price": 103025,
+    "stock": 2,
+    "outlet": true,
+    "condition": "Sin caja",
+    "weightKg": 1.5,
+    "images": [
+      "assets/img/products/outlet-asus-prime-b560-plus-ac-hes.webp"
+    ],
+    "description": "Motherboard ATX B560 para Intel 10.ª y 11.ª generación con WiFi 5 y Bluetooth integrados, PCIe 4.0, dos M.2 y USB 3.2 Gen 2. Permite overclock de memoria.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Chipset",
+            "Intel B560"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (10.ª/11.ª gen)"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Soporte",
+            "4 × DDR4, hasta 128 GB, hasta 4800 MHz (OC)"
+          ]
+        ]
+      },
+      {
+        "title": "Almacenamiento y conectividad",
+        "rows": [
+          [
+            "Ranuras M.2",
+            "2 (una PCIe 4.0)"
+          ],
+          [
+            "SATA",
+            "6"
+          ],
+          [
+            "Inalámbrico",
+            "WiFi 5 + Bluetooth"
+          ],
+          [
+            "Salidas de video",
+            "HDMI, DisplayPort"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-asus-prime-b460m-a-r2",
+    "name": "Motherboard ASUS PRIME B460M-A R2.0 LGA1200",
+    "brand": "ASUS",
+    "category": "Motherboards",
+    "price": 95100,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Con caja",
+    "weightKg": 1.1,
+    "images": [
+      "assets/img/products/outlet-asus-prime-b460m-a-r2.webp"
+    ],
+    "description": "Motherboard Micro-ATX B460 para Intel 10.ª generación, con doble M.2, salidas de video DVI/HDMI/DisplayPort y Aura Sync. Ideal para una PC de oficina o gamer compacta.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Chipset",
+            "Intel B460"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (10.ª gen)"
+          ],
+          [
+            "Formato",
+            "Micro-ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Soporte",
+            "4 × DDR4, hasta 128 GB, 2933 MHz"
+          ]
+        ]
+      },
+      {
+        "title": "Almacenamiento y conectividad",
+        "rows": [
+          [
+            "Ranuras M.2",
+            "2"
+          ],
+          [
+            "SATA",
+            "6"
+          ],
+          [
+            "Salidas de video",
+            "DVI, HDMI, DisplayPort"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-gigabyte-b460m-ds3h-v2",
+    "name": "Motherboard Gigabyte B460M DS3H V2 LGA1200",
+    "brand": "Gigabyte",
+    "category": "Motherboards",
+    "price": 95100,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Con caja",
+    "weightKg": 1.1,
+    "images": [],
+    "description": "Motherboard Micro-ATX B460 para Intel 10.ª generación con M.2 NVMe, salidas VGA/DVI/HDMI y audio HD. Una base simple y confiable para una PC de uso diario.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Chipset",
+            "Intel B460"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (10.ª gen)"
+          ],
+          [
+            "Formato",
+            "Micro-ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Soporte",
+            "4 × DDR4, hasta 128 GB, 2933 MHz"
+          ]
+        ]
+      },
+      {
+        "title": "Almacenamiento y conectividad",
+        "rows": [
+          [
+            "Ranuras M.2",
+            "1"
+          ],
+          [
+            "SATA",
+            "6"
+          ],
+          [
+            "Salidas de video",
+            "VGA, DVI, HDMI"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-rog-strix-z490-e",
+    "name": "Motherboard ASUS ROG STRIX Z490-E GAMING LGA1200 (0 km)",
+    "brand": "ASUS",
+    "category": "Motherboards",
+    "price": 317000,
+    "stock": 1,
+    "outlet": true,
+    "condition": "0 km, full box",
+    "weightKg": 1.8,
+    "images": [
+      "assets/img/products/outlet-rog-strix-z490-e.webp"
+    ],
+    "description": "Motherboard ATX de gama alta para Intel 10.ª/11.ª gen: VRM de 14+2 fases, WiFi 6, red Intel 2,5 Gb, dos M.2 con disipador y Aura Sync. Sin uso, completa con su caja y accesorios.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Chipset",
+            "Intel Z490"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (10.ª/11.ª gen)"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Soporte",
+            "4 × DDR4, hasta 128 GB, hasta 4600 MHz (OC)"
+          ]
+        ]
+      },
+      {
+        "title": "Almacenamiento y conectividad",
+        "rows": [
+          [
+            "Ranuras M.2",
+            "2"
+          ],
+          [
+            "SATA",
+            "6"
+          ],
+          [
+            "Inalámbrico",
+            "WiFi 6 + Bluetooth 5.1"
+          ],
+          [
+            "Red",
+            "Intel 2,5 Gb"
+          ],
+          [
+            "Salidas de video",
+            "HDMI, DisplayPort"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-msi-h510m-a-pro",
+    "name": "Motherboard MSI H510M-A PRO LGA1200",
+    "brand": "MSI",
+    "category": "Motherboards",
+    "price": 87175,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Sin caja",
+    "weightKg": 0.9,
+    "images": [],
+    "description": "Motherboard Micro-ATX H510 para Intel 10.ª y 11.ª generación, con M.2, salidas VGA/HDMI y red Gigabit. Económica y confiable para oficina o una PC gamer de entrada.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Chipset",
+            "Intel H510"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (10.ª/11.ª gen)"
+          ],
+          [
+            "Formato",
+            "Micro-ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Soporte",
+            "2 × DDR4, hasta 64 GB, hasta 3200 MHz"
+          ]
+        ]
+      },
+      {
+        "title": "Almacenamiento y conectividad",
+        "rows": [
+          [
+            "Ranuras M.2",
+            "1"
+          ],
+          [
+            "SATA",
+            "4"
+          ],
+          [
+            "Salidas de video",
+            "VGA, HDMI"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-msi-mpg-z490-gaming-plus",
+    "name": "Motherboard MSI MPG Z490 GAMING PLUS LGA1200",
+    "brand": "MSI",
+    "category": "Motherboards",
+    "price": 142650,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Full box",
+    "weightKg": 1.6,
+    "images": [],
+    "description": "Motherboard ATX gamer Z490 para Intel 10.ª/11.ª gen con overclock, red 2,5 Gb, doble M.2 con disipador Frozr y Mystic Light RGB. Completa con su caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Chipset",
+            "Intel Z490"
+          ],
+          [
+            "Socket",
+            "LGA 1200 (10.ª/11.ª gen)"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Soporte",
+            "4 × DDR4, hasta 128 GB, hasta 4800 MHz (OC)"
+          ]
+        ]
+      },
+      {
+        "title": "Almacenamiento y conectividad",
+        "rows": [
+          [
+            "Ranuras M.2",
+            "2"
+          ],
+          [
+            "SATA",
+            "6"
+          ],
+          [
+            "Red",
+            "Realtek 2,5 Gb"
+          ],
+          [
+            "Salidas de video",
+            "HDMI, DisplayPort"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-rog-strix-b450-f-ii",
+    "name": "Motherboard ASUS ROG STRIX B450-F GAMING II AM4",
+    "brand": "ASUS",
+    "category": "Motherboards",
+    "price": 158500,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Full box",
+    "weightKg": 1.6,
+    "images": [
+      "assets/img/products/outlet-rog-strix-b450-f-ii.webp"
+    ],
+    "description": "Motherboard ATX gamer AM4 para Ryzen (hasta serie 5000 con BIOS actualizado), con doble M.2, audio SupremeFX, red Intel Gigabit y Aura Sync RGB. Completa con su caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Chipset",
+            "AMD B450"
+          ],
+          [
+            "Socket",
+            "AM4 (Ryzen)"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Memoria",
+        "rows": [
+          [
+            "Soporte",
+            "4 × DDR4, hasta 128 GB, hasta 4400 MHz (OC)"
+          ]
+        ]
+      },
+      {
+        "title": "Almacenamiento y conectividad",
+        "rows": [
+          [
+            "Ranuras M.2",
+            "2"
+          ],
+          [
+            "SATA",
+            "6"
+          ],
+          [
+            "Red",
+            "Intel Gigabit"
+          ],
+          [
+            "Salidas de video",
+            "HDMI, DisplayPort"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-thermaltake-smart-700w",
+    "name": "Fuente Thermaltake Smart 700W 80 Plus White",
+    "brand": "Thermaltake",
+    "category": "Fuentes",
+    "price": 95100,
+    "stock": 26,
+    "outlet": true,
+    "condition": "Sin caja",
+    "weightKg": 2,
+    "images": [],
+    "description": "Fuente ATX de 700 W con certificación 80 Plus, PFC activo y ventilador silencioso de 120 mm. Una opción confiable para PCs de oficina y gamers de gama media.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Potencia",
+            "700 W"
+          ],
+          [
+            "Certificación",
+            "80 Plus (White)"
+          ],
+          [
+            "Cableado",
+            "Fijo"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Refrigeración y protección",
+        "rows": [
+          [
+            "Ventilador",
+            "120 mm silencioso"
+          ],
+          [
+            "PFC",
+            "Activo"
+          ],
+          [
+            "Línea +12V",
+            "Única"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-gigabyte-p650b",
+    "name": "Fuente Gigabyte P650B 650W 80 Plus Bronze",
+    "brand": "Gigabyte",
+    "category": "Fuentes",
+    "price": 79250,
+    "stock": 0,
+    "outlet": true,
+    "condition": "Sin caja",
+    "weightKg": 1.8,
+    "images": [],
+    "description": "Fuente ATX de 650 W con certificación 80 Plus Bronze, ventilador de 120 mm y protecciones completas.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Potencia",
+            "650 W"
+          ],
+          [
+            "Certificación",
+            "80 Plus Bronze"
+          ],
+          [
+            "Cableado",
+            "Fijo"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Refrigeración y protección",
+        "rows": [
+          [
+            "Ventilador",
+            "120 mm"
+          ],
+          [
+            "Protecciones",
+            "OVP, OPP, SCP, UVP, OCP, OTP"
+          ]
+        ]
+      }
+    ],
+    "active": false
+  },
+  {
+    "id": "outlet-gigabyte-p750gm",
+    "name": "Fuente Gigabyte P750GM 750W 80 Plus Gold Modular",
+    "brand": "Gigabyte",
+    "category": "Fuentes",
+    "price": 142650,
+    "stock": 4,
+    "outlet": true,
+    "condition": "Full, en caja",
+    "weightKg": 2,
+    "images": [],
+    "description": "Fuente de 750 W 80 Plus Gold totalmente modular: solo conectás los cables que usás, para un armado prolijo y mejor flujo de aire. Ventilador de 120 mm silencioso. Completa con caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Potencia",
+            "750 W"
+          ],
+          [
+            "Certificación",
+            "80 Plus Gold (90 % al 50 % de carga)"
+          ],
+          [
+            "Cableado",
+            "Totalmente modular"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Refrigeración y protección",
+        "rows": [
+          [
+            "Ventilador",
+            "120 mm con rodamiento hidráulico"
+          ],
+          [
+            "Protecciones",
+            "OVP, OPP, SCP, UVP, OCP, OTP"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-gigabyte-p850gm",
+    "name": "Fuente Gigabyte P850GM 850W 80 Plus Gold Modular",
+    "brand": "Gigabyte",
+    "category": "Fuentes",
+    "price": 198125,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Full, en caja",
+    "weightKg": 2.1,
+    "images": [],
+    "description": "Fuente de 850 W 80 Plus Gold totalmente modular, pensada para PCs gamer con placas de video potentes. Completa con caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Potencia",
+            "850 W"
+          ],
+          [
+            "Certificación",
+            "80 Plus Gold"
+          ],
+          [
+            "Cableado",
+            "Totalmente modular"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Refrigeración y protección",
+        "rows": [
+          [
+            "Ventilador",
+            "120 mm"
+          ],
+          [
+            "Protecciones",
+            "OVP, OPP, SCP, UVP, OCP, OTP"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-gigabyte-p1000gm",
+    "name": "Fuente Gigabyte P1000GM 1000W 80 Plus Gold Modular",
+    "brand": "Gigabyte",
+    "category": "Fuentes",
+    "price": 237750,
+    "stock": 2,
+    "outlet": true,
+    "condition": "Full, en caja",
+    "weightKg": 2.4,
+    "images": [],
+    "description": "Fuente de 1000 W 80 Plus Gold totalmente modular para equipos de gama alta (RTX 3080/3090, procesadores de alto consumo). Completa con caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Potencia",
+            "1000 W"
+          ],
+          [
+            "Certificación",
+            "80 Plus Gold"
+          ],
+          [
+            "Cableado",
+            "Totalmente modular"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Refrigeración y protección",
+        "rows": [
+          [
+            "Ventilador",
+            "120 mm"
+          ],
+          [
+            "Protecciones",
+            "OVP, OPP, SCP, UVP, OCP, OTP"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-thermaltake-smart-rgb-700w",
+    "name": "Fuente Thermaltake Smart RGB 700W 80 Plus",
+    "brand": "Thermaltake",
+    "category": "Fuentes",
+    "price": 126800,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Sin caja",
+    "weightKg": 2,
+    "images": [],
+    "description": "Fuente ATX de 700 W 80 Plus con ventilador RGB de 120 mm y 15 modos de iluminación controlados desde un botón. Ideal para gabinetes con vidrio.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Potencia",
+            "700 W"
+          ],
+          [
+            "Certificación",
+            "80 Plus (White)"
+          ],
+          [
+            "Cableado",
+            "Fijo"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Refrigeración y protección",
+        "rows": [
+          [
+            "Ventilador",
+            "120 mm RGB (15 modos)"
+          ],
+          [
+            "PFC",
+            "Activo"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-aorus-p750w-nueva",
+    "name": "Fuente AORUS P750W 80 Plus Gold Modular (nueva)",
+    "brand": "Gigabyte",
+    "category": "Fuentes",
+    "price": 237750,
+    "stock": 2,
+    "outlet": true,
+    "condition": "Nuevas, full box",
+    "weightKg": 2.2,
+    "images": [],
+    "description": "Fuente de 750 W 80 Plus Gold totalmente modular de la línea AORUS: ventilador con modo semi-pasivo, capacitores japoneses y 10 años de garantía de fábrica. Nueva, completa con caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Potencia",
+            "750 W"
+          ],
+          [
+            "Certificación",
+            "80 Plus Gold"
+          ],
+          [
+            "Cableado",
+            "Totalmente modular"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Refrigeración y protección",
+        "rows": [
+          [
+            "Ventilador",
+            "120 mm con rodamiento de bolas y modo 0 RPM"
+          ],
+          [
+            "Protecciones",
+            "OCP, OTP, OVP, OPP, UVP, SCP"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-aorus-p750w-usada",
+    "name": "Fuente AORUS P750W 80 Plus Gold Modular (usada)",
+    "brand": "Gigabyte",
+    "category": "Fuentes",
+    "price": 190200,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Usada, sin caja",
+    "weightKg": 2,
+    "images": [],
+    "description": "Fuente de 750 W 80 Plus Gold totalmente modular de la línea AORUS, con ventilador semi-pasivo y capacitores japoneses. Usada, funcionando perfecto, sin caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Potencia",
+            "750 W"
+          ],
+          [
+            "Certificación",
+            "80 Plus Gold"
+          ],
+          [
+            "Cableado",
+            "Totalmente modular"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Refrigeración y protección",
+        "rows": [
+          [
+            "Ventilador",
+            "120 mm con rodamiento de bolas y modo 0 RPM"
+          ],
+          [
+            "Protecciones",
+            "OCP, OTP, OVP, OPP, UVP, SCP"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-redragon-850w",
+    "name": "Fuente Redragon 850W",
+    "brand": "Redragon",
+    "category": "Fuentes",
+    "price": 182275,
+    "stock": 0,
+    "outlet": true,
+    "condition": "Full, en caja",
+    "weightKg": 2.2,
+    "images": [],
+    "description": "Fuente ATX de 850 W de Redragon. Sin stock por el momento (en reposición).\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Potencia",
+            "850 W"
+          ],
+          [
+            "Certificación",
+            "Consultar"
+          ],
+          [
+            "Cableado",
+            "Consultar"
+          ],
+          [
+            "Formato",
+            "ATX"
+          ]
+        ]
+      },
+      {
+        "title": "Refrigeración y protección",
+        "rows": [
+          [
+            "Ventilador",
+            "Consultar"
+          ]
+        ]
+      }
+    ],
+    "active": false
+  },
+  {
+    "id": "outlet-sentey-r20",
+    "name": "Gabinete Sentey R20 RGB",
+    "brand": "Sentey",
+    "category": "Gabinetes",
+    "price": 63400,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Nuevo, sellado",
+    "weightKg": 5,
+    "images": [],
+    "description": "Gabinete gamer con iluminación RGB arcoíris, panel lateral de acrílico, USB 3.0 frontal y filtro antipolvo. Nuevo y sellado.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "Sentey R20"
+          ],
+          [
+            "Tipo",
+            "Gabinete gamer mid tower"
+          ],
+          [
+            "Panel lateral",
+            "Acrílico transparente"
+          ],
+          [
+            "Iluminación",
+            "RGB"
+          ]
+        ]
+      },
+      {
+        "title": "Puertos frontales",
+        "rows": [
+          [
+            "USB",
+            "USB 3.0 + USB 2.0"
+          ],
+          [
+            "Audio",
+            "Micrófono / auriculares"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-sentey-x10",
+    "name": "Gabinete Sentey X10 Rainbow",
+    "brand": "Sentey",
+    "category": "Gabinetes",
+    "price": 63400,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Nuevo, sellado",
+    "weightKg": 4.5,
+    "images": [],
+    "description": "Gabinete gamer compacto con iluminación RGB arcoíris, panel lateral de acrílico y USB 3.0 frontal. Compatible con Micro-ATX y Mini-ITX. Nuevo y sellado.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Modelo",
+            "Sentey X10"
+          ],
+          [
+            "Tipo",
+            "Gabinete gamer mid tower"
+          ],
+          [
+            "Panel lateral",
+            "Acrílico transparente"
+          ],
+          [
+            "Iluminación",
+            "RGB"
+          ]
+        ]
+      },
+      {
+        "title": "Puertos frontales",
+        "rows": [
+          [
+            "USB",
+            "USB 3.0 + USB 2.0"
+          ],
+          [
+            "Audio",
+            "Micrófono / auriculares"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-pc-gamer-ryzen5",
+    "name": "PC Gamer Ryzen 5 2600 PRO 16GB SSD 120GB (nueva)",
+    "brand": "EXE",
+    "category": "PC armadas y consolas",
+    "price": 538900,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Nueva, armada",
+    "weightKg": 8,
+    "images": [],
+    "description": "PC armada nueva lista para usar: gabinete Sentey X10, motherboard A320, procesador AMD Ryzen 5 2600 PRO (6 núcleos / 12 hilos), 16 GB de RAM (2 × 8 GB en dual channel), SSD de 120 GB y fuente de 650 W 80 Plus Bronze. No incluye placa de video: sumale una para jugar.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Componentes",
+        "rows": [
+          [
+            "Procesador",
+            "AMD Ryzen 5 2600 PRO (6 núcleos / 12 hilos)"
+          ],
+          [
+            "Motherboard",
+            "A320 (AM4)"
+          ],
+          [
+            "Memoria RAM",
+            "16 GB (2 × 8 GB)"
+          ],
+          [
+            "Almacenamiento",
+            "SSD 120 GB"
+          ],
+          [
+            "Placa de video",
+            "No incluye"
+          ],
+          [
+            "Fuente",
+            "650 W 80 Plus Bronze"
+          ],
+          [
+            "Gabinete",
+            "Sentey X10"
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "id": "outlet-steam-deck-512",
+    "name": "Consola Steam Deck 512GB",
+    "brand": "Valve",
+    "category": "PC armadas y consolas",
+    "price": 951000,
+    "stock": 1,
+    "outlet": true,
+    "condition": "Full: cargador original, funda, estuche y paño de limpieza",
+    "weightKg": 1.2,
+    "images": [],
+    "description": "La consola portátil de Valve para jugar tu biblioteca de Steam en cualquier lugar: procesador AMD de 4 núcleos con gráficos RDNA 2, 16 GB de RAM y 512 GB de almacenamiento. Incluye cargador original, funda, estuche y paño de limpieza.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "specs": [
+      {
+        "title": "Características generales",
+        "rows": [
+          [
+            "Procesador",
+            "AMD APU Zen 2, 4 núcleos / 8 hilos"
+          ],
+          [
+            "Gráficos",
+            "AMD RDNA 2, 8 CU"
+          ],
+          [
+            "Memoria",
+            "16 GB LPDDR5"
+          ],
+          [
+            "Almacenamiento",
+            "512 GB SSD NVMe"
+          ],
+          [
+            "Pantalla",
+            "7\" táctil (LCD) o 7,4\" (OLED): consultar versión"
+          ],
+          [
+            "Sistema",
+            "SteamOS"
+          ]
+        ]
+      },
+      {
+        "title": "Incluye",
+        "rows": [
+          [
+            "Accesorios",
+            "Cargador original, funda, estuche, paño de limpieza"
+          ]
+        ]
+      }
+    ]
   }
 ]

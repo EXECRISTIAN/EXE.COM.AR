@@ -1,0 +1,23 @@
+name: Descargar fotos de productos
+# Corre cuando cambia tools/images.json en una rama claude/**: baja las fotos oficiales y las commitea en la misma rama.
+on:
+  push:
+    branches: ["claude/**"]
+    paths: ["tools/images.json", "tools/fetch_images.py"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq imagemagick webp >/dev/null
+      - run: pip install -q pillow
+      - run: python3 tools/fetch_images.py
+      - name: Commit
+        run: |
+          git config user.name "exe-bot"; git config user.email "exe-bot@users.noreply.github.com"
+          git add site/assets/img/products tools/images-report.json
+          git diff --cached --quiet || git commit -m "Fotos de productos descargadas por la Action"
+          git push

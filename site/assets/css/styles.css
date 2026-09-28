@@ -470,3 +470,9 @@ body.no-scroll { overflow: hidden; }
 .pd-admin-row a { color: var(--c0); font-weight: 700; }
 .pd-admin-row small { color: var(--muted); }
 .price.price-ask, .pd-info .price.price-ask { font-size: 1rem; color: var(--c0); }
+
+/* Productos outlet: etiqueta y estado */
+.tag.tag-outlet { left: auto; right: 10px; background: #f59e0b; color: #1a1200; }
+.condition { display: block; font-size: .78rem; color: var(--muted); }
+.pd-condition { margin: 2px 0 6px; font-size: .88rem; color: var(--c3); }
+.pd-condition .tag-outlet { display: inline-block; margin-right: 6px; padding: 2px 8px; border-radius: 4px; background: #f59e0b; color: #1a1200; font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
