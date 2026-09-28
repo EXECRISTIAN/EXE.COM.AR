@@ -992,9 +992,7 @@
     "outlet": true,
     "condition": "Full, en caja. Uso gaming",
     "weightKg": 2.5,
-    "images": [
-      "assets/img/products/outlet-rtx3090-zotac-trinity.webp"
-    ],
+    "images": [],
     "description": "Una de las placas más potentes de su generación: 24 GB de GDDR6X para jugar en 4K con ray tracing y DLSS, editar video y trabajar con IA o renderizado. Refrigeración IceStorm 2.0 de triple ventilador y luces SPECTRA RGB.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -1086,9 +1084,7 @@
     "outlet": true,
     "condition": "Sin caja, con cooler",
     "weightKg": 0.3,
-    "images": [
-      "assets/img/products/outlet-pentium-g5420.webp"
-    ],
+    "images": [],
     "description": "Procesador económico de 2 núcleos y 4 hilos para PC de oficina, estudio o multimedia, con gráficos integrados UHD 610. Compatible con motherboards de 8.ª y 9.ª generación (chipsets 300).\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -1158,9 +1154,7 @@
     "outlet": true,
     "condition": "Sin caja, sin cooler",
     "weightKg": 0.2,
-    "images": [
-      "assets/img/products/outlet-celeron-g5925.webp"
-    ],
+    "images": [],
     "description": "El procesador más accesible para LGA1200: 2 núcleos para una PC de oficina, caja registradora o uso básico, con gráficos integrados UHD 610. Se entrega sin cooler.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -1230,9 +1224,7 @@
     "outlet": true,
     "condition": "Full, en caja",
     "weightKg": 0.3,
-    "images": [
-      "assets/img/products/outlet-celeron-g5925.webp"
-    ],
+    "images": [],
     "description": "El procesador más accesible para LGA1200: 2 núcleos para una PC de oficina, caja registradora o uso básico, con gráficos integrados UHD 610. Completo, con su caja y cooler original.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -1302,9 +1294,7 @@
     "outlet": true,
     "condition": "Sin caja, con cooler",
     "weightKg": 0.3,
-    "images": [
-      "assets/img/products/outlet-celeron-g5905.webp"
-    ],
+    "images": [],
     "description": "Procesador básico de 2 núcleos para LGA1200, ideal para una PC de oficina o de uso hogareño liviano. Gráficos integrados UHD 610 e incluye cooler.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -1374,9 +1364,7 @@
     "outlet": true,
     "condition": "Full, en caja",
     "weightKg": 0.3,
-    "images": [
-      "assets/img/products/outlet-i3-10100.webp"
-    ],
+    "images": [],
     "description": "4 núcleos y 8 hilos con hasta 4,3 GHz: rinde muy bien en oficina, estudio y juegos livianos, y tiene gráficos integrados UHD 630 para arrancar sin placa de video. Completo, con caja y cooler.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -1450,9 +1438,7 @@
     "outlet": true,
     "condition": "Full, en caja",
     "weightKg": 0.3,
-    "images": [
-      "assets/img/products/outlet-i3-10100.webp"
-    ],
+    "images": [],
     "description": "Versión renovada del i3-10100 con 100 MHz más: 4 núcleos, 8 hilos, hasta 4,4 GHz y gráficos UHD 630. Ideal para una PC rápida de oficina o gamer de entrada. Completo, con caja y cooler.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -1526,9 +1512,7 @@
     "outlet": true,
     "condition": "Con",
     "weightKg": 0.3,
-    "images": [
-      "assets/img/products/outlet-i3-10100.webp"
-    ],
+    "images": [],
     "description": "4 núcleos y 8 hilos hasta 4,3 GHz para una PC gamer de entrada con placa de video. La versión F no trae gráficos integrados: necesita placa de video.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -1602,9 +1586,7 @@
     "outlet": true,
     "condition": "Full, en caja",
     "weightKg": 0.3,
-    "images": [
-      "assets/img/products/outlet-i5-10400.webp"
-    ],
+    "images": [],
     "description": "6 núcleos y 12 hilos hasta 4,3 GHz: el clásico equilibrado para jugar y trabajar, con gráficos UHD 630 integrados. Completo, con caja y cooler.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -1678,9 +1660,7 @@
     "outlet": true,
     "condition": "Sin caja, con cooler",
     "weightKg": 0.3,
-    "images": [
-      "assets/img/products/outlet-i3-12100f.webp"
-    ],
+    "images": [],
     "description": "4 núcleos Performance y 8 hilos de 12.ª generación: rinde como un i5 de generaciones anteriores y entra en plataformas LGA1700 (series 600 y 700) con DDR4 o DDR5. Requiere placa de video. Incluye cooler.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -1754,9 +1734,7 @@
     "outlet": true,
     "condition": "Sin caja",
     "weightKg": 1.6,
-    "images": [
-      "assets/img/products/outlet-z390-aorus-elite.webp"
-    ],
+    "images": [],
     "description": "Motherboard ATX gamer para Intel 8.ª y 9.ª generación con chipset Z390 (permite overclock en procesadores K), alimentación de 12+1 fases, doble M.2 con disipador e iluminación RGB Fusion.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -1818,9 +1796,7 @@
     "outlet": true,
     "condition": "Con caja",
     "weightKg": 1.6,
-    "images": [
-      "assets/img/products/outlet-biostar-z490a-silver.webp"
-    ],
+    "images": [],
     "description": "Motherboard ATX con chipset Z490 para Intel 10.ª y 11.ª generación, soporte de overclock en procesadores K, salidas VGA/HDMI/DisplayPort y diseño en tonos plateados.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2066,9 +2042,7 @@
     "outlet": true,
     "condition": "Con caja",
     "weightKg": 1.1,
-    "images": [
-      "assets/img/products/outlet-gigabyte-b460m-ds3h-v2.webp"
-    ],
+    "images": [],
     "description": "Motherboard Micro-ATX B460 para Intel 10.ª generación con M.2 NVMe, salidas VGA/DVI/HDMI y audio HD. Una base simple y confiable para una PC de uso diario.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2194,9 +2168,7 @@
     "outlet": true,
     "condition": "Sin caja",
     "weightKg": 0.9,
-    "images": [
-      "assets/img/products/outlet-msi-h510m-a-pro.webp"
-    ],
+    "images": [],
     "description": "Motherboard Micro-ATX H510 para Intel 10.ª y 11.ª generación, con M.2, salidas VGA/HDMI y red Gigabit. Económica y confiable para oficina o una PC gamer de entrada.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2254,9 +2226,7 @@
     "outlet": true,
     "condition": "Full box",
     "weightKg": 1.6,
-    "images": [
-      "assets/img/products/outlet-msi-mpg-z490-gaming-plus.webp"
-    ],
+    "images": [],
     "description": "Motherboard ATX gamer Z490 para Intel 10.ª/11.ª gen con overclock, red 2,5 Gb, doble M.2 con disipador Frozr y Mystic Light RGB. Completa con su caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2382,9 +2352,7 @@
     "outlet": true,
     "condition": "Sin caja",
     "weightKg": 2,
-    "images": [
-      "assets/img/products/outlet-thermaltake-smart-700w.webp"
-    ],
+    "images": [],
     "description": "Fuente ATX de 700 W con certificación 80 Plus, PFC activo y ventilador silencioso de 120 mm. Una opción confiable para PCs de oficina y gamers de gama media.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2437,9 +2405,7 @@
     "outlet": true,
     "condition": "Sin caja",
     "weightKg": 1.8,
-    "images": [
-      "assets/img/products/outlet-gigabyte-p650b.webp"
-    ],
+    "images": [],
     "description": "Fuente ATX de 650 W con certificación 80 Plus Bronze, ventilador de 120 mm y protecciones completas.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2489,9 +2455,7 @@
     "outlet": true,
     "condition": "Full, en caja",
     "weightKg": 2,
-    "images": [
-      "assets/img/products/outlet-gigabyte-p750gm.webp"
-    ],
+    "images": [],
     "description": "Fuente de 750 W 80 Plus Gold totalmente modular: solo conectás los cables que usás, para un armado prolijo y mejor flujo de aire. Ventilador de 120 mm silencioso. Completa con caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2540,9 +2504,7 @@
     "outlet": true,
     "condition": "Full, en caja",
     "weightKg": 2.1,
-    "images": [
-      "assets/img/products/outlet-gigabyte-p850gm.webp"
-    ],
+    "images": [],
     "description": "Fuente de 850 W 80 Plus Gold totalmente modular, pensada para PCs gamer con placas de video potentes. Completa con caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2591,9 +2553,7 @@
     "outlet": true,
     "condition": "Full, en caja",
     "weightKg": 2.4,
-    "images": [
-      "assets/img/products/outlet-gigabyte-p1000gm.webp"
-    ],
+    "images": [],
     "description": "Fuente de 1000 W 80 Plus Gold totalmente modular para equipos de gama alta (RTX 3080/3090, procesadores de alto consumo). Completa con caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2642,9 +2602,7 @@
     "outlet": true,
     "condition": "Sin caja",
     "weightKg": 2,
-    "images": [
-      "assets/img/products/outlet-thermaltake-smart-rgb-700w.webp"
-    ],
+    "images": [],
     "description": "Fuente ATX de 700 W 80 Plus con ventilador RGB de 120 mm y 15 modos de iluminación controlados desde un botón. Ideal para gabinetes con vidrio.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2693,9 +2651,7 @@
     "outlet": true,
     "condition": "Nuevas, full box",
     "weightKg": 2.2,
-    "images": [
-      "assets/img/products/outlet-aorus-p750w.webp"
-    ],
+    "images": [],
     "description": "Fuente de 750 W 80 Plus Gold totalmente modular de la línea AORUS: ventilador con modo semi-pasivo, capacitores japoneses y 10 años de garantía de fábrica. Nueva, completa con caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2744,9 +2700,7 @@
     "outlet": true,
     "condition": "Usada, sin caja",
     "weightKg": 2,
-    "images": [
-      "assets/img/products/outlet-aorus-p750w.webp"
-    ],
+    "images": [],
     "description": "Fuente de 750 W 80 Plus Gold totalmente modular de la línea AORUS, con ventilador semi-pasivo y capacitores japoneses. Usada, funcionando perfecto, sin caja.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2795,9 +2749,7 @@
     "outlet": true,
     "condition": "Full, en caja",
     "weightKg": 2.2,
-    "images": [
-      "assets/img/products/outlet-redragon-850w.webp"
-    ],
+    "images": [],
     "description": "Fuente ATX de 850 W de Redragon. Sin stock por el momento (en reposición).\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2843,9 +2795,7 @@
     "outlet": true,
     "condition": "Nuevo, sellado",
     "weightKg": 5,
-    "images": [
-      "assets/img/products/outlet-sentey-r20.webp"
-    ],
+    "images": [],
     "description": "Gabinete gamer con iluminación RGB arcoíris, panel lateral de acrílico, USB 3.0 frontal y filtro antipolvo. Nuevo y sellado.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2894,9 +2844,7 @@
     "outlet": true,
     "condition": "Nuevo, sellado",
     "weightKg": 4.5,
-    "images": [
-      "assets/img/products/outlet-sentey-x10.webp"
-    ],
+    "images": [],
     "description": "Gabinete gamer compacto con iluminación RGB arcoíris, panel lateral de acrílico y USB 3.0 frontal. Compatible con Micro-ATX y Mini-ITX. Nuevo y sellado.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2945,9 +2893,7 @@
     "outlet": true,
     "condition": "Nueva, armada",
     "weightKg": 8,
-    "images": [
-      "assets/img/products/outlet-sentey-x10.webp"
-    ],
+    "images": [],
     "description": "PC armada nueva lista para usar: gabinete Sentey X10, motherboard A320, procesador AMD Ryzen 5 2600 PRO (6 núcleos / 12 hilos), 16 GB de RAM (2 × 8 GB en dual channel), SSD de 120 GB y fuente de 650 W 80 Plus Bronze. No incluye placa de video: sumale una para jugar.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
@@ -2995,9 +2941,7 @@
     "outlet": true,
     "condition": "Full: cargador original, funda, estuche y paño de limpieza",
     "weightKg": 1.2,
-    "images": [
-      "assets/img/products/outlet-steam-deck-512.webp"
-    ],
+    "images": [],
     "description": "La consola portátil de Valve para jugar tu biblioteca de Steam en cualquier lugar: procesador AMD de 4 núcleos con gráficos RDNA 2, 16 GB de RAM y 512 GB de almacenamiento. Incluye cargador original, funda, estuche y paño de limpieza.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "specs": [
       {
