@@ -7,7 +7,7 @@
 //          SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 // Deploy: supabase functions deploy send-email
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { orderTemplates } from "../_shared/emails.js";
+import { orderTemplates, renderTemplate } from "../_shared/emails.js";
 
 const env = (k: string) => Deno.env.get(k) ?? "";
 const db = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"));
@@ -49,11 +49,19 @@ Deno.serve(async (req) => {
     trackUrl: o.tracking_number ? `https://envia.com/es-AR/rastreo?label=${encodeURIComponent(o.tracking_number)}` : null,
   };
 
-  const { subject, html } = tpl(data);
-  const res = await send(p.email, subject, html);
+  // Plantilla editada en el panel (email_templates): la activa más reciente para ese evento.
+  // Si está desactivada (y no hay otra activa) no se envía; si la tabla no responde, se usa la plantilla fija.
+  async function pick(event: string, fallback: any) {
+    const { data: rows, error } = await db.from("email_templates").select("*").eq("event", event).order("updated_at", { ascending: false });
+    if (error || !rows || !rows.length) return fallback(data);
+    const t = rows.find((r: any) => r.active);
+    return t ? renderTemplate(t, data) : null;
+  }
+  const mail = await pick(template, tpl);
+  const res = mail ? await send(p.email, mail.subject, mail.html) : { status: 204, body: "plantilla desactivada" };
   if (template === "order_created" && env("ADMIN_EMAIL")) {
-    const a = orderTemplates.admin_new_order(data);
-    await send(env("ADMIN_EMAIL"), a.subject, a.html);
+    const a = await pick("admin_new_order", orderTemplates.admin_new_order);
+    if (a) await send(env("ADMIN_EMAIL"), a.subject, a.html);
   }
   return new Response(res.body, { status: res.status });
 });
