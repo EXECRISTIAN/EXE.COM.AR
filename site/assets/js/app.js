@@ -57,24 +57,120 @@
           const out = tracksStock(p) && p.stock <= 0;
           return `
           <article class="card reveal" style="--d:${(i % 4) * 0.08}s">
-            <div class="card-media">
+            <a class="card-media" href="#producto/${encodeURIComponent(p.id)}" aria-label="Ver detalles de ${esc(p.name)}">
               <img src="${esc(mainImg(p))}" alt="${esc(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
               ${p.images && p.images[1] ? `<img class="alt" src="${esc(p.images[1])}" alt="" loading="lazy">` : ""}
               ${p.category ? `<span class="tag">${esc(p.category)}</span>` : ""}
-            </div>
+              ${p.images && p.images.length > 1 ? `<span class="img-count" aria-hidden="true">${p.images.length} fotos</span>` : ""}
+            </a>
             <div class="card-body">
               ${p.brand ? `<span class="card-brand">${esc(p.brand)}</span>` : ""}
-              <h3>${esc(p.name)}</h3>
+              <h3><a href="#producto/${encodeURIComponent(p.id)}">${esc(p.name)}</a></h3>
               <div class="price">${priceLabel(p)}</div>
               ${stockBadge(p)}
               ${p.variants ? `<select data-variant="${esc(p.id)}" aria-label="Variante">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select>` : ""}
               <button class="btn btn-primary" data-add="${esc(p.id)}" ${out ? "disabled" : ""}>${out ? "Sin stock" : "Agregar al carrito"}</button>
+              <a class="card-more" href="#producto/${encodeURIComponent(p.id)}">Ver detalles${p.specs ? " y especificaciones" : ""}</a>
             </div>
           </article>`;
         }).join("")
       : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
     observeReveals();
   }
+
+  /* ---------- Ficha de producto: galería + especificaciones ---------- */
+  // Se abre con #producto/<id> (se puede compartir el link). Esc, la X o el fondo la cierran.
+  let pdProduct = null, pdIndex = 0, pdOpenedByClick = false;
+  const pdImages = (p) => (p.images && p.images.length ? p.images : [PLACEHOLDER]);
+  function pdSetImage(i) {
+    const imgs = pdImages(pdProduct);
+    pdIndex = (i + imgs.length) % imgs.length;
+    const main = $("pdMain");
+    main.src = imgs[pdIndex];
+    main.alt = `${pdProduct.name} — foto ${pdIndex + 1} de ${imgs.length}`;
+    document.querySelectorAll(".pd-thumbs button").forEach((b, k) => b.setAttribute("aria-current", String(k === pdIndex)));
+    const c = $("pdCounter"); if (c) c.textContent = `${pdIndex + 1} / ${imgs.length}`;
+  }
+  function openProduct(id) {
+    const p = products.find((x) => x.id === id);
+    if (!p) return;
+    pdProduct = p;
+    const imgs = pdImages(p), out = tracksStock(p) && p.stock <= 0;
+    const waAsk = waLink(`Hola EXE! Quería consultar por: ${p.name}`);
+    $("pd").innerHTML = `
+      <button class="pd-close icon-btn" id="pdClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="pd-gallery">
+        <div class="pd-stage">
+          <img id="pdMain" src="${esc(imgs[0])}" alt="" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
+          ${imgs.length > 1 ? `
+            <button class="pd-nav prev" data-pd-step="-1" aria-label="Foto anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="pd-nav next" data-pd-step="1" aria-label="Foto siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5l7 7-7 7"/></svg></button>
+            <span class="pd-counter" id="pdCounter"></span>` : ""}
+        </div>
+        ${imgs.length > 1 ? `<div class="pd-thumbs">${imgs.map((src, k) => `<button data-pd-img="${k}" aria-label="Ver foto ${k + 1}"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}
+      </div>
+      <div class="pd-info">
+        ${p.brand ? `<span class="card-brand">${esc(p.brand)}</span>` : ""}
+        <h2 id="pdName">${esc(p.name)}</h2>
+        <div class="price">${priceLabel(p)}</div>
+        ${stockBadge(p)}
+        ${p.variants ? `<label class="field">Variante<select id="pdVariant">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select></label>` : ""}
+        <div class="pd-actions">
+          <button class="btn btn-primary" data-pd-add="${esc(p.id)}" ${out ? "disabled" : ""}>${out ? "Sin stock" : "Agregar al carrito"}</button>
+          <a class="btn btn-outline" href="${esc(waAsk)}" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+        </div>
+        ${p.description ? `<div class="pd-desc">${esc(p.description)}</div>` : ""}
+        <h3 class="pd-specs-title">Especificaciones</h3>
+        ${p.specs && p.specs.length
+          ? p.specs.map((s, k) => `<details class="pd-spec"${k === 0 ? " open" : ""}><summary>${esc(s.title)}</summary>
+              <table>${s.rows.map(([key, val]) => `<tr><th>${esc(key)}</th><td>${esc(val)}</td></tr>`).join("")}</table></details>`).join("")
+          : `<p class="pd-nospecs">La ficha técnica de este producto está en revisión. Consultanos por WhatsApp y te pasamos todos los datos.</p>`}
+      </div>`;
+    pdSetImage(0);
+    $("pdOverlay").hidden = false;
+    requestAnimationFrame(() => $("pdOverlay").classList.add("show"));
+    document.body.classList.add("no-scroll");
+    $("pdClose").focus();
+  }
+  function closeProduct(fromHash) {
+    if ($("pdOverlay").hidden) return;
+    $("pdOverlay").classList.remove("show");
+    document.body.classList.remove("no-scroll");
+    setTimeout(() => { $("pdOverlay").hidden = true; }, 250);
+    pdProduct = null;
+    if (!fromHash) {
+      if (pdOpenedByClick) history.back();
+      else history.replaceState(null, "", location.pathname + location.search + "#productos");
+    }
+    pdOpenedByClick = false;
+  }
+  function routeProduct() {
+    const m = location.hash.match(/^#producto\/(.+)$/);
+    if (m) openProduct(decodeURIComponent(m[1])); else closeProduct(true);
+  }
+  window.addEventListener("hashchange", routeProduct);
+  $("pdOverlay").addEventListener("click", (e) => {
+    if (e.target === $("pdOverlay") || e.target.closest("#pdClose")) return closeProduct();
+    const step = e.target.closest("[data-pd-step]"); if (step) return pdSetImage(pdIndex + Number(step.dataset.pdStep));
+    const th = e.target.closest("[data-pd-img]"); if (th) return pdSetImage(Number(th.dataset.pdImg));
+    const addBtn = e.target.closest("[data-pd-add]");
+    if (addBtn) { add(addBtn.dataset.pdAdd, $("pdVariant") ? $("pdVariant").value : null); renderProducts(); }
+  });
+  document.addEventListener("keydown", (e) => {
+    if ($("pdOverlay").hidden) return;
+    if (e.key === "Escape") closeProduct();
+    else if (e.key === "ArrowRight") pdSetImage(pdIndex + 1);
+    else if (e.key === "ArrowLeft") pdSetImage(pdIndex - 1);
+  });
+  // Deslizar con el dedo entre fotos
+  let pdTouchX = null;
+  $("pdOverlay").addEventListener("touchstart", (e) => { if (e.target.closest(".pd-stage")) pdTouchX = e.touches[0].clientX; }, { passive: true });
+  $("pdOverlay").addEventListener("touchend", (e) => {
+    if (pdTouchX === null) return;
+    const dx = e.changedTouches[0].clientX - pdTouchX; pdTouchX = null;
+    if (Math.abs(dx) > 40) pdSetImage(pdIndex + (dx < 0 ? 1 : -1));
+  });
+  document.addEventListener("click", (e) => { if (e.target.closest('a[href^="#producto/"]')) pdOpenedByClick = true; }, true);
 
   /* ---------- Carrito ---------- */
   function add(id, variant) {
@@ -220,7 +316,7 @@
   $("cartOpen").onclick = () => toggleCart(true);
   $("cartClose").onclick = () => toggleCart(false);
   $("overlay").onclick = () => toggleCart(false);
-  document.addEventListener("keydown", (e) => e.key === "Escape" && toggleCart(false));
+  document.addEventListener("keydown", (e) => e.key === "Escape" && $("pdOverlay").hidden && toggleCart(false));
   $("cartClear").onclick = () => { cart = []; shipping = null; if (shipOn) $("shipOpts").innerHTML = ""; save(); renderCart(); renderProducts(); };
   $("sendWa").onclick = () => window.open(waLink(buildMessage()), "_blank", "noopener");
 
@@ -332,6 +428,6 @@
   /* ---------- Datos ---------- */
   fetch("data/products.json")
     .then((r) => r.json())
-    .then((data) => { products = data; renderFilters(); renderProducts(); renderCart(); })
+    .then((data) => { products = data; renderFilters(); renderProducts(); renderCart(); routeProduct(); })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();
