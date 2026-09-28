@@ -7,7 +7,7 @@
 .tabs button { padding: 10px; border: 0; border-radius: 6px; background: transparent; color: var(--muted); cursor: pointer; font-weight: 600; }
 .tabs button.active { background: var(--surface); color: var(--c2); box-shadow: 0 2px 6px var(--shadow-strong); }
 .form { display: grid; gap: 14px; }
-.notice { padding: 12px 14px; border-radius: 6px; font-size: .9rem; border: 1px solid; }
+.notice { padding: 8px 12px; border-radius: 6px; font-size: .9rem; line-height: 1.45; border: 1px solid; }
 .notice.info { border-color: #046bd244; background: #046bd214; color: var(--info-fg); }
 .notice.error { border-color: #dc262644; background: #dc262614; color: var(--err-fg); }
 .notice.ok { border-color: #16a34a44; background: #16a34a14; color: var(--ok-fg); }
