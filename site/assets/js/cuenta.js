@@ -112,9 +112,16 @@
 
   // Pide confirmación antes de cerrar sesión
   const logoutDialog = $("logoutDialog");
-  $("logout").addEventListener("click", () => { logoutDialog.returnValue = ""; logoutDialog.showModal(); });
+  // El diálogo modal bloquea el resto de la página: el selector de tema se mueve adentro mientras está abierto
+  const themeMini = $("themeMini");
+  $("logout").addEventListener("click", () => {
+    logoutDialog.returnValue = "";
+    if (themeMini) logoutDialog.appendChild(themeMini);
+    logoutDialog.showModal();
+  });
   logoutDialog.addEventListener("click", (e) => { if (e.target === logoutDialog) logoutDialog.close("cancel"); });   // clic afuera = cancelar
   logoutDialog.addEventListener("close", async () => {
+    if (themeMini) document.body.appendChild(themeMini);
     if (logoutDialog.returnValue === "ok") { await sb.auth.signOut(); render(); }
   });
 
