@@ -172,7 +172,7 @@ button { font: inherit; }
 .brands h2 { text-align: center; color: var(--heading); font-weight: 500; font-size: clamp(1.7rem, 3vw, 2.4rem); margin-bottom: 0; }
 .brands-text { margin: 30px auto 0; padding: 0 30px; max-width: 900px; text-align: center; }
 /* 957d0fb: banner inferior (min-h 500, radius 25, borde sup/inf 1px rgba(0,0,0,.08), margin-top 30) */
-.wide-banner { position: relative; display: block; min-height: 500px; margin-top: 30px; border-radius: 25px; overflow: hidden;
+.wide-banner { position: relative; display: block; min-height: 400px; margin-top: 30px; border-radius: 25px; overflow: hidden;
   border-block: 1px solid var(--line-soft); background: #000 url("../img/banner-inferior-01.webp") center / cover no-repeat; }
 .wide-banner .shine { position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, #ffffff22 50%, transparent 70%);
   transform: translateX(-100%); animation: shine 7s infinite 2s; }
@@ -189,12 +189,13 @@ button { font: inherit; }
 /* df67cbb / 36e744c: carrusel de logos (5 visibles, 3 en tablet) */
 .logos { overflow: hidden; margin-top: 30px; }
 /* El fondo del track es el de la sección: la animación lo aísla, y así los logos se funden con él en ambos modos. */
-.logos-track { display: flex; animation: logos 25s linear infinite; width: max-content; background: var(--c4); }
+.logos-track { display: flex; animation: logos var(--logos-dur, 25s) linear infinite; width: max-content; background: var(--c4); will-change: transform; }
 .logos:hover .logos-track { animation-play-state: paused; }
-.logos-track img { width: calc(min(1400px, 100vw) / 5); max-width: 240px; padding: 10px 20px; object-fit: contain; aspect-ratio: 150 / 134;
+.logos-track img { width: calc(min(1400px, 100vw) / 5); max-width: 240px; height: auto; padding: 10px 20px; object-fit: contain; aspect-ratio: 150 / 134;
   filter: var(--brand-filter); opacity: .75; transition: filter .3s, opacity .3s; mix-blend-mode: var(--brand-blend); }
 .logos-track img:hover { filter: var(--brand-filter-hover); opacity: 1; }
 @keyframes logos { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .logos-track { animation: none; } }
 
 /* ---------- Catálogo ---------- */
 .section { padding: 80px 0; }
@@ -386,7 +387,7 @@ body.no-scroll { overflow: hidden; }
   .brand-card { min-height: 320px; }                       /* 3e0bc12 mobile */
   .brands { padding: 50px 20px 10px; }
   .brands-text { padding: 0; }
-  .wide-banner { min-height: 300px; }
+  .wide-banner { min-height: 240px; }
   .features { margin-top: 30px; }
   .feature { width: 100%; padding: 30px; }
   .footer-grid { grid-template-columns: 1fr; }

@@ -559,8 +559,22 @@
 
   /* ---------- Contenido de config ---------- */
   const logos = cfg.brandLogos || [];
-  $("logos").innerHTML = [...logos, ...logos]
-    .map((l, i) => `<button type="button" class="logo-btn" data-brand-tag="${esc(l.brand || l.name)}"${i >= logos.length ? ' tabindex="-1" aria-hidden="true"' : ""} title="Ver productos ${esc(l.brand || l.name)}" aria-label="Ver productos ${esc(l.brand || l.name)}"><img src="${esc(l.src)}" alt="${esc(l.name)}" loading="lazy"></button>`).join("");
+  // Carrusel de logos sin cortes en cualquier ancho (16:9, 21:9, 32:9…): cada mitad del track se repite hasta
+  // cubrir la pantalla y la animación corre -50 %. Solo se recalcula si cambia la cantidad de copias necesarias.
+  const logoBtn = (l, hidden) => `<button type="button" class="logo-btn" data-brand-tag="${esc(l.brand || l.name)}"${hidden ? ' tabindex="-1" aria-hidden="true"' : ""} title="Ver productos ${esc(l.brand || l.name)}" aria-label="Ver productos ${esc(l.brand || l.name)}"><img src="${esc(l.src)}" alt="${hidden ? "" : esc(l.name)}" width="150" height="134" decoding="async"></button>`;
+  let logoCopies = 0;
+  function buildLogos() {
+    const track = $("logos"); if (!logos.length) return;
+    const itemW = track.firstElementChild ? track.firstElementChild.getBoundingClientRect().width : Math.min(240, Math.min(1400, innerWidth) / 5);
+    const copies = Math.max(1, Math.ceil(innerWidth / (itemW * logos.length)));   // copias por mitad
+    if (copies === logoCopies) return;
+    logoCopies = copies;
+    const half = Array.from({ length: copies }, (_, c) => logos.map((l) => logoBtn(l, c > 0)).join("")).join("");
+    track.innerHTML = half + half.replace(/<button type="button" class="logo-btn"(?![^>]*aria-hidden)/g, '<button type="button" class="logo-btn" tabindex="-1" aria-hidden="true"');
+    track.style.setProperty("--logos-dur", `${Math.round(25 * copies)}s`);   // misma velocidad sin importar las copias
+  }
+  buildLogos(); buildLogos();   // la 2.ª pasada mide el ancho real de cada logo
+  let logosTimer; addEventListener("resize", () => { clearTimeout(logosTimer); logosTimer = setTimeout(buildLogos, 250); });
   const waHello = waLink("Hola EXE! Quería hacer una consulta.");
   $("waDirect").href = waHello; $("waFloat").href = waHello; $("waFooter").href = waHello;
   $("mailFooter").href = `mailto:${cfg.email}`; $("mailFooter").textContent = cfg.email;
