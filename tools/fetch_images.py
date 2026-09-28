@@ -29,12 +29,11 @@ def og_image(page):
             return urllib.parse.urljoin(page, u.replace("&amp;", "&"))
     return None
 def corners_white(path):
-    # promedio de brillo de las 4 esquinas (0-255)
-    out = subprocess.run(["convert", path, "-resize", "20x20!", "-colorspace", "Gray", "txt:-"], capture_output=True, text=True).stdout
-    vals = [int(m) for m in re.findall(r"gray\((\d+)", out)] or [int(float(m) * 2.55) for m in re.findall(r"gray\(([\d.]+)%", out)]
-    if len(vals) < 400: return None
-    c = [vals[0], vals[19], vals[380], vals[399]]
-    return sum(c) / 4
+    # brillo promedio de las 4 esquinas (0-255); 255 = blanco puro
+    from PIL import Image
+    im = Image.open(path).convert("L").resize((40, 40))
+    px = [im.getpixel((x, y)) for x in (0, 1, 38, 39) for y in (0, 1, 38, 39)]
+    return sum(px) / len(px)
 PREFER = re.compile(r"(m\.media-amazon\.com|images-na\.ssl-images-amazon\.com|c1\.neweggimages\.com|neweggimages\.com|bhphotovideo\.com/images)", re.I)
 def bing_candidates(q):
     html = _get("https://www.bing.com/images/search?form=HDRSC2&first=1&q=" + urllib.parse.quote(q)).decode("utf-8", "ignore")
@@ -47,12 +46,13 @@ for it in json.load(open("tools/images.json")):
         raw = pathlib.Path("/tmp") / (pid + ".src")
         if it.get("q"):   # búsqueda: primera foto de Amazon/Newegg con fondo blanco
             src = None
-            for cand in bing_candidates(it["q"]):
+            cands = bing_candidates(it["q"]); it["cands"] = len(cands)
+            for cand in cands:
                 try:
                     raw.write_bytes(_get(cand)); w = corners_white(str(raw))
                     if w is not None and w > 240: src = cand; break
                 except Exception: pass
-            if not src: raise RuntimeError("sin foto de fondo blanco en la búsqueda")
+            if not src: raise RuntimeError(f"sin foto de fondo blanco ({it['cands']} candidatas)")
         else:
             if not src: src = og_image(it["page"])
             if not src: raise RuntimeError("sin og:image")
