@@ -442,6 +442,7 @@ body.no-scroll { overflow: hidden; }
 .fp-price { display: flex; align-items: center; gap: 6px; }
 .fp-price input { width: 100%; min-width: 0; height: 38px; padding: 0 10px; border: 1px solid var(--c6); border-radius: 10px; background: var(--bg); color: var(--c2); font: inherit; }
 .fp-price input:focus { outline: 2px solid var(--c0); border-color: transparent; }
-.fp-clear { justify-self: start; align-self: end; padding: 8px 16px; font-size: .88rem; }
+.fp-actions { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.fp-actions .btn { padding: 8px 16px; font-size: .88rem; }
 .fp-price input { -moz-appearance: textfield; appearance: textfield; }
 .fp-price input::-webkit-outer-spin-button, .fp-price input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }

@@ -115,7 +115,10 @@
             <div class="fp-price"><input type="number" id="fpMin" inputmode="numeric" min="0" placeholder="Mínimo" aria-label="Precio mínimo"><span>–</span><input type="number" id="fpMax" inputmode="numeric" min="0" placeholder="Máximo" aria-label="Precio máximo"></div>
           </fieldset>
           <fieldset><legend>Disponibilidad</legend><label class="fp-check"><input type="checkbox" id="fpStock"> Solo con stock confirmado</label></fieldset>
-          <button class="btn btn-outline fp-clear" id="fpClear" type="button">Limpiar filtros</button>
+          <div class="fp-actions">
+            <button class="btn btn-outline fp-clear" id="fpClear" type="button">Limpiar filtros</button>
+            <button class="btn btn-primary fp-done" id="fpDone" type="button">Listo</button>
+          </div>
         </div>
         <div class="filters reveal" id="filters"></div>
         <div class="grid" id="productGrid"></div>
