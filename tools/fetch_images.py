@@ -36,9 +36,11 @@ def corners_white(path):
     return sum(px) / len(px)
 PREFER = re.compile(r"(m\.media-amazon\.com|images-na\.ssl-images-amazon\.com|c1\.neweggimages\.com|neweggimages\.com|bhphotovideo\.com/images)", re.I)
 def bing_candidates(q):
-    html = _get("https://www.bing.com/images/search?form=HDRSC2&first=1&q=" + urllib.parse.quote(q)).decode("utf-8", "ignore")
+    html = _get("https://www.bing.com/images/search?form=HDRSC2&first=1&qft=+filterui:color2-FGcls_WHITE&q=" + urllib.parse.quote(q)).decode("utf-8", "ignore")
     urls = [urllib.parse.unquote(u).replace("&amp;", "&") for u in re.findall(r'murl&quot;:&quot;(.*?)&quot;', html)]
-    return [u for u in urls if PREFER.search(u)][:8]
+    bad = re.compile(r"pinterest|pinimg|youtube|ytimg|facebook|fbcdn|instagram|tiktok|reddit|redd\.it|wikia|aliexpress|alicdn", re.I)
+    urls = [u for u in urls if u.startswith("https://") and not bad.search(u)]
+    return (sorted(urls, key=lambda u: 0 if PREFER.search(u) else 1))[:10]   # primero Amazon/Newegg
 report = []
 for it in json.load(open("tools/images.json")):
     pid, src = it["id"], it.get("img")
