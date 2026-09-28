@@ -39,6 +39,10 @@ Deno.serve(async (req) => {
     .eq("id", order_id).single();
   if (!o) return new Response("order not found", { status: 404 });
 
+  // Solo se escribe a cuentas con el email confirmado (evita mandar correo a direcciones falsas).
+  const { data: prof } = await db.from("orders").select("profiles(email_verified_at)").eq("id", order_id).single();
+  if (!(prof as any)?.profiles?.email_verified_at) return new Response("email no verificado", { status: 409 });
+
   const itemsHtml = "<ul>" + o.order_items
     .map((i: any) => `<li>${i.qty} x ${i.products.name} — ${money(i.qty * i.unit_price)}</li>`).join("") + "</ul>";
   const { subject, html } = tpl({ id: o.id, total: o.total, name: o.profiles.full_name ?? "", itemsHtml });

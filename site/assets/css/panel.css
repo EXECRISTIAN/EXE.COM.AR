@@ -45,3 +45,4 @@
   .sidebar { position: static; height: auto; }
   .side-nav { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }
+.captcha { min-height: 65px; }

@@ -30,6 +30,7 @@
         <form class="form" id="loginForm">
           <label class="field">Email<input type="email" name="email" required autocomplete="email"></label>
           <label class="field">Contraseña<input type="password" name="password" required autocomplete="current-password"></label>
+          <div class="captcha" data-captcha="login"></div>
           <button class="btn btn-primary">Ingresar</button>
           <button type="button" class="link-btn" id="forgot">Olvidé mi contraseña</button>
         </form>
@@ -38,9 +39,21 @@
           <label class="field">Teléfono (WhatsApp)<input name="phone" type="tel" autocomplete="tel"></label>
           <label class="field">Email<input type="email" name="email" required autocomplete="email"></label>
           <label class="field">Contraseña<input type="password" name="password" minlength="8" required autocomplete="new-password"></label>
+          <div class="captcha" data-captcha="register"></div>
           <button class="btn btn-primary">Crear cuenta</button>
         </form>
         <p class="notice" id="msg" hidden style="margin-top:14px"></p>
+      </section>
+
+      <!-- Llegó desde el enlace de "Olvidé mi contraseña" / reactivación de cuenta -->
+      <section id="recovery" hidden>
+        <h1>Elegí tu nueva contraseña</h1>
+        <p style="color:var(--c3)">Tu email quedó verificado. Creá una contraseña para volver a usar tu cuenta.</p>
+        <form class="form" id="recoveryForm">
+          <label class="field">Nueva contraseña<input type="password" name="password" minlength="8" required autocomplete="new-password"></label>
+          <button class="btn btn-primary">Guardar contraseña</button>
+        </form>
+        <p class="notice" id="recoveryMsg" hidden style="margin-top:14px"></p>
       </section>
 
       <!-- Con sesión -->
@@ -59,6 +72,7 @@
   <script src="assets/js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="assets/js/backend.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&hl=es" async defer></script>
   <script src="assets/js/cuenta.js"></script>
 </body>
 </html>

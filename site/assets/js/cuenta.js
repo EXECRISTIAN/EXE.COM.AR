@@ -24,31 +24,73 @@
   }
   const { sb } = be;
 
+  // ---------- Antibots (Cloudflare Turnstile, en español) ----------
+  // Supabase valida el token del lado del servidor cuando el captcha está activado en Attack Protection.
+  const siteKey = window.SITE_CONFIG?.turnstileSiteKey;
+  const widgets = {};
+  function mountCaptchas() {
+    if (!siteKey || !window.turnstile) return;
+    document.querySelectorAll("[data-captcha]").forEach((el) => {
+      if (widgets[el.dataset.captcha] !== undefined) return;
+      widgets[el.dataset.captcha] = window.turnstile.render(el, { sitekey: siteKey, language: "es", theme: "auto", size: "flexible" });
+    });
+  }
+  (function waitTurnstile(n = 0) {
+    if (window.turnstile) mountCaptchas(); else if (n < 50) setTimeout(() => waitTurnstile(n + 1), 200);
+  })();
+  const captcha = (name) => {
+    if (!siteKey || !window.turnstile) return {}; // si el captcha no cargó, decide el servidor
+    const t = window.turnstile && widgets[name] !== undefined ? window.turnstile.getResponse(widgets[name]) : "";
+    return t ? { captchaToken: t } : null;
+  };
+  const resetCaptcha = (name) => { if (window.turnstile && widgets[name] !== undefined) window.turnstile.reset(widgets[name]); };
+  const needCaptcha = () => show("Completá la verificación \"No soy un robot\" y volvé a intentar.");
+
   $("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
-    const { error } = await sb.auth.signInWithPassword({ email: f.get("email"), password: f.get("password") });
-    if (error) return show("Email o contraseña incorrectos.");
+    const c = captcha("login"); if (!c) return needCaptcha();
+    const { error } = await sb.auth.signInWithPassword({ email: f.get("email"), password: f.get("password"), options: c });
+    resetCaptcha("login");
+    if (error) return show(/confirm/i.test(error.message) ? "Tenés que confirmar tu email: revisá tu bandeja de entrada (y spam)." : "Email o contraseña incorrectos.");
     render();
   });
 
   $("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
+    const c = captcha("register"); if (!c) return needCaptcha();
     const { error } = await sb.auth.signUp({
       email: f.get("email"),
       password: f.get("password"),
-      options: { data: { full_name: f.get("full_name"), phone: f.get("phone") }, emailRedirectTo: location.href },
+      options: { data: { full_name: f.get("full_name"), phone: f.get("phone") }, emailRedirectTo: location.href, ...c },
     });
-    if (error) return show(error.message);
+    resetCaptcha("register");
+    if (error) return show("No pudimos crear la cuenta. Revisá los datos e intentá de nuevo.");
     show("¡Listo! Te enviamos un email para confirmar tu cuenta.", "ok");
   });
 
   $("forgot").addEventListener("click", async () => {
     const email = $("loginForm").email.value;
     if (!email) return show("Escribí tu email arriba y volvé a tocar el enlace.");
-    await sb.auth.resetPasswordForEmail(email, { redirectTo: location.href });
+    const c = captcha("login"); if (!c) return needCaptcha();
+    await sb.auth.resetPasswordForEmail(email, { redirectTo: location.href.split("#")[0], ...c });
+    resetCaptcha("login");
     show("Si el email existe, te llegará un enlace para restablecer la contraseña.", "ok");
+  });
+
+  // Al volver desde el email de recuperación Supabase abre una sesión especial: pedimos la contraseña nueva.
+  sb.auth.onAuthStateChange((event) => {
+    if (event !== "PASSWORD_RECOVERY") return;
+    $("guest").hidden = true; $("logged").hidden = true; $("recovery").hidden = false;
+  });
+  $("recoveryForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const { error } = await sb.auth.updateUser({ password: new FormData(e.target).get("password") });
+    const m = $("recoveryMsg"); m.hidden = false;
+    if (error) { m.className = "notice error"; m.textContent = "No se pudo guardar. Probá con otra contraseña (mínimo 8 caracteres)."; return; }
+    m.className = "notice ok"; m.textContent = "¡Listo! Contraseña guardada.";
+    setTimeout(() => { $("recovery").hidden = true; render(); }, 1200);
   });
 
   $("logout").addEventListener("click", async () => { await sb.auth.signOut(); render(); });
