@@ -14,6 +14,8 @@
   let products = [];
   let filter = "Todos";
   let query = "";
+  let sortBy = "";
+  const fp = { brands: new Set(), min: null, max: null, stock: false };   // panel "Filtros"
   let cart = load();
 
   function load() {
@@ -50,8 +52,17 @@
     const q = query.toLowerCase();
     const list = products.filter(
       (p) => (filter === "Todos" || p.category === filter) &&
-        (!q || `${p.name} ${p.brand || ""} ${p.category || ""}`.toLowerCase().includes(q))
+        (!q || `${p.name} ${p.brand || ""} ${p.category || ""}`.toLowerCase().includes(q)) &&
+        (!fp.brands.size || fp.brands.has(p.brand)) &&
+        (fp.min == null || (p.price > 0 && p.price >= fp.min)) &&
+        (fp.max == null || (p.price > 0 && p.price <= fp.max)) &&
+        (!fp.stock || (tracksStock(p) && available(p) > 0))
     );
+    const byPrice = (p) => (p.price > 0 ? p.price : Infinity);   // "Consultar" siempre al final
+    if (sortBy === "price-asc") list.sort((a, b) => byPrice(a) - byPrice(b));
+    if (sortBy === "price-desc") list.sort((a, b) => (b.price || -1) - (a.price || -1));
+    if (sortBy === "name-asc") list.sort((a, b) => a.name.localeCompare(b.name, "es"));
+    if (sortBy === "name-desc") list.sort((a, b) => b.name.localeCompare(a.name, "es"));
     $("productGrid").innerHTML = list.length
       ? list.map((p, i) => {
           const out = tracksStock(p) && p.stock <= 0;
@@ -333,6 +344,37 @@
   });
 
   $("search").addEventListener("input", (e) => { query = e.target.value.trim(); renderProducts(); });
+
+  /* ---------- Filtros y orden ---------- */
+  function renderBrandOptions() {
+    const brands = [...new Set(products.map((p) => p.brand).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"));
+    $("fpBrands").innerHTML = brands.map((b) =>
+      `<label class="fp-check"><input type="checkbox" value="${esc(b)}"${fp.brands.has(b) ? " checked" : ""}> ${esc(b)}</label>`).join("");
+  }
+  function updateFilters() {
+    const n = fp.brands.size + (fp.min != null || fp.max != null ? 1 : 0) + (fp.stock ? 1 : 0);
+    $("filtersCount").hidden = !n; $("filtersCount").textContent = n;
+    renderProducts();
+  }
+  const numOrNull = (v) => (v === "" || isNaN(+v) ? null : Math.max(0, +v));
+  $("filtersBtn").onclick = () => {
+    const open = $("filtersPanel").hidden;
+    $("filtersPanel").hidden = !open; $("filtersBtn").setAttribute("aria-expanded", open);
+  };
+  $("filtersPanel").addEventListener("input", (e) => {
+    const t = e.target;
+    if (t.closest("#fpBrands")) t.checked ? fp.brands.add(t.value) : fp.brands.delete(t.value);
+    if (t.id === "fpMin") fp.min = numOrNull(t.value);
+    if (t.id === "fpMax") fp.max = numOrNull(t.value);
+    if (t.id === "fpStock") fp.stock = t.checked;
+    updateFilters();
+  });
+  $("fpClear").onclick = () => {
+    fp.brands.clear(); fp.min = fp.max = null; fp.stock = false;
+    $("fpMin").value = $("fpMax").value = ""; $("fpStock").checked = false;
+    renderBrandOptions(); updateFilters();
+  };
+  $("sortSel").onchange = (e) => { sortBy = e.target.value; renderProducts(); };
   $("cartOpen").onclick = () => toggleCart(true);
   $("cartClose").onclick = () => toggleCart(false);
   $("overlay").onclick = () => toggleCart(false);
@@ -448,6 +490,6 @@
   /* ---------- Datos ---------- */
   fetch("data/products.json", { cache: "no-cache" })   // siempre revalida precios y stock
     .then((r) => r.json())
-    .then((data) => { products = data; renderFilters(); renderProducts(); renderCart(); routeProduct(); })
+    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();
