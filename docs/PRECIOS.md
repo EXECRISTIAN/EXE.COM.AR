@@ -3,7 +3,7 @@
 Pedido del 28/09/2026. Se hace de a poco, sin que haga falta pedirlo cada vez.
 
 ## Reglas
-- **Precio de venta = precio de referencia × 1,30** (redondeado a $100). En la web se aclara "Consultar precio final".
+- **Precio de venta = precio de referencia × 1,50** (redondeado a $100). En la web se aclara "Consultar precio final".
 - Referencia: tiendas líderes de Argentina (CompraGamer primero; luego Mexx, Venex, FullH4rd si se pueden leer).
 - **Solo productos nuevos** (nada de outlet, usados, combos ni PCs armadas), con **envío nacional** y entrega de **2 semanas como máximo**.
 - Productos de menos de **$2.000.000**, con demanda (gaming / armado de PC / oficina).
