@@ -71,6 +71,18 @@
     </div>
   </main>
 
+  <!-- Confirmación de cierre de sesión -->
+  <dialog class="confirm" id="logoutDialog" aria-labelledby="logoutTitle">
+    <form method="dialog">
+      <h2 id="logoutTitle">¿Seguro que querés cerrar sesión?</h2>
+      <p>Vas a tener que volver a ingresar para ver tus pedidos.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-outline" value="cancel" autofocus>Cancelar</button>
+        <button class="btn btn-danger" value="ok">Cerrar sesión</button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Selector de tema mini (solo en Mi cuenta): abajo a la derecha, medio oculto y casi transparente -->
   <div class="theme-mini" id="themeMini" role="radiogroup" aria-label="Modo de tema" data-mode="auto">
     <span class="tm-thumb" aria-hidden="true"></span>
