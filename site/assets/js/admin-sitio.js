@@ -61,7 +61,7 @@
       <div class="panel"><h3 style="margin-top:0">Página principal (de arriba hacia abajo)</h3>
         <ol class="st-list">${blocks.map((b, i) => `<li class="st-item ${b.active ? "" : "is-off"}" data-id="${esc(b.id)}">
           <div class="st-move"><button type="button" data-mv="-1" title="Subir" ${i === 0 ? "disabled" : ""}>▲</button><button type="button" data-mv="1" title="Bajar" ${i === blocks.length - 1 ? "disabled" : ""}>▼</button></div>
-          <div class="st-info"><b>${esc(b.title || TYPES[b.type].name)}</b><small>${esc(TYPES[b.type].name)}${b.active ? "" : " · oculta"}</small></div>
+          <div class="st-info"><b>${esc(b.title || TYPES[b.type].name)}</b><small>${esc(TYPES[b.type].name)}${b.active ? "" : " · oculta"}${b.description ? ` · ${esc(b.description)}` : ""}</small></div>
           <label class="switch" title="Mostrar / ocultar"><input type="checkbox" data-act ${b.active ? "checked" : ""}><span></span></label>
           <a class="btn btn-outline" href="#sitio-editar/${encodeURIComponent(b.id)}">Editar</a>
           ${b.builtin ? `<span class="st-lock" title="Sección original: se puede ocultar, no eliminar">🔒</span>` : `<button type="button" class="link-btn" data-del title="Eliminar">🗑</button>`}
@@ -128,6 +128,7 @@
       <p class="notice" id="stMsg" hidden></p>
       <section class="panel ed-sec"><h3>${esc(T.name)}</h3>
         <div class="ed-grid"><label class="field">Nombre (solo para el panel)<input name="title" value="${esc(b.title || "")}"></label>
+        <label class="field">Descripción / nota interna<input name="description" value="${esc(b.description || "")}" placeholder="Para qué es esta sección"></label>
         <label class="field ed-check"><input type="checkbox" name="active" ${b.active ? "checked" : ""}> Mostrar en la página</label></div>
         ${T.note ? `<p class="ed-hint">${esc(T.note)}</p>` : ""}
         <div id="stFields"></div>
@@ -209,7 +210,7 @@
     f.addEventListener("submit", async (e) => {
       e.preventDefault(); readFields();
       try {
-        await save([{ id: cur.id, type: cur.type, page: cur.page || "inicio", position: cur.position, builtin: cur.builtin, title: f.elements.title.value.trim() || TYPES[cur.type].name, active: f.elements.active.checked, data: cur.data }]);
+        await save([{ id: cur.id, type: cur.type, page: cur.page || "inicio", position: cur.position, builtin: cur.builtin, title: f.elements.title.value.trim() || TYPES[cur.type].name, description: f.elements.description.value.trim() || null, active: f.elements.active.checked, data: cur.data }]);
         msg("Guardado ✔ Recargá la página web para verlo.", "ok");
       } catch (err) { msg("No se pudo guardar: " + err.message, "error"); }
     });

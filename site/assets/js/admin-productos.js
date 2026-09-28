@@ -37,7 +37,7 @@
   async function loadAll(force) {
     if (A.demo) return (cache = demoStore());
     if (cache && !force) return cache;
-    const cols = "id,name,brand,category,description,price,price_usd,stock,show_stock,active,outlet,condition,image,images,specs,weight_kg,sort,variants,updated_at";
+    const cols = "id,name,brand,category,tags,description,price,price_usd,stock,show_stock,active,outlet,condition,image,images,specs,weight_kg,sort,variants,updated_at";
     const fxr = await sb().from("fx_settings").select("*").eq("id", 1).maybeSingle();
     fx = fxr.data || null;
     const [p, c, s] = await Promise.all([
@@ -100,7 +100,7 @@
       </div>
       <div class="pr-toolbar">
         ${w ? `<a class="btn btn-primary" href="#editar/nuevo">＋ Nuevo producto</a>` : ""}
-        <input type="search" id="prQ" placeholder="Buscar por nombre, marca o código…" value="${esc(listState.q)}">
+        <input type="search" id="prQ" placeholder="Buscar por nombre, marca, código o etiqueta…" value="${esc(listState.q)}">
         <select id="prCat"><option value="">Todas las categorías</option>${cats.map((c) => `<option ${c === listState.cat ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
         <select id="prFilter">
           ${[["", "Todos"], ["activos", "Activos"], ["inactivos", "Inactivos"], ["outlet", "Outlet"], ["sinfoto", "Sin foto"], ["sinprecio", "Sin precio"], ["sinstock", "Sin stock"], ["sincosto", "Sin costo cargado"]]
@@ -115,6 +115,8 @@
         <button class="btn btn-outline" data-bulk="pct">Subir/bajar precio %</button>
         <button class="btn btn-outline" data-bulk="margin">Aplicar margen sobre costo</button>
         <button class="btn btn-outline" data-bulk="consult">Poner "a consultar"</button>
+        <button class="btn btn-outline" data-bulk="tagadd">🏷 Agregar etiqueta</button>
+        <button class="btn btn-outline" data-bulk="tagrm">Quitar etiqueta</button>
         <button class="btn btn-outline danger" data-bulk="delete">Eliminar</button>` : ""}
         <button class="link-btn" data-bulk="clear">Quitar selección</button>
       </div>
@@ -130,7 +132,7 @@
     const { products, costs } = cache;
     const q = listState.q.toLowerCase();
     return products.filter((p) => {
-      if (q && !`${p.name} ${p.brand || ""} ${p.id}`.toLowerCase().includes(q)) return false;
+      if (q && !`${p.name} ${p.brand || ""} ${p.id} ${(p.tags || []).join(" ")}`.toLowerCase().includes(q)) return false;
       if (listState.cat && p.category !== listState.cat) return false;
       switch (listState.filter) {
         case "activos": return p.active; case "inactivos": return !p.active; case "outlet": return p.outlet;
@@ -150,7 +152,8 @@
         <td><input type="checkbox" data-sel ${listState.sel.has(p.id) ? "checked" : ""} aria-label="Seleccionar"></td>
         <td>${(p.images || [])[0] ? `<img class="pr-thumb" src="${esc(imgUrl(p.images[0]))}" alt="" loading="lazy">` : `<span class="pr-thumb pr-nophoto" title="Sin foto">📷</span>`}</td>
         <td><a href="#editar/${encodeURIComponent(p.id)}" class="pr-name">${esc(p.name)}</a>
-          <small class="pr-meta">${esc(p.brand || "")}${p.outlet ? ` · <span class="pill pending">Outlet</span>` : ""}${p.condition ? ` · ${esc(p.condition)}` : ""}</small></td>
+          <small class="pr-meta">${esc(p.brand || "")}${p.outlet ? ` · <span class="pill pending">Outlet</span>` : ""}${p.condition ? ` · ${esc(p.condition)}` : ""}</small>
+          ${(p.tags || []).length ? `<small class="pr-meta">🏷 ${p.tags.map(esc).join(", ")}</small>` : ""}</td>
         <td>${esc(p.category || "—")}</td>
         ${w ? `<td><input class="pr-in" data-f="cost" inputmode="numeric" value="${c ?? ""}" placeholder="—"></td>` : ""}
         <td>${p.price_usd != null
@@ -215,7 +218,12 @@
     if (action === "clear") { listState.sel.clear(); return renderRows(); }
     let fn;
     if (action === "on" || action === "off") fn = (p) => patchProduct(p.id, { active: action === "on" });
-    if (action === "consult") fn = (p) => patchProduct(p.id, { price: 0 });
+    if (action === "consult") fn = (p) => patchProduct(p.id, { price: 0, price_usd: null });
+    if (action === "tagadd" || action === "tagrm") {
+      const v = await ask(action === "tagadd" ? "Agregar etiqueta" : "Quitar etiqueta", "Nombre de la etiqueta (ej: Oferta, Gamer, Oficina).", "");
+      if (!v || !v.trim()) return; const tag = v.trim();
+      fn = (p) => { const t = new Set(p.tags || []); action === "tagadd" ? t.add(tag) : t.delete(tag); return patchProduct(p.id, { tags: [...t] }); };
+    }
     if (action === "pct") {
       const v = await ask("Subir o bajar el precio de venta", "Porcentaje (ej: 10 para subir 10 %, -5 para bajar 5 %). Se redondea a $100.", "10");
       if (v === null) return; const f = 1 + num(v) / 100;
@@ -264,7 +272,7 @@
   A.views.editar = async function (id) {
     const { products, costs, sources } = await loadAll(true);
     const isNew = id === "nuevo";
-    const p = isNew ? { id: "", name: "", brand: "", category: "", description: "", price: 0, stock: 1, show_stock: true, active: true, outlet: false, condition: "", images: [], specs: [], weight_kg: 1, sort: products.length } : products.find((x) => x.id === id);
+    const p = isNew ? { id: "", name: "", brand: "", category: "", tags: [], description: "", price: 0, stock: 1, show_stock: true, active: true, outlet: false, condition: "", images: [], specs: [], weight_kg: 1, sort: products.length } : products.find((x) => x.id === id);
     if (!p) return `<p class="notice error">No existe el producto "${esc(id)}".</p>`;
     const c = costs.get(p.id) || {};
     ed = { isNew, orig: p.id, images: [...(p.images || [])], specs: JSON.parse(JSON.stringify(p.specs || [])), sources: [...(sources.get(p.id) || [])], removedSources: [] };
@@ -291,6 +299,7 @@
             <label class="field">Código (para el link)<input name="id" value="${esc(p.id)}" ${isNew ? "" : "readonly"} placeholder="se genera solo desde el nombre" pattern="[a-z0-9\-]+"><small>${isNew ? "Solo minúsculas, números y guiones." : "No se puede cambiar (lo usan los links y pedidos)."}</small></label>
             <label class="field">Marca<input name="brand" list="edBrands" value="${esc(p.brand || "")}" ${ro}></label>
             <label class="field">Categoría<input name="category" list="edCats" value="${esc(p.category || "")}" placeholder="Elegí o escribí una nueva" ${ro}></label>
+            <label class="field ed-wide">Etiquetas (separadas por coma)<input name="tags" list="edTags" value="${esc((p.tags || []).join(", "))}" placeholder="Ej: Gamer, Oferta, Oficina" ${ro}><small>Se muestran en la tienda y sirven para filtrar. Existentes: ${[...new Set(products.flatMap((x) => x.tags || []))].sort().map(esc).join(", ") || "ninguna"}</small></label>
             <label class="field ed-check"><input type="checkbox" name="outlet" ${p.outlet ? "checked" : ""} ${ro}> Es producto outlet</label>
             <label class="field">Estado / condición<input name="condition" value="${esc(p.condition || "")}" placeholder="Ej: Sin caja, con cooler" ${ro}></label>
           </div>
@@ -519,6 +528,7 @@
         outlet: el("outlet").checked, condition: el("condition").value.trim() || null,
         ...(isUsd() ? { price_usd: Math.max(0, val("price")) } : { price: Math.max(0, num(el("price").value)), price_usd: null }),
         show_stock: el("show_stock").checked, stock: el("show_stock").checked ? Math.max(0, Math.round(num(el("stock").value))) : 999,
+        tags: [...new Set(el("tags").value.split(",").map((t) => t.trim()).filter(Boolean))],
         active: el("active").checked, weight_kg: Math.max(0.01, num(el("weight_kg").value) || 1), description: el("description").value.trim() || null,
         images: ed.images, specs: ed.specs.map((s) => ({ title: s.title.trim() || "Características", rows: s.rows.filter((r) => r[0].trim() && r[1].trim()).map((r) => [r[0].trim(), r[1].trim()]) })).filter((s) => s.rows.length),
       };
