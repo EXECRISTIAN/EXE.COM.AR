@@ -6,7 +6,7 @@
   const money = (n) =>
     new Intl.NumberFormat(cfg.locale, { style: "currency", currency: cfg.currency, maximumFractionDigits: 0 }).format(n);
   const mainImg = (p) => (p.images && p.images[0]) || p.image || PLACEHOLDER;
-  const priceLabel = (p) => (p.price > 0 ? money(p.price) : "Consultar");
+  const priceLabel = (p) => (p.price > 0 ? money(p.price) : "Consultar precio por WhatsApp");
   const esc = (s) =>
     String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
   const waLink = (text) => `https://wa.me/${cfg.whatsappNumber}?text=${encodeURIComponent(text)}`;
@@ -83,7 +83,7 @@
             <div class="card-body">
               ${p.brand ? `<button class="tag-brand" type="button" data-brand-tag="${esc(p.brand)}" title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
               <h3><a href="#producto/${encodeURIComponent(p.id)}">${esc(p.name)}</a></h3>
-              <div class="price">${priceLabel(p)}</div>
+              <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>
               ${p.price > 0 ? `<span class="price-note">Consultar precio final</span>` : ""}
               ${stockBadge(p)}
               ${p.variants ? `<select data-variant="${esc(p.id)}" aria-label="Variante">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select>` : ""}
@@ -132,7 +132,7 @@
       <div class="pd-info">
         ${p.brand ? `<button class="tag-brand" type="button" data-brand-tag="${esc(p.brand)}" title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
         <h2 id="pdName">${esc(p.name)}</h2>
-        <div class="price">${priceLabel(p)}</div>
+        <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>
         ${p.price > 0 ? `<span class="price-note">Consultá el precio final actualizado</span>` : ""}
         <div class="pd-admin" id="pdAdmin" hidden></div>
         ${stockBadge(p)}

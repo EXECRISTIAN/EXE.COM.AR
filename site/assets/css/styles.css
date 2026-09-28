@@ -469,3 +469,4 @@ body.no-scroll { overflow: hidden; }
 .pd-admin-row { display: grid; gap: 2px; }
 .pd-admin-row a { color: var(--c0); font-weight: 700; }
 .pd-admin-row small { color: var(--muted); }
+.price.price-ask, .pd-info .price.price-ask { font-size: 1rem; color: var(--c0); }
