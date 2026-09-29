@@ -731,7 +731,27 @@
   };
   const loadJson = () => fetch("data/products.json", { cache: "no-cache" }).then((r) => r.json())
     .then((data) => data.filter((p) => p.active !== false));   // "active": false = sin stock: no se muestra ni se puede pedir
+  // Datos estructurados para Google (tienda + lista de productos con precio y disponibilidad).
+  // "Consultar precio" no publica precio; la foto y el link apuntan a la ficha del producto.
+  function structuredData() {
+    const base = location.origin + location.pathname.replace(/[^/]*$/, "");
+    const abs = (u) => (u && /^https?:/.test(u) ? u : base + (u || "").replace(/^\.?\//, ""));
+    const items = products.slice(0, 100).map((p, i) => {
+      const prod = { "@type": "Product", name: p.name, url: `${base}#producto/${encodeURIComponent(p.id)}`, sku: p.id,
+        ...(p.brand ? { brand: { "@type": "Brand", name: p.brand } } : {}), ...(p.category ? { category: p.category } : {}),
+        ...(p.images && p.images[0] ? { image: abs(p.images[0]) } : {}), ...(p.description ? { description: String(p.description).slice(0, 500) } : {}) };
+      if (p.price > 0) prod.offers = { "@type": "Offer", priceCurrency: "ARS", price: p.price,
+        availability: typeof p.stock === "number" && p.stock <= 0 ? "https://schema.org/OutOfStock" : p.noStock ? "https://schema.org/BackOrder" : "https://schema.org/InStock",
+        itemCondition: p.outlet ? "https://schema.org/UsedCondition" : "https://schema.org/NewCondition" };
+      return { "@type": "ListItem", position: i + 1, item: prod };
+    });
+    const data = [{ "@context": "https://schema.org", "@type": "Store", name: "EXE", url: base, image: abs("assets/img/favicon.jpg"), telephone: "+54 9 11 3009 5254", email: "ventas@exe.com.ar", address: { "@type": "PostalAddress", addressCountry: "AR" } },
+      { "@context": "https://schema.org", "@type": "ItemList", name: "Productos de EXE", itemListElement: items }];
+    let s = document.getElementById("ldJson");
+    if (!s) { s = document.createElement("script"); s.type = "application/ld+json"; s.id = "ldJson"; document.head.appendChild(s); }
+    s.textContent = JSON.stringify(data).replace(/</g, "\\u003c");
+  }
   loadDb().catch(loadJson)
-    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); })
+    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();

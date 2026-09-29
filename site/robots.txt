@@ -1,0 +1,10 @@
+# Vale cuando la web esté en la raíz del dominio (exe.com.ar). En github.io/EXE.COM.AR los buscadores no lo leen
+# (el panel y Mi cuenta igual tienen <meta name="robots" content="noindex">).
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /cuenta.html
+Disallow: /EXE.COM.AR/admin/
+Disallow: /EXE.COM.AR/cuenta.html
+
+Sitemap: https://execristian.github.io/EXE.COM.AR/sitemap.xml
