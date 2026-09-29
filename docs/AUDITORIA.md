@@ -7,10 +7,10 @@ panel en `?demo`), hace PR + merge y lo tilda con la fecha. Reglas:
 - No tocar precios de venta outlet ni costos. No publicar links/costos en el repo.
 
 ## Pendiente
-- [ ] 404 y enlaces rotos en toda la web.
-- [ ] Fotos: productos sin foto (seguir con la tanda de precios/fotos).
+- [ ] Fotos: productos sin foto — tanda automática en pausa hasta que Cristian apruebe recrear el Worker de descarga (o suba fotos propias desde el panel).
 
 ## Hecho
+- [x] 29/09 — Enlaces: todos los links, scripts, estilos e imágenes internas de la web existen; las 32 fotos de productos cargadas en la base están en el sitio. Página 404 con noindex y link a la tienda.
 - [x] 29/09 — Seguridad: advisors de Supabase revisados. Cerrado fx_apply (cualquier usuario con sesión podía ejecutarla), funciones de trigger fuera de la API, permisos sin acceso anónimo, search_path fijo. Todas las funciones del panel verifican permiso. Sin sesión: tablas públicas OK y privadas (costos, referencias, historial, plantillas) bloqueadas. Quedan: pg_net en el esquema public (moverlo puede romper el cron; se deja) y "contraseñas filtradas" (función paga de Supabase).
 - [x] 29/09 — Textos: "Envíos a todo el país", "3 y 6 cuotas", "Pagos seguros" (portada y base de datos). Sin otros errores en tienda, Mi cuenta y 404.
 - [x] 29/09 — SEO: vista previa al compartir (Open Graph/Twitter con imagen), canonical, noindex en Mi cuenta/panel/404, sitemap.xml y robots.txt (robots rige cuando esté en exe.com.ar), datos estructurados de la tienda y de cada producto (precio, stock, estado nuevo/usado; sin precio si es "consultar").
