@@ -29,3 +29,4 @@ Siguiente intento en las tandas diarias: leer `og:image` con el navegador de Clo
 | 2026-09-28 | 05:50 | 2 | ~40 s | CompraGamer "8500g": solo aparece en combo (kit con mother), sin referencia suelta. |
 | 2026-09-28 | 06:53 | 2 | ~40 s | "5800x": solo existe el 5800XT (otro modelo, no se usa). "a620m-a": sin resultados del modelo. Total del día ~7 min; próxima tanda 00:30 UTC. |
 | 2026-09-29 | 00:31 | 4 | ~1,5 min | Sin coincidencia exacta en CompraGamer: Aerocool Cylon 600W, DeepCool AG400 Plus, MSI GTX 1650 Ventus XS, T-Force Delta DDR4 8GB 3600 (solo modelos parecidos o DDR5). Estos productos probablemente estén discontinuados en esa tienda: buscar referencia en otra tienda o cargarla a mano. |
+| 2026-09-29 | 04:31 | 2 | ~40 s | Mexx: sin resultados para Aerocool Cylon 600W ni DeepCool AG400 Plus. Próximo intento: Venex / Maximus. Total del día ~2 min. |
