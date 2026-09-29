@@ -7,12 +7,12 @@ panel en `?demo`), hace PR + merge y lo tilda con la fecha. Reglas:
 - No tocar precios de venta outlet ni costos. No publicar links/costos en el repo.
 
 ## Pendiente
-- [ ] Textos: ortografía y tono en toda la web (español rioplatense), páginas legales (términos, privacidad, garantía, envíos).
 - [ ] Seguridad: revisar advisors de Supabase, políticas RLS de cada tabla, funciones SECURITY DEFINER, cabeceras (CSP) posibles en Pages.
 - [ ] 404 y enlaces rotos en toda la web.
 - [ ] Fotos: productos sin foto (seguir con la tanda de precios/fotos).
 
 ## Hecho
+- [x] 29/09 — Textos: "Envíos a todo el país", "3 y 6 cuotas", "Pagos seguros" (portada y base de datos). Sin otros errores en tienda, Mi cuenta y 404.
 - [x] 29/09 — SEO: vista previa al compartir (Open Graph/Twitter con imagen), canonical, noindex en Mi cuenta/panel/404, sitemap.xml y robots.txt (robots rige cuando esté en exe.com.ar), datos estructurados de la tienda y de cada producto (precio, stock, estado nuevo/usado; sin precio si es "consultar").
 - [x] 28/09 — Rendimiento: todas las imágenes < 200 KB (1,5 MB en total), carga inicial 725 KB / 36 archivos, imagen principal visible en ~0,6 s. Agregado: conexión anticipada a Supabase (catálogo) y prioridad alta a la primera imagen del carrusel. Scripts ya al final y CSS/JS con versión por deploy (caché).
 - [x] 28/09 — Panel en celular: las 11 secciones sin errores de consola; menú en una fila deslizable; la página ya no se desplaza de costado (las tablas se deslizan dentro de su recuadro); indicadores en 2 columnas.
@@ -25,3 +25,4 @@ panel en `?demo`), hace PR + merge y lo tilda con la fecha. Reglas:
 ## Propuestas para Cristian (no se aplican sin su OK)
 - **Azul de marca un poco más oscuro en modo claro** (#0084d6 → #0073bb): hoy el texto blanco sobre azul y los links azules tienen contraste 3,98 (lo recomendado es 4,5). Cambio casi imperceptible pero mejora la lectura.
 - **Botón verde "Enviar pedido por WhatsApp"**: texto blanco sobre verde WhatsApp tiene contraste 2 (bajo). Opciones: verde más oscuro (#128C4A) o texto negro.
+- **Páginas legales** (Términos y condiciones, Política de privacidad —obligatoria por la Ley 25.326 ahora que se guardan datos y consentimiento de ofertas—, Garantía y devoluciones —Ley 24.240: 10 días de arrepentimiento para compras online—, Envíos). Necesito de Cristian: razón social o nombre, CUIT, domicilio, plazo de garantía de productos nuevos y outlet, y política de cambios. Con eso armo las 4 páginas y el "Botón de arrepentimiento" que exige la Res. 424/2020.
