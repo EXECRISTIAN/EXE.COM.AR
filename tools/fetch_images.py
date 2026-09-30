@@ -34,12 +34,20 @@ def corners_white(path):
     im = Image.open(path).convert("L").resize((40, 40))
     px = [im.getpixel((x, y)) for x in (0, 1, 38, 39) for y in (0, 1, 38, 39)]
     return sum(px) / len(px)
+TRUSTED = re.compile(r"(amazon\.com|ssl-images-amazon|neweggimages\.com|bhphotovideo\.com|gigabyte\.com|aorus\.com|msi\.com|asus\.com|intel\.com|amd\.com|nvidia\.com|zotac\.com|thermaltake\.com|biostar\.com\.tw|redragon|sentey\.com|steamstatic\.com|steampowered\.com|steamdeck\.com|corsair\.com|mercadolibre|mlstatic\.com)", re.I)
+def is_blank(path):
+    # descarta imágenes vacías (todo blanco o un solo color): menos de 4% de píxeles "con contenido"
+    from PIL import Image
+    im = Image.open(path).convert("L").resize((100, 100))
+    px = list(im.getdata())
+    return sum(1 for v in px if v < 235) < 400
 PREFER = re.compile(r"(m\.media-amazon\.com|images-na\.ssl-images-amazon\.com|c1\.neweggimages\.com|neweggimages\.com|bhphotovideo\.com/images)", re.I)
 def bing_candidates(q):
     html = _get("https://www.bing.com/images/search?form=HDRSC2&first=1&qft=+filterui:color2-FGcls_WHITE&q=" + urllib.parse.quote(q)).decode("utf-8", "ignore")
     urls = [urllib.parse.unquote(u).replace("&amp;", "&") for u in re.findall(r'murl&quot;:&quot;(.*?)&quot;', html)]
     bad = re.compile(r"pinterest|pinimg|youtube|ytimg|facebook|fbcdn|instagram|tiktok|reddit|redd\.it|wikia|aliexpress|alicdn", re.I)
     urls = [u for u in urls if u.startswith("https://") and not bad.search(u)]
+    urls = [u for u in urls if TRUSTED.search(u)]              # solo tiendas grandes y fabricantes (nada de fondos de pantalla)
     return (sorted(urls, key=lambda u: 0 if PREFER.search(u) else 1))[:10]   # primero Amazon/Newegg
 def commons_urls(q):
     api = "https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|mime&iiurlwidth=900&gsrsearch=" + urllib.parse.quote(q)
@@ -82,7 +90,7 @@ for it in json.load(open("tools/images.json")):
             for cand in cands:
                 try:
                     raw.write_bytes(_get(cand)); w = corners_white(str(raw))
-                    if w is not None and w > 240: src = cand; break
+                    if w is not None and w > 240 and not is_blank(str(raw)) and raw.stat().st_size > 8000: src = cand; break
                 except Exception: pass
             if not src: raise RuntimeError(f"sin foto de fondo blanco ({it['cands']} candidatas)")
         else:
