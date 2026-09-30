@@ -905,3 +905,25 @@
     .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();
+
+/* Al achicar/agrandar la ventana, mantener a la vista lo que el usuario estaba mirando
+   (si no, las secciones de arriba cambian de alto y la página "se corre"). */
+(() => {
+  let anchor = null, top = 0, resizing = false, t;
+  const pick = () => {
+    if (resizing || scrollY < 10) { if (!resizing) anchor = null; return; }
+    const hh = (document.querySelector(".site-header") || {}).offsetHeight || 70;
+    const el = document.elementFromPoint(innerWidth / 2, hh + 20);
+    if (el && el !== document.body && el !== document.documentElement) { anchor = el; top = el.getBoundingClientRect().top; }
+  };
+  addEventListener("scroll", () => { clearTimeout(t); t = setTimeout(pick, 80); }, { passive: true });
+  addEventListener("resize", () => {
+    resizing = true;
+    if (anchor && anchor.isConnected) {
+      const d = anchor.getBoundingClientRect().top - top;
+      if (Math.abs(d) > 1) scrollTo({ top: scrollY + d, behavior: "instant" });
+    }
+    clearTimeout(t); t = setTimeout(() => { resizing = false; }, 400);
+  });
+  pick();
+})();
