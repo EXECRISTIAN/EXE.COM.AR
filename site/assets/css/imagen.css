@@ -1,6 +1,7 @@
 /* Editor de imágenes (solo panel). Oscuro, como el editor visual. */
 :root { color-scheme: dark; --bg: #0b0f16; --pn: #111826; --ln: #1f2a3a; --in: #162133; --bd: #2a3a50; --tx: #dbe3ee; --mt: #8aa0b8; --ac: #0084d6; --ok: #16a34a; }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { height: 100%; margin: 0; }
 body { background: var(--bg); color: var(--tx); font: 13px/1.35 Lato, system-ui, sans-serif; }
 button, input, select, textarea { font: inherit; color: inherit; }
