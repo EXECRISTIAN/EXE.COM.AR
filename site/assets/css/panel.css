@@ -108,7 +108,12 @@
   font: 12px/1.35 var(--font); box-shadow: 0 4px 14px var(--shadow-strong);
   opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s; pointer-events: none;
 }
-.theme-mini.show-tip .tm-tip { opacity: 1; visibility: visible; }
+.theme-mini.show-tip .tm-tip { opacity: 1; visibility: visible; pointer-events: auto; }
+.theme-mini .tm-tip { display: flex; align-items: flex-start; gap: 8px; }
+.theme-mini .tm-x { flex: none; width: 18px; height: 18px; margin: -1px -4px 0 0; padding: 0; border: 0; border-radius: 4px;
+  background: none; color: inherit; opacity: .7; cursor: pointer; font: 700 11px/18px var(--font); text-align: center; }
+.theme-mini .tm-x:hover { opacity: 1; background: #e81123; color: #fff; }
+.theme-mini .tm-x:focus-visible { outline: 2px solid var(--c0); outline-offset: 1px; }
 .theme-mini.tip-long .tm-tip { max-width: min(290px, calc(100vw - 32px)); white-space: pre-line; line-height: 1.5; }
 /* "?" pegado a la izquierda del selector (explicación al instante) y cuenta regresiva al lado */
 .theme-mini .tm-help {
