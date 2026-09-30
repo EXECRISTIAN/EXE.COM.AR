@@ -765,6 +765,46 @@
     if (type === "espaciador") { css.setProperty("--sp-h", `${num(d.height, 0, 400) ?? 40}px`); css.setProperty("--sp-hm", `${num(d.height_mobile, 0, 400) ?? num(d.height, 0, 400) ?? 24}px`);
       if (hex(d.line_color)) css.setProperty("--sp-line", hex(d.line_color)); }
   }
+  // Editor visual: tamaños de cada capa (sección / contenedor / tarjeta) y sombras por capas. Todo validado y acotado.
+  // Capas: sección = el bloque entero; contenedor = su .container; tarjeta = la única caja dentro del contenedor (si la hay).
+  function cmsLayers(el) {
+    const cont = el.querySelector(":scope > .container") || el.querySelector(".container");
+    const card = cont && cont.children.length === 1 ? cont.firstElementChild : null;
+    return { sec: el, cont: cont || null, card };
+  }
+  const SHADOW_LAYERS = ["sec", "cont", "card"];
+  function shadowCss(list, layer) {
+    return (Array.isArray(list) ? list : []).slice(0, 8).filter((s) => s && s.on !== false && s.layer === layer).map((s) => {
+      const c = hex(s.color) || "#000000", a = (num(s.a, 0, 100) ?? 40) / 100;
+      const rgba = `rgba(${parseInt(c.slice(1, 3), 16)},${parseInt(c.slice(3, 5), 16)},${parseInt(c.slice(5, 7), 16)},${a})`;
+      return `${s.inset ? "inset " : ""}${num(s.x, -200, 200) ?? 0}px ${num(s.y, -200, 200) ?? 0}px ${num(s.blur, 0, 300) ?? 0}px ${num(s.spread, -100, 150) ?? 0}px ${rgba}`;
+    }).join(", ");
+  }
+  function applyBox(el, st) {
+    (el.__cmsProps || []).forEach(([n, k]) => n.style.removeProperty(k));
+    const set = []; el.__cmsProps = set;
+    const put = (n, k, v) => { if (!n || v == null || v === "") return; n.style.setProperty(k, v, "important"); set.push([n, k]); };
+    const L = cmsLayers(el);
+    const px = (v, a, b) => { const n = num(v, a, b); return n == null ? null : `${n}px`; };
+    put(L.sec, "min-height", st.sec_h ? px(st.sec_h, 0, 1600) : null);
+    put(L.sec, "margin-top", st.sec_mt != null && st.sec_mt !== "" ? px(st.sec_mt, -300, 400) : null);
+    put(L.sec, "margin-bottom", st.sec_mb != null && st.sec_mb !== "" ? px(st.sec_mb, -300, 400) : null);
+    if (L.cont) put(L.cont, "max-width", st.cont_w ? px(st.cont_w, 200, 2400) : null);
+    if (L.card) {
+      const w = num(st.card_w, 10, 100); put(L.card, "width", w ? `${w}%` : null); if (w) put(L.card, "margin-inline", "auto");
+      put(L.card, "min-height", st.card_h ? px(st.card_h, 0, 1600) : null);
+      put(L.card, "padding-block", st.card_py != null && st.card_py !== "" ? px(st.card_py, 0, 300) : null);
+      put(L.card, "padding-inline", st.card_px != null && st.card_px !== "" ? px(st.card_px, 0, 300) : null);
+      put(L.card, "border-radius", st.card_r != null && st.card_r !== "" ? px(st.card_r, 0, 120) : null);
+    }
+    SHADOW_LAYERS.forEach((k) => { const sh = shadowCss(st.shadows, k); if (sh) put(L[k], "box-shadow", sh); });
+    // "Sobresalir": la sección queda por encima de sus vecinas y no recorta sus sombras.
+    if (st.over) { put(L.sec, "position", "relative"); put(L.sec, "z-index", "5"); put(L.sec, "overflow", "visible"); if (L.cont) put(L.cont, "overflow", "visible"); }
+  }
+  // Vista previa del editor visual (solo dentro del panel, en un iframe del mismo sitio): expone applySite para los cambios en vivo.
+  if (window.parent !== window && /[?&]cms-edit=1/.test(location.search)) {
+    try { if (window.parent.location.origin === location.origin) window.EXE_CMS = { applySite, cmsLayers }; } catch (e) { /* otro origen: nada */ }
+  }
   function applySite(blocks) {
     const main = document.querySelector("main");
     document.querySelectorAll("[data-block-cms]").forEach((el) => el.remove());
@@ -776,7 +816,7 @@
         el.innerHTML = creators[b.type](b.data || {});
       } else if (el && renderers[b.type]) { try { renderers[b.type](el, b.data || {}); } catch (e) { /* si un bloque falla, queda el contenido original */ } }
       if (!el) return;
-      try { applyStyle(el, b.data || {}, b.type); } catch (e) { /* estilo inválido: se ignora */ }
+      try { applyStyle(el, b.data || {}, b.type); applyBox(el, (b.data || {}).style || {}); } catch (e) { /* estilo inválido: se ignora */ }
       el.hidden = !b.active;
       main.appendChild(el);   // reordena según la posición
     });
@@ -793,7 +833,7 @@
 
   if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
     fetch(`${cfg.supabaseUrl}/rest/v1/site_blocks?select=id,type,position,active,data&page=eq.inicio&order=position`, { headers: { apikey: cfg.supabaseAnonKey } })
-      .then((r) => (r.ok ? r.json() : Promise.reject())).then((rows) => { if (rows.length) applySite(rows); }).catch(() => {});
+      .then((r) => (r.ok ? r.json() : Promise.reject())).then((rows) => { if (rows.length && !(window.EXE_CMS && window.EXE_CMS.draft)) applySite(rows); }).catch(() => {});
   }
 
   /* ---------- Contenido de config ---------- */
