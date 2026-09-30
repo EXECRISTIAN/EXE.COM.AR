@@ -537,6 +537,30 @@
   });
   darkQuery.addEventListener("change", syncThemeMeta);
 
+  // ---------- Botón flotante de WhatsApp: visible / oculto (preferencia guardada en este dispositivo) ----------
+  const waSwitch = $("waSwitch");
+  function applyWa(mode, save = true) {
+    if (mode === "off") document.documentElement.dataset.waFloat = "off"; else delete document.documentElement.dataset.waFloat;
+    if (save) { try { mode === "off" ? localStorage.setItem("exe-wa-float", "off") : localStorage.removeItem("exe-wa-float"); } catch (e) {} }
+    waSwitch.dataset.mode = mode;
+    waSwitch.querySelectorAll("button").forEach((b) => {
+      const on = b.dataset.mode === mode;
+      b.setAttribute("aria-checked", String(on));
+      b.tabIndex = on ? 0 : -1;
+    });
+  }
+  if (waSwitch) {
+    let storedWa = null;
+    try { storedWa = localStorage.getItem("exe-wa-float"); } catch (e) {}
+    applyWa(storedWa === "off" ? "off" : "on", false);
+    waSwitch.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) applyWa(b.dataset.mode); });
+    waSwitch.addEventListener("keydown", (e) => {
+      const next = { ArrowLeft: "off", ArrowUp: "off", ArrowRight: "on", ArrowDown: "on" }[e.key];
+      if (!next) return;
+      e.preventDefault(); applyWa(next); waSwitch.querySelector(`[data-mode="${next}"]`).focus();
+    });
+  }
+
   const header = $("header");
   const onScroll = () => header.classList.toggle("scrolled", window.scrollY > 40);
   window.addEventListener("scroll", onScroll, { passive: true });
