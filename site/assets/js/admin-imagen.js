@@ -31,15 +31,22 @@
   const cutCache = new Map(); // src|tol → canvas con el blanco quitado
 
   /* ---------- Acceso ---------- */
+  // Si algo no responde, no queda trabado en "Verificando permisos…": avisa qué pasó
+  const timeout = (p, ms, what) => Promise.race([p, new Promise((_, ko) => setTimeout(() => ko(new Error(what + " no respondió (recargá la página)")), ms))]);
   async function boot() {
+    try { await bootInner(); }
+    catch (e) { gate("No se pudo abrir el editor: " + esc(e.message) + ' — <a href="">Recargar</a>', true); console.error(e); }
+  }
+  async function bootInner() {
     if (!demo) {
       if (!be) return gate("El backend no está configurado.");
-      const user = await be.user();
+      const user = await timeout(be.user(), 15000, "El inicio de sesión");
       if (!user) return gate('Tenés que <a href="../cuenta.html">iniciar sesión</a>.', true);
-      const perms = await be.permissions().catch(() => new Set());
+      const perms = await timeout(be.permissions(), 15000, "La verificación de permisos").catch(() => new Set());
       if (!perms.has("site.edit")) return gate("Tu usuario no tiene permiso para editar imágenes.");
     }
-    try { await loadDoc(); } catch (e) { return gate("No se pudo abrir el diseño: " + esc(e.message), true); }
+    gate("Abriendo la imagen…");
+    try { await timeout(loadDoc(), 25000, "La imagen"); } catch (e) { return gate("No se pudo abrir el diseño: " + esc(e.message), true); }
     if (demo) $("ieBack").href = "index.html?demo=1#imagenes";
     $("ieGate").hidden = true; $("ie").hidden = false;
     bindUi(); fit(); render(); renderSide(); setState(demo ? "Modo demo: no se guarda en la base" : "");
@@ -104,7 +111,8 @@
     if (imgCache.has(src)) { const im = imgCache.get(src); return im.complete && im.naturalWidth ? Promise.resolve(im) : new Promise((ok, ko) => { im.addEventListener("load", () => ok(im)); im.addEventListener("error", ko); }); }
     const im = new Image(); im.crossOrigin = "anonymous"; im.decoding = "async";
     const p = new Promise((ok, ko) => { im.onload = () => { ok(im); render(); }; im.onerror = () => ko(new Error("No se pudo cargar la imagen")); });
-    im.src = abs(src); imgCache.set(src, im);
+    const u = abs(src);
+    im.src = /^(blob:|data:)/.test(u) ? u : u + (u.includes("?") ? "&" : "?") + "cors=1"; imgCache.set(src, im);
     return p;
   }
   // "Varita": vuelve transparente el blanco (y casi blanco) de la imagen
