@@ -163,6 +163,7 @@
             </div></div>`}
           ${addBtn(p, "data-pd-add")}
           <a class="btn btn-outline" href="${esc(waAsk)}" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+          <button type="button" class="btn btn-outline btn-share" data-share-product="${esc(p.id)}">${SHARE_ICON} Compartir</button>
         </div>
         ${p.description ? `<div class="pd-desc">${esc(p.description)}</div>` : ""}
         <h3 class="pd-specs-title">Especificaciones</h3>
@@ -376,6 +377,89 @@
     toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
   }
 
+  /* ---------- Compartir (producto y presupuesto) ----------
+     Si el dispositivo tiene menú nativo de compartir (Android, iPhone/iPad, Mac, Windows con Chrome/Edge) se usa ese:
+     muestra las apps que la persona tiene instaladas. Si no (ej. Linux o Firefox de escritorio), se abre un menú propio. */
+  const siteBase = () => location.origin + location.pathname.replace(/[^/]*$/, "");
+  function sharePlatform() {
+    const ua = navigator.userAgent || "", pf = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || "";
+    if (/iPhone|iPad|iPod/.test(ua) || (/Mac/.test(pf) && navigator.maxTouchPoints > 1)) return "ios";
+    if (/Mac/.test(pf)) return "mac";
+    if (/Android/.test(ua)) return "android";
+    if (/Win/.test(pf)) return "windows";
+    return "linux";
+  }
+  const PLATFORM = sharePlatform();
+  document.documentElement.dataset.platform = PLATFORM;
+  // Ícono de compartir de cada sistema: Apple (caja con flecha arriba), Windows (caja con flecha curva), Android/Linux (3 nodos)
+  const SHARE_ICON = `<svg class="share-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${
+    PLATFORM === "ios" || PLATFORM === "mac" ? '<path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5v10h14V11h-1"/>'
+    : PLATFORM === "windows" ? '<path d="M14 5l5 4-5 4"/><path d="M19 9h-6a6 6 0 0 0-6 6v1"/><path d="M4 11v9h14v-3"/>'
+    : '<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/>'}</svg>`;
+
+  function shareMenu(data) {
+    let dlg = $("shareDlg");
+    if (!dlg) {
+      dlg = document.createElement("dialog");
+      dlg.id = "shareDlg"; dlg.className = "share-dlg";
+      document.body.appendChild(dlg);
+      dlg.addEventListener("click", (e) => { if (e.target === dlg || e.target.closest("[data-share-close]")) dlg.close(); });
+    }
+    const t = encodeURIComponent(data.text), u = encodeURIComponent(data.url), both = encodeURIComponent(`${data.text}\n${data.url}`);
+    const opts = [
+      ["WhatsApp", `https://wa.me/?text=${both}`, "#25d366"],
+      ["Telegram", `https://t.me/share/url?url=${u}&text=${t}`, "#229ed9"],
+      ["Facebook", `https://www.facebook.com/sharer/sharer.php?u=${u}`, "#1877f2"],
+      ["X", `https://x.com/intent/post?text=${t}&url=${u}`, "#111"],
+      ["Email", `mailto:?subject=${encodeURIComponent(data.title)}&body=${both}`, "#6b7280"],
+    ];
+    dlg.innerHTML = `<div class="share-box" role="document">
+        <div class="share-head"><b>${esc(data.title)}</b><button type="button" class="icon-btn" data-share-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+        <div class="share-grid">${opts.map(([n, href, c]) => `<a href="${esc(href)}" target="_blank" rel="noopener" style="--c:${c}"><span>${esc(n[0])}</span>${esc(n)}</a>`).join("")}
+          <button type="button" data-copy style="--c:#0084d6"><span>⧉</span>Copiar</button></div>
+        <input class="share-url" readonly value="${esc(data.url)}" aria-label="Link para compartir">
+      </div>`;
+    dlg.querySelector("[data-copy]").onclick = async () => {
+      const txt = `${data.text}\n${data.url}`;
+      try { await navigator.clipboard.writeText(txt); toast("Copiado: pegalo donde quieras"); }
+      catch (e) { const i = dlg.querySelector(".share-url"); i.select(); document.execCommand && document.execCommand("copy"); toast("Link seleccionado para copiar"); }
+    };
+    dlg.showModal();
+  }
+  async function share(data) {
+    if (navigator.share) {
+      try { await navigator.share({ title: data.title, text: data.text, url: data.url }); return; }
+      catch (e) { if (e && e.name === "AbortError") return; }   // la persona canceló: no hacer nada
+    }
+    shareMenu(data);
+  }
+  function shareProduct(id) {
+    const p = products.find((x) => x.id === id); if (!p) return;
+    share({ title: p.name, text: `Mirá este producto en EXE: ${p.name} — ${priceLabel(p)}`, url: `${siteBase()}#producto/${encodeURIComponent(p.id)}` });
+  }
+  // Presupuesto: el link lleva los productos del carrito; quien lo abre los puede cargar en su carrito con un toque.
+  function shareBudget() {
+    if (!cart.length) return toast("Agregá productos al carrito para compartir el presupuesto");
+    const { lines, total, hasConsult } = renderCart();
+    const code = cart.map((l) => [l.id, l.qty, l.variant || ""].map(encodeURIComponent).join("~")).join(".");
+    const rows = lines.map((l) => `• ${l.qty} x ${l.product.name}${l.variant ? ` (${l.variant})` : ""} — ${l.product.price > 0 ? money(l.qty * l.product.price) : "a consultar"}`);
+    const text = ["Presupuesto EXE:", ...rows, total ? `Total estimado: ${money(total)}${hasConsult ? " (+ productos a consultar)" : ""}` : "Precio a consultar"].join("\n");
+    share({ title: "Presupuesto EXE", text, url: `${siteBase()}#presupuesto/${code}` });
+  }
+  function routeBudget() {
+    const m = location.hash.match(/^#presupuesto\/(.+)$/);
+    if (!m || !products.length) return;
+    const items = m[1].split(".").slice(0, 50).map((x) => x.split("~").map((v) => { try { return decodeURIComponent(v); } catch (e) { return ""; } }))
+      .map(([id, q, v]) => ({ id, qty: Math.max(1, Math.min(99, parseInt(q, 10) || 1)), variant: v || null }))
+      .filter((it) => products.some((p) => p.id === it.id));
+    history.replaceState(null, "", location.pathname + location.search + "#productos");
+    if (!items.length) return toast("El presupuesto compartido ya no tiene productos disponibles");
+    if (!confirm(`Te compartieron un presupuesto con ${items.length} producto${items.length > 1 ? "s" : ""}. ¿Lo cargo en tu carrito?`)) return;
+    items.forEach((it) => add(it.id, it.variant, it.qty));
+    toggleCart(true);
+  }
+  window.addEventListener("hashchange", routeBudget);
+
   /* ---------- Eventos ---------- */
   document.addEventListener("click", (e) => {
     const t = e.target.closest("button, a[data-filter]");
@@ -493,6 +577,8 @@
   $("cartClose").onclick = () => toggleCart(false);
   $("overlay").onclick = () => toggleCart(false);
   document.addEventListener("keydown", (e) => e.key === "Escape" && $("pdOverlay").hidden && toggleCart(false));
+  $("cartShare").onclick = shareBudget;
+  document.addEventListener("click", (e) => { const b = e.target.closest("[data-share-product]"); if (b) shareProduct(b.dataset.shareProduct); });
   $("cartClear").onclick = () => { cart = []; shipping = null; if (shipOn) $("shipOpts").innerHTML = ""; save(); renderCart(); renderProducts(); };
   $("sendWa").onclick = () => window.open(waLink(buildMessage()), "_blank", "noopener");
 
@@ -776,6 +862,6 @@
     s.textContent = JSON.stringify(data).replace(/</g, "\\u003c");
   }
   loadDb().catch(loadJson)
-    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
+    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();

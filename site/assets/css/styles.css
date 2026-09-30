@@ -563,3 +563,20 @@ section.cms-block:has(> .cms-spacer) { padding: 0; }
 .pw-eye .pupil { transform-box: fill-box; transform-origin: center; transition: transform .3s .08s cubic-bezier(.3,1.6,.5,1); transform: scale(.2); }
 .pw-eye.on .pupil { transform: scale(1); }
 @media (prefers-reduced-motion: reduce) { .pw-eye g, .pw-eye .pupil { transition: none; } }
+
+/* ---------- Compartir ---------- */
+.btn-share { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.share-ic { width: 18px; height: 18px; flex: none; }
+.cart-links { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; }
+.share-dlg { width: min(420px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--line, #e2e2e2); border-radius: 16px;
+  background: var(--surface, #fff); color: var(--c3, inherit); box-shadow: 0 18px 50px #0006; }
+.share-dlg::backdrop { background: rgba(0, 0, 0, .55); }
+.share-box { padding: 16px 18px 18px; }
+.share-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.share-head b { font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.share-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.share-grid a, .share-grid button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px; border: 0; border-radius: 12px;
+  background: none; color: inherit; font: inherit; font-size: .85rem; text-decoration: none; cursor: pointer; }
+.share-grid a:hover, .share-grid button:hover { background: #8881; }
+.share-grid span { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: #fff; font-weight: 800; font-size: 1.1rem; }
+.share-url { width: 100%; padding: 9px 12px; border: 1px solid var(--line, #d6d6d6); border-radius: 10px; background: transparent; color: inherit; font: inherit; font-size: .85rem; }
