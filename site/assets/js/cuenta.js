@@ -8,6 +8,34 @@
     m.textContent = msg; m.className = `notice ${kind}`; m.hidden = false;
   }
 
+  // ---------- Ver / ocultar contraseña (ojo cerrado ⇄ ojo abierto, animado) ----------
+  const EYE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <g class="eye-open"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle class="pupil" cx="12" cy="12" r="3"/></g>
+    <g class="eye-closed"><path d="M2.5 11c2.2 3.2 5.6 5 9.5 5s7.3-1.8 9.5-5"/><path d="M5.4 14.2 4 16.3M9 15.7l-.6 2.5M15 15.7l.6 2.5M18.6 14.2l1.4 2.1"/></g></svg>`;
+  document.querySelectorAll('input[type="password"]').forEach((inp) => {
+    const wrap = document.createElement("span");
+    wrap.className = "pw-wrap";
+    inp.before(wrap); wrap.append(inp);
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "pw-eye"; b.innerHTML = EYE;
+    const sync = () => {
+      const visible = inp.type === "text";
+      b.classList.toggle("on", visible);
+      b.setAttribute("aria-label", visible ? "Ocultar contraseña" : "Mostrar contraseña");
+      b.setAttribute("aria-pressed", String(visible));
+      b.title = b.getAttribute("aria-label");
+    };
+    b.addEventListener("click", () => {
+      const pos = inp.selectionStart;
+      inp.type = inp.type === "password" ? "text" : "password";
+      sync(); inp.focus();
+      try { inp.setSelectionRange(pos, pos); } catch (e) {}
+    });
+    // al enviar el formulario se vuelve a ocultar (no queda visible en pantalla)
+    inp.form && inp.form.addEventListener("submit", () => { inp.type = "password"; sync(); });
+    sync(); wrap.append(b);
+  });
+
   document.querySelectorAll("[data-tab]").forEach((b) =>
     b.addEventListener("click", () => {
       document.querySelectorAll("[data-tab]").forEach((x) => x.classList.toggle("active", x === b));

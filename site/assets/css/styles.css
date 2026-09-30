@@ -546,3 +546,20 @@ section.cms-block:has(> .cms-spacer) { padding: 0; }
 :root[data-theme="dark"] .captcha-note { color: #fca5a5; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .captcha-note { color: #fca5a5; } }
 .captcha-note .link-btn { font-size: inherit; color: inherit; text-decoration: underline; font-weight: 700; padding: 0; }
+
+/* Ver / ocultar contraseña: ojo cerrado ⇄ abierto con parpadeo animado */
+.pw-wrap { position: relative; display: block; }
+.pw-wrap input { width: 100%; padding-right: 46px; }
+.pw-eye { position: absolute; top: 50%; right: 6px; transform: translateY(-50%); width: 36px; height: 36px; padding: 0; border: 0; border-radius: 8px;
+  background: none; color: var(--muted, #6b7280); cursor: pointer; display: grid; place-items: center; transition: color .2s, background .2s; }
+.pw-eye:hover { color: var(--text, inherit); background: #8881; }
+.pw-eye:focus-visible { outline: 2px solid var(--c0); outline-offset: 1px; }
+.pw-eye svg { width: 22px; height: 22px; overflow: visible; }
+.pw-eye g { transform-box: fill-box; transform-origin: center; transition: transform .28s cubic-bezier(.3,1.4,.5,1), opacity .2s; }
+.pw-eye .eye-open { transform: scaleY(.08); opacity: 0; }
+.pw-eye .eye-closed { transform: translateY(-1px); opacity: 1; }
+.pw-eye.on .eye-open { transform: scaleY(1); opacity: 1; }
+.pw-eye.on .eye-closed { transform: translateY(-3px) scaleY(.3); opacity: 0; }
+.pw-eye .pupil { transform-box: fill-box; transform-origin: center; transition: transform .3s .08s cubic-bezier(.3,1.6,.5,1); transform: scale(.2); }
+.pw-eye.on .pupil { transform: scale(1); }
+@media (prefers-reduced-motion: reduce) { .pw-eye g, .pw-eye .pupil { transition: none; } }
