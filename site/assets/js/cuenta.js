@@ -12,27 +12,32 @@
   const EYE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <g class="eye-open"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle class="pupil" cx="12" cy="12" r="3"/></g>
     <g class="eye-closed"><path d="M2.5 11c2.2 3.2 5.6 5 9.5 5s7.3-1.8 9.5-5"/><path d="M5.4 14.2 4 16.3M9 15.7l-.6 2.5M15 15.7l.6 2.5M18.6 14.2l1.4 2.1"/></g></svg>`;
-  document.querySelectorAll('input[type="password"]').forEach((inp) => {
+  // Contraseñas: ocultas por defecto (cambia el tipo). Emails: visibles por defecto; al ocultarlos se tapan con puntos
+  // sin cambiar el tipo (así siguen validándose y autocompletándose como email).
+  document.querySelectorAll('input[type="password"], input[type="email"]').forEach((inp) => {
+    const isMail = inp.type === "email", what = isMail ? "email" : "contraseña";
     const wrap = document.createElement("span");
     wrap.className = "pw-wrap";
     inp.before(wrap); wrap.append(inp);
     const b = document.createElement("button");
     b.type = "button"; b.className = "pw-eye"; b.innerHTML = EYE;
+    const shown = () => (isMail ? !inp.classList.contains("masked") : inp.type === "text");
     const sync = () => {
-      const visible = inp.type === "text";
+      const visible = shown();
       b.classList.toggle("on", visible);
-      b.setAttribute("aria-label", visible ? "Ocultar contraseña" : "Mostrar contraseña");
+      b.setAttribute("aria-label", visible ? `Ocultar ${what}` : `Mostrar ${what}`);
       b.setAttribute("aria-pressed", String(visible));
       b.title = b.getAttribute("aria-label");
     };
     b.addEventListener("click", () => {
       const pos = inp.selectionStart;
-      inp.type = inp.type === "password" ? "text" : "password";
+      if (isMail) inp.classList.toggle("masked");
+      else inp.type = inp.type === "password" ? "text" : "password";
       sync(); inp.focus();
       try { inp.setSelectionRange(pos, pos); } catch (e) {}
     });
-    // al enviar el formulario se vuelve a ocultar (no queda visible en pantalla)
-    inp.form && inp.form.addEventListener("submit", () => { inp.type = "password"; sync(); });
+    // al enviar el formulario la contraseña se vuelve a ocultar (no queda visible en pantalla)
+    if (!isMail && inp.form) inp.form.addEventListener("submit", () => { inp.type = "password"; sync(); });
     sync(); wrap.append(b);
   });
 
@@ -47,7 +52,7 @@
 
   if (!be) {
     $("offline").hidden = false;
-    document.querySelectorAll("#guest form button").forEach((b) => (b.disabled = true));
+    document.querySelectorAll("#guest form button:not(.pw-eye)").forEach((b) => (b.disabled = true));
     return;
   }
   const { sb } = be;

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editor de imágenes | EXE</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="../assets/img/favicon.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Oswald:wght@500;700&family=Bebas+Neue&display=swap">
+  <link rel="stylesheet" href="../assets/css/imagen.css">
+</head>
+<body>
+  <!-- Editor de imágenes y vectores por capas. Solo usuarios con site.edit (la base valida con RLS al guardar).
+       Nada de esto se carga en la tienda pública. -->
+  <div class="ie-gate" id="ieGate"><p id="ieGateMsg">Verificando permisos…</p><a href="index.html#imagenes">← Volver al panel</a></div>
+
+  <div class="ie" id="ie" hidden>
+    <header class="ie-top">
+      <a class="ie-btn" href="index.html#imagenes" id="ieBack" title="Volver al panel">←</a>
+      <input class="ie-name" id="ieName" aria-label="Nombre del diseño" maxlength="120">
+      <span class="ie-size" id="ieSize"></span>
+      <button type="button" class="ie-btn" id="ieUndo" title="Deshacer (Ctrl+Z)" disabled>↶</button>
+      <button type="button" class="ie-btn" id="ieRedo" title="Rehacer (Ctrl+Y)" disabled>↷</button>
+      <span class="ie-zoom"><button type="button" class="ie-btn" id="ieZoomOut" title="Alejar">−</button><button type="button" class="ie-btn" id="ieZoomFit" title="Ajustar a la pantalla">100%</button><button type="button" class="ie-btn" id="ieZoomIn" title="Acercar">+</button></span>
+      <button type="button" class="ie-btn" id="ieZones" aria-pressed="true" title="Mostrar las zonas con enlace">🔗 Ver zonas</button>
+      <span class="ie-spacer"></span>
+      <span class="ie-state" id="ieState"></span>
+      <button type="button" class="ie-btn" id="ieExport">Exportar WebP</button>
+      <button type="button" class="ie-btn ie-pub" id="ieSave">Guardar en la web</button>
+    </header>
+    <nav class="ie-tools" id="ieTools" aria-label="Herramientas">
+      <button type="button" data-tool="select" title="Seleccionar y mover (V)" aria-pressed="true">↖</button>
+      <button type="button" data-tool="hand" title="Mover el lienzo (H)">✥</button>
+      <button type="button" data-tool="text" title="Texto (T)">T</button>
+      <button type="button" data-tool="rect" title="Rectángulo (R)">▭</button>
+      <button type="button" data-tool="ellipse" title="Círculo / elipse (E)">◯</button>
+      <button type="button" data-tool="pen" title="Lápiz a mano alzada (P)">✎</button>
+      <button type="button" data-tool="poly" title="Curvas y polígonos: clic para cada punto, doble clic o Enter para terminar (C)">⬠</button>
+      <button type="button" data-tool="image" title="Insertar imagen (I)">🖼</button>
+      <button type="button" data-tool="zone" title="Zona tocable con enlace (Z)">🔗</button>
+      <button type="button" data-tool="crop" title="Recortar la imagen seleccionada">✂</button>
+      <button type="button" data-tool="wand" title="Quitar el fondo blanco de la imagen seleccionada">🪄</button>
+    </nav>
+    <main class="ie-stage" id="ieStage">
+      <div class="ie-board" id="ieBoard"><canvas id="ieCanvas"></canvas><div class="ie-ov" id="ieOv"></div></div>
+    </main>
+    <aside class="ie-side" id="ieSide"></aside>
+    <input type="file" id="ieFile" accept="image/*" hidden>
+  </div>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../assets/js/backend.js"></script>
+  <script src="../assets/js/admin-imagen.js"></script>
+</body>
+</html>

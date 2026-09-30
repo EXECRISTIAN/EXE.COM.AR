@@ -550,6 +550,7 @@ section.cms-block:has(> .cms-spacer) { padding: 0; }
 /* Ver / ocultar contraseña: ojo cerrado ⇄ abierto con parpadeo animado */
 .pw-wrap { position: relative; display: block; }
 .pw-wrap input { width: 100%; padding-right: 46px; }
+.pw-wrap input.masked { -webkit-text-security: disc; text-security: disc; }
 .pw-eye { position: absolute; top: 50%; right: 6px; transform: translateY(-50%); width: 36px; height: 36px; padding: 0; border: 0; border-radius: 8px;
   background: none; color: var(--muted, #6b7280); cursor: pointer; display: grid; place-items: center; transition: color .2s, background .2s; }
 .pw-eye:hover { color: var(--text, inherit); background: #8881; }
@@ -580,3 +581,9 @@ section.cms-block:has(> .cms-spacer) { padding: 0; }
 .share-grid a:hover, .share-grid button:hover { background: #8881; }
 .share-grid span { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: #fff; font-weight: 800; font-size: 1.1rem; }
 .share-url { width: 100%; padding: 9px 12px; border: 1px solid var(--line, #d6d6d6); border-radius: 10px; background: transparent; color: inherit; font: inherit; font-size: .85rem; }
+
+/* Zonas tocables de imágenes hechas en el editor del panel */
+.dz-layer { position: absolute; pointer-events: none; z-index: 2; }
+.dz { position: absolute; display: block; pointer-events: auto; border-radius: 6px; transition: box-shadow .2s, background .2s; }
+.dz:hover, .dz:focus-visible { background: #ffffff14; box-shadow: inset 0 0 0 2px #ffffffb3; outline: none; }
+.dz-price { position: absolute; left: 8px; bottom: 8px; padding: 4px 10px; border-radius: 8px; background: var(--accent-bg); color: var(--on-accent); font-weight: 700; font-size: clamp(.7rem, 1.4vw, 1rem); box-shadow: 0 4px 14px #0005; white-space: nowrap; }
