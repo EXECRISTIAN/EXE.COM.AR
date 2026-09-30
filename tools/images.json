@@ -1,102 +1,98 @@
 [
  {
   "id": "outlet-aorus-p750w-nueva",
-  "q": "AORUS P750W 80 Plus Gold modular power supply GP-AP750GM"
- },
- {
-  "id": "outlet-biostar-z490a-silver",
-  "q": "Biostar RACING Z490A-SILVER motherboard"
- },
- {
-  "id": "outlet-celeron-g5905",
-  "q": "Intel Celeron G5905 processor box"
- },
- {
-  "id": "outlet-celeron-g5925-full",
-  "q": "Intel Celeron G5925 processor box"
- },
- {
-  "id": "outlet-gigabyte-b460m-ds3h-v2",
-  "q": "Gigabyte B460M DS3H V2 motherboard"
- },
- {
-  "id": "outlet-gigabyte-p1000gm",
-  "q": "Gigabyte P1000GM power supply"
- },
- {
-  "id": "outlet-gigabyte-p650b",
-  "q": "Gigabyte P650B power supply"
+  "page": "https://www.gigabyte.com/Power-Supply/GP-AP750GM"
  },
  {
   "id": "outlet-gigabyte-p750gm",
-  "q": "Gigabyte P750GM power supply"
+  "page": "https://www.gigabyte.com/Power-Supply/GP-P750GM"
  },
  {
   "id": "outlet-gigabyte-p850gm",
-  "q": "Gigabyte P850GM power supply"
+  "page": "https://www.gigabyte.com/Power-Supply/GP-P850GM"
  },
  {
-  "id": "outlet-i3-10100",
-  "q": "Intel Core i3-10100 processor box"
+  "id": "outlet-gigabyte-p1000gm",
+  "page": "https://www.gigabyte.com/Power-Supply/GP-P1000GM"
  },
  {
-  "id": "outlet-i3-10100f",
-  "q": "Intel Core i3-10100F processor box"
+  "id": "outlet-gigabyte-p650b",
+  "page": "https://www.gigabyte.com/Power-Supply/GP-P650B"
  },
  {
-  "id": "outlet-i3-10105",
-  "q": "Intel Core i3-10105 processor box"
- },
- {
-  "id": "outlet-i3-12100f",
-  "q": "Intel Core i3-12100F processor box"
- },
- {
-  "id": "outlet-i5-10400",
-  "q": "Intel Core i5-10400 processor box"
- },
- {
-  "id": "outlet-msi-h510m-a-pro",
-  "q": "MSI H510M-A PRO motherboard"
- },
- {
-  "id": "outlet-msi-mpg-z490-gaming-plus",
-  "q": "MSI MPG Z490 GAMING PLUS motherboard"
- },
- {
-  "id": "outlet-pentium-g5420",
-  "q": "Intel Pentium Gold G5420 processor box"
- },
- {
-  "id": "outlet-redragon-850w",
-  "q": "Redragon 850W power supply"
- },
- {
-  "id": "outlet-rtx3090-zotac-trinity",
-  "q": "ZOTAC GAMING GeForce RTX 3090 Trinity"
- },
- {
-  "id": "outlet-sentey-r20",
-  "q": "Sentey R20 RGB gabinete"
- },
- {
-  "id": "outlet-sentey-x10",
-  "q": "Sentey X10 Rainbow gabinete"
- },
- {
-  "id": "outlet-steam-deck-512",
-  "q": "Steam Deck 512GB console"
- },
- {
-  "id": "outlet-thermaltake-smart-700w",
-  "q": "Thermaltake Smart 700W 80 Plus White power supply"
- },
- {
-  "id": "outlet-thermaltake-smart-rgb-700w",
-  "q": "Thermaltake Smart RGB 700W power supply"
+  "id": "outlet-gigabyte-b460m-ds3h-v2",
+  "page": "https://www.gigabyte.com/Motherboard/B460M-DS3H-V2-rev-10"
  },
  {
   "id": "outlet-z390-aorus-elite",
-  "q": "Gigabyte Z390 AORUS ELITE motherboard"
+  "page": "https://www.gigabyte.com/Motherboard/Z390-AORUS-ELITE-rev-10"
+ },
+ {
+  "id": "outlet-msi-h510m-a-pro",
+  "page": "https://www.msi.com/Motherboard/H510M-A-PRO"
+ },
+ {
+  "id": "outlet-msi-mpg-z490-gaming-plus",
+  "page": "https://www.msi.com/Motherboard/MPG-Z490-GAMING-PLUS"
+ },
+ {
+  "id": "outlet-biostar-z490a-silver",
+  "page": "https://www.biostar.com.tw/app/en/mb/introduction.php?S_ID=990"
+ },
+ {
+  "id": "outlet-rtx3090-zotac-trinity",
+  "page": "https://www.zotac.com/us/product/graphics_card/zotac-gaming-geforce-rtx-3090-trinity"
+ },
+ {
+  "id": "outlet-thermaltake-smart-rgb-700w",
+  "page": "https://www.thermaltake.com/smart-rgb-700w.html"
+ },
+ {
+  "id": "outlet-thermaltake-smart-700w",
+  "page": "https://www.thermaltake.com/smart-700w.html"
+ },
+ {
+  "id": "outlet-sentey-r20",
+  "page": "https://www.sentey.com/es/gabinete-sentey-r20-r20/"
+ },
+ {
+  "id": "outlet-sentey-x10",
+  "page": "https://www.sentey.com/es/gabinete-sentey-x10-rainbow-x10/"
+ },
+ {
+  "id": "outlet-steam-deck-512",
+  "page": "https://www.steamdeck.com/es/"
+ },
+ {
+  "id": "outlet-i3-10100",
+  "page": "https://www.amazon.com/dp/B086MMRW87"
+ },
+ {
+  "id": "outlet-i3-10100f",
+  "page": "https://www.amazon.com/dp/B08L9NTKZG"
+ },
+ {
+  "id": "outlet-i3-10105",
+  "page": "https://www.amazon.com/dp/B092ZGRHB5"
+ },
+ {
+  "id": "outlet-i3-12100f",
+  "page": "https://www.amazon.com/dp/B09NPJX7PV"
+ },
+ {
+  "id": "outlet-i5-10400",
+  "page": "https://www.amazon.com/dp/B086MN38Q2"
+ },
+ {
+  "id": "outlet-celeron-g5905",
+  "page": "https://www.amazon.com/dp/B08LBV3HY4"
+ },
+ {
+  "id": "outlet-celeron-g5925-full",
+  "page": "https://www.amazon.com/dp/B08PBRGFQM"
+ },
+ {
+  "id": "outlet-pentium-g5420",
+  "page": "https://www.amazon.com/dp/B07SBKXDNS"
  }
 ]
