@@ -64,11 +64,25 @@
   const views = {
     async resumen() {
       const orders = await load("orders");
-      const paid = orders.filter((o) => o.status === "paid");
+      const ok = (o) => !["pending", "cancelled"].includes(o.status);
+      const day = (d) => String(d || "").slice(0, 10), today = new Date().toLocaleDateString("sv"), month = today.slice(0, 7);
+      const sum = (list) => money(list.reduce((n, o) => n + Number(o.total || 0), 0));
+      const sold = orders.filter(ok);
+      // Stock y dólar dependen de otros permisos: si no se pueden leer, esa tarjeta no se muestra.
+      const products = perms.has("products.read") ? await load("products").catch(() => []) : [];
+      const low = products.filter((p) => p.active && p.stock <= 2).sort((a, b) => a.stock - b.stock).slice(0, 5);
+      let fx = null;
+      try { fx = demo ? 1550 : (await be.sb.from("fx_settings").select("effective_rate").eq("id", 1).single()).data?.effective_rate; } catch (e) { fx = null; }
+      const last = orders.slice(0, 5);
       return `<div class="kpis">
-        <div class="kpi"><small>Pedidos</small><strong>${orders.length}</strong></div>
-        <div class="kpi"><small>Pendientes de pago</small><strong>${orders.filter((o) => o.status === "pending").length}</strong></div>
-        <div class="kpi"><small>Facturado (pagados)</small><strong>${money(paid.reduce((n, o) => n + o.total, 0))}</strong></div>
+        <div class="kpi"><small>Ventas de hoy</small><strong>${sum(sold.filter((o) => day(o.created_at) === today))}</strong></div>
+        <div class="kpi"><small>Ventas del mes</small><strong>${sum(sold.filter((o) => day(o.created_at).startsWith(month)))}</strong></div>
+        <div class="kpi"><small>Pedidos pendientes</small><strong>${orders.filter((o) => o.status === "pending").length}</strong></div>
+        ${fx ? `<div class="kpi"><small>Dólar usado hoy</small><strong>${money(fx)}</strong></div>` : ""}
+      </div>
+      <div class="kpis kpis-wide">
+        ${perms.has("products.read") ? `<div class="kpi"><small>⚠️ Stock bajo</small><div class="kpi-list">${low.length ? low.map((p) => `<a href="#editar/${encodeURIComponent(p.id)}">${esc(p.name)}</a> — ${p.stock > 0 ? `quedan ${p.stock}` : "sin stock"}`).join("<br>") : "Todo con stock"}</div></div>` : ""}
+        <div class="kpi"><small>🧾 Últimos pedidos</small><div class="kpi-list">${last.length ? last.map((o) => `#${o.id} ${esc(o.customer || "")} — ${money(o.total)} <span class="pill ${esc(o.status)}">${esc(o.status)}</span>`).join("<br>") : "Todavía no hay pedidos"}</div></div>
       </div>`;
     },
     async pedidos() {
