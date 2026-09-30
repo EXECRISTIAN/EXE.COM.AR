@@ -4,8 +4,8 @@
 
 export const BRAND = {
   name: "EXE",
-  site: "https://execristian.github.io/EXE.COM.AR/",   // cambiar a https://www.exe.com.ar/ al migrar
-  logo: "https://execristian.github.io/EXE.COM.AR/assets/img/logo-oscuro.png",
+  site: "https://exe.com.ar/",
+  logo: "https://exe.com.ar/assets/img/logo-oscuro.png",
   whatsapp: "5491130095254",
   phone: "+54 9 11 3009 5254",
   email: "ventas@exe.com.ar",
