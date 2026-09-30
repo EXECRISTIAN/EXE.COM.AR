@@ -97,10 +97,10 @@
   background: none; cursor: pointer; display: grid; place-items: center; color: var(--muted);
 }
 .theme-mini button:focus-visible { outline: 2px solid var(--c0); outline-offset: 1px; }
-.theme-mini svg { width: 12px; height: 12px; }
+.theme-mini svg { width: 12px; height: 12px; display: block; }
 .theme-mini .tm-sun { fill: #fff; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; }
 .theme-mini .tm-moon { fill: #000; }
-.theme-mini .tm-a { font: 900 11px/1 var(--font); }
+.theme-mini .tm-a { fill: none; stroke: currentColor; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
 .theme-mini [data-mode="auto"][aria-checked="true"] { color: #fff; }
 .theme-mini .tm-tip {
   position: absolute; right: 0; bottom: calc(100% + 8px); width: max-content; max-width: 200px;
