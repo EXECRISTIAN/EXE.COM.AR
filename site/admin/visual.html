@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editor visual | EXE</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="../assets/img/favicon.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap">
+  <link rel="stylesheet" href="../assets/css/visual.css">
+</head>
+<body>
+  <!-- Editor visual de la página de inicio. Solo usuarios con el permiso site.edit (además, la base valida con RLS al guardar).
+       Todo el peso del editor vive acá: la tienda pública no carga nada de esto. -->
+  <div class="ve-gate" id="veGate"><p id="veGateMsg">Verificando permisos…</p><a href="index.html#sitio">← Volver al panel</a></div>
+
+  <div class="ve" id="ve" hidden>
+    <header class="ve-top">
+      <a class="ve-btn" href="index.html#sitio" title="Volver al panel">←</a>
+      <b class="ve-title">Editor visual</b>
+      <div class="ve-seg" id="veDevice" role="radiogroup" aria-label="Tamaño de pantalla">
+        <button type="button" data-w="1280" aria-checked="true">🖥 PC</button>
+        <button type="button" data-w="820" aria-checked="false">▭ Tablet</button>
+        <button type="button" data-w="390" aria-checked="false">📱 Celular</button>
+      </div>
+      <button type="button" class="ve-btn" id="veTheme" title="Ver en claro / oscuro">☀︎ / ☾</button>
+      <button type="button" class="ve-btn" id="veOutline" aria-pressed="true" title="Mostrar / ocultar los bordes de las capas">▦ Bordes</button>
+      <span class="ve-spacer"></span>
+      <span class="ve-state" id="veState"></span>
+      <button type="button" class="ve-btn" id="veUndo" title="Deshacer (Ctrl+Z)" disabled>↶</button>
+      <button type="button" class="ve-btn" id="veRedo" title="Rehacer (Ctrl+Y)" disabled>↷</button>
+      <button type="button" class="ve-btn ve-pub" id="vePublish" disabled>Publicar</button>
+    </header>
+    <aside class="ve-side" id="veSide"></aside>
+    <main class="ve-stage" id="veStage">
+      <div class="ve-frame-wrap" id="veWrap"><iframe id="veFrame" title="Vista previa de la página" src="../index.html?cms-edit=1"></iframe></div>
+      <div class="ve-legend"><span class="l-sec">Sección</span><span class="l-cont">Contenedor</span><span class="l-card">Tarjeta</span><span class="l-sp">Espacio</span></div>
+    </main>
+  </div>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../assets/js/backend.js"></script>
+  <script src="../assets/js/admin-visual.js"></script>
+</body>
+</html>

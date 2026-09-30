@@ -57,6 +57,7 @@
     return `
       <div class="pr-toolbar">
         <button class="btn btn-primary" id="stAdd" type="button">＋ Agregar sección</button>
+        <a class="btn btn-outline" href="visual.html${A.demo ? "?demo=1" : ""}">🎨 Editor visual</a>
         <a class="btn btn-outline" href="../index.html" target="_blank" rel="noopener">Ver la página ↗</a>
       </div>
       <div class="panel"><h3 style="margin-top:0">Página principal (de arriba hacia abajo)</h3>
