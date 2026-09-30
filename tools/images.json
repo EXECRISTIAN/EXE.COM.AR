@@ -1,1 +1,102 @@
-[]
+[
+ {
+  "id": "outlet-aorus-p750w-nueva",
+  "q": "AORUS P750W 80 Plus Gold modular power supply GP-AP750GM"
+ },
+ {
+  "id": "outlet-biostar-z490a-silver",
+  "q": "Biostar RACING Z490A-SILVER motherboard"
+ },
+ {
+  "id": "outlet-celeron-g5905",
+  "q": "Intel Celeron G5905 processor box"
+ },
+ {
+  "id": "outlet-celeron-g5925-full",
+  "q": "Intel Celeron G5925 processor box"
+ },
+ {
+  "id": "outlet-gigabyte-b460m-ds3h-v2",
+  "q": "Gigabyte B460M DS3H V2 motherboard"
+ },
+ {
+  "id": "outlet-gigabyte-p1000gm",
+  "q": "Gigabyte P1000GM power supply"
+ },
+ {
+  "id": "outlet-gigabyte-p650b",
+  "q": "Gigabyte P650B power supply"
+ },
+ {
+  "id": "outlet-gigabyte-p750gm",
+  "q": "Gigabyte P750GM power supply"
+ },
+ {
+  "id": "outlet-gigabyte-p850gm",
+  "q": "Gigabyte P850GM power supply"
+ },
+ {
+  "id": "outlet-i3-10100",
+  "q": "Intel Core i3-10100 processor box"
+ },
+ {
+  "id": "outlet-i3-10100f",
+  "q": "Intel Core i3-10100F processor box"
+ },
+ {
+  "id": "outlet-i3-10105",
+  "q": "Intel Core i3-10105 processor box"
+ },
+ {
+  "id": "outlet-i3-12100f",
+  "q": "Intel Core i3-12100F processor box"
+ },
+ {
+  "id": "outlet-i5-10400",
+  "q": "Intel Core i5-10400 processor box"
+ },
+ {
+  "id": "outlet-msi-h510m-a-pro",
+  "q": "MSI H510M-A PRO motherboard"
+ },
+ {
+  "id": "outlet-msi-mpg-z490-gaming-plus",
+  "q": "MSI MPG Z490 GAMING PLUS motherboard"
+ },
+ {
+  "id": "outlet-pentium-g5420",
+  "q": "Intel Pentium Gold G5420 processor box"
+ },
+ {
+  "id": "outlet-redragon-850w",
+  "q": "Redragon 850W power supply"
+ },
+ {
+  "id": "outlet-rtx3090-zotac-trinity",
+  "q": "ZOTAC GAMING GeForce RTX 3090 Trinity"
+ },
+ {
+  "id": "outlet-sentey-r20",
+  "q": "Sentey R20 RGB gabinete"
+ },
+ {
+  "id": "outlet-sentey-x10",
+  "q": "Sentey X10 Rainbow gabinete"
+ },
+ {
+  "id": "outlet-steam-deck-512",
+  "q": "Steam Deck 512GB console"
+ },
+ {
+  "id": "outlet-thermaltake-smart-700w",
+  "q": "Thermaltake Smart 700W 80 Plus White power supply"
+ },
+ {
+  "id": "outlet-thermaltake-smart-rgb-700w",
+  "q": "Thermaltake Smart RGB 700W power supply"
+ },
+ {
+  "id": "outlet-z390-aorus-elite",
+  "q": "Gigabyte Z390 AORUS ELITE motherboard"
+ }
+]

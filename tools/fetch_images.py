@@ -5,7 +5,7 @@ import json, re, subprocess, sys, urllib.request, urllib.parse, pathlib
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36"
 OUT = pathlib.Path("site/assets/img/products")
-PROXY = "https://tmp-exe-img.execomar.workers.dev/?u="   # Worker temporal (solo dominios de fabricantes) por si el sitio bloquea a GitHub
+PROXY = "https://exe-img-proxy.execomar.workers.dev/?u="   # Worker exe-img-proxy (gratis; solo dominios de fabricantes y CDNs de imágenes) por si el sitio bloquea a GitHub
 def _get(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "es-AR,es;q=0.9,en;q=0.8"})
     with urllib.request.urlopen(req, timeout=30) as r:
