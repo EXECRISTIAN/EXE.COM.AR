@@ -10,7 +10,7 @@
   const money = (n) => "$" + Number(n || 0).toLocaleString("es-AR");
 
   const DEMO = {
-    perms: new Set(["site.edit", "dashboard.access", "orders.read", "orders.update_status", "products.read", "products.write", "stock.write", "users.read", "roles.manage", "emails.manage", "shipping.manage"]),
+    perms: new Set(["site.edit", "dashboard.access", "orders.read", "orders.update_status", "orders.create", "orders.mark_paid", "products.read", "products.write", "stock.write", "users.read", "roles.manage", "emails.manage", "shipping.manage"]),
     orders: [
       { id: 1042, created_at: "2026-09-20", customer: "Juan Pérez", status: "paid", total: 452000, carrier: "andreani", tracking_number: "360000012345670", label_url: "#" },
       { id: 1043, created_at: "2026-09-22", customer: "Ana Gómez", status: "pending", total: 98000 },
@@ -26,7 +26,7 @@
       { name: "moderador", perms: ["dashboard.access", "orders.read", "orders.update_status", "products.read", "stock.write"] },
       { name: "suscriptor", perms: [] },
     ],
-    allPerms: ["dashboard.access", "orders.read", "orders.update_status", "orders.mark_paid", "products.read", "products.write", "stock.write", "users.read", "users.assign_roles", "roles.manage", "emails.manage", "shipping.manage"],
+    allPerms: ["dashboard.access", "orders.read", "orders.create", "orders.update_status", "orders.mark_paid", "products.read", "products.write", "stock.write", "users.read", "users.assign_roles", "roles.manage", "emails.manage", "shipping.manage"],
   };
 
   let perms = new Set();
@@ -142,14 +142,14 @@
   async function load(kind) {
     if (demo) return DEMO[kind];
     const q = {
-      orders: () => be.sb.from("orders").select("id, created_at, status, total, carrier, tracking_number, label_url, customer:profiles(full_name)").order("created_at", { ascending: false }),
+      orders: () => be.sb.from("orders").select("id, created_at, status, total, carrier, tracking_number, label_url, customer_name, packed_at, source, customer:profiles(full_name)").order("created_at", { ascending: false }),
       products: () => be.sb.from("products").select("id, name, price, stock, show_stock, active").order("name"),
       users: () => be.sb.rpc("admin_list_users"),
       roles: () => be.sb.rpc("admin_list_roles"),
     }[kind];
     const { data, error } = await q();
     if (error) throw error;
-    return kind === "orders" ? data.map((o) => ({ ...o, customer: o.customer?.full_name })) : data;
+    return kind === "orders" ? data.map((o) => ({ ...o, customer: o.customer?.full_name || o.customer_name })) : data;
   }
 
   // Vistas extra sin link en el menú (ej. #editar/<id>): { perm, parent, title }
@@ -182,7 +182,7 @@
     run(); if (!labelize.obs) { labelize.obs = new MutationObserver(run); labelize.obs.observe($("view"), { childList: true, subtree: true }); }
   }
   // API para los módulos del panel (admin-productos.js)
-  window.EXE_ADMIN = { views, subviews, route, esc, money, $, get perms() { return perms; }, demo, be, DEMO, alertView: (m) => alertView(m) };
+  window.EXE_ADMIN = { views, subviews, route, esc, money, $, shipCell, get perms() { return perms; }, demo, be, DEMO, alertView: (m) => alertView(m) };
 
   $("logout").onclick = async () => { if (be) await be.sb.auth.signOut(); location.href = "../index.html"; };
   // boot() arranca cuando cargaron los módulos (admin-productos.js llama a EXE_ADMIN.start())

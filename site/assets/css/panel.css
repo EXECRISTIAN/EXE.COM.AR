@@ -340,3 +340,25 @@
 .side-out { border-top: 1px solid var(--border, #e2e2e2); margin-top: 10px; padding-top: 10px; }
 .kpis-wide { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 @media (max-width: 560px) { .kpis.kpis-wide { grid-template-columns: 1fr !important; } }
+
+/* Pedidos: armar pedido, ficha, lista de armado */
+.orders-bar, .order-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.btn-sm { padding: 6px 12px; font-size: .85rem; }
+.tag-mini { font-size: .7rem; padding: 1px 6px; border-radius: 999px; background: var(--border, #e2e2e2); color: var(--muted); vertical-align: middle; }
+.order-form h3, .order-cols h3 { margin: 6px 0 12px; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 14px; margin-bottom: 12px; }
+.grid-2 .wide { grid-column: 1 / -1; }
+.add-line { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.add-line #npSearch { flex: 1 1 260px; min-width: 0; } .add-line #npQty { width: 80px; }
+.order-total { font-size: 1.2rem; margin: 10px 0 14px; }
+.order-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start; }
+.pick-list { list-style: none; margin: 0 0 8px; padding: 0; }
+.pick-list li { border-bottom: 1px solid var(--border, #e2e2e2); }
+.pick-list label { display: flex; align-items: center; gap: 10px; padding: 10px 2px; cursor: pointer; }
+.pick-list input { width: 20px; height: 20px; flex: none; }
+.pick-list span { flex: 1; } .pick-list small { color: var(--muted); white-space: nowrap; }
+.pick-list input:checked + span { text-decoration: line-through; color: var(--muted); }
+.pick-hint { color: var(--muted); font-size: .9rem; }
+@media (max-width: 560px) { .order-cols { grid-template-columns: minmax(0, 1fr); } }
+#npLines input, #orderStatus, .add-line input { padding: 8px 10px; border: 1px solid var(--border, #d6d6d6); border-radius: 8px; background: var(--surface, #fff); color: inherit; font: inherit; }
+#orderStatus { width: 100%; margin-top: 4px; }
