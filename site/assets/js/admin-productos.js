@@ -37,7 +37,7 @@
   async function loadAll(force) {
     if (A.demo) return (cache = demoStore());
     if (cache && !force) return cache;
-    const cols = "id,name,brand,category,tags,description,price,price_usd,stock,show_stock,active,outlet,condition,image,images,specs,weight_kg,sort,variants,updated_at,ask_price,ask_stock,cart_ok,hide_no_stock";
+    const cols = "id,name,brand,category,tags,description,price,price_usd,stock,show_stock,active,outlet,condition,image,images,specs,weight_kg,location,sort,variants,updated_at,ask_price,ask_stock,cart_ok,hide_no_stock";
     const fxr = await sb().from("fx_settings").select("*").eq("id", 1).maybeSingle();
     fx = fxr.data || null;
     const [p, c, s] = await Promise.all([
@@ -409,6 +409,7 @@
             <label class="field">Unidades<input name="stock" inputmode="numeric" value="${p.show_stock ? p.stock : ""}"></label>
             <label class="field ed-check"><input type="checkbox" name="active" ${p.active ? "checked" : ""}> Visible en la tienda</label>
             <label class="field">Peso (kg, para envíos)<input name="weight_kg" inputmode="decimal" value="${p.weight_kg ?? 1}" ${ro}></label>
+            <label class="field">Ubicación en depósito (sale en la lista de armado)<input name="location" maxlength="40" placeholder="Ej: Estante A2" value="${esc(p.location || "")}" ${ro}></label>
           </div>
           <div class="ed-flags">${FLAGS.map(([f, ic, n, d]) => `<label class="ed-flag"><input type="checkbox" name="${f}" ${flagOn(p, f) ? "checked" : ""} ${ro}><span><b>${ic} ${n}</b><small>${d}</small></span></label>`).join("")}</div>
         </section>
@@ -616,7 +617,7 @@
         ...Object.fromEntries(FLAGS.map(([f]) => [f, el(f).checked])),
         show_stock: el("show_stock").checked, stock: el("show_stock").checked ? Math.max(0, Math.round(num(el("stock").value))) : 999,
         tags: [...new Set(el("tags").value.split(",").map((t) => t.trim()).filter(Boolean))],
-        active: el("active").checked, weight_kg: Math.max(0.01, num(el("weight_kg").value) || 1), description: el("description").value.trim() || null,
+        active: el("active").checked, weight_kg: Math.max(0.01, num(el("weight_kg").value) || 1), location: el("location").value.trim().slice(0, 40) || null, description: el("description").value.trim() || null,
         images: ed.images, specs: ed.specs.map((s) => ({ title: s.title.trim() || "Características", rows: s.rows.filter((r) => r[0].trim() && r[1].trim()).map((r) => [r[0].trim(), r[1].trim()]) })).filter((s) => s.rows.length),
       };
       if (ed.isNew) prod.sort = cache.products.length;
