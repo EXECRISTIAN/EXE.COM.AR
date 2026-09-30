@@ -210,6 +210,7 @@
     $("accOrders").textContent = count || 0;
     $("accVerified").textContent = prof?.email_verified_at || user.email_confirmed_at ? "✔ Verificado" : "Sin verificar";
     accMsg("");
+    renderMfa();
     scrollTo(0, 0);
   }
   addEventListener("hashchange", showSettings);
@@ -230,8 +231,48 @@
     accMsg(error ? "No se pudo enviar el email. Esperá unos minutos y probá de nuevo." : `Te mandamos un email a ${user.email} para elegir una contraseña nueva.`, error ? "error" : "ok");
   };
 
+  /* ---------- Verificación en dos pasos ---------- */
+  const MFA = window.EXE_MFA;
+  // Muestra una pantalla de la verificación (código o alta) en lugar del resto
+  async function mfaScreen(run) {
+    ["guest", "logged", "settings", "recovery"].forEach((id) => ($(id).hidden = true));
+    $("mfaStep").hidden = false;
+    try { return await run($("mfaBox")); } finally { $("mfaStep").hidden = true; $("mfaBox").innerHTML = ""; }
+  }
+  async function renderMfa() {
+    const box = $("accMfa"); if (!box || !MFA) return;
+    const st = await MFA.status().catch(() => null); if (!st) { box.innerHTML = ""; return; }
+    const on = st.factors[0];
+    box.innerHTML = `<div class="acc-mfa-card"><div><b>🔐 Verificación en dos pasos</b><small>${on ? `Activada desde el ${new Date(on.created_at).toLocaleDateString("es-AR")}. Al entrar se pide el código de tu app.` : "Desactivada. Sumá un código de tu celular además de la contraseña."}</small></div>
+      <button type="button" class="btn ${on ? "btn-outline" : "btn-primary"}" id="mfaToggle">${on ? "Desactivar" : "Activar"}</button></div>`;
+    $("mfaToggle").onclick = async () => {
+      if (on) {
+        if (!confirm("¿Desactivar la verificación en dos pasos? Tu cuenta queda protegida solo con la contraseña.")) return;
+        try { await MFA.remove(on.id); accMsg("Verificación en dos pasos desactivada.", "ok"); } catch (e) { accMsg("No se pudo desactivar: " + e.message, "error"); }
+        return renderMfa();
+      }
+      const ok = await mfaScreen((el) => MFA.enroll(el));
+      history.replaceState("", "", location.pathname + location.search + "#configuracion");
+      await showSettings();
+      accMsg(ok ? "¡Listo! Verificación en dos pasos activada." : "", ok ? "ok" : "");
+    };
+  }
+  if ($("mfaNeedBtn")) $("mfaNeedBtn").onclick = async () => { const ok = await mfaScreen((el) => MFA.enroll(el, { required: true })); render(); if (ok) show("¡Listo! Ya podés entrar al panel.", "ok"); };
+
+  let mfaAsking = false;
   async function render() {
-    const user = await be.user();
+    let user = await be.user();
+    // Si la cuenta tiene la verificación activada y esta sesión todavía no pasó el código, se pide antes de mostrar nada
+    if (user && MFA && !mfaAsking) {
+      const st = await MFA.status().catch(() => null);
+      if (st && st.factors.length && st.cur !== "aal2") {
+        mfaAsking = true;
+        const ok = await mfaScreen((el) => MFA.challenge(el, st.factors[0], { cancelText: "Salir" }));
+        mfaAsking = false;
+        if (!ok) { await sb.auth.signOut(); user = null; }
+      }
+    }
+    if (mfaAsking) return;
     $("guest").hidden = !!user;
     $("logged").hidden = !user;
     await showSettings();
@@ -240,6 +281,9 @@
     $("dashLink").hidden = true; // oculto por defecto; solo se muestra si la base confirma el permiso
     const perms = await be.permissions().catch(() => new Set());
     $("dashLink").hidden = !perms.has("dashboard.access");
+    // Administradores: la verificación en dos pasos es obligatoria (la base no da permisos sin ella)
+    const mst = perms.has("dashboard.access") && MFA ? await MFA.status().catch(() => null) : null;
+    $("mfaNeed").hidden = !(mst && !mst.factors.length);
     const { data: orders } = await sb.from("orders").select("id, created_at, status, total, carrier, tracking_number").order("created_at", { ascending: false });
     $("orders").innerHTML = orders?.length
       ? `<table class="table"><tr><th>Pedido</th><th>Fecha</th><th>Estado</th><th>Total</th><th>Envío</th></tr>${orders

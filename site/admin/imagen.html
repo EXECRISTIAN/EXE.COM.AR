@@ -12,7 +12,7 @@
 <body>
   <!-- Editor de imágenes y vectores por capas. Solo usuarios con site.edit (la base valida con RLS al guardar).
        Nada de esto se carga en la tienda pública. -->
-  <div class="ie-gate" id="ieGate"><p id="ieGateMsg">Verificando permisos…</p><a href="index.html#imagenes">← Volver al panel</a></div>
+  <div class="ie-gate" id="ieGate"><div id="ieGateMsg">Verificando permisos…</div><a href="index.html#imagenes">← Volver al panel</a></div>
 
   <div class="ie" id="ie" hidden>
     <header class="ie-top">
@@ -51,6 +51,7 @@
   <script src="../assets/js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../assets/js/backend.js"></script>
+  <script src="../assets/js/mfa.js"></script>
   <script src="../assets/js/admin-imagen.js"></script>
 </body>
 </html>

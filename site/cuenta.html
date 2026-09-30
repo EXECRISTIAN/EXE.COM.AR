@@ -58,9 +58,13 @@
       </section>
 
       <!-- Con sesión -->
+      <!-- Segundo paso: código de la app de verificación (si la cuenta lo tiene activado) -->
+      <section id="mfaStep" hidden><div id="mfaBox"></div></section>
+
       <section id="logged" hidden>
         <h1>Hola, <span id="who"></span></h1>
         <p style="color:var(--c3)">Desde acá vas a ver tu historial de pedidos.</p>
+        <p class="notice info" id="mfaNeed" hidden>🔐 Para usar el panel de administración tenés que activar la verificación en dos pasos. <button type="button" class="link-btn" id="mfaNeedBtn">Activarla ahora</button></p>
         <div id="orders"></div>
         <div class="account-actions">
           <a class="btn btn-outline btn-solid" id="dashLink" href="admin/" hidden>Panel de administración</a>
@@ -79,6 +83,7 @@
       <label class="field">Email<input name="email" readonly></label>
       <label class="field ed-check acc-optin"><input type="checkbox" name="marketing_opt_in"> Quiero recibir ofertas y novedades de EXE por email (podés darte de baja cuando quieras)</label>
       <div class="acc-stats"><div><b id="accOrders">0</b><small>Pedidos</small></div><div><b id="accVerified">—</b><small>Email</small></div></div>
+      <div class="acc-mfa" id="accMfa"></div>
       <p class="notice" id="accMsg" hidden></p>
       <div class="confirm-actions">
         <button class="btn btn-outline" type="button" id="accReset">Cambiar contraseña</button>
@@ -117,6 +122,7 @@
   <script src="assets/js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="assets/js/backend.js"></script>
+  <script src="assets/js/mfa.js"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&hl=es" async defer></script>
   <script src="assets/js/cuenta.js"></script>
   <script src="assets/js/theme-mini.js"></script>
