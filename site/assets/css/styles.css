@@ -540,3 +540,9 @@ html[data-wa-float="off"] .wa-float { display: none; }
 .cms-spacer.line::after { content: ""; position: absolute; left: 50%; top: 50%; width: min(1100px, calc(100% - 32px)); height: 1px; transform: translateX(-50%); background: var(--sp-line, var(--line)); }
 section.cms-block:has(> .cms-spacer) { padding: 0; }
 .chip:focus-visible, .fx-rbtn:focus-visible, .p-tag:focus-visible, .tag-brand:focus-visible { outline: 2px solid var(--c0); outline-offset: 2px; }
+
+/* Aviso cuando falla la verificación antibots (Cloudflare Turnstile) */
+.captcha-note { margin: 6px 0 0; font-size: .88rem; color: #b42318; }
+:root[data-theme="dark"] .captcha-note { color: #fca5a5; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .captcha-note { color: #fca5a5; } }
+.captcha-note .link-btn { font-size: inherit; color: inherit; text-decoration: underline; font-weight: 700; padding: 0; }

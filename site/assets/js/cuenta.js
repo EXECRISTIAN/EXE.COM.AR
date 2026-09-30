@@ -56,15 +56,35 @@
   // Supabase valida el token del lado del servidor cuando el captcha está activado en Attack Protection.
   const siteKey = window.SITE_CONFIG?.turnstileSiteKey;
   const widgets = {};
+  // Si la verificación falla (o el script de Cloudflare no carga), aviso debajo para que recargue la página.
+  function captchaNote(el, show) {
+    let n = el.nextElementSibling;
+    if (!n || !n.classList.contains("captcha-note")) {
+      n = document.createElement("p");
+      n.className = "captcha-note"; n.setAttribute("role", "alert"); n.hidden = true;
+      n.innerHTML = 'No se pudo completar la verificación. <button type="button" class="link-btn">Recargá la página</button> y probá de nuevo.';
+      n.querySelector("button").onclick = () => location.reload();
+      el.after(n);
+    }
+    n.hidden = !show;
+  }
   function mountCaptchas() {
     if (!siteKey || !window.turnstile) return;
     document.querySelectorAll("[data-captcha]").forEach((el) => {
       if (widgets[el.dataset.captcha] !== undefined) return;
-      widgets[el.dataset.captcha] = window.turnstile.render(el, { sitekey: siteKey, language: "es", theme: "auto", size: "flexible" });
+      widgets[el.dataset.captcha] = window.turnstile.render(el, {
+        sitekey: siteKey, language: "es", theme: "auto", size: "flexible",
+        callback: () => captchaNote(el, false),
+        "error-callback": () => { captchaNote(el, true); return true; },
+        "timeout-callback": () => captchaNote(el, true),
+        "unsupported-callback": () => captchaNote(el, true),
+      });
     });
   }
   (function waitTurnstile(n = 0) {
-    if (window.turnstile) mountCaptchas(); else if (n < 50) setTimeout(() => waitTurnstile(n + 1), 200);
+    if (window.turnstile) mountCaptchas();
+    else if (n < 50) setTimeout(() => waitTurnstile(n + 1), 200);
+    else if (siteKey) document.querySelectorAll("[data-captcha]").forEach((el) => captchaNote(el, true));   // no cargó en 10 s
   })();
   const captcha = (name) => {
     if (!siteKey || !window.turnstile) return {}; // si el captcha no cargó, decide el servidor
