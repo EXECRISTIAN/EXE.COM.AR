@@ -906,24 +906,24 @@
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();
 
-/* Al achicar/agrandar la ventana, mantener a la vista lo que el usuario estaba mirando
-   (si no, las secciones de arriba cambian de alto y la página "se corre"). */
+/* Al achicar/agrandar la ventana (o si cambia el alto de algo de arriba), mantener quieto lo que el
+   usuario estaba mirando: sin saltos ni efecto de "scroll" hacia otra sección. */
 (() => {
-  let anchor = null, top = 0, resizing = false, t;
+  let anchor = null, top = 0, lock = 0, t;
   const pick = () => {
-    if (resizing || scrollY < 10) { if (!resizing) anchor = null; return; }
+    if (Date.now() < lock) return;
+    if (scrollY < 10) { anchor = null; return; }
     const hh = (document.querySelector(".site-header") || {}).offsetHeight || 70;
     const el = document.elementFromPoint(innerWidth / 2, hh + 20);
     if (el && el !== document.body && el !== document.documentElement) { anchor = el; top = el.getBoundingClientRect().top; }
   };
-  addEventListener("scroll", () => { clearTimeout(t); t = setTimeout(pick, 80); }, { passive: true });
-  addEventListener("resize", () => {
-    resizing = true;
-    if (anchor && anchor.isConnected) {
-      const d = anchor.getBoundingClientRect().top - top;
-      if (Math.abs(d) > 1) scrollTo({ top: scrollY + d, behavior: "instant" });
-    }
-    clearTimeout(t); t = setTimeout(() => { resizing = false; }, 400);
-  });
+  const fix = () => {
+    if (!anchor || !anchor.isConnected) return;
+    const d = anchor.getBoundingClientRect().top - top;
+    if (Math.abs(d) > 1) { lock = Date.now() + 300; scrollTo({ top: scrollY + d, behavior: "instant" }); }
+  };
+  addEventListener("scroll", () => { clearTimeout(t); t = setTimeout(pick, 120); }, { passive: true });
+  addEventListener("resize", () => { lock = Date.now() + 500; fix(); });
+  if (window.ResizeObserver) new ResizeObserver(() => { if (Date.now() < lock) fix(); }).observe(document.body);
   pick();
 })();
