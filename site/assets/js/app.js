@@ -15,7 +15,7 @@
   let filter = "Todos";
   let query = "";
   let sortBy = "";
-  const fp = { brands: new Set(), tags: new Set(), min: null, max: null, stock: false, logo: null };   // panel "Filtros" (+ logo de marca elegido abajo)
+  const fp = { brands: new Set(), tags: new Set(), min: null, max: null, stock: false, logo: null, ids: null };   // panel "Filtros" (+ logo de marca elegido abajo)
   // Marca por logo: busca sus palabras en la marca o el nombre (ej. el logo NVIDIA encuentra las placas "GeForce" de MSI)
   const brandMatches = (p, bf) => {
     const hay = ` ${`${p.brand || ""} ${p.name || ""}`.toLowerCase().replace(/[^a-z0-9áéíóúñ]+/g, " ")} `;
@@ -74,7 +74,8 @@
         (fp.min == null || (p.price > 0 && p.price >= fp.min)) &&
         (fp.max == null || (p.price > 0 && p.price <= fp.max)) &&
         (!fp.stock || (tracksStock(p) && available(p) > 0)) &&
-        (!fp.logo || brandMatches(p, fp.logo))
+        (!fp.logo || brandMatches(p, fp.logo)) &&
+        (!fp.ids || fp.ids.has(p.id))
     );
     const byPrice = (p) => (p.price > 0 ? p.price : Infinity);   // "Consultar" siempre al final
     if (sortBy === "price-asc") list.sort((a, b) => byPrice(a) - byPrice(b));
@@ -500,8 +501,9 @@
   }
   function updateFilters() {
     const n = fp.brands.size + fp.tags.size + (fp.min != null || fp.max != null ? 1 : 0) + (fp.stock ? 1 : 0) + (fp.logo ? 1 : 0);
-    $("activeBrand").hidden = !fp.logo;
-    $("activeBrand").innerHTML = fp.logo ? `<button type="button" class="chip active" id="clearLogo" aria-label="Quitar filtro de marca ${esc(fp.logo.brand)}">Marca: ${esc(fp.logo.brand)} <span aria-hidden="true">✕</span></button>` : "";
+    $("activeBrand").hidden = !fp.logo && !fp.ids;
+    $("activeBrand").innerHTML = (fp.logo ? `<button type="button" class="chip active" id="clearLogo" aria-label="Quitar filtro de marca ${esc(fp.logo.brand)}">Marca: ${esc(fp.logo.brand)} <span aria-hidden="true">✕</span></button>` : "") +
+      (fp.ids ? `<button type="button" class="chip active" id="clearSel" aria-label="Ver todos los productos">Selección (${fp.ids.size}) <span aria-hidden="true">✕</span></button>` : "");
     $("filtersCount").hidden = !n; $("filtersCount").textContent = n;
     renderProducts();
   }
@@ -521,7 +523,7 @@
     updateFilters();
   });
   $("fpClear").onclick = () => {
-    fp.brands.clear(); fp.tags.clear(); fp.min = fp.max = null; fp.stock = false; fp.logo = null;
+    fp.brands.clear(); fp.tags.clear(); fp.min = fp.max = null; fp.stock = false; fp.logo = null; fp.ids = null;
     $("fpMin").value = $("fpMax").value = ""; $("fpStock").checked = false;
     renderBrandOptions(); updateFilters();
   };
@@ -541,6 +543,14 @@
       if (!$("pdOverlay").hidden) closeProduct();
       fp.tags.clear(); fp.tags.add(tg.dataset.tag); renderBrandOptions(); updateFilters();
       return $("productos").scrollIntoView({ behavior: "smooth" });
+    }
+    const sel = e.target.closest("[data-dz-ids], #clearSel");
+    if (sel) {
+      e.preventDefault();
+      fp.ids = sel.id === "clearSel" ? null : new Set(sel.dataset.dzIds.split(",").filter(Boolean));
+      if (fp.ids) { filter = "Todos"; renderFilters(); }
+      updateFilters();
+      return fp.ids && $("productos").scrollIntoView({ behavior: "smooth" });
     }
     const t = e.target.closest("[data-brand-tag], #clearLogo");
     if (!t) return;
@@ -821,7 +831,63 @@
       main.appendChild(el);   // reordena según la posición
     });
     observeReveals();
+    designZones();
   }
+  /* ---------- Zonas tocables de las imágenes hechas en el editor (tabla designs) ----------
+     Una imagen publicada desde el editor vive en .../disenos/...; si tiene enlaces, se dibujan encima como links
+     transparentes (en % de la imagen, así sirven a cualquier tamaño). Solo se piden a la base si hay alguna. */
+  const zoneCache = new Map();   // url → hotspots
+  const zoneImgs = () => [...document.querySelectorAll("main img")].filter((i) => /\/disenos\/[^/]+\.webp/.test(i.getAttribute("src") || ""));
+  async function designZones() {
+    try {
+      if (!cfg.supabaseUrl) return;
+      const urls = [...new Set(zoneImgs().map((i) => i.getAttribute("src")))].filter((u) => !zoneCache.has(u)).slice(0, 30);
+      if (urls.length) {
+        const list = urls.map((u) => `"${u.replace(/["\\]/g, "")}"`).join(",");
+        const r = await fetch(`${cfg.supabaseUrl}/rest/v1/designs?select=image_url,hotspots&image_url=in.(${encodeURIComponent(list)})`, { headers: { apikey: cfg.supabaseAnonKey } });
+        const rows = r.ok ? await r.json() : [];
+        urls.forEach((u) => zoneCache.set(u, []));
+        rows.forEach((d) => zoneCache.set(d.image_url, Array.isArray(d.hotspots) ? d.hotspots : []));
+      }
+      paintZones();
+    } catch (e) { /* sin zonas: la imagen sigue funcionando como antes */ }
+  }
+  const pct = (v) => `${Math.max(0, Math.min(100, Number(v) * 100 || 0)).toFixed(3)}%`;
+  function zoneAttrs(k) {
+    const v = String(k.v ?? "");
+    switch (k.t) {
+      case "product": return `href="#producto/${encodeURIComponent(v)}"`;
+      case "products": return `href="#productos" data-dz-ids="${esc((Array.isArray(k.v) ? k.v : []).slice(0, 60).map(String).join(","))}"`;
+      case "category": return `href="#productos" data-filter="${esc(v)}"`;
+      case "brand": return `href="#productos" data-brand-tag="${esc(v)}"`;
+      case "section": return v === "carrito" ? 'href="#" data-dz-cart="1"' : `href="#${v === "inicio" ? "" : esc(v.replace(/[^\w-]/g, ""))}"`;
+      case "url": return /^https?:\/\/[^\s"<>]+$/i.test(v) ? `href="${esc(v)}"${k.tab ? ' target="_blank" rel="noopener"' : ""}` : "";
+      case "whatsapp": return `href="${esc(waLink(v || "Hola EXE!"))}" target="_blank" rel="noopener"`;
+      default: return "";
+    }
+  }
+  function paintZones() {
+    zoneImgs().forEach((img) => {
+      const hs = zoneCache.get(img.getAttribute("src")) || [];
+      const host = (img.closest("a") || img).parentElement;
+      if (!host) return;
+      let layer = host.querySelector(":scope > .dz-layer");
+      if (!hs.length) { if (layer) layer.remove(); return; }
+      if (getComputedStyle(host).position === "static") host.style.position = "relative";
+      if (!layer) { layer = document.createElement("div"); layer.className = "dz-layer"; host.appendChild(layer); }
+      layer.innerHTML = hs.slice(0, 40).map((h) => {
+        const k = h.link || {}, attrs = zoneAttrs(k); if (!attrs) return "";
+        const p = k.t === "product" ? products.find((x) => x.id === k.v) : null;
+        if (k.t === "product" && k.hide && (!p || (tracksStock(p) && p.stock <= 0))) return "";
+        const label = h.label || (p ? p.name : "Ver más");
+        return `<a class="dz" ${attrs} style="left:${pct(h.x)};top:${pct(h.y)};width:${pct(h.w)};height:${pct(h.h)}" aria-label="${esc(label)}" title="${esc(label)}">${k.price && p ? `<span class="dz-price">${esc(priceLabel(p))}</span>` : ""}</a>`;
+      }).join("");
+      const place = () => Object.assign(layer.style, { left: img.offsetLeft + "px", top: img.offsetTop + "px", width: img.offsetWidth + "px", height: img.offsetHeight + "px" });
+      place();
+      if (!img.__dzObs && window.ResizeObserver) { img.__dzObs = new ResizeObserver(place); img.__dzObs.observe(img); }
+    });
+  }
+  document.addEventListener("click", (e) => { if (e.target.closest("[data-dz-cart]")) { e.preventDefault(); $("cartOpen").click(); } });
   /* ---------- Animaciones de entrada ---------- */
   const revealer = new IntersectionObserver((entries) => {
     entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("in"); revealer.unobserve(en.target); } });
@@ -902,7 +968,7 @@
     s.textContent = JSON.stringify(data).replace(/</g, "\\u003c");
   }
   loadDb().catch(loadJson)
-    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
+    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); paintZones(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();
 
