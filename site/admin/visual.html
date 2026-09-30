@@ -12,7 +12,7 @@
 <body>
   <!-- Editor visual de la página de inicio. Solo usuarios con el permiso site.edit (además, la base valida con RLS al guardar).
        Todo el peso del editor vive acá: la tienda pública no carga nada de esto. -->
-  <div class="ve-gate" id="veGate"><p id="veGateMsg">Verificando permisos…</p><a href="index.html#sitio">← Volver al panel</a></div>
+  <div class="ve-gate" id="veGate"><div id="veGateMsg">Verificando permisos…</div><a href="index.html#sitio">← Volver al panel</a></div>
 
   <div class="ve" id="ve" hidden>
     <header class="ve-top">
@@ -41,6 +41,7 @@
   <script src="../assets/js/config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../assets/js/backend.js"></script>
+  <script src="../assets/js/mfa.js"></script>
   <script src="../assets/js/admin-visual.js"></script>
 </body>
 </html>

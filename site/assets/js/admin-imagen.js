@@ -44,6 +44,7 @@
       if (!user) return gate('Tenés que <a href="../cuenta.html">iniciar sesión</a>.', true);
       const perms = await timeout(be.permissions(), 15000, "La verificación de permisos").catch(() => new Set());
       if (!perms.has("site.edit")) return gate("Tu usuario no tiene permiso para editar imágenes.");
+      if (window.EXE_MFA && !(await window.EXE_MFA.gate($("ieGateMsg"), { required: true }))) return gate("Para editar hace falta la verificación en dos pasos. <a href=\"\">Reintentar</a>", true);
     }
     gate("Abriendo la imagen…");
     try { await timeout(loadDoc(), 25000, "La imagen"); } catch (e) { return gate("No se pudo abrir el diseño: " + esc(e.message), true); }

@@ -49,7 +49,18 @@
       $("gateMsg").className = "notice error";
       return ($("gateMsg").textContent = "Tu usuario no tiene permiso para acceder al panel.");
     }
+    // Verificación en dos pasos: obligatoria para el panel (sin ella la base no da ningún permiso)
+    if (!(await mfaGate())) return;
     open(user.email);
+  }
+
+  async function mfaGate() {
+    if (!window.EXE_MFA) return true;
+    $("gateMsg").hidden = true;
+    const ok = await window.EXE_MFA.gate($("gateMfa"), { required: true }).catch((e) => { $("gateMfa").innerHTML = `<p class="notice error">${esc(e.message)}</p>`; return false; });
+    $("gateMfa").innerHTML = "";
+    if (!ok) { $("gateMsg").hidden = false; $("gateMsg").textContent = "Para entrar al panel hace falta la verificación en dos pasos."; }
+    return ok;
   }
 
   function open(who) {
