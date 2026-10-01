@@ -402,3 +402,13 @@
 .img-info b { display: block; font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .img-info small { opacity: .7; font-size: .75rem; }
 .img-edit { padding: 6px 10px; font-size: .85rem; white-space: nowrap; }
+
+/* Productos → importar del fabricante */
+.ed-maker { margin-top: 14px; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 10px; display: grid; gap: 8px; }
+.ed-maker-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.ed-maker-row .pr-in { flex: 1 1 260px; }
+.ed-maker small { color: var(--muted); }
+.ed-maker-imgs { display: flex; flex-wrap: wrap; gap: 8px; }
+.ed-maker-imgs label { position: relative; width: 110px; height: 110px; border: 1px solid var(--line); border-radius: 8px; background: #fff; display: grid; place-items: center; cursor: pointer; overflow: hidden; }
+.ed-maker-imgs img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.ed-maker-imgs input { position: absolute; top: 6px; left: 6px; }

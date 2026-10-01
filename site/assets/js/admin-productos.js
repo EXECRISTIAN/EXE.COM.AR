@@ -421,7 +421,11 @@
             <button class="btn btn-outline" type="button" id="edPick">📷 Subir fotos</button>
             <span>o arrastralas / pegalas acá</span>
             <span class="ed-spacer"></span><input id="edImgUrl" placeholder="…o pegá el link de una imagen" class="pr-in ed-url"><button class="btn btn-outline" type="button" id="edAddUrl">Agregar</button></div>
-            <label class="field ed-check"><input type="checkbox" id="edWhite" checked> Poner fondo blanco (para PNG con fondo transparente)</label>` : ""}
+            <label class="field ed-check"><input type="checkbox" id="edWhite" checked> Poner fondo blanco (para PNG con fondo transparente)</label>
+            <div class="ed-maker"><div class="ed-maker-row"><button class="btn btn-outline" type="button" id="edMakerBtn">🏭 Traer fotos y ficha del fabricante</button>
+              <input id="edMakerUrl" class="pr-in" placeholder="(opcional) link de la página oficial del fabricante"></div>
+              <small>Solo sitios oficiales de fabricantes certificados (intel.com, asus.com, gigabyte.com, msi.com…). Nunca de tiendas. Se compara el modelo con la página antes de traer nada.</small>
+              <div id="edMakerOut"></div></div>` : ""}
         </section>
 
         <section class="panel ed-sec"><h3>5. Descripción</h3>
@@ -528,6 +532,72 @@
   }
   function msg(text, kind) { const m = $("edMsg"); m.hidden = false; m.className = `notice ${kind}`; m.textContent = text; }
 
+  /* ---------- Importar del fabricante (función "fabricante": sin IA, solo sitios oficiales certificados) ---------- */
+  const MAKER_DEMO = { maker: "GIGABYTE", page: "https://www.gigabyte.com/Motherboard/B460M-DS3H-V2-rev-10", title: "B460M DS3H V2 (rev. 1.0) | GIGABYTE",
+    tokens: ["b460m", "ds3h", "v2"], match: { ok: true, found: ["b460m", "ds3h", "v2"], missing: [] },
+    images: ["../assets/img/products/muestra/outlet-gigabyte-b460m-ds3h-v2.webp"],
+    specs: [{ title: "CPU", rows: [["Socket", "LGA1200"], ["Procesadores", "Intel Core 10.ª y 11.ª gen"]] }, { title: "Memoria", rows: [["Zócalos", "4 x DDR4"], ["Máximo", "128 GB"]] }] };
+  async function makerCall(body, raw) {
+    if (A.demo) {
+      if (body.action === "image") return fetch(body.url).then((r) => r.blob());
+      return new Promise((ok) => setTimeout(() => ok(MAKER_DEMO), 300));
+    }
+    const { data: { session } } = await sb().auth.getSession();
+    const r = await fetch(`${window.SITE_CONFIG.supabaseUrl}/functions/v1/fabricante`, { method: "POST",
+      headers: { "Content-Type": "application/json", apikey: window.SITE_CONFIG.supabaseAnonKey, Authorization: `Bearer ${session ? session.access_token : ""}` }, body: JSON.stringify(body) });
+    if (raw) { if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || `Error ${r.status}`); return r.blob(); }
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || `Error ${r.status}`);
+    return d;
+  }
+  let makerRes = null, makerBusy = false;
+  async function makerLookup(auto) {
+    const f = $("edForm"); if (!f || makerBusy) return;
+    const name = f.elements.name.value.trim(), brand = f.elements.brand.value.trim(), url = ($("edMakerUrl").value || "").trim();
+    const out = $("edMakerOut");
+    if (!name) { if (!auto) out.innerHTML = '<p class="notice error">Escribí el nombre del producto con el modelo.</p>'; return; }
+    makerBusy = true; out.innerHTML = '<p class="notice info">Buscando en el sitio del fabricante…</p>';
+    try {
+      const d = await makerCall({ action: "lookup", brand, name, url });
+      makerRes = d && !d.error ? d : null;
+      if (!d || d.error) { out.innerHTML = `<p class="notice ${auto ? "info" : "error"}">${esc((d && d.error) || "Sin resultados")}</p>`; return; }
+      renderMaker(d);
+      // Automático (producto nuevo sin fotos): si el modelo coincide, se traen solas las fotos y la ficha
+      if (auto && d.match.ok) {
+        if (!ed.images.length && d.images.length) await makerImages(d.images.slice(0, 4));
+        if (!ed.specs.length && d.specs.length) makerSpecs(d.specs);
+        msg(`Fotos y ficha traídas de ${d.maker} (${new URL(d.page).hostname}). Revisalas y tocá Guardar.`, "ok");
+      }
+    } catch (e) { out.innerHTML = `<p class="notice error">No se pudo consultar al fabricante: ${esc(e.message)}</p>`; }
+    finally { makerBusy = false; }
+  }
+  function renderMaker(d) {
+    const ok = d.match.ok;
+    $("edMakerOut").innerHTML = `<div class="ed-maker-res">
+      <p class="notice ${ok ? "ok" : "error"}">${ok ? "✔ El modelo coincide" : "⚠ El modelo NO coincide del todo"} con <a href="${esc(d.page)}" target="_blank" rel="noopener">${esc(d.title || d.page)}</a> (${esc(d.maker)}).
+        ${ok ? "" : `Falta en la página: <b>${esc(d.match.missing.join(", "))}</b>. Revisá que sea el producto correcto antes de usar nada.`}</p>
+      ${d.images.length ? `<div class="ed-maker-imgs">${d.images.map((u, i) => `<label><input type="checkbox" data-mimg="${i}" ${ok && i < 4 ? "checked" : ""}><img src="${esc(u)}" alt="" loading="lazy" referrerpolicy="no-referrer"></label>`).join("")}</div>` : '<p class="ed-hint">No se encontraron fotos del fabricante en esa página.</p>'}
+      <p class="ed-hint">${d.specs.length ? `Ficha técnica: ${d.specs.length} secciones, ${d.specs.reduce((n, s) => n + s.rows.length, 0)} datos.` : "No se encontró ficha técnica en la página."}</p>
+      <div class="ed-row-btns">${d.images.length ? '<button class="btn btn-outline" type="button" id="edMakerUseImgs">Usar fotos marcadas</button>' : ""}${d.specs.length ? '<button class="btn btn-outline" type="button" id="edMakerUseSpecs">Usar ficha técnica</button>' : ""}</div></div>`;
+    const ui = $("edMakerUseImgs"); if (ui) ui.onclick = () => makerImages([...document.querySelectorAll("[data-mimg]:checked")].map((c) => d.images[+c.dataset.mimg]));
+    const us = $("edMakerUseSpecs"); if (us) us.onclick = () => { makerSpecs(d.specs); msg("Ficha técnica cargada. Revisala y tocá Guardar.", "ok"); };
+  }
+  // Las fotos pasan por la función (solo dominios del fabricante) y se suben como WebP igual que una foto propia
+  async function makerImages(urls) {
+    if (!urls.length) return;
+    const files = [];
+    for (const u of urls) {
+      try { const b = await makerCall({ action: "image", url: u }, true); files.push(new File([b], (u.split("/").pop() || "foto").split("?")[0] || "foto", { type: b.type || "image/jpeg" })); }
+      catch (e) { msg("No se pudo traer una foto: " + e.message, "error"); }
+    }
+    if (files.length) await uploadFiles(files);
+  }
+  function makerSpecs(list) {
+    const have = new Set(ed.specs.map((s) => s.title.toLowerCase()));
+    list.forEach((s) => { if (!have.has(String(s.title).toLowerCase())) ed.specs.push({ title: String(s.title).slice(0, 60), rows: s.rows.slice(0, 50).map((r) => [String(r[0]).slice(0, 80), String(r[1]).slice(0, 300)]) }); });
+    renderSpecs();
+  }
+
   function bindEditor() {
     const f = $("edForm"); const w = can("products.write");
     const el = (n) => f.elements[n];
@@ -572,6 +642,10 @@
       ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
       drop.addEventListener("drop", (e) => uploadFiles(e.dataTransfer.files));
       f.addEventListener("paste", (e) => { const files = [...(e.clipboardData || {}).files || []]; if (files.length) { e.preventDefault(); uploadFiles(files); } });
+      $("edMakerBtn").onclick = () => makerLookup(false);
+      // Producto nuevo: al completar nombre y marca se busca solo en el fabricante
+      if (ed.isNew) { let t; const kick = () => { clearTimeout(t); t = setTimeout(() => { if (!ed.images.length && f.elements.name.value.trim().length > 6 && f.elements.brand.value.trim()) makerLookup(true); }, 1200); };
+        f.elements.name.addEventListener("change", kick); f.elements.brand.addEventListener("change", kick); }
       $("edAddUrl").onclick = () => { const u = $("edImgUrl").value.trim(); if (/^https:\/\//.test(u)) { ed.images.push(u); $("edImgUrl").value = ""; renderPhotos(); } else msg("El link tiene que empezar con https://", "error"); };
       // Frases rápidas
       f.querySelectorAll("[data-snip]").forEach((b) => (b.onclick = () => { const t = el("description"); t.value = (t.value.trim() ? t.value.trim() + "\n\n" : "") + b.dataset.snip; }));
