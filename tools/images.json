@@ -1,10 +1,57 @@
 [
-{"id":"outlet-gigabyte-b460m-ds3h-v2","page":"https://www.amazon.com/GIGABYTE-B460M-Intel-Micro-ATX-Motherboard/dp/B083GTCRHX"},
-{"id":"outlet-msi-h510m-a-pro","page":"https://www.amazon.com/MSI-H510M-PRO-ProSeries-Motherboard/dp/B08WBYHQLM"},
-{"id":"outlet-msi-mpg-z490-gaming-plus","page":"https://www.amazon.com/MSI-Gaming-Motherboard-Socket-Mystic/dp/B0876HBFVC"},
-{"id":"outlet-z390-aorus-elite","page":"https://www.amazon.com/GIGABYTE-Z390-AORUS-LGA1151-Motherboard/dp/B07HRWJ555"},
-{"id":"outlet-i3-10105","page":"https://www.amazon.com/Intel-BX8070110105-i3-10105-LGA1200-Processor/dp/B092ZGRHB5"},
-{"id":"outlet-steam-deck-512","page":"https://www.amazon.com/Valve-Handheld-Console-No-Operating-System/dp/B0BBQRYN9M"},
-{"id":"outlet-celeron-g5925-sin-caja","page":"https://pcpartpicker.com/product/Z2Dkcf/intel-celeron-g5925-36-ghz-dual-core-oemtray-processor-cm8070104292013"},
-{"id":"outlet-sentey-x10","page":"https://compu-service.com.ar/gabinetes/gabinete-gamer/gabinete-sentey-x10-rainbow-135445.html"}
+ {
+  "id": "outlet-gigabyte-b460m-ds3h-v2",
+  "imgs": [
+   "https://c1.neweggimages.com/productimage/nb1280/13-145-298-V01.jpg",
+   "https://c1.neweggimages.com/ProductImageCompressAll1280/13-145-298-V01.jpg",
+   "https://c1.neweggimages.com/ProductImage/13-145-298-V01.jpg",
+   "https://c1.neweggimages.com/ProductImage/13-145-298-01.jpg",
+   "https://c1.neweggimages.com/ProductImageCompressAll1280/13-145-298-01.jpg",
+   "https://c1.neweggimages.com/productimage/nb1280/13-145-298-01.jpg"
+  ]
+ },
+ {
+  "id": "outlet-msi-h510m-a-pro",
+  "imgs": [
+   "https://c1.neweggimages.com/productimage/nb1280/13-144-402-V01.jpg",
+   "https://c1.neweggimages.com/ProductImageCompressAll1280/13-144-402-V01.jpg",
+   "https://c1.neweggimages.com/ProductImage/13-144-402-V01.jpg",
+   "https://c1.neweggimages.com/ProductImage/13-144-402-01.jpg",
+   "https://c1.neweggimages.com/ProductImageCompressAll1280/13-144-402-01.jpg",
+   "https://c1.neweggimages.com/productimage/nb1280/13-144-402-01.jpg"
+  ]
+ },
+ {
+  "id": "outlet-msi-mpg-z490-gaming-plus",
+  "imgs": [
+   "https://c1.neweggimages.com/productimage/nb1280/13-144-416-V01.jpg",
+   "https://c1.neweggimages.com/ProductImageCompressAll1280/13-144-416-V01.jpg",
+   "https://c1.neweggimages.com/ProductImage/13-144-416-V01.jpg",
+   "https://c1.neweggimages.com/ProductImage/13-144-416-01.jpg",
+   "https://c1.neweggimages.com/ProductImageCompressAll1280/13-144-416-01.jpg",
+   "https://c1.neweggimages.com/productimage/nb1280/13-144-416-01.jpg"
+  ]
+ },
+ {
+  "id": "outlet-z390-aorus-elite",
+  "imgs": [
+   "https://c1.neweggimages.com/productimage/nb1280/13-145-092-V01.jpg",
+   "https://c1.neweggimages.com/ProductImageCompressAll1280/13-145-092-V01.jpg",
+   "https://c1.neweggimages.com/ProductImage/13-145-092-V01.jpg",
+   "https://c1.neweggimages.com/ProductImage/13-145-092-01.jpg",
+   "https://c1.neweggimages.com/ProductImageCompressAll1280/13-145-092-01.jpg",
+   "https://c1.neweggimages.com/productimage/nb1280/13-145-092-01.jpg"
+  ]
+ },
+ {
+  "id": "outlet-i3-10105",
+  "imgs": [
+   "https://c1.neweggimages.com/productimage/nb1280/19-118-391-V01.jpg",
+   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-391-V01.jpg",
+   "https://c1.neweggimages.com/ProductImage/19-118-391-V01.jpg",
+   "https://c1.neweggimages.com/ProductImage/19-118-391-01.jpg",
+   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-391-01.jpg",
+   "https://c1.neweggimages.com/productimage/nb1280/19-118-391-01.jpg"
+  ]
+ }
 ]

@@ -93,6 +93,14 @@ for it in json.load(open("tools/images.json")):
                     if w is not None and w > 240 and not is_blank(str(raw)) and raw.stat().st_size > 8000: src = cand; break
                 except Exception: pass
             if not src: raise RuntimeError(f"sin foto de fondo blanco ({it['cands']} candidatas)")
+        elif it.get("imgs"):   # varias URLs directas posibles: la primera que baje y no esté vacía
+            src = None
+            for cand in it["imgs"]:
+                try:
+                    raw.write_bytes(get(cand))
+                    if raw.stat().st_size > 8000: src = cand; break
+                except Exception: pass
+            if not src: raise RuntimeError("ninguna URL directa respondió")
         else:
             if not src: src = og_image(it["page"])
             if not src: raise RuntimeError("sin og:image")
