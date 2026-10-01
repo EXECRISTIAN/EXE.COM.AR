@@ -67,6 +67,9 @@
       .join("");
   }
 
+  // Gabinetes: se venden vacíos salvo que la descripción diga que incluye componentes
+  const caseOnly = (p) => /gabinete/i.test(p.category || "") && !/(^|[^o]\s)incluye\s+(componentes|fuente|placa|procesador)/i.test(p.description || "");
+  const CASE_NOTE = "el gabinete solo no incluye componentes dentro";
   function renderProducts() {
     const q = query.toLowerCase();
     const list = products.filter(
@@ -169,7 +172,9 @@
           <a class="btn btn-outline" href="${esc(waAsk)}" target="_blank" rel="noopener">Consultar por WhatsApp</a>
           <button type="button" class="btn btn-outline btn-share" data-share-product="${esc(p.id)}">${SHARE_ICON} Compartir</button>
         </div>
+        ${caseOnly(p) ? `<p class="pd-note">⚠️ Se vende solo el gabinete: ${CASE_NOTE}.</p>` : ""}
         ${p.description ? `<div class="pd-desc">${esc(p.description)}</div>` : ""}
+        <p class="pd-illus">Las imágenes presentadas son puramente ilustrativas.</p>
         <h3 class="pd-specs-title">Especificaciones</h3>
         ${p.specs && p.specs.length
           ? p.specs.map((s, k) => `<details class="pd-spec"${k === 0 ? " open" : ""}><summary>${esc(s.title)}</summary>
@@ -293,7 +298,7 @@
         <li>
           <img src="${esc(mainImg(l.product))}" alt="" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
           <div class="info">${esc(l.product.name)}
-            <small>${l.variant ? esc(l.variant) + " · " : ""}${priceLabel(l.product)}${l.product.noStock ? " · a pedido" : l.product.askStock ? " · stock a consultar" : ""}</small>
+            <small>${l.variant ? esc(l.variant) + " · " : ""}${priceLabel(l.product)}${l.product.noStock ? " · a pedido" : l.product.askStock ? " · stock a consultar" : ""}${caseOnly(l.product) ? ` · ${CASE_NOTE}` : ""}</small>
           </div>
           <div class="qty">
             <button data-dec="${i}" aria-label="Restar">−</button>
@@ -353,7 +358,8 @@
     const rows = lines.map((l) => {
       const sub = l.product.price > 0 ? money(l.qty * l.product.price) : "a consultar";
       const tag = l.product.noStock ? " (a pedido)" : l.product.askStock ? " (consultar stock)" : "";
-      return `• ${l.qty} x ${l.product.name}${l.variant ? ` (${l.variant})` : ""}${tag} — ${sub}`;
+      const empty = caseOnly(l.product) ? ` (${CASE_NOTE})` : "";
+      return `• ${l.qty} x ${l.product.name}${l.variant ? ` (${l.variant})` : ""}${tag}${empty} — ${sub}`;
     });
     return [
       `Hola EXE! ${name ? `Soy ${name}. ` : ""}Quiero hacer este pedido:`,
