@@ -266,6 +266,8 @@ body.no-scroll { overflow: hidden; }
 .pd-info .price { font-size: 1.6rem; }
 .pd-info select { padding: 10px; border-radius: 6px; border: 1px solid var(--c6); background: var(--surface); color: var(--c2); font: inherit; }
 .pd-actions { display: grid; gap: 8px; margin: 6px 0 4px; }
+.pd-note { margin: 0; padding: 8px 12px; border-radius: 8px; background: rgba(250,204,21,.15); border: 1px solid rgba(250,204,21,.5); font-weight: 600; }
+.pd-illus { margin: 0; font-size: .8rem; opacity: .7; font-style: italic; }
 .pd-desc { white-space: pre-line; color: var(--c3); }
 .pd-specs-title { font-size: 1.05rem; margin: 10px 0 0; }
 .pd-spec { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
