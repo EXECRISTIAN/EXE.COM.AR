@@ -76,7 +76,47 @@ def candidates_mode(items):
         rep.append({"id": it["id"], "n": len(got), "cands": got, "found": len(urls)})
     json.dump(rep, open("tools/candidatas/report.json", "w"), indent=1)
     print(json.dumps(rep, indent=1))
+
+def gallery_mode(items):
+    """Hasta 5 fotos por producto desde la página que indicó Cristian (og:image, JSON-LD y galería del mismo sitio)."""
+    rep = []
+    for it in items:
+        pid, page = it["id"], it["page"]; got = []
+        try:
+            html = get(page).decode("utf-8", "ignore")
+            host = urllib.parse.urlparse(page).hostname or ""
+            dom = ".".join(host.split(".")[-2:]) if not host.endswith(".com.ar") else ".".join(host.split(".")[-3:])
+            cands = []
+            for pat in (r'<meta[^>]+property=["\']og:image(?::secure_url)?["\'][^>]+content=["\']([^"\']+)', r'"image"\s*:\s*"(https?:[^"]+)"', r'"image"\s*:\s*\[\s*"(https?:[^"]+)"'):
+                cands += re.findall(pat, html, re.I)
+            for m in re.finditer(r'(?:data-src|data-zoom-image|data-large|src)=["\']([^"\']+\.(?:jpe?g|png|webp)(?:\?[^"\']*)?)', html, re.I):
+                u = m.group(1)
+                if re.search(r"product|gallery|zoom|websites/|image/|files/|uploads?/|cdn", u, re.I): cands.append(u)
+            seen = []
+            for u in cands:
+                u = urllib.parse.urljoin(page, u.replace("&amp;", "&").replace("\\/", "/"))
+                h = urllib.parse.urlparse(u).hostname or ""
+                if u in seen or not (h.endswith(dom) or "shopify" in h or "cdn" in h): continue
+                if re.search(r"logo|icon|sprite|banner|badge|flag|avatar|placeholder|award|thumb_|_thumb|\.svg", u, re.I): continue
+                seen.append(u)
+            for u in seen:
+                if len(got) >= 5: break
+                try:
+                    raw = pathlib.Path("/tmp") / "g.src"; raw.write_bytes(get(u))
+                    if raw.stat().st_size < 15000: continue
+                    dst = OUT / f"{pid}-g{len(got)+1}.webp"
+                    subprocess.run(["convert", str(raw) + "[0]", "-background", "white", "-alpha", "remove", "-alpha", "off", "-trim", "+repage", "-resize", "900x900", "-gravity", "center", "-extent", "1000x1000", "-quality", "82", str(dst)], check=True, timeout=60)
+                    if dst.stat().st_size < 8000: dst.unlink(); continue
+                    got.append({"file": dst.name, "src": u})
+                except Exception: pass
+            rep.append({"id": pid, "page": page, "n": len(got), "fotos": got, "candidatas": len(seen)})
+        except Exception as e:
+            rep.append({"id": pid, "page": page, "n": 0, "error": str(e)[:200]})
+    json.dump(rep, open("tools/images-report.json", "w"), indent=1, ensure_ascii=False)
+    print(json.dumps(rep, indent=1, ensure_ascii=False))
 items_all = json.load(open("tools/images.json"))
+if items_all and items_all[0].get("mode") == "galeria":
+    gallery_mode(items_all[1:]); sys.exit(0)
 if items_all and items_all[0].get("mode") == "candidatas":
     candidates_mode(items_all[1:]); sys.exit(0)
 report = []
