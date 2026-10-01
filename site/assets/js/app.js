@@ -5,7 +5,10 @@
   const $ = (id) => document.getElementById(id);
   const money = (n) =>
     new Intl.NumberFormat(cfg.locale, { style: "currency", currency: cfg.currency, maximumFractionDigits: 0 }).format(n);
-  const mainImg = (p) => (p.images && p.images[0]) || p.image || PLACEHOLDER;
+  // Sin foto real: imagen ilustrativa del producto (assets/img/products/muestra/<id>.webp, la genera
+  // tools/imagenes_muestra.py); si tampoco existe, el dibujo genérico. Al subir una foto real la reemplaza sola.
+  const sampleImg = (p) => `assets/img/products/muestra/${encodeURIComponent(p.id)}.webp`;
+  const mainImg = (p) => (p.images && p.images[0]) || p.image || sampleImg(p);
   const priceLabel = (p) => (p.price > 0 ? money(p.price) : p.askStock ? "Consultar precio y stock" : "Consultar precio por WhatsApp");
   const esc = (s) =>
     String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -117,7 +120,7 @@
   /* ---------- Ficha de producto: galería + especificaciones ---------- */
   // Se abre con #producto/<id> (se puede compartir el link). Esc, la X o el fondo la cierran.
   let pdProduct = null, pdIndex = 0, pdOpenedByClick = false;
-  const pdImages = (p) => (p.images && p.images.length ? p.images : [PLACEHOLDER]);
+  const pdImages = (p) => (p.images && p.images.length ? p.images : [p.image || sampleImg(p)]);
   function pdSetImage(i) {
     const imgs = pdImages(pdProduct);
     pdIndex = (i + imgs.length) % imgs.length;

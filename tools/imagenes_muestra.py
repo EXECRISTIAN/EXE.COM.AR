@@ -95,5 +95,5 @@ for pid,cat,brand,title,sub in P:
   d.text((s(600),s(985)),sub,font=font(FR,36),fill=(90,98,112),anchor="mm")
   rr(d,(70,1090,470,1140),25,fill=(236,239,244)); d.text((s(270),s(1115)),"Imagen ilustrativa",font=font(F,26),fill=(90,98,112),anchor="mm")
   d.text((s(1130),s(1115)),"EXE OUTLET",font=font(F,28),fill=(160,166,178),anchor="rm")
-  img.resize((1200,1200),Image.LANCZOS).save(f"gen/{pid}.webp","WEBP",quality=86,method=6)
+  img.resize((1200,1200),Image.LANCZOS).save(f"site/assets/img/products/muestra/{pid}.webp","WEBP",quality=86,method=6)
 print("ok",len(P))
