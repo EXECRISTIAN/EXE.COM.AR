@@ -5,7 +5,7 @@ import json, re, subprocess, sys, urllib.request, urllib.parse, pathlib
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36"
 OUT = pathlib.Path("site/assets/img/products")
-PROXY = "https://tmp-exe-img.execomar.workers.dev/?u="   # Worker temporal (solo dominios de fabricantes) por si el sitio bloquea a GitHub
+PROXY = "https://exe-img-proxy.execomar.workers.dev/?u="   # Worker exe-img-proxy (gratis; solo dominios de fabricantes y CDNs de imágenes) por si el sitio bloquea a GitHub
 def _get(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "es-AR,es;q=0.9,en;q=0.8"})
     with urllib.request.urlopen(req, timeout=30) as r:
@@ -34,12 +34,20 @@ def corners_white(path):
     im = Image.open(path).convert("L").resize((40, 40))
     px = [im.getpixel((x, y)) for x in (0, 1, 38, 39) for y in (0, 1, 38, 39)]
     return sum(px) / len(px)
+TRUSTED = re.compile(r"(amazon\.com|ssl-images-amazon|neweggimages\.com|bhphotovideo\.com|gigabyte\.com|aorus\.com|msi\.com|asus\.com|intel\.com|amd\.com|nvidia\.com|zotac\.com|thermaltake\.com|biostar\.com\.tw|redragon|sentey\.com|steamstatic\.com|steampowered\.com|steamdeck\.com|corsair\.com|mercadolibre|mlstatic\.com|logitech\.com|logitechg\.com|razer\.com|steelseries\.com|hyperx\.com|roccat\.com|gloriousgaming\.com|redragon\.es|benq\.com|viewsonic\.com|duckychannel\.com\.tw|keychron\.com|bitfenix\.com|idcooling\.com|scythe\-eu\.com|thermalright\.com|colorful\.cn|yeston\.net|montechpc\.com|zalman\.com|adata\.com|xpg\.com|vcolor\.com\.tw|silicon\-power\.com|lexar\.com|netac\.com|overtech\.com\.ar|noga\.com\.ar|kolink\.eu|gamemaxpc\.com|marsgaming\.eu|aerocool\.io|1stplayer\.com|marvo\-tech\.com|huananzhi\.com|szmz\-pc\.com|soyocn\.com|asrock\.com|evga\.com|pny\.com|sapphiretech\.com|powercolor\.com|xfxforce\.com|palit\.com|gainward\.com|inno3d\.com|kingston\.com|crucial\.com|gskill\.com|teamgroupinc\.com|seagate\.com|westerndigital\.com|samsung\.com|patriotmemory\.com|sabrent\.com|nzxt\.com|coolermaster\.com|seasonic\.com|bequiet\.com|noctua\.at|deepcool\.com|lian\-li\.com|silverstonetek\.com|phanteks\.com|fractal\-design\.com|arctic\.de|antec\.com|latam\.msi\.com)", re.I)
+def is_blank(path):
+    # descarta imágenes vacías (todo blanco o un solo color): menos de 4% de píxeles "con contenido"
+    from PIL import Image
+    im = Image.open(path).convert("L").resize((100, 100))
+    px = list(im.getdata())
+    return sum(1 for v in px if v < 235) < 400
 PREFER = re.compile(r"(m\.media-amazon\.com|images-na\.ssl-images-amazon\.com|c1\.neweggimages\.com|neweggimages\.com|bhphotovideo\.com/images)", re.I)
 def bing_candidates(q):
     html = _get("https://www.bing.com/images/search?form=HDRSC2&first=1&qft=+filterui:color2-FGcls_WHITE&q=" + urllib.parse.quote(q)).decode("utf-8", "ignore")
     urls = [urllib.parse.unquote(u).replace("&amp;", "&") for u in re.findall(r'murl&quot;:&quot;(.*?)&quot;', html)]
     bad = re.compile(r"pinterest|pinimg|youtube|ytimg|facebook|fbcdn|instagram|tiktok|reddit|redd\.it|wikia|aliexpress|alicdn", re.I)
     urls = [u for u in urls if u.startswith("https://") and not bad.search(u)]
+    urls = [u for u in urls if TRUSTED.search(u)]              # solo tiendas grandes y fabricantes (nada de fondos de pantalla)
     return (sorted(urls, key=lambda u: 0 if PREFER.search(u) else 1))[:10]   # primero Amazon/Newegg
 def commons_urls(q):
     api = "https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url|mime&iiurlwidth=900&gsrsearch=" + urllib.parse.quote(q)
@@ -82,7 +90,7 @@ for it in json.load(open("tools/images.json")):
             for cand in cands:
                 try:
                     raw.write_bytes(_get(cand)); w = corners_white(str(raw))
-                    if w is not None and w > 240: src = cand; break
+                    if w is not None and w > 240 and not is_blank(str(raw)) and raw.stat().st_size > 8000: src = cand; break
                 except Exception: pass
             if not src: raise RuntimeError(f"sin foto de fondo blanco ({it['cands']} candidatas)")
         else:
