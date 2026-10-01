@@ -24,7 +24,7 @@
   let D = null;              // documento: { w, h, bg, layers: [] }
   let design = { id: null, name: "Diseño nuevo", kind: "banner" };
   let target = qs.get("target") || "";   // dónde se usa al guardar: block:<id>:<ruta> | product:<id>:<n>
-  let sel = null, tool = "select", zoom = 1, showZones = true, dirty = false;
+  let sel = null, tool = "select", zoom = 1, showZones = true, dirty = false, hovId = null;
   let catalog = null;        // productos para los enlaces (id, name, brand, category, stock)
   const undo = [], redo = [];
   const imgCache = new Map(); // src → HTMLImageElement
@@ -58,9 +58,9 @@
   async function loadDoc() {
     const id = qs.get("id");
     if (id && !demo) {
-      const r = await be.sb.from("designs").select("id,name,kind,width,height,doc").eq("id", id).single();
+      const r = await be.sb.from("designs").select("id,name,kind,width,height,doc,image_url").eq("id", id).single();
       if (r.error) throw r.error;
-      design = { id: r.data.id, name: r.data.name, kind: r.data.kind };
+      design = { id: r.data.id, name: r.data.name, kind: r.data.kind, imageUrl: r.data.image_url };
       D = { ...newDoc(r.data.width, r.data.height), ...r.data.doc, w: r.data.width, h: r.data.height };
       if (!target && r.data.doc && r.data.doc.target) target = r.data.doc.target;
     } else if (qs.get("src")) {
@@ -246,8 +246,83 @@
       const c = $("ieCanvas");
       if (c.width !== D.w || c.height !== D.h) { c.width = D.w; c.height = D.h; }
       paint(c.getContext("2d"), D.w, D.h);
-      overlay();
+      overlay(); live(true);
     });
+  }
+
+  /* ---------- Vista en la web en vivo: la página real con esta imagen, que se actualiza mientras editás ---------- */
+  let liveOn = false, liveW = 1280, liveTimer = 0, liveBlobUrl = "", liveReady = false;
+  const baseName = (u) => String(u || "").split("?")[0].split("/").pop();
+  function liveUrl() {
+    const pid = target.startsWith("product:") ? target.split(":")[1] : "";
+    return `../index.html?cms-edit=1${pid ? "#producto/" + encodeURIComponent(pid) : ""}`;
+  }
+  function toggleLive(on = !liveOn) {
+    liveOn = on; $("ieLive").setAttribute("aria-pressed", on); $("ieLivePanel").hidden = !on;
+    if (on) {
+      const f = $("ieLiveFrame"); liveReady = false;
+      f.onload = () => { liveReady = true; setTimeout(() => live(true), 600); setTimeout(() => live(true), 2000); };
+      f.src = liveUrl(); fitLive();
+    }
+    setTimeout(fit, 50);
+  }
+  function fitLive() {
+    const wrap = $("ieLiveWrap"), f = $("ieLiveFrame"); if (!wrap || !f) return;
+    const k = Math.min(1, (wrap.clientWidth - 16) / liveW);
+    f.style.width = liveW + "px"; f.style.height = Math.round((wrap.clientHeight - 4) / k) + "px"; f.style.transform = `scale(${k})`;
+    f.parentElement.style.minWidth = "0";
+  }
+  // Imágenes de la página que corresponden a esta imagen (por nombre de archivo o por su lugar en la sección)
+  function liveTargets(doc) {
+    const names = [baseName(qs.get("src")), baseName(design.imageUrl)].filter(Boolean);
+    let imgs = [...doc.querySelectorAll("img")].filter((i) => names.includes(baseName(i.dataset.ieOrig || i.getAttribute("src"))));
+    if (!imgs.length && target.startsWith("block:")) {
+      const [, id, path] = target.split(":"); const n = +(String(path).match(/\d+/) || [0])[0];
+      const all = [...doc.querySelectorAll(`[data-block="${CSS.escape(id)}"] img`)]; if (all[n]) imgs = [all[n]];
+    }
+    if (!imgs.length && target.startsWith("product:")) imgs = [...doc.querySelectorAll("#pdMain")];
+    return imgs;
+  }
+  function live(content) {
+    if (!liveOn || !liveReady) return;
+    clearTimeout(liveTimer);
+    liveTimer = setTimeout(async () => {
+      const doc = $("ieLiveFrame").contentDocument; if (!doc || !doc.body) return;
+      const imgs = liveTargets(doc);
+      $("ieLiveInfo").textContent = imgs.length ? "" : " · Esta imagen todavía no está puesta en ninguna parte de la página";
+      if (content && imgs.length) {
+        const c = document.createElement("canvas"); c.width = D.w; c.height = D.h; paint(c.getContext("2d"), D.w, D.h);
+        const blob = await new Promise((ok) => c.toBlob(ok, "image/webp", 0.8)).catch(() => null);
+        if (blob) { if (liveBlobUrl) URL.revokeObjectURL(liveBlobUrl); liveBlobUrl = URL.createObjectURL(blob); }
+      }
+      // Marcas amarillas: la imagen completa y la capa elegida (o la que tiene el mouse encima)
+      doc.querySelectorAll(".__ie-mark").forEach((m) => m.remove());
+      let st = doc.getElementById("__ie-st");
+      if (!st) { st = doc.createElement("style"); st.id = "__ie-st"; st.textContent = ".__ie-mark{position:absolute;pointer-events:none;z-index:2147483000;border:3px solid #facc15;box-shadow:0 0 0 1px #0009;border-radius:3px}.__ie-mark.l{border-style:dashed;background:#facc1526}.__ie-mark i{position:absolute;left:-3px;top:-22px;background:#facc15;color:#111;font:700 11px/1 Lato,sans-serif;padding:3px 6px;border-radius:4px;white-space:nowrap;font-style:normal}"; doc.head.appendChild(st); }
+      const L = (hovId && byId(hovId)) || cur(), sx = doc.defaultView.scrollX, sy = doc.defaultView.scrollY;
+      imgs.forEach((im, i) => {
+        if (!im.dataset.ieOrig) im.dataset.ieOrig = im.getAttribute("src") || "";
+        if (liveBlobUrl) { im.removeAttribute("srcset"); im.src = liveBlobUrl; }
+        const r = im.getBoundingClientRect(); if (!r.width) return;
+        const box = (x, y, w, h, cls, label) => { const m = doc.createElement("div"); m.className = "__ie-mark " + cls; Object.assign(m.style, { left: x + sx + "px", top: y + sy + "px", width: w + "px", height: h + "px" }); if (label) m.innerHTML = `<i>${esc(label)}</i>`; doc.body.appendChild(m); };
+        box(r.left, r.top, r.width, r.height, "", i === 0 ? `${D.w} × ${D.h} → se ve a ${Math.round(r.width)} × ${Math.round(r.height)} px` : "");
+        if (L && !L.hidden) {
+          // Dónde se dibuja de verdad la imagen dentro de su caja (la página puede recortarla: object-fit cover / contain)
+          const cs = doc.defaultView.getComputedStyle(im), fit = cs.objectFit;
+          let w = r.width, h = r.height, ox = 0, oy = 0;
+          if (fit === "cover" || fit === "contain") {
+            const k = (fit === "cover" ? Math.max : Math.min)(r.width / D.w, r.height / D.h);
+            w = D.w * k; h = D.h * k;
+            const [px, py] = (cs.objectPosition || "50% 50%").split(" ").map((v) => (v.endsWith("%") ? parseFloat(v) / 100 : 0.5));
+            ox = (r.width - w) * (isNaN(px) ? 0.5 : px); oy = (r.height - h) * (isNaN(py) ? 0.5 : py);
+          }
+          const x0 = Math.max(r.left, r.left + ox + w * L.x / D.w), y0 = Math.max(r.top, r.top + oy + h * L.y / D.h);
+          const x1 = Math.min(r.right, r.left + ox + w * (L.x + L.w) / D.w), y1 = Math.min(r.bottom, r.top + oy + h * (L.y + L.h) / D.h);
+          if (x1 > x0 && y1 > y0) box(x0, y0, x1 - x0, y1 - y0, "l", i === 0 ? L.name : "");
+        }
+        if (i === 0 && !im.dataset.ieSeen) { im.dataset.ieSeen = "1"; im.scrollIntoView({ block: "center" }); }
+      });
+    }, content ? 300 : 30);
   }
 
   /* ---------- Vista: zoom y superposición (selección, manijas, zonas) ---------- */
@@ -277,9 +352,12 @@
       if (L.type === "zone") { if (showZones || L.id === sel) h += `<div class="zone" style="${boxCss(L)}"><i>${esc(linkLabel(L.link) || "🔗 Zona sin enlace")}</i></div>`; }
       else if (L.link && L.link.t && showZones) h += `<div class="zone lnk" style="${boxCss(L)}"><i>${esc(linkLabel(L.link))}</i></div>`;
     });
+    const HV = hovId && hovId !== sel ? byId(hovId) : null;
+    if (HV && !HV.hidden) h += `<div class="hov" style="${boxCss(HV)}"></div>`;
     const L = cur();
     if (L && !L.hidden) {
       h += `<div class="sel" style="${boxCss(L)}"></div>`;
+      h += `<div class="dim" style="left:${(L.x + L.w / 2) * zoom}px;top:${(L.y + L.h) * zoom + 4}px">${Math.round(L.w)} × ${Math.round(L.h)} px</div>`;
       if (!L.locked) handles(L).forEach(([k, x, y]) => { h += `<div class="hdl${k === "rot" ? " rot" : ""}" data-h="${k}" style="left:${x * zoom}px;top:${y * zoom}px;cursor:${k === "rot" ? "grab" : CURSOR[k]}"></div>`; });
     }
     if (poly) h += `<svg><polyline points="${poly.map(([x, y]) => `${x * zoom},${y * zoom}`).join(" ")}" fill="none" stroke="#0084d6" stroke-width="2" stroke-dasharray="5 4"/>${poly.map(([x, y]) => `<circle cx="${x * zoom}" cy="${y * zoom}" r="4" fill="#fff" stroke="#0084d6" stroke-width="2"/>`).join("")}</svg>`;
@@ -393,7 +471,10 @@
 
   /* ---------- Acciones ---------- */
   function add(L) { D.layers.push(L); sel = L.id; if (L.type === "image") loadImg(L.src).catch(() => null); commit(); }
-  function select(id) { sel = id; renderSide(); overlay(); }
+  function select(id) {
+    sel = id; renderSide(); overlay(); live();
+    const row = sel && document.querySelector(`#ieLayers [data-sel="${sel}"]`); if (row) row.scrollIntoView({ block: "nearest" });
+  }
   function removeSel() { const L = cur(); if (!L) return; D.layers = D.layers.filter((l) => l !== L); sel = null; commit(); }
   function duplicate() { const L = cur(); if (!L) return; const c = clone(L); c.id = uid(); c.name += " (copia)"; c.x += 20; c.y += 20; c.locked = false; D.layers.splice(D.layers.indexOf(L) + 1, 0, c); sel = c.id; commit(); }
   function move(id, d) { const i = D.layers.findIndex((l) => l.id === id), j = i + d; if (i < 0 || j < 0 || j >= D.layers.length) return; [D.layers[i], D.layers[j]] = [D.layers[j], D.layers[i]]; commit(); }
@@ -472,7 +553,7 @@
   }
   function layerProps(L) {
     const fx = L.fx || {};
-    let h = `<h4>${TYPE_ICON[L.type]} ${esc(TYPE_NAME[L.type])}</h4>
+    let h = `<h4 class="on">${TYPE_ICON[L.type]} ${esc(TYPE_NAME[L.type])} seleccionado</h4>
       <label class="f w2"><span>Nombre</span><input type="text" value="${esc(L.name)}" data-k="name" maxlength="60"></label>
       <div class="xy"><label>X<input type="number" value="${L.x}" data-k="x"></label><label>Y<input type="number" value="${L.y}" data-k="y"></label><label>Ancho<input type="number" min="1" value="${L.w}" data-k="w"></label><label>Alto<input type="number" min="1" value="${L.h}" data-k="h" ${L.type === "text" ? "disabled" : ""}></label></div>
       <div class="row" style="margin:6px 0"><button type="button" class="sbtn" data-align="l" title="Alinear a la izquierda del lienzo">⇤</button><button type="button" class="sbtn" data-align="c" title="Centrar horizontal">↔</button><button type="button" class="sbtn" data-align="r" title="Alinear a la derecha">⇥</button><button type="button" class="sbtn" data-align="t" title="Arriba">⤒</button><button type="button" class="sbtn" data-align="m" title="Centrar vertical">↕</button><button type="button" class="sbtn" data-align="b" title="Abajo">⤓</button>${L.type === "image" ? '<button type="button" class="sbtn" data-align="fill" title="Cubrir todo el lienzo">⛶</button>' : ""}</div>`;
@@ -619,26 +700,27 @@
       setTimeout(() => URL.revokeObjectURL(a.href), 4000);
     } catch (e) { setState(e.message, "err"); }
   }
-  async function save() {
-    const btn = $("ieSave"); btn.disabled = true; setState("Guardando…");
+  async function save(apply = true) {
+    const btn = $(apply ? "ieSave" : "ieSaveDraft"); btn.disabled = true; setState("Guardando…");
     try {
       design.name = ($("ieName").value || "Diseño").trim().slice(0, 120);
       const blob = await exportBlob(), hs = hotspots();
-      if (demo) { dirty = false; setState(`Modo demo: se generó la imagen (${Math.round(blob.size / 1024)} KB) y ${hs.length} zona${hs.length === 1 ? "" : "s"} con enlace, pero no se guardó.`, "ok"); return; }
+      if (demo) { dirty = false; setState(`Modo demo (${apply ? "aplicar" : "guardar"}): se generó la imagen (${Math.round(blob.size / 1024)} KB) y ${hs.length} zona${hs.length === 1 ? "" : "s"} con enlace, pero no se guardó.`, "ok"); return; }
       design.id = design.id || uid();
       const path = `disenos/${design.id}-${Date.now()}.webp`;
       const up = await be.sb.storage.from(BUCKET).upload(path, blob, { contentType: "image/webp", cacheControl: "31536000" });
       if (up.error) throw up.error;
       const url = be.sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+      design.imageUrl = design.imageUrl || url;
       const doc = clone(D); doc.layers.forEach((l) => delete l.__q); delete doc.w; delete doc.h; doc.target = target;
       const row = { id: design.id, name: design.name, kind: design.kind, width: D.w, height: D.h, doc, image_url: url, hotspots: hs, updated_at: new Date().toISOString() };
       const r = await be.sb.from("designs").upsert(row);
       if (r.error) throw r.error;
       history.replaceState(null, "", `?id=${design.id}`);
       let where = "";
-      if (target) where = await applyTarget(url);
+      if (target && apply) where = await applyTarget(url);
       dirty = false;
-      setState(`Guardado${where ? " y publicado en " + where : ""}. ${hs.length} zona${hs.length === 1 ? "" : "s"} con enlace.`, "ok");
+      setState(`${where ? "Guardado y aplicado en " + where : apply && !target ? "Guardado (este diseño todavía no está puesto en ninguna parte de la web)" : "Cambios guardados (la web todavía no cambió: tocá Aplicar en la web)"}. ${hs.length} zona${hs.length === 1 ? "" : "s"} con enlace.`, "ok");
     } catch (e) { setState("No se pudo guardar: " + e.message, "err"); }
     finally { btn.disabled = false; }
   }
@@ -696,16 +778,31 @@
     $("ieZoomIn").onclick = () => setZoom(zoom * 1.25); $("ieZoomOut").onclick = () => setZoom(zoom / 1.25); $("ieZoomFit").onclick = fit;
     $("ieZones").onclick = () => { showZones = !showZones; $("ieZones").setAttribute("aria-pressed", showZones); overlay(); };
     $("ieExport").onclick = exportFile;
-    $("ieSave").onclick = save;
+    $("ieSave").onclick = () => save(true);
+    $("ieSaveDraft").onclick = () => save(false);
+    $("ieLive").onclick = () => toggleLive();
+    $("ieLiveClose").onclick = () => toggleLive(false);
+    document.querySelectorAll("[data-lw]").forEach((b) => (b.onclick = () => { liveW = +b.dataset.lw; fitLive(); }));
+    // Pasar el mouse por una capa de la lista la marca en el lienzo (y en la vista en la web)
+    $("ieSide").addEventListener("mouseover", (e) => { const r = e.target.closest("#ieLayers [data-sel]"); const id = r ? r.dataset.sel || null : null; if (id !== hovId) { hovId = id; overlay(); live(); } });
+    $("ieSide").addEventListener("mouseleave", () => { if (hovId) { hovId = null; overlay(); live(); } });
+    // Tamaño del lienzo arrastrando la esquina
+    $("ieBoardH").addEventListener("pointerdown", (e) => {
+      e.preventDefault(); e.stopPropagation(); const h = $("ieBoardH"); h.setPointerCapture(e.pointerId);
+      const sx = e.clientX, sy = e.clientY, w0 = D.w, h0 = D.h;
+      const mv = (ev) => { let w = clamp(Math.round(w0 + (ev.clientX - sx) / zoom), 50, 4000), hh = clamp(Math.round(h0 + (ev.clientY - sy) / zoom), 50, 4000); if (ev.shiftKey) hh = clamp(Math.round(w * h0 / w0), 50, 4000); D.w = w; D.h = hh; setZoom(zoom); render(); $("ieSize").textContent = `${w} × ${hh}`; };
+      const up = () => { h.removeEventListener("pointermove", mv); h.removeEventListener("pointerup", up); commit(); };
+      h.addEventListener("pointermove", mv); h.addEventListener("pointerup", up);
+    });
     $("ieName").addEventListener("input", () => { design.name = $("ieName").value; later(); });
     $("ieStage").addEventListener("wheel", (e) => { if (!e.ctrlKey) return; e.preventDefault(); setZoom(zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1)); }, { passive: false });
-    addEventListener("resize", () => setZoom(zoom));
+    addEventListener("resize", () => { setZoom(zoom); if (liveOn) fitLive(); });
     document.addEventListener("keydown", (e) => {
       const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
       const mod = e.ctrlKey || e.metaKey;
       if (mod && e.key.toLowerCase() === "z" && !typing) { e.preventDefault(); return e.shiftKey ? doRedo() : doUndo(); }
       if (mod && e.key.toLowerCase() === "y" && !typing) { e.preventDefault(); return doRedo(); }
-      if (mod && e.key.toLowerCase() === "s") { e.preventDefault(); return save(); }
+      if (mod && e.key.toLowerCase() === "s") { e.preventDefault(); return save(false); }
       if (typing) return;
       if (e.key === "Enter" && tool === "poly") return finishPoly();
       if (e.key === "Escape") { poly = null; pen = null; drawBox = null; if (tool !== "select") setTool("select"); else select(null); return; }

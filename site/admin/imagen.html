@@ -26,7 +26,9 @@
       <span class="ie-spacer"></span>
       <span class="ie-state" id="ieState"></span>
       <button type="button" class="ie-btn" id="ieExport">Exportar WebP</button>
-      <button type="button" class="ie-btn ie-pub" id="ieSave">Guardar en la web</button>
+      <button type="button" class="ie-btn" id="ieLive" aria-pressed="false" title="Ver la página con esta imagen, en vivo">👁 Vista en la web</button>
+      <button type="button" class="ie-btn" id="ieSaveDraft" title="Guarda el diseño sin cambiar la web (Ctrl+S)">💾 Guardar cambios</button>
+      <button type="button" class="ie-btn ie-pub" id="ieSave" title="Guarda y reemplaza la imagen en la página o el producto">🌐 Aplicar en la web</button>
     </header>
     <nav class="ie-tools" id="ieTools" aria-label="Herramientas">
       <button type="button" data-tool="select" title="Seleccionar y mover (V)" aria-pressed="true">↖</button>
@@ -41,9 +43,16 @@
       <button type="button" data-tool="crop" title="Recortar la imagen seleccionada">✂</button>
       <button type="button" data-tool="wand" title="Quitar el fondo blanco de la imagen seleccionada">🪄</button>
     </nav>
+    <div class="ie-main">
     <main class="ie-stage" id="ieStage">
-      <div class="ie-board" id="ieBoard"><canvas id="ieCanvas"></canvas><div class="ie-ov" id="ieOv"></div></div>
+      <div class="ie-board" id="ieBoard"><canvas id="ieCanvas"></canvas><div class="ie-ov" id="ieOv"></div><div class="ie-board-h" id="ieBoardH" title="Arrastrá para cambiar el tamaño del lienzo (Shift: mantener proporción)"></div></div>
     </main>
+    <section class="ie-live" id="ieLivePanel" hidden>
+      <div class="ie-live-bar"><b>👁 Vista en la web — en vivo</b><span id="ieLiveInfo"></span><span class="ie-spacer"></span>
+        <button type="button" class="ie-btn" data-lw="1280">🖥 PC</button><button type="button" class="ie-btn" data-lw="390">📱 Celular</button><button type="button" class="ie-btn" id="ieLiveClose" title="Cerrar">✕</button></div>
+      <div class="ie-live-wrap" id="ieLiveWrap"><iframe id="ieLiveFrame" title="Vista previa de la página"></iframe></div>
+    </section>
+    </div>
     <aside class="ie-side" id="ieSide"></aside>
     <input type="file" id="ieFile" accept="image/*" hidden>
   </div>
