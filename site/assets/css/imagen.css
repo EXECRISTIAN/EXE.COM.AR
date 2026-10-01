@@ -1,5 +1,5 @@
 /* Editor de imágenes (solo panel). Oscuro, como el editor visual. */
-:root { color-scheme: dark; --bg: #0b0f16; --pn: #111826; --ln: #1f2a3a; --in: #162133; --bd: #2a3a50; --tx: #dbe3ee; --mt: #8aa0b8; --ac: #0084d6; --ok: #16a34a; }
+:root { --sel: #facc15; color-scheme: dark; --bg: #0b0f16; --pn: #111826; --ln: #1f2a3a; --in: #162133; --bd: #2a3a50; --tx: #dbe3ee; --mt: #8aa0b8; --ac: #0084d6; --ok: #16a34a; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { height: 100%; margin: 0; }
@@ -32,8 +32,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .ie-board canvas { display: block; width: 100%; height: 100%; background: repeating-conic-gradient(#fff 0 25%, #e6e9ee 0 50%) 0 0 / 20px 20px; }
 .ie-ov { position: absolute; inset: 0; touch-action: none; }
 .ie-ov.draw { cursor: crosshair; }
-.ie-ov .sel { position: absolute; border: 1.5px solid var(--ac); pointer-events: none; transform-origin: center; }
-.ie-ov .hdl { position: absolute; width: 11px; height: 11px; margin: -6px 0 0 -6px; background: #fff; border: 2px solid var(--ac); border-radius: 2px; pointer-events: auto; }
+.ie-ov .sel { position: absolute; border: 2px solid var(--sel); box-shadow: 0 0 0 1px #0008; pointer-events: none; transform-origin: center; }
+.ie-ov .hdl { position: absolute; width: 11px; height: 11px; margin: -6px 0 0 -6px; background: #fff; border: 2px solid var(--sel); border-radius: 2px; pointer-events: auto; }
 .ie-ov .rot { border-radius: 50%; cursor: grab; }
 .ie-ov .zone { position: absolute; border: 2px dashed #22c55e; background: #22c55e1a; pointer-events: none; transform-origin: center; }
 .ie-ov .zone i { position: absolute; left: -2px; top: -20px; background: #22c55e; color: #fff; padding: 1px 6px; border-radius: 4px; font: 700 11px Lato, sans-serif; white-space: nowrap; font-style: normal; }
@@ -43,7 +43,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .ie-side h4 { margin: 16px 0 8px; font-size: 11px; letter-spacing: .1em; color: var(--mt); text-transform: uppercase; }
 .ie-side h4:first-child { margin-top: 4px; }
 .ly { display: flex; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 6px; background: var(--in); margin-bottom: 4px; border: 1px solid transparent; cursor: pointer; }
-.ly.on { border-color: var(--ac); }
+.ly.on { border-color: var(--sel); background: #facc1522; }
+.ly.on .nm { color: var(--sel); font-weight: 700; }
+.ie-side h4.on { color: var(--sel); }
 .ly .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ly small { color: var(--mt); }
 .ly button { border: 0; background: none; cursor: pointer; padding: 2px 4px; border-radius: 4px; color: var(--mt); }
@@ -79,3 +81,15 @@ textarea.in { resize: vertical; min-height: 54px; }
   .ie-name { width: 110px; } .ie-size, .ie-state, #ieZones, #ieExport { display: none; }
   .ie-board { margin: 16px; }
 }
+
+/* Selección y medidas en amarillo, lienzo redimensionable y vista en la web en vivo */
+.ie-ov .hov { position: absolute; border: 2px dashed var(--sel); pointer-events: none; transform-origin: center; }
+.ie-ov .dim { position: absolute; transform: translate(-50%, 6px); background: var(--sel); color: #111; font: 700 11px/1 Lato, sans-serif; padding: 3px 6px; border-radius: 4px; white-space: nowrap; pointer-events: none; }
+.ie-board-h { position: absolute; right: -9px; bottom: -9px; width: 16px; height: 16px; background: var(--sel); border: 2px solid #111; border-radius: 3px; cursor: nwse-resize; touch-action: none; }
+.ie-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.ie-main .ie-stage { flex: 1; min-height: 0; }
+.ie-live { flex: 0 0 44%; display: flex; flex-direction: column; border-top: 2px solid var(--sel); background: var(--pn); min-height: 0; }
+.ie-live-bar { display: flex; align-items: center; gap: 6px; padding: 6px 10px; flex-wrap: wrap; }
+.ie-live-bar span { color: var(--mt); }
+.ie-live-wrap { flex: 1; overflow: auto; background: #0005; display: flex; justify-content: center; min-height: 0; }
+.ie-live-wrap iframe { border: 0; background: #fff; transform-origin: 0 0; flex: none; }

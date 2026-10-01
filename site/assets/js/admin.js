@@ -20,7 +20,9 @@
       { id: "gabinete-antec-nx200m-white", name: "Gabinete Antec NX200M White Vidrio Templado", price: 0, stock: 5, show_stock: true, active: true },
       { id: "cooler-deepcool-ag400-plus", name: "Cooler DeepCool AG400 PLUS", price: 0, stock: 0, show_stock: true, active: true },
     ],
-    users: [{ email: "admin@exe.com.ar", full_name: "Administrador", roles: ["administrador"] }, { email: "cliente@mail.com", full_name: "Cliente", roles: ["suscriptor"] }],
+    users: [{ email: "admin@exe.com.ar", full_name: "Administrador", phone: "1130095254", created_at: "2026-09-01", last_sign_in_at: "2026-10-01", verified: true, mfa: true, orders: 0, roles: ["administrador"] },
+      { email: "cliente@mail.com", full_name: "Juan Pérez", phone: "1155554444", created_at: "2026-09-20", last_sign_in_at: "2026-09-28", verified: true, mfa: false, orders: 2, last_order_at: "2026-09-22", roles: [] }],
+    legacy: [{ email: "ana@mail.com", full_name: "Ana Gómez", phone: "1144443333", city: "CABA", last_order_at: "2024-05-10", claimed: false }],
     roles: [
       { name: "administrador", perms: ["*"] },
       { name: "moderador", perms: ["dashboard.access", "orders.read", "orders.update_status", "products.read", "stock.write"] },
@@ -103,10 +105,21 @@
         </table></div><p class="notice info">"Pagado" lo marca solamente el sistema al recibir la confirmación de Mercado Pago (o un administrador con el permiso <b>orders.mark_paid</b>, quedando registrado quién y cuándo).</p>`;
     },
     async usuarios() {
-      const rows = await load("users");
-      return `<div class="panel"><table class="table"><tr><th>Usuario</th><th>Email</th><th>Roles</th></tr>
-        ${rows.map((u) => `<tr><td>${esc(u.full_name)}</td><td>${esc(u.email)}</td><td>${u.roles.map(esc).join(", ")}</td></tr>`).join("")}
-        </table></div>`;
+      const [rows, legacy] = await Promise.all([load("users"), load("legacy").catch(() => [])]);
+      const d = (x) => (x ? new Date(x).toLocaleDateString("es-AR") : "—");
+      const wa = (ph) => { const n = String(ph || "").replace(/\D/g, ""); return n ? `<a href="https://wa.me/${n.startsWith("54") ? n : "549" + n.replace(/^0/, "")}" target="_blank" rel="noopener">${esc(ph)}</a>` : "—"; };
+      return `<div class="usr-bar"><input class="pr-in" id="usrQ" type="search" placeholder="🔍 Buscar por nombre, email o teléfono" aria-label="Buscar usuarios">
+          <span class="usr-count">${rows.length} registrado${rows.length === 1 ? "" : "s"} · ${legacy.length} cliente${legacy.length === 1 ? "" : "s"} anterior${legacy.length === 1 ? "" : "es"}</span></div>
+        <div class="panel"><h3>Usuarios registrados</h3><div class="tbl-scroll"><table class="table usr-t">
+        <tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Alta</th><th>Último ingreso</th><th>Email</th><th>2 pasos</th><th>Pedidos</th><th>Roles</th></tr>
+        ${rows.map((u) => `<tr data-q="${esc(`${u.full_name || ""} ${u.email || ""} ${u.phone || ""}`.toLowerCase())}"><td>${esc(u.full_name || "—")}</td><td><a href="mailto:${esc(u.email)}">${esc(u.email)}</a></td><td>${wa(u.phone)}</td>
+          <td>${d(u.created_at)}</td><td>${d(u.last_sign_in_at)}</td><td>${u.verified ? "✔ Confirmado" : "Sin confirmar"}</td><td>${u.mfa ? "🔐 Activa" : "—"}</td>
+          <td>${u.orders || 0}${u.last_order_at ? ` <small>(último ${d(u.last_order_at)})</small>` : ""}</td><td>${(u.roles || []).map(esc).join(", ") || "cliente"}</td></tr>`).join("") || '<tr><td colspan="9">Todavía no hay usuarios.</td></tr>'}
+        </table></div></div>
+        ${legacy.length ? `<div class="panel"><h3>Clientes anteriores (tienda WordPress)</h3><p class="ed-hint">No tienen cuenta todavía: se vinculan solos cuando crean una con el mismo email y lo confirman. No se les manda nada.</p>
+        <div class="tbl-scroll"><table class="table usr-t"><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Ciudad</th><th>Última compra</th><th>Estado</th></tr>
+        ${legacy.map((c) => `<tr data-q="${esc(`${c.full_name || ""} ${c.email || ""} ${c.phone || ""} ${c.city || ""}`.toLowerCase())}"><td>${esc(c.full_name || "—")}</td><td>${esc(c.email)}</td><td>${wa(c.phone)}</td><td>${esc(c.city || "—")}</td><td>${d(c.last_order_at)}</td><td>${c.claimed ? "✔ Ya tiene cuenta" : "Sin cuenta"}</td></tr>`).join("")}
+        </table></div></div>` : ""}`;
     },
     async roles() {
       const rows = await load("roles");
@@ -155,7 +168,8 @@
     const q = {
       orders: () => be.sb.from("orders").select("id, created_at, status, total, carrier, tracking_number, label_url, customer_name, packed_at, source, customer:profiles(full_name)").order("created_at", { ascending: false }),
       products: () => be.sb.from("products").select("id, name, price, stock, show_stock, active").order("name"),
-      users: () => be.sb.rpc("admin_list_users"),
+      users: () => be.sb.rpc("admin_users_full"),
+      legacy: () => be.sb.rpc("admin_legacy_customers"),
       roles: () => be.sb.rpc("admin_list_roles"),
     }[kind];
     const { data, error } = await q();
@@ -163,6 +177,7 @@
     return kind === "orders" ? data.map((o) => ({ ...o, customer: o.customer?.full_name || o.customer_name })) : data;
   }
 
+  views.usuarios.after = () => { const q = document.getElementById("usrQ"); if (q) q.oninput = () => { const v = q.value.trim().toLowerCase(); document.querySelectorAll(".usr-t tr[data-q]").forEach((tr) => (tr.hidden = !!v && !tr.dataset.q.includes(v))); }; };
   // Vistas extra sin link en el menú (ej. #editar/<id>): { perm, parent, title }
   const subviews = {};
   async function route() {
