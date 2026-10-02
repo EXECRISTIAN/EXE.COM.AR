@@ -98,10 +98,10 @@ def search_mode(items):
             if it.get("commons"):
                 try: urls += commons_urls(q)
                 except Exception as e: print("commons", q, e)
-        urls = list(dict.fromkeys(u for u in urls if u.startswith("http") and not bad.search(u)))
+        urls = list(dict.fromkeys([*it.get("urls", []), *(u for u in urls if u.startswith("http") and not bad.search(u))]))
         got = []
         for u in urls:
-            if len(got) >= 8: break
+            if len(got) >= it.get("max", 8): break
             try:
                 raw = pathlib.Path("/tmp") / "c.src"; raw.write_bytes(_get(u))
                 dst = out / f"{it['id']}-{len(got)}.webp"
