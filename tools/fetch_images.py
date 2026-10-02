@@ -77,6 +77,42 @@ def candidates_mode(items):
     json.dump(rep, open("tools/candidatas/report.json", "w"), indent=1)
     print(json.dumps(rep, indent=1))
 
+def search_mode(items):
+    """Busca en Bing Imágenes (sin filtrar tienda) y baja hasta 8 candidatas por consulta para elegir a mano."""
+    out = pathlib.Path("tools/candidatas"); out.mkdir(exist_ok=True)
+    bad = re.compile(r"pinterest|pinimg|youtube|ytimg|facebook|fbcdn|instagram|tiktok|reddit|redd\.it|aliexpress|alicdn|wallpaper|shutterstock|alamy|dreamstime|123rf|istock|gettyimages|depositphotos|mercadolibre|mlstatic", re.I)
+    rep = []
+    for it in items:
+        urls = []
+        for q in it["qs"]:
+            try:
+                html = _get("https://www.bing.com/images/search?form=HDRSC2&first=1&q=" + urllib.parse.quote(q)).decode("utf-8", "ignore")
+                urls += [urllib.parse.unquote(u).replace("&amp;", "&") for u in re.findall(r'murl&quot;:&quot;(.*?)&quot;', html)]
+            except Exception as e: print("bing", q, e)
+            try:   # buscador de Newegg: fotos de producto de su CDN
+                page = _get("https://www.newegg.com/p/pl?d=" + urllib.parse.quote(q)).decode("utf-8", "ignore")
+                found = re.findall(r'https://c1\.neweggimages\.com/(?:ProductImageCompressAll\d+|productimage/nb\d+)/[A-Za-z0-9_-]+\.(?:jpg|png)', page)
+                urls += [re.sub(r'/(ProductImageCompressAll\d+|productimage/nb\d+)/', '/ProductImageCompressAll1280/', u) for u in found[:6]]
+                print("newegg", q, len(found))
+            except Exception as e: print("newegg", q, e)
+            if it.get("commons"):
+                try: urls += commons_urls(q)
+                except Exception as e: print("commons", q, e)
+        urls = list(dict.fromkeys([*it.get("urls", []), *(u for u in urls if u.startswith("http") and not bad.search(u))]))
+        got = []
+        for u in urls:
+            if len(got) >= it.get("max", 8): break
+            try:
+                raw = pathlib.Path("/tmp") / "c.src"; raw.write_bytes(_get(u))
+                dst = out / f"{it['id']}-{len(got)}.webp"
+                subprocess.run(["convert", str(raw) + "[0]", "-background", "white", "-alpha", "remove", "-alpha", "off", "-resize", "800x800>", "-quality", "85", str(dst)], check=True, timeout=60)
+                if dst.stat().st_size < 6000: dst.unlink(); continue
+                got.append({"file": dst.name, "src": u})
+            except Exception: pass
+        rep.append({"id": it["id"], "n": len(got), "cands": got, "found": len(urls)})
+    json.dump(rep, open("tools/candidatas/report.json", "w"), indent=1)
+    print(json.dumps(rep, indent=1))
+
 def gallery_mode(items):
     """Hasta 5 fotos por producto desde la página que indicó Cristian (og:image, JSON-LD y galería del mismo sitio)."""
     rep = []
@@ -117,6 +153,8 @@ def gallery_mode(items):
 items_all = json.load(open("tools/images.json"))
 if items_all and items_all[0].get("mode") == "galeria":
     gallery_mode(items_all[1:]); sys.exit(0)
+if items_all and items_all[0].get("mode") == "busqueda":
+    search_mode(items_all[1:]); sys.exit(0)
 if items_all and items_all[0].get("mode") == "candidatas":
     candidates_mode(items_all[1:]); sys.exit(0)
 report = []
