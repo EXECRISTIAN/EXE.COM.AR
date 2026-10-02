@@ -89,12 +89,15 @@ def search_mode(items):
                 html = _get("https://www.bing.com/images/search?form=HDRSC2&first=1&q=" + urllib.parse.quote(q)).decode("utf-8", "ignore")
                 urls += [urllib.parse.unquote(u).replace("&amp;", "&") for u in re.findall(r'murl&quot;:&quot;(.*?)&quot;', html)]
             except Exception as e: print("bing", q, e)
-            try:   # DuckDuckGo Imágenes
-                page = _get("https://duckduckgo.com/?iax=images&ia=images&q=" + urllib.parse.quote(q)).decode("utf-8", "ignore")
-                vqd = re.search(r'vqd=["\']?([\d-]+)', page).group(1)
-                data = json.loads(_get(f"https://duckduckgo.com/i.js?l=wt-wt&o=json&f=,,,&p=1&q={urllib.parse.quote(q)}&vqd={vqd}").decode("utf-8"))
-                urls += [r["image"] for r in data.get("results", [])[:25]]
-            except Exception as e: print("ddg", q, e)
+            try:   # buscador de Newegg: fotos de producto de su CDN
+                page = _get("https://www.newegg.com/p/pl?d=" + urllib.parse.quote(q)).decode("utf-8", "ignore")
+                found = re.findall(r'https://c1\.neweggimages\.com/(?:ProductImageCompressAll\d+|productimage/nb\d+)/[A-Za-z0-9_-]+\.(?:jpg|png)', page)
+                urls += [re.sub(r'/(ProductImageCompressAll\d+|productimage/nb\d+)/', '/ProductImageCompressAll1280/', u) for u in found[:6]]
+                print("newegg", q, len(found))
+            except Exception as e: print("newegg", q, e)
+            if it.get("commons"):
+                try: urls += commons_urls(q)
+                except Exception as e: print("commons", q, e)
         urls = list(dict.fromkeys(u for u in urls if u.startswith("http") and not bad.search(u)))
         got = []
         for u in urls:
