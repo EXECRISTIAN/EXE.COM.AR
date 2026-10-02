@@ -1,41 +1,37 @@
 [
  {
-  "mode": "galeria"
+  "mode": "busqueda"
  },
  {
-  "id": "outlet-z390-aorus-elite",
-  "page": "https://www.aorus.com/es-ar/laptops/z390-aorus-elite-rev-10"
+  "id": "i3-10105",
+  "qs": [
+   "Intel Core i3-10105 box",
+   "Intel Core i3-10105 caja"
+  ]
  },
  {
-  "id": "outlet-biostar-z490a-silver",
-  "page": "https://sigmatiendas.com/products/tarjeta-madre-biostar-z49a-atx-socket-lga1200-4xddr4-4400-6xsata-1xm-2-4pcie-3-0x1-4xusb-3-2-vga-hdmi-4k-dx12-hdcp-wifi-6"
+  "id": "chip-lga1200",
+  "qs": [
+   "Intel Celeron G5925 processor chip",
+   "Intel Celeron G5925 tray cpu"
+  ]
  },
  {
-  "id": "outlet-asus-prime-z590-p",
-  "page": "https://www.asus.com/motherboards-components/motherboards/prime/prime-z590-p/"
+  "id": "i3-10100",
+  "qs": [
+   "Intel Core i3-10100 box"
+  ]
  },
  {
-  "id": "outlet-asus-prime-b560-plus-ac-hes",
-  "page": "https://www.asus.com/motherboards-components/motherboards/prime/prime-b560-plus-ac-hes/"
+  "id": "i5-10400",
+  "qs": [
+   "Intel Core i5-10400 box"
+  ]
  },
  {
-  "id": "outlet-asus-prime-b460m-a-r2",
-  "page": "https://www.asus.com/motherboards-components/motherboards/prime/prime-b460m-a-r2-0/"
- },
- {
-  "id": "outlet-gigabyte-b460m-ds3h-v2",
-  "page": "https://www.aorus.com/es-ar/motherboards/b460m-ds3h-v2-rev-10"
- },
- {
-  "id": "outlet-msi-h510m-a-pro",
-  "page": "https://latam.msi.com/Motherboard/H510M-A-PRO/Overview"
- },
- {
-  "id": "outlet-msi-mpg-z490-gaming-plus",
-  "page": "https://latam.msi.com/Motherboard/MPG-Z490-GAMING-PLUS"
- },
- {
-  "id": "outlet-rog-strix-b450-f-ii",
-  "page": "https://rog.asus.com/latin/motherboards/rog-strix/rog-strix-b450-f-gaming-ii-model/"
+  "id": "i5-11400",
+  "qs": [
+   "Intel Core i5-11400 box"
+  ]
  }
 ]
