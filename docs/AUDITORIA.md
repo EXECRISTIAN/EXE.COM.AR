@@ -7,9 +7,10 @@ panel en `?demo`), hace PR + merge y lo tilda con la fecha. Reglas:
 - No tocar precios de venta outlet ni costos. No publicar links/costos en el repo.
 
 ## Pendiente
-- [ ] Fotos: productos sin foto — tanda automática en pausa hasta que Cristian apruebe recrear el Worker de descarga (o suba fotos propias desde el panel).
+- (sin pendientes)
 
 ## Hecho
+- [x] 02/10 — Fotos: todos los productos activos tienen foto real (Steam Deck enviada por Cristian; i3-10105 y G5925 sin caja desde Newegg; gabinete X10 con 4 fotos).
 - [x] 29/09 — Enlaces: todos los links, scripts, estilos e imágenes internas de la web existen; las 32 fotos de productos cargadas en la base están en el sitio. Página 404 con noindex y link a la tienda.
 - [x] 29/09 — Seguridad: advisors de Supabase revisados. Cerrado fx_apply (cualquier usuario con sesión podía ejecutarla), funciones de trigger fuera de la API, permisos sin acceso anónimo, search_path fijo. Todas las funciones del panel verifican permiso. Sin sesión: tablas públicas OK y privadas (costos, referencias, historial, plantillas) bloqueadas. Quedan: pg_net en el esquema public (moverlo puede romper el cron; se deja) y "contraseñas filtradas" (función paga de Supabase).
 - [x] 29/09 — Textos: "Envíos a todo el país", "3 y 6 cuotas", "Pagos seguros" (portada y base de datos). Sin otros errores en tienda, Mi cuenta y 404.
