@@ -6,32 +6,37 @@
   "id": "i3-10105",
   "qs": [
    "Intel Core i3-10105 box",
-   "Intel Core i3-10105 caja"
+   "BX8070110105",
+   "Intel i3 10105 retail box"
+  ]
+ },
+ {
+  "id": "i3-10105f",
+  "qs": [
+   "Intel Core i3-10105F box",
+   "BX8070110105F"
   ]
  },
  {
   "id": "chip-lga1200",
   "qs": [
-   "Intel Celeron G5925 processor chip",
-   "Intel Celeron G5925 tray cpu"
-  ]
- },
- {
-  "id": "i3-10100",
-  "qs": [
-   "Intel Core i3-10100 box"
-  ]
- },
- {
-  "id": "i5-10400",
-  "qs": [
-   "Intel Core i5-10400 box"
+   "Intel Celeron G5925 processor",
+   "Intel Celeron G5925 tray",
+   "Intel LGA1200 cpu chip top view"
   ]
  },
  {
   "id": "i5-11400",
   "qs": [
-   "Intel Core i5-11400 box"
+   "Intel Core i5-11400 box",
+   "BX8070811400"
+  ]
+ },
+ {
+  "id": "i5-10400",
+  "qs": [
+   "Intel Core i5-10400 box",
+   "BX8070110400"
   ]
  }
 ]
