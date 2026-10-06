@@ -10,6 +10,7 @@ panel en `?demo`), hace PR + merge y lo tilda con la fecha. Reglas:
 - (sin pendientes)
 
 ## Hecho
+- [x] 06/10 — Pasada general: tienda, Mi cuenta, 404 y panel (?demo) en claro/oscuro, 390 px y escritorio sin errores, sin imágenes rotas ni desplazamiento lateral. Arreglado: la copia de respaldo del catálogo (products.json, se usa si Supabase no responde) estaba desactualizada (fotos de 32 productos, descripción del Sentey X10, precio de la PC Gamer, ocultos y "a pedido"). Regenerada desde la base con `tools/export_products.py` (solo columnas públicas). Advisors de Supabase sin novedades.
 - [x] 02/10 — Fotos: todos los productos activos tienen foto real (Steam Deck enviada por Cristian; i3-10105 y G5925 sin caja desde Newegg; gabinete X10 con 4 fotos).
 - [x] 29/09 — Enlaces: todos los links, scripts, estilos e imágenes internas de la web existen; las 32 fotos de productos cargadas en la base están en el sitio. Página 404 con noindex y link a la tienda.
 - [x] 29/09 — Seguridad: advisors de Supabase revisados. Cerrado fx_apply (cualquier usuario con sesión podía ejecutarla), funciones de trigger fuera de la API, permisos sin acceso anónimo, search_path fijo. Todas las funciones del panel verifican permiso. Sin sesión: tablas públicas OK y privadas (costos, referencias, historial, plantillas) bloqueadas. Quedan: pg_net en el esquema public (moverlo puede romper el cron; se deja) y "contraseñas filtradas" (función paga de Supabase).
