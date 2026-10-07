@@ -697,22 +697,39 @@
 
   /* ---------- Carrusel principal ---------- */
   const track = $("heroTrack");
+  // Siempre avanza en el mismo sentido: al final del último pasa a una copia del primero y salta sin animación al real
   let slideCount = 0, current = 0, timer, dots = [];
+  const moveTo = (i, animate = true) => {
+    track.style.transition = animate ? "" : "none";
+    track.style.transform = `translateX(-${i * 100}%)`;
+    if (!animate) void track.offsetWidth;   // aplica la posición antes de volver a animar
+  };
   function go(i) {
     if (!slideCount) return;
-    current = (i + slideCount) % slideCount;
-    track.style.transform = `translateX(-${current * 100}%)`;
-    dots.forEach((d, k) => d.classList.toggle("active", k === current));
+    if (i < 0) { moveTo(slideCount, false); i = slideCount - 1; }   // hacia atrás desde el primero: parte de la copia
+    current = Math.min(i, slideCount);
+    moveTo(current);
+    dots.forEach((d, k) => d.classList.toggle("active", k === current % slideCount));
   }
+  track.addEventListener("transitionend", (e) => {
+    if (e.target === track && current === slideCount) { current = 0; moveTo(0, false); }
+  });
   const play = () => { clearInterval(timer); if (slideCount > 1) timer = setInterval(() => go(current + 1), 5000); };
   // Se puede volver a llamar si el panel cambió las imágenes del carrusel
   function setupHero() {
+    track.querySelectorAll(".hero-clone").forEach((c) => c.remove());
     slideCount = track.children.length; current = 0;
-    $("dots").innerHTML = [...track.children].map((_, i) => `<button aria-label="Imagen ${i + 1}"${i === 0 ? ' class="active"' : ""}></button>`).join("");
+    if (slideCount > 1) {
+      const clone = track.children[0].cloneNode(true);
+      clone.classList.add("hero-clone"); clone.setAttribute("aria-hidden", "true");
+      clone.querySelectorAll("a").forEach((a) => (a.tabIndex = -1));
+      track.appendChild(clone);
+    }
+    $("dots").innerHTML = Array.from({ length: slideCount }, (_, i) => `<button aria-label="Imagen ${i + 1}"${i === 0 ? ' class="active"' : ""}></button>`).join("");
     dots = [...$("dots").children];
     dots.forEach((d, i) => d.addEventListener("click", () => { go(i); play(); }));
-    [$("heroPrev"), $("heroNext"), $("dots")].forEach((el) => (el.hidden = slideCount < 2));
-    go(0); play();
+    $("heroNav").hidden = slideCount < 2;
+    moveTo(0, false); dots.forEach((d, k) => d.classList.toggle("active", k === 0)); play();
   }
   $("heroPrev").onclick = () => { go(current - 1); play(); };
   $("heroNext").onclick = () => { go(current + 1); play(); };
@@ -735,7 +752,7 @@
   const renderers = {
     hero(el, d) {
       if (!d.slides || !d.slides.length) return;
-      track.innerHTML = d.slides.map((sl, i) => `<div class="hero-slide">${sl.link ? `<a ${linkOf(sl)}>` : ""}<img src="${src(sl.img)}" alt="${esc(sl.alt || "")}" width="1904" height="650"${i ? ' loading="lazy"' : ' fetchpriority="high"'}>${sl.link ? "</a>" : ""}</div>`).join("");
+      track.innerHTML = d.slides.map((sl, i) => `<div class="hero-slide">${sl.link ? `<a ${linkOf(sl)}>` : ""}<img src="${src(sl.img)}" alt="${esc(sl.alt || "")}" width="1920" height="655"${i ? ' loading="lazy"' : ' fetchpriority="high"'}>${sl.link ? "</a>" : ""}</div>`).join("");
       setupHero();
     },
     tarjetas(el, d) {
