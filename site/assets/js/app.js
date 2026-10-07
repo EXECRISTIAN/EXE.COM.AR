@@ -1084,7 +1084,8 @@
     s.textContent = JSON.stringify(data).replace(/</g, "\\u003c");
   }
   loadDb().catch(loadJson)
-    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); routeSearch(); paintZones(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
+    // Los productos sin precio cargado no se muestran en la tienda (siguen en el panel; aparecen solos al ponerles precio)
+    .then((data) => { products = data.filter((p) => Number(p.price) > 0); renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); routeSearch(); paintZones(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();
 
