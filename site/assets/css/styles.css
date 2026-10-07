@@ -394,8 +394,12 @@ html[data-wa-float="off"] .wa-float { display: none; }
   .menu-toggle { display: grid; }
   .hero-arrow { display: none; }
   .brand-banners { flex-direction: column; padding: 0 10px 40px; }
-  .brand-card { width: min(78vw, 330px); margin: 8px; padding: 16px; align-self: center; }   /* celular vertical: tarjetas más chicas */
-  .brand-card .btn-banner { font-size: 1.1rem; padding: 14px 30px; min-width: 62%; }
+  /* Celular vertical: tarjetas chatas (más bajas que los banners principales), con zoom al producto */
+  .brand-card { width: min(100% - 20px, 460px); aspect-ratio: 2.25 / 1; margin: 7px; padding: 14px; align-self: center; }
+  .brand-card img { object-position: var(--pos-m, 50% 35%); }
+  .brand-card .btn-banner { font-size: 1.05rem; padding: 11px 26px; min-width: 50%; }
+  /* Banners principales: recorta los costados vacíos para que se vean más grandes */
+  .hero-slide img { aspect-ratio: 2.15 / 1; object-position: 42% 50%; }
   .brands { padding: 50px 20px 10px; }
   .brands-text { padding: 0; }
   .wide-banner { min-height: 240px; }
