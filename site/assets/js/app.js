@@ -740,7 +740,7 @@
     },
     tarjetas(el, d) {
       if (!d.cards) return;
-      el.innerHTML = d.cards.map((c, i) => `<article class="brand-card reveal" style="--d:${i * 0.12}s"><picture>${c.img_mobile ? `<source media="(max-width: 767px)" srcset="${src(c.img_mobile)}">` : ""}<img src="${src(c.img)}" alt="${esc(c.alt || "")}" width="352" height="480" loading="lazy"></picture>${c.text ? `<a ${linkOf(c) || 'href="#productos"'} class="btn btn-banner">${esc(c.text)}</a>` : ""}</article>`).join("");
+      el.innerHTML = d.cards.map((c, i) => `<article class="brand-card reveal" style="--d:${i * 0.12}s${c.pos ? `;--pos:${esc(c.pos)}` : ""}"><picture>${c.img_mobile ? `<source media="(max-width: 767px)" srcset="${src(c.img_mobile)}">` : ""}<img src="${src(c.img)}" alt="${esc(c.alt || "")}" width="1056" height="1440" loading="lazy"></picture>${c.text ? `<a ${linkOf(c) || 'href="#productos"'} class="btn btn-banner">${esc(c.text)}</a>` : ""}</article>`).join("");
     },
     catalogo(el, d) {
       const h = el.querySelector(".section-head"); if (!h) return;
