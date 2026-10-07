@@ -104,8 +104,12 @@ def search_mode(items):
             if len(got) >= it.get("max", 8): break
             try:
                 raw = pathlib.Path("/tmp") / "c.src"; raw.write_bytes(_get(u))
-                dst = out / f"{it['id']}-{len(got)}.webp"
-                subprocess.run(["convert", str(raw) + "[0]", "-background", "white", "-alpha", "remove", "-alpha", "off", "-resize", "800x800>", "-quality", "85", str(dst)], check=True, timeout=60)
+                if it.get("full"):   # resolución completa (hasta 2000 px) y transparencia, para armar banners
+                    dst = out / f"{it['id']}-{len(got)}.png"
+                    subprocess.run(["convert", str(raw) + "[0]", "-resize", "2000x2000>", str(dst)], check=True, timeout=60)
+                else:
+                    dst = out / f"{it['id']}-{len(got)}.webp"
+                    subprocess.run(["convert", str(raw) + "[0]", "-background", "white", "-alpha", "remove", "-alpha", "off", "-resize", "800x800>", "-quality", "85", str(dst)], check=True, timeout=60)
                 if dst.stat().st_size < 6000: dst.unlink(); continue
                 got.append({"file": dst.name, "src": u})
             except Exception: pass

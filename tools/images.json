@@ -3,57 +3,44 @@
   "mode": "busqueda"
  },
  {
-  "id": "nw",
-  "qs": [],
-  "urls": [
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-225-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-226-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-227-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-228-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-229-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-230-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-231-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-232-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-233-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-234-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-235-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-236-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-237-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-238-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-239-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-240-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-241-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-242-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-243-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-244-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-245-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-246-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-247-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-248-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-249-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-250-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-251-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-252-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-253-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-254-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-255-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-256-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-257-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-258-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-259-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-260-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-261-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-262-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-263-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-264-V01.jpg"
-  ],
-  "max": 40
+  "id": "rtx4060-strix",
+  "full": true,
+  "max": 4,
+  "qs": [
+   "ASUS ROG Strix GeForce RTX 4060 OC"
+  ]
  },
  {
-  "id": "i3b",
+  "id": "rtx4060-dual",
+  "full": true,
+  "max": 4,
   "qs": [
-   "BX8070110105",
-   "Intel Core i3-10105 4-Core LGA 1200 Desktop Processor"
+   "ASUS Dual GeForce RTX 4060 OC"
+  ]
+ },
+ {
+  "id": "monitor-rog",
+  "full": true,
+  "max": 5,
+  "qs": [
+   "ASUS ROG Swift OLED gaming monitor",
+   "ASUS ROG Strix gaming monitor 27"
+  ]
+ },
+ {
+  "id": "mother-rog",
+  "full": true,
+  "max": 4,
+  "qs": [
+   "ASUS ROG Strix B650E-F Gaming WiFi"
+  ]
+ },
+ {
+  "id": "mother-proart",
+  "full": true,
+  "max": 4,
+  "qs": [
+   "ASUS ProArt X670E-Creator WiFi"
   ]
  }
 ]
