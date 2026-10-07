@@ -60,10 +60,29 @@
   }
 
   /* ---------- Catálogo ---------- */
+  // Íconos de las categorías (SVG de trazo, toman el color del texto). Una categoría nueva sin ícono se muestra solo con texto.
+  const CAT_ICONS = {
+    todos: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    procesador: '<rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx=".5"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/>',
+    mother: '<rect x="3" y="3" width="18" height="18" rx="2"/><rect x="6" y="6" width="5" height="5" rx=".5"/><path d="M14 6h4M14 9h4M6 14h12M6 17h8"/>',
+    placa: '<rect x="2" y="6" width="20" height="11" rx="2"/><circle cx="8" cy="11.5" r="3"/><circle cx="16" cy="11.5" r="3"/><path d="M5 17v3M9 17v2M13 17v2"/>',
+    gabinete: '<rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="15" r="3"/><path d="M9 6h6M9 9h6"/>',
+    fuente: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="10" cy="12" r="4"/><path d="M10 8v8M6 12h8M17 9v6"/>',
+    memoria: '<rect x="2" y="7" width="20" height="9" rx="1.5"/><path d="M6 10v3M10 10v3M14 10v3M18 10v3M5 16v2M9 16v2M15 16v2M19 16v2"/>',
+    refrig: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.5"/><path d="M12 10.5C11 7 12 4.5 14 4M13.5 12c3.5-1 6 0 6.5 2M12 13.5c1 3.5 0 6-2 6.5M10.5 12c-3.5 1-6 0-6.5-2"/>',
+    pc: '<rect x="2" y="4" width="14" height="10" rx="1.5"/><path d="M6 18h6M9 14v4"/><rect x="18" y="4" width="4" height="14" rx="1"/><path d="M19.5 7h1"/>',
+    monitor: '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
+    almacen: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h6M7 14h3"/><circle cx="17" cy="12" r="1"/>',
+    perif: '<rect x="2" y="7" width="14" height="10" rx="2"/><path d="M5 10h1M8 10h1M11 10h1M5 14h7"/><rect x="18" y="8" width="4" height="8" rx="2"/>',
+  };
+  const CAT_MATCH = [[/^todos$/i, "todos"], [/procesad|cpu/i, "procesador"], [/mother|placa madre|tarjeta madre/i, "mother"], [/placa.*video|gpu|gr[aá]fic/i, "placa"],
+    [/gabinete/i, "gabinete"], [/fuente/i, "fuente"], [/memoria|\bram\b/i, "memoria"], [/refrig|cooler|disipad/i, "refrig"], [/pc arm|consola/i, "pc"],
+    [/monitor/i, "monitor"], [/disco|ssd|almacen/i, "almacen"], [/perif|teclado|mouse|auricular/i, "perif"]];
+  const catIcon = (c) => { const m = CAT_MATCH.find(([re]) => re.test(c)); return m ? `<svg class="chip-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CAT_ICONS[m[1]]}</svg>` : ""; };
   function renderFilters() {
     const cats = ["Todos", ...new Set(products.map((p) => p.category).filter(Boolean))];
     $("filters").innerHTML = cats
-      .map((c) => `<button class="chip${c === filter ? " active" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`)
+      .map((c) => `<button class="chip${c === filter ? " active" : ""}" data-cat="${esc(c)}">${catIcon(c)}${esc(c)}</button>`)
       .join("");
   }
 

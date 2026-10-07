@@ -637,3 +637,6 @@ html { touch-action: manipulation; }
   /* Respuesta inmediata al tocar (en táctil no hay hover) */
   .btn:active, .chip:active, .icon-btn:active, .hero-arrow:active, .pd-nav:active, .qty button:active, .brand-card .btn-banner:active { transform: scale(.96); }
 }
+/* Íconos en los filtros de categoría */
+.chip { display: inline-flex; align-items: center; gap: 7px; }
+.chip-ico { width: 17px; height: 17px; flex: none; }
