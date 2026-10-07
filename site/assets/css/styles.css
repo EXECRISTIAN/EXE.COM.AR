@@ -394,7 +394,8 @@ html[data-wa-float="off"] .wa-float { display: none; }
   .menu-toggle { display: grid; }
   .hero-arrow { display: none; }
   .brand-banners { flex-direction: column; padding: 0 10px 40px; }
-  .brand-card { width: min(100% - 20px, 460px); align-self: center; }   /* la foto completa, sin recortar títulos */
+  .brand-card { width: min(78vw, 330px); margin: 8px; padding: 16px; align-self: center; }   /* celular vertical: tarjetas más chicas */
+  .brand-card .btn-banner { font-size: 1.1rem; padding: 14px 30px; min-width: 62%; }
   .brands { padding: 50px 20px 10px; }
   .brands-text { padding: 0; }
   .wide-banner { min-height: 240px; }
@@ -596,3 +597,10 @@ section.cms-block:has(> .cms-spacer) { padding: 0; }
 .acc-mfa-card { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; margin: 14px 0; }
 .acc-mfa-card > div { display: grid; gap: 4px; flex: 1 1 220px; }
 .acc-mfa-card small { color: var(--muted); }
+
+/* Celular horizontal: las 3 tarjetas en fila, bajas para que entren en la pantalla */
+@media (orientation: landscape) and (max-height: 520px) {
+  .brand-banners { flex-direction: row; justify-content: center; padding: 16px 10px 30px; }
+  .brand-card { flex: 0 1 auto; width: min(30vw, calc((100svh - 40px) * 352 / 370)); margin: 6px; padding: 12px; }
+  .brand-card .btn-banner { font-size: 1rem; padding: 12px 20px; min-width: 70%; }
+}
