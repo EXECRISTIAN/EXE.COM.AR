@@ -1,0 +1,121 @@
+[
+ {
+  "id": "rtx4060-strix",
+  "n": 4,
+  "cands": [
+   {
+    "file": "rtx4060-strix-0.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/14-126-656-V05.jpg"
+   },
+   {
+    "file": "rtx4060-strix-1.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/14-126-653-05.png"
+   },
+   {
+    "file": "rtx4060-strix-2.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/BP4YS2504151BHVX436.jpg"
+   },
+   {
+    "file": "rtx4060-strix-3.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/14-126-668-01.png"
+   }
+  ],
+  "found": 4
+ },
+ {
+  "id": "rtx4060-dual",
+  "n": 4,
+  "cands": [
+   {
+    "file": "rtx4060-dual-0.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/BP4YS2504240AAX618B.jpg"
+   },
+   {
+    "file": "rtx4060-dual-1.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/BP4YS2504150W7AXH36.jpg"
+   },
+   {
+    "file": "rtx4060-dual-2.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/14-126-670-25.png"
+   },
+   {
+    "file": "rtx4060-dual-3.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/14-126-665-V02.jpg"
+   }
+  ],
+  "found": 6
+ },
+ {
+  "id": "monitor-rog",
+  "n": 5,
+  "cands": [
+   {
+    "file": "monitor-rog-0.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/24-281-297-41.png"
+   },
+   {
+    "file": "monitor-rog-1.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/24-281-314-07.png"
+   },
+   {
+    "file": "monitor-rog-2.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/24-281-347-09.png"
+   },
+   {
+    "file": "monitor-rog-3.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/24-281-376-07.jpg"
+   },
+   {
+    "file": "monitor-rog-4.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/3D4-000D-000C5-01.jpg"
+   }
+  ],
+  "found": 12
+ },
+ {
+  "id": "mother-rog",
+  "n": 4,
+  "cands": [
+   {
+    "file": "mother-rog-0.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/13-119-604-09.png"
+   },
+   {
+    "file": "mother-rog-1.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/AJEPS2401250EWMNAE0.jpg"
+   },
+   {
+    "file": "mother-rog-2.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/ARA8D2405180BBLCR77.jpg"
+   },
+   {
+    "file": "mother-rog-3.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/C75JD2607200ECWFSD2.jpg"
+   }
+  ],
+  "found": 6
+ },
+ {
+  "id": "mother-proart",
+  "n": 4,
+  "cands": [
+   {
+    "file": "mother-proart-0.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/13-119-589-09.png"
+   },
+   {
+    "file": "mother-proart-1.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/ARA8D2405170JXEGU32.jpg"
+   },
+   {
+    "file": "mother-proart-2.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/A7S6D2401230ZEGLKC1.jpg"
+   },
+   {
+    "file": "mother-proart-3.png",
+    "src": "https://c1.neweggimages.com/ProductImageCompressAll1280/A7S6D2401230ZE9KH69.jpg"
+   }
+  ],
+  "found": 6
+ }
+]
