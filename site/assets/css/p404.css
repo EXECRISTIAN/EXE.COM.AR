@@ -8,7 +8,8 @@
     radial-gradient(ellipse 55% 60% at 72% 42%, rgba(56, 120, 255, .16), transparent 70%),
     linear-gradient(180deg, #151c2b 0%, var(--e-bg) 100%);
   padding-block: clamp(36px, 7vw, 96px) clamp(40px, 7vw, 96px);
-  min-height: calc(100svh - 80px);
+  /* Alto según el contenido (en pantallas muy altas, como el modo escritorio del celular, no deja huecos) */
+  min-height: min(calc(100svh - 80px), 900px);
   display: flex; align-items: center;
 }
 /* Fondo: cuadrícula tenue + líneas de código decorativas */
@@ -75,8 +76,9 @@
 .e404-search svg { width: 26px; height: 26px; }
 
 /* Tablet y celular: todo en una columna, el dibujo entre el texto y los botones */
-@media (max-width: 860px) {
-  .e404 { text-align: center; }
+/* Celular, tablet y pantallas verticales (ej. modo escritorio del celular) */
+@media (max-width: 860px), (orientation: portrait) and (max-width: 1280px) {
+  .e404 { text-align: center; min-height: 0; }
   .e404-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "text" "art" "actions" "search"; }
   .e404-desc { margin-inline: auto; }
   .e404-art { max-width: min(78vw, 380px); }
@@ -89,6 +91,22 @@
   .e404-btn { width: 100%; }
   .e404-search input { height: 44px; }
   .e404-search input::placeholder { font-size: .9em; }
+}
+/* Pantallas verticales anchas (modo escritorio del celular, tablets): todo más grande para llenar la pantalla
+   y el bloque ocupa el alto libre, así el pie queda abajo sin huecos. */
+@media (orientation: portrait) and (min-width: 600px) and (max-width: 1280px) {
+  body:has(.e404) { min-height: 100svh; display: flex; flex-direction: column; }
+  body:has(.e404) .e404 { flex: 1; }
+  .e404-num { font-size: 21vw; }
+  .e404-title { font-size: 5.4vw; }
+  .e404-sub { font-size: 4vw; }
+  .e404-desc { font-size: 2.7vw; max-width: 34ch; }
+  .e404-art { max-width: 62vw; }
+  .e404-actions { flex-direction: column; align-items: center; }
+  .e404-btn { width: min(100%, 78vw); font-size: 3.2vw; min-height: 9.5vw; }
+  .e404-search { width: min(100%, 84vw); }
+  .e404-search input { height: 7vw; font-size: 2.4vw; }
+  .e404-search button { height: 7vw; width: 11vw; }
 }
 /* Pantallas bajas y anchas (notebooks): todo entra sin scroll */
 @media (min-width: 861px) and (max-height: 760px) {
