@@ -270,14 +270,51 @@
     else if (e.key === "ArrowRight") pdSetImage(pdIndex + 1);
     else if (e.key === "ArrowLeft") pdSetImage(pdIndex - 1);
   });
-  // Deslizar con el dedo entre fotos
-  let pdTouchX = null;
-  $("pdOverlay").addEventListener("touchstart", (e) => { if (e.target.closest(".pd-stage")) pdTouchX = e.touches[0].clientX; }, { passive: true });
-  $("pdOverlay").addEventListener("touchend", (e) => {
-    if (pdTouchX === null) return;
-    const dx = e.changedTouches[0].clientX - pdTouchX; pdTouchX = null;
-    if (Math.abs(dx) > 40) pdSetImage(pdIndex + (dx < 0 ? 1 : -1));
-  });
+  // Táctil en la ficha: la foto sigue al dedo; al soltar entra la siguiente/anterior desde el costado.
+  // Con una sola foto el arrastre tiene resistencia y rebota (indica que no hay más).
+  let pdDrag = null;
+  $("pdOverlay").addEventListener("touchstart", (e) => {
+    if (!e.target.closest(".pd-stage") || e.touches.length > 1) return;
+    pdDrag = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now(), dx: 0, axis: null };
+  }, { passive: true });
+  $("pdOverlay").addEventListener("touchmove", (e) => {
+    if (!pdDrag) return;
+    const dx = e.touches[0].clientX - pdDrag.x, dy = e.touches[0].clientY - pdDrag.y;
+    if (!pdDrag.axis) { if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return; pdDrag.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y"; }
+    if (pdDrag.axis !== "x") return;
+    const single = pdImages(pdProduct).length < 2;
+    pdDrag.dx = single ? dx * 0.25 : dx;
+    const img = $("pdMain"); img.style.transition = "none"; img.style.transform = `translateX(${pdDrag.dx}px)`;
+  }, { passive: true });
+  const pdEnd = () => {
+    if (!pdDrag) return;
+    const { dx, t } = pdDrag, img = $("pdMain"), w = img.clientWidth, speed = Math.abs(dx) / Math.max(1, Date.now() - t);
+    pdDrag = null;
+    const change = pdImages(pdProduct).length > 1 && (Math.abs(dx) > w * 0.2 || (speed > 0.4 && Math.abs(dx) > 20));
+    img.style.transition = "transform .22s ease, opacity .22s ease";
+    if (!change) { img.style.transform = ""; return; }   // vuelve a su lugar (rebote)
+    const dir = dx < 0 ? 1 : -1;
+    img.style.transform = `translateX(${-dir * w}px)`; img.style.opacity = "0";
+    setTimeout(() => {
+      pdSetImage(pdIndex + dir);
+      img.style.transition = "none"; img.style.transform = `translateX(${dir * w * 0.4}px)`;
+      void img.offsetWidth;
+      img.style.transition = "transform .22s ease, opacity .22s ease"; img.style.transform = ""; img.style.opacity = "";
+    }, 180);
+  };
+  $("pdOverlay").addEventListener("touchend", pdEnd);
+  $("pdOverlay").addEventListener("touchcancel", pdEnd);
+  // Miniaturas: sombra en el borde que tiene más fotos para deslizar
+  const pdThumbsFade = (el) => { el.classList.toggle("fade-l", el.scrollLeft > 2); el.classList.toggle("fade-r", el.scrollLeft + el.clientWidth < el.scrollWidth - 2); };
+  $("pdOverlay").addEventListener("scroll", (e) => { if (e.target.classList && e.target.classList.contains("pd-thumbs")) pdThumbsFade(e.target); }, true);
+  new MutationObserver(() => { const t = document.querySelector(".pd-thumbs"); if (t) pdThumbsFade(t); }).observe($("pd"), { childList: true });
+  // Marcas: tocar la cinta la pausa (como el hover en PC) para poder ver o tocar un logo
+  const logoStrip = document.querySelector(".logos");
+  if (logoStrip) {
+    let resume;
+    logoStrip.addEventListener("touchstart", () => { clearTimeout(resume); logoStrip.classList.add("paused"); }, { passive: true });
+    logoStrip.addEventListener("touchend", () => { resume = setTimeout(() => logoStrip.classList.remove("paused"), 1500); });
+  }
   document.addEventListener("click", (e) => { if (e.target.closest('a[href^="#producto/"]')) pdOpenedByClick = true; }, true);
 
   /* ---------- Carrito ---------- */
@@ -697,34 +734,72 @@
 
   /* ---------- Carrusel principal ---------- */
   const track = $("heroTrack");
+  // Siempre avanza en el mismo sentido: al final del último pasa a una copia del primero y salta sin animación al real
   let slideCount = 0, current = 0, timer, dots = [];
+  const moveTo = (i, animate = true) => {
+    track.style.transition = animate ? "" : "none";
+    track.style.transform = `translateX(-${i * 100}%)`;
+    if (!animate) void track.offsetWidth;   // aplica la posición antes de volver a animar
+  };
   function go(i) {
     if (!slideCount) return;
-    current = (i + slideCount) % slideCount;
-    track.style.transform = `translateX(-${current * 100}%)`;
-    dots.forEach((d, k) => d.classList.toggle("active", k === current));
+    if (i < 0) { moveTo(slideCount, false); i = slideCount - 1; }   // hacia atrás desde el primero: parte de la copia
+    current = Math.min(i, slideCount);
+    moveTo(current);
+    dots.forEach((d, k) => d.classList.toggle("active", k === current % slideCount));
   }
+  track.addEventListener("transitionend", (e) => {
+    if (e.target === track && current === slideCount) { current = 0; moveTo(0, false); }
+  });
   const play = () => { clearInterval(timer); if (slideCount > 1) timer = setInterval(() => go(current + 1), 5000); };
   // Se puede volver a llamar si el panel cambió las imágenes del carrusel
   function setupHero() {
+    track.querySelectorAll(".hero-clone").forEach((c) => c.remove());
     slideCount = track.children.length; current = 0;
-    $("dots").innerHTML = [...track.children].map((_, i) => `<button aria-label="Imagen ${i + 1}"${i === 0 ? ' class="active"' : ""}></button>`).join("");
+    if (slideCount > 1) {
+      const clone = track.children[0].cloneNode(true);
+      clone.classList.add("hero-clone"); clone.setAttribute("aria-hidden", "true");
+      clone.querySelectorAll("a").forEach((a) => (a.tabIndex = -1));
+      track.appendChild(clone);
+    }
+    $("dots").innerHTML = Array.from({ length: slideCount }, (_, i) => `<button aria-label="Imagen ${i + 1}"${i === 0 ? ' class="active"' : ""}></button>`).join("");
     dots = [...$("dots").children];
     dots.forEach((d, i) => d.addEventListener("click", () => { go(i); play(); }));
-    [$("heroPrev"), $("heroNext"), $("dots")].forEach((el) => (el.hidden = slideCount < 2));
-    go(0); play();
+    $("heroNav").hidden = slideCount < 2;
+    moveTo(0, false); dots.forEach((d, k) => d.classList.toggle("active", k === 0)); play();
   }
   $("heroPrev").onclick = () => { go(current - 1); play(); };
   $("heroNext").onclick = () => { go(current + 1); play(); };
-  // Deslizar con el dedo en celulares
-  let touchX = null;
-  track.addEventListener("touchstart", (e) => (touchX = e.touches[0].clientX), { passive: true });
-  track.addEventListener("touchend", (e) => {
-    if (touchX === null) return;
-    const dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) > 40) { go(current + (dx < 0 ? 1 : -1)); play(); }
-    touchX = null;
-  });
+  // Táctil: el carrusel sigue al dedo (touchstart/touchmove/touchend) y al soltar decide por distancia o velocidad
+  // (un "flick" rápido alcanza aunque sea corto). El CSS deja el scroll vertical al navegador (touch-action: pan-y).
+  let drag = null;
+  track.addEventListener("touchstart", (e) => {
+    if (slideCount < 2 || e.touches.length > 1) return;
+    clearInterval(timer);
+    if (current === slideCount) { current = 0; moveTo(0, false); }   // si quedó en la copia, pasa al real
+    drag = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now(), dx: 0, axis: null };
+  }, { passive: true });
+  track.addEventListener("touchmove", (e) => {
+    if (!drag) return;
+    const dx = e.touches[0].clientX - drag.x, dy = e.touches[0].clientY - drag.y;
+    if (!drag.axis) { if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return; drag.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y"; }
+    if (drag.axis !== "x") return;   // gesto vertical: es scroll de la página
+    // Desde el primero hacia la derecha se usa la copia del final (se ve igual) para mostrar el último a la izquierda
+    if (current === 0 && dx > 0) current = slideCount; else if (current === slideCount && dx < 0) current = 0;
+    drag.dx = dx;
+    track.style.transition = "none";
+    track.style.transform = `translateX(calc(-${current * 100}% + ${dx}px))`;
+  }, { passive: true });
+  const endDrag = () => {
+    if (!drag) return;
+    const { dx, t } = drag, w = track.parentElement.clientWidth, speed = Math.abs(dx) / Math.max(1, Date.now() - t);
+    drag = null;
+    if (Math.abs(dx) > 8) track.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); }, { capture: true, once: true });   // no abrir links al arrastrar
+    go(Math.abs(dx) > w * 0.18 || (speed > 0.4 && Math.abs(dx) > 20) ? current + (dx < 0 ? 1 : -1) : current);
+    play();
+  };
+  track.addEventListener("touchend", endDrag);
+  track.addEventListener("touchcancel", endDrag);
   setupHero();
 
   /* ---------- Página editable desde el panel (tabla site_blocks) ----------
@@ -735,7 +810,7 @@
   const renderers = {
     hero(el, d) {
       if (!d.slides || !d.slides.length) return;
-      track.innerHTML = d.slides.map((sl, i) => `<div class="hero-slide">${sl.link ? `<a ${linkOf(sl)}>` : ""}<img src="${src(sl.img)}" alt="${esc(sl.alt || "")}" width="1904" height="650"${i ? ' loading="lazy"' : ' fetchpriority="high"'}>${sl.link ? "</a>" : ""}</div>`).join("");
+      track.innerHTML = d.slides.map((sl, i) => `<div class="hero-slide">${sl.link ? `<a ${linkOf(sl)}>` : ""}<img src="${src(sl.img)}" alt="${esc(sl.alt || "")}" width="1920" height="655"${i ? ' loading="lazy"' : ' fetchpriority="high"'}>${sl.link ? "</a>" : ""}</div>`).join("");
       setupHero();
     },
     tarjetas(el, d) {

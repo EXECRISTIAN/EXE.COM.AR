@@ -3,57 +3,28 @@
   "mode": "busqueda"
  },
  {
-  "id": "nw",
+  "id": "z790",
+  "full": true,
+  "minw": 1500,
+  "max": 12,
   "qs": [],
-  "urls": [
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-225-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-226-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-227-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-228-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-229-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-230-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-231-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-232-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-233-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-234-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-235-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-236-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-237-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-238-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-239-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-240-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-241-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-242-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-243-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-244-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-245-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-246-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-247-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-248-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-249-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-250-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-251-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-252-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-253-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-254-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-255-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-256-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-257-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-258-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-259-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-260-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-261-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-262-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-263-V01.jpg",
-   "https://c1.neweggimages.com/ProductImageCompressAll1280/19-118-264-V01.jpg"
-  ],
-  "max": 40
+  "pages": [
+   "https://rog.asus.com/articles/maximus-motherboards/new-z790-motherboards-from-rog-pave-the-way-for-14th-gen-intel-core-cpus/",
+   "https://www.custompc.com/asus/z790-motherboards-intel-14th-gen",
+   "https://www.guru3d.com/story/asus-offers-new-rog-rog-strix-and-tuf-gaming-z790-motherboards/",
+   "https://www.asus.com/microsite/motherboard/Intel-Z790-B760-H770/"
+  ]
  },
  {
-  "id": "i3b",
-  "qs": [
-   "BX8070110105",
-   "Intel Core i3-10105 4-Core LGA 1200 Desktop Processor"
+  "id": "am4",
+  "full": true,
+  "minw": 1500,
+  "max": 12,
+  "qs": [],
+  "pages": [
+   "https://www.asus.com/Microsite/motherboard/AMD-AM4-Ryzen-5000/",
+   "https://www.asus.com/us/site/motherboards/amd-ryzen-5000/",
+   "https://www.thefpsreview.com/2020/10/10/asus-announces-bios-updates-for-amd-ryzen-5000-series-zen-3-cpus-introduces-new-b550-x570-motherboards/"
   ]
  }
 ]

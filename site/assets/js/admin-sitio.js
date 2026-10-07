@@ -9,7 +9,7 @@
 
   // Tipos de sección y sus campos. list = lista repetible.
   const TYPES = {
-    hero: { name: "Carrusel de imágenes", fields: [{ k: "slides", list: "Imagen", item: [{ k: "img", t: "image", l: "Imagen (1904 × 540 px aprox.)" }, { k: "alt", l: "Descripción de la imagen" }, { k: "link", l: "Link al tocar (opcional)" }] }] },
+    hero: { name: "Carrusel de imágenes", fields: [{ k: "slides", list: "Imagen", item: [{ k: "img", t: "image", l: "Imagen (1920 × 655 px aprox.; se pueden agregar o quitar las que quieras)" }, { k: "alt", l: "Descripción de la imagen" }, { k: "link", l: "Link al tocar (opcional)" }] }] },
     tarjetas: { name: "Tarjetas con imagen y botón", fields: [{ k: "cards", list: "Tarjeta", item: [{ k: "img", t: "image", l: "Imagen (vertical, 352 × 480 px aprox.)" }, { k: "img_mobile", t: "image", l: "Imagen para celular (opcional)" }, { k: "alt", l: "Descripción de la imagen" }, { k: "text", l: "Texto del botón" }, { k: "filter", l: "Al tocar, mostrar la categoría…" }, { k: "link", l: "…o ir a este link" }] }] },
     catalogo: { name: "Catálogo de productos", fields: [{ k: "title", l: "Título" }, { k: "text", t: "textarea", l: "Texto" }] },
     banner: { name: "Banner ancho", fields: [{ k: "img", t: "image", l: "Imagen (ancha, 1400 × 400 px aprox.)" }, { k: "alt", l: "Descripción" }, { k: "filter", l: "Al tocar, mostrar la categoría…" }, { k: "link", l: "…o ir a este link" }] },
