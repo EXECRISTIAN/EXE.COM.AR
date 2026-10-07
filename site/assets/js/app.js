@@ -270,14 +270,51 @@
     else if (e.key === "ArrowRight") pdSetImage(pdIndex + 1);
     else if (e.key === "ArrowLeft") pdSetImage(pdIndex - 1);
   });
-  // Deslizar con el dedo entre fotos
-  let pdTouchX = null;
-  $("pdOverlay").addEventListener("touchstart", (e) => { if (e.target.closest(".pd-stage")) pdTouchX = e.touches[0].clientX; }, { passive: true });
-  $("pdOverlay").addEventListener("touchend", (e) => {
-    if (pdTouchX === null) return;
-    const dx = e.changedTouches[0].clientX - pdTouchX; pdTouchX = null;
-    if (Math.abs(dx) > 40) pdSetImage(pdIndex + (dx < 0 ? 1 : -1));
-  });
+  // Táctil en la ficha: la foto sigue al dedo; al soltar entra la siguiente/anterior desde el costado.
+  // Con una sola foto el arrastre tiene resistencia y rebota (indica que no hay más).
+  let pdDrag = null;
+  $("pdOverlay").addEventListener("touchstart", (e) => {
+    if (!e.target.closest(".pd-stage") || e.touches.length > 1) return;
+    pdDrag = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now(), dx: 0, axis: null };
+  }, { passive: true });
+  $("pdOverlay").addEventListener("touchmove", (e) => {
+    if (!pdDrag) return;
+    const dx = e.touches[0].clientX - pdDrag.x, dy = e.touches[0].clientY - pdDrag.y;
+    if (!pdDrag.axis) { if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return; pdDrag.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y"; }
+    if (pdDrag.axis !== "x") return;
+    const single = pdImages(pdProduct).length < 2;
+    pdDrag.dx = single ? dx * 0.25 : dx;
+    const img = $("pdMain"); img.style.transition = "none"; img.style.transform = `translateX(${pdDrag.dx}px)`;
+  }, { passive: true });
+  const pdEnd = () => {
+    if (!pdDrag) return;
+    const { dx, t } = pdDrag, img = $("pdMain"), w = img.clientWidth, speed = Math.abs(dx) / Math.max(1, Date.now() - t);
+    pdDrag = null;
+    const change = pdImages(pdProduct).length > 1 && (Math.abs(dx) > w * 0.2 || (speed > 0.4 && Math.abs(dx) > 20));
+    img.style.transition = "transform .22s ease, opacity .22s ease";
+    if (!change) { img.style.transform = ""; return; }   // vuelve a su lugar (rebote)
+    const dir = dx < 0 ? 1 : -1;
+    img.style.transform = `translateX(${-dir * w}px)`; img.style.opacity = "0";
+    setTimeout(() => {
+      pdSetImage(pdIndex + dir);
+      img.style.transition = "none"; img.style.transform = `translateX(${dir * w * 0.4}px)`;
+      void img.offsetWidth;
+      img.style.transition = "transform .22s ease, opacity .22s ease"; img.style.transform = ""; img.style.opacity = "";
+    }, 180);
+  };
+  $("pdOverlay").addEventListener("touchend", pdEnd);
+  $("pdOverlay").addEventListener("touchcancel", pdEnd);
+  // Miniaturas: sombra en el borde que tiene más fotos para deslizar
+  const pdThumbsFade = (el) => { el.classList.toggle("fade-l", el.scrollLeft > 2); el.classList.toggle("fade-r", el.scrollLeft + el.clientWidth < el.scrollWidth - 2); };
+  $("pdOverlay").addEventListener("scroll", (e) => { if (e.target.classList && e.target.classList.contains("pd-thumbs")) pdThumbsFade(e.target); }, true);
+  new MutationObserver(() => { const t = document.querySelector(".pd-thumbs"); if (t) pdThumbsFade(t); }).observe($("pd"), { childList: true });
+  // Marcas: tocar la cinta la pausa (como el hover en PC) para poder ver o tocar un logo
+  const logoStrip = document.querySelector(".logos");
+  if (logoStrip) {
+    let resume;
+    logoStrip.addEventListener("touchstart", () => { clearTimeout(resume); logoStrip.classList.add("paused"); }, { passive: true });
+    logoStrip.addEventListener("touchend", () => { resume = setTimeout(() => logoStrip.classList.remove("paused"), 1500); });
+  }
   document.addEventListener("click", (e) => { if (e.target.closest('a[href^="#producto/"]')) pdOpenedByClick = true; }, true);
 
   /* ---------- Carrito ---------- */
@@ -733,15 +770,36 @@
   }
   $("heroPrev").onclick = () => { go(current - 1); play(); };
   $("heroNext").onclick = () => { go(current + 1); play(); };
-  // Deslizar con el dedo en celulares
-  let touchX = null;
-  track.addEventListener("touchstart", (e) => (touchX = e.touches[0].clientX), { passive: true });
-  track.addEventListener("touchend", (e) => {
-    if (touchX === null) return;
-    const dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) > 40) { go(current + (dx < 0 ? 1 : -1)); play(); }
-    touchX = null;
-  });
+  // Táctil: el carrusel sigue al dedo (touchstart/touchmove/touchend) y al soltar decide por distancia o velocidad
+  // (un "flick" rápido alcanza aunque sea corto). El CSS deja el scroll vertical al navegador (touch-action: pan-y).
+  let drag = null;
+  track.addEventListener("touchstart", (e) => {
+    if (slideCount < 2 || e.touches.length > 1) return;
+    clearInterval(timer);
+    if (current === slideCount) { current = 0; moveTo(0, false); }   // si quedó en la copia, pasa al real
+    drag = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now(), dx: 0, axis: null };
+  }, { passive: true });
+  track.addEventListener("touchmove", (e) => {
+    if (!drag) return;
+    const dx = e.touches[0].clientX - drag.x, dy = e.touches[0].clientY - drag.y;
+    if (!drag.axis) { if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return; drag.axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y"; }
+    if (drag.axis !== "x") return;   // gesto vertical: es scroll de la página
+    // Desde el primero hacia la derecha se usa la copia del final (se ve igual) para mostrar el último a la izquierda
+    if (current === 0 && dx > 0) current = slideCount; else if (current === slideCount && dx < 0) current = 0;
+    drag.dx = dx;
+    track.style.transition = "none";
+    track.style.transform = `translateX(calc(-${current * 100}% + ${dx}px))`;
+  }, { passive: true });
+  const endDrag = () => {
+    if (!drag) return;
+    const { dx, t } = drag, w = track.parentElement.clientWidth, speed = Math.abs(dx) / Math.max(1, Date.now() - t);
+    drag = null;
+    if (Math.abs(dx) > 8) track.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); }, { capture: true, once: true });   // no abrir links al arrastrar
+    go(Math.abs(dx) > w * 0.18 || (speed > 0.4 && Math.abs(dx) > 20) ? current + (dx < 0 ? 1 : -1) : current);
+    play();
+  };
+  track.addEventListener("touchend", endDrag);
+  track.addEventListener("touchcancel", endDrag);
   setupHero();
 
   /* ---------- Página editable desde el panel (tabla site_blocks) ----------
