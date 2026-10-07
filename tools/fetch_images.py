@@ -105,9 +105,14 @@ def search_mode(items):
             try:
                 raw = pathlib.Path("/tmp") / "c.src"; raw.write_bytes(_get(u))
                 dst = out / f"{it['id']}-{len(got)}.webp"
-                subprocess.run(["convert", str(raw) + "[0]", "-background", "white", "-alpha", "remove", "-alpha", "off", "-resize", "800x800>", "-quality", "85", str(dst)], check=True, timeout=60)
+                if it.get("full"):   # banners: tamaño original, solo si es ancho
+                    w = int(subprocess.run(["identify", "-format", "%w", str(raw) + "[0]"], capture_output=True, text=True, timeout=30).stdout or 0)
+                    if w < it.get("minw", 1800): continue
+                    subprocess.run(["convert", str(raw) + "[0]", "-resize", "2600x>", "-quality", "92", str(dst)], check=True, timeout=120)
+                else:
+                    subprocess.run(["convert", str(raw) + "[0]", "-background", "white", "-alpha", "remove", "-alpha", "off", "-resize", "800x800>", "-quality", "85", str(dst)], check=True, timeout=60)
                 if dst.stat().st_size < 6000: dst.unlink(); continue
-                got.append({"file": dst.name, "src": u})
+                got.append({"file": dst.name, "src": u, "w": w if it.get("full") else None})
             except Exception: pass
         rep.append({"id": it["id"], "n": len(got), "cands": got, "found": len(urls)})
     json.dump(rep, open("tools/candidatas/report.json", "w"), indent=1)
