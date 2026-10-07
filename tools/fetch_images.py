@@ -98,6 +98,12 @@ def search_mode(items):
             if it.get("commons"):
                 try: urls += commons_urls(q)
                 except Exception as e: print("commons", q, e)
+        for pg in it.get("pages", []):   # todas las imágenes de una página (banners de sitios oficiales)
+            try:
+                h = _get(pg).decode("utf-8", "ignore").replace("\\/", "/")
+                urls += [u if u.startswith("http") else urllib.parse.urljoin(pg, u) for u in re.findall(r'((?:https?:)?//[^"\'\s()<>]+?\.(?:jpg|jpeg|png|webp))', h, re.I)]
+                print("page", pg, len(urls))
+            except Exception as e: print("page", pg, e)
         urls = list(dict.fromkeys([*it.get("urls", []), *(u for u in urls if u.startswith("http") and not bad.search(u))]))
         got = []
         for u in urls:

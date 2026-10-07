@@ -5,23 +5,26 @@
  {
   "id": "z790",
   "full": true,
-  "max": 10,
-  "qs": [
-   "ASUS Z790 motherboard banner",
-   "ASUS Z790 ready for 14th gen Intel banner",
-   "ROG Maximus Z790 Dark Hero TUF Gaming Z790 banner",
-   "asus z790 intel 14th gen key visual"
+  "minw": 1500,
+  "max": 12,
+  "qs": [],
+  "pages": [
+   "https://rog.asus.com/articles/maximus-motherboards/new-z790-motherboards-from-rog-pave-the-way-for-14th-gen-intel-core-cpus/",
+   "https://www.custompc.com/asus/z790-motherboards-intel-14th-gen",
+   "https://www.guru3d.com/story/asus-offers-new-rog-rog-strix-and-tuf-gaming-z790-motherboards/",
+   "https://www.asus.com/microsite/motherboard/Intel-Z790-B760-H770/"
   ]
  },
  {
   "id": "am4",
   "full": true,
-  "max": 10,
-  "qs": [
-   "ASUS AMD 500 series 400 series motherboard banner",
-   "ASUS X570 B550 dominate the game banner",
-   "ROG Crosshair VIII X570 B550 banner asus",
-   "asus 500 series amd motherboards key visual"
+  "minw": 1500,
+  "max": 12,
+  "qs": [],
+  "pages": [
+   "https://www.asus.com/Microsite/motherboard/AMD-AM4-Ryzen-5000/",
+   "https://www.asus.com/us/site/motherboards/amd-ryzen-5000/",
+   "https://www.thefpsreview.com/2020/10/10/asus-announces-bios-updates-for-amd-ryzen-5000-series-zen-3-cpus-introduces-new-b550-x570-motherboards/"
   ]
  }
 ]
