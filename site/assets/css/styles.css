@@ -160,7 +160,7 @@ button { font: inherit; }
 
 /* ---------- Banners de marca: be97f60 (padding 60 0) / 9986b28 (min-h 500, margin-top 40) ---------- */
 .brand-banners { display: flex; gap: 0; padding: 60px 10px; max-width: 1220px; margin: 0 auto; }
-.brand-card { position: relative; flex: 1; min-height: 0; aspect-ratio: 352 / 480; margin: 10px; padding: 40px; border-radius: 20px; overflow: hidden;
+.brand-card { position: relative; flex: 1; min-height: 0; aspect-ratio: 352 / 370; margin: 10px; padding: 40px; border-radius: 20px; overflow: hidden;
   display: flex; flex-direction: column; justify-content: flex-end; align-items: center; isolation: isolate; }
 .brand-card picture, .brand-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: var(--pos, 50% 50%); z-index: -1; }
 /* --pos (en cada tarjeta del index) = centro del producto dentro de la foto: queda como eje en cualquier recorte */
