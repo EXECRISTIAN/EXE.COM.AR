@@ -204,6 +204,19 @@
     if (m) openProduct(decodeURIComponent(m[1])); else closeProduct(true);
   }
   window.addEventListener("hashchange", routeProduct);
+  // Links desde otras páginas (ej. la 404): #buscar/<texto> filtra el catálogo y #carrito abre el pedido.
+  function routeSearch() {
+    const m = location.hash.match(/^#buscar\/(.*)$/);
+    if (m) {
+      query = decodeURIComponent(m[1]).trim(); $("search").value = query; renderProducts();
+      history.replaceState(null, "", location.pathname + location.search + "#productos");
+      $("productos").scrollIntoView();
+    } else if (location.hash === "#carrito") {
+      history.replaceState(null, "", location.pathname + location.search);
+      $("cartOpen").click();
+    }
+  }
+  window.addEventListener("hashchange", routeSearch);
 
   /* ---------- Solo administradores: precio de referencia y link de compra ----------
      Los links NO están en products.json (es público): viven en Supabase (tabla product_sources, RLS products.write).
@@ -977,7 +990,7 @@
     s.textContent = JSON.stringify(data).replace(/</g, "\\u003c");
   }
   loadDb().catch(loadJson)
-    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); paintZones(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
+    .then((data) => { products = data; renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); routeSearch(); paintZones(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();
 

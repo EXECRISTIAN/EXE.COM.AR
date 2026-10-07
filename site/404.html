@@ -5,38 +5,132 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Página no encontrada | EXE</title>
   <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#ffffff">
   <meta name="copyright" content="© 2026 EXE (exe.com.ar). Todos los derechos reservados.">
-  <script>try{var t=localStorage.getItem("exe-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
-  <!-- Página autocontenida: GitHub Pages la sirve desde cualquier ruta, así que no depende de CSS relativos -->
-  <style>
-    :root { --bg: #fff; --fg: #333; --title: #000; --muted: #6b7280; --accent: #0084d6; --line: #e2e2e2; color-scheme: light; }
-    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0b0f16; --fg: #cbd5e1; --title: #f1f5f9; --muted: #94a3b8; --accent: #3d8ef0; --line: #1f2835; color-scheme: dark; } }
-    :root[data-theme="dark"] { --bg: #0b0f16; --fg: #cbd5e1; --title: #f1f5f9; --muted: #94a3b8; --accent: #3d8ef0; --line: #1f2835; color-scheme: dark; }
-    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; box-sizing: border-box;
-      background: var(--bg); color: var(--fg); font-family: Lato, system-ui, -apple-system, "Segoe UI", sans-serif; text-align: center; }
-    .code { font-size: clamp(4rem, 18vw, 8rem); font-weight: 800; line-height: 1; color: var(--accent); letter-spacing: -.04em; }
-    h1 { margin: 10px 0 6px; font-size: 1.5rem; color: var(--title); }
-    p { margin: 0 auto 22px; max-width: 40ch; color: var(--muted); }
-    .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-    a.btn { display: inline-block; padding: 12px 22px; border-radius: 15px; font-weight: 700; text-decoration: none; border: 1px solid var(--accent); }
-    a.primary { background: var(--accent); color: #fff; }
-    a.secondary { color: var(--accent); }
-  </style>
+  <!-- GitHub Pages sirve esta página desde cualquier ruta inexistente: la base hace que los archivos relativos
+       apunten siempre a la raíz del sitio (en github.io vive en /EXE.COM.AR/, con dominio propio en /). -->
+  <script>document.write('<base href="' + (location.pathname.indexOf("/EXE.COM.AR/") === 0 ? "/EXE.COM.AR/" : "/") + '">')</script>
+  <link rel="icon" href="assets/img/favicon.jpg" type="image/jpeg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@700;800&family=Roboto:wght@400;700&display=swap">
+  <script>try{var t=localStorage.getItem("exe-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;if(localStorage.getItem("exe-wa-float")==="off")document.documentElement.dataset.waFloat="off"}catch(e){}</script>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/p404.css">
 </head>
 <body>
-  <main>
-    <div class="code" aria-hidden="true">404</div>
-    <h1>No encontramos esta página</h1>
-    <p>Puede que el enlace esté mal escrito o que la página ya no exista. Te llevamos a la tienda:</p>
-    <div class="actions">
-      <a class="btn primary" id="home" href="/">Ir a la tienda</a>
-      <a class="btn secondary" href="https://wa.me/5491130095254" target="_blank" rel="noopener">Escribinos por WhatsApp</a>
+  <header class="site-header" id="header">
+    <div class="container header-inner">
+      <a href="./#inicio" class="logo" aria-label="EXE inicio"><img class="logo-light" src="assets/img/logo.png" alt="EXE" width="106" height="55"><img class="logo-dark" src="assets/img/logo-oscuro.png" alt="EXE" width="106" height="55"></a>
+      <nav class="nav" id="nav">
+        <a href="./#inicio" >Inicio</a>
+        <a href="./#productos">Productos</a>
+        <a href="./#marcas">Marcas</a>
+        <a href="./#contacto">Contacto</a>
+      </nav>
+      <div class="header-actions">
+        <a class="icon-btn" href="cuenta.html" aria-label="Mi cuenta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        </a>
+        <a class="icon-btn" href="./#carrito" aria-label="Abrir carrito">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+          <span class="badge" id="cartCount" hidden>0</span>
+        </a>
+        <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menú">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="e404" id="inicio">
+    <div class="e404-bg" aria-hidden="true">
+      <pre class="e404-code e404-code-a">// cliente.buscar(ruta)
+const ruta = location.pathname;
+if (!existe(ruta)) {
+  $estado = 404;
+  return false;
+}</pre>
+      <pre class="e404-code e404-code-b">const archivo = await abrir("ERROR_N°404.EXE");
+// tienda.componentes -> 100% OK</pre>
+    </div>
+    <div class="container e404-grid">
+      <div class="e404-text">
+        <p class="e404-num" aria-hidden="true">404</p>
+        <h1 class="e404-title">¡UY! ERROR_N°404.EXE</h1>
+        <p class="e404-sub"><span class="red">ARCHIVO</span> <span class="cyan">NO ENCONTRADO</span></p>
+        <p class="e404-desc">Parece que intentaste ejecutar una ruta inexistente o el <strong>archivo ha sido borrado del sistema.</strong> ¡No te preocupes! El resto de nuestros componentes sigue al 100%.</p>
+      </div>
+      <img class="e404-art" src="assets/img/404-robot.webp" alt="Robot junto a un archivo .exe roto" width="600" height="600">
+      <div class="e404-actions">
+        <a class="e404-btn e404-btn-home" id="e404Home" href="./"><span>IR AL INICIO [ EXE.COM.AR ]</span></a>
+        <a class="e404-btn e404-btn-wa" id="e404Wa" href="https://wa.me/5491130095254" target="_blank" rel="noopener"><span>ESCRÍBENOS POR WHATSAPP</span></a>
+      </div>
+      <form class="e404-search" id="e404Search" role="search">
+        <input id="e404Q" type="search" name="q" placeholder="¿Buscás algo en especial? (Procesadores, placas de video...)" aria-label="Buscar productos" autocomplete="off">
+        <button type="submit" aria-label="Buscar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+        </button>
+      </form>
     </div>
   </main>
-  <script>
-    // En github.io el sitio vive en /EXE.COM.AR/; con dominio propio, en la raíz.
-    var base = location.pathname.indexOf("/EXE.COM.AR/") === 0 ? "/EXE.COM.AR/" : "/";
-    document.getElementById("home").href = base;
-  </script>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a href="./#inicio" class="logo"><img src="assets/img/logo-blanco.png" alt="EXE" width="113" height="50" loading="lazy"></a>
+          <p style="margin-top:14px;max-width:360px">Hardware, componentes y periféricos para armar tu PC.</p>
+        </div>
+        <div>
+          <h4>Tienda</h4>
+          <ul><li><a href="./#productos">Productos</a></li><li><a href="./#marcas">Marcas</a></li><li><a href="cuenta.html">Mi cuenta</a></li></ul>
+        </div>
+        <div>
+          <h4>Contacto</h4>
+          <ul><li><a id="waFooter" target="_blank" rel="noopener">WhatsApp</a></li><li><a href="tel:+5491130095254">Tel: 11 3009-5254</a></li><li><a id="mailFooter"></a></li></ul>
+        </div>
+      </div>
+      <div class="copy">
+        <span>© <span id="year"></span> EXE — exe.com.ar. Todos los derechos reservados. | Tel +54 9 11 3009 5254</span>
+        <div class="prefs">
+        <div class="theme-label">
+          <span>Botón WhatsApp</span>
+          <div class="theme-switch switch-2" id="waSwitch" role="radiogroup" aria-label="Botón flotante de WhatsApp" data-mode="on">
+            <span class="thumb" aria-hidden="true"></span>
+            <button type="button" role="radio" data-mode="off" aria-checked="false" aria-label="Ocultar botón de WhatsApp" title="Ocultar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M6 18L18 6"/></svg>
+            </button>
+            <button type="button" role="radio" data-mode="on" aria-checked="true" aria-label="Mostrar botón de WhatsApp" title="Mostrar">
+              <svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3zm0 23.6c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.6 10.6 0 1 1 16 26.6zm5.8-7.9c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.7 8.7 0 0 1-4.3-3.8c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.7 5.8 5.1 2.2.9 3 1 4.1.8.7-.1 1.9-.8 2.2-1.5.3-.8.3-1.4.2-1.5-.1-.1-.3-.2-.6-.4z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="theme-label">
+          <span>Tema</span>
+          <div class="theme-switch" id="themeSwitch" role="radiogroup" aria-label="Tema de la página" data-mode="auto">
+            <span class="thumb" aria-hidden="true"></span>
+            <button type="button" role="radio" data-mode="light" aria-checked="false" aria-label="Claro" title="Claro">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            </button>
+            <button type="button" role="radio" data-mode="auto" aria-checked="true" aria-label="Automático (según el sistema)" title="Automático (según el sistema)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor" stroke="none"/></svg>
+            </button>
+            <button type="button" role="radio" data-mode="dark" aria-checked="false" aria-label="Oscuro" title="Oscuro">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+            </button>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <a class="wa-float" id="waFloat" target="_blank" rel="noopener" aria-label="WhatsApp">
+    <svg viewBox="0 0 32 32"><path d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3zm0 23.6c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.6 10.6 0 1 1 16 26.6zm5.8-7.9c-.3-.2-1.9-.9-2.2-1s-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.7 8.7 0 0 1-4.3-3.8c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.7 5.8 5.1 2.2.9 3 1 4.1.8.7-.1 1.9-.8 2.2-1.5.3-.8.3-1.4.2-1.5-.1-.1-.3-.2-.6-.4z"/></svg>
+  </a>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/p404.js"></script>
 </body>
 </html>
