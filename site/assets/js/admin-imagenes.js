@@ -27,7 +27,7 @@
   async function data() {
     if (A.demo) return {
       designs: [{ id: "demo", name: "Ryzen 8000 ya en stock", width: 1200, height: 750, image_url: "", hotspots: [{}, {}] }],
-      blocks: [{ id: "hero", type: "hero", data: { slides: [{ img: "assets/img/banner-asus-z790.webp" }] } }, { id: "tarjetas", type: "tarjetas", data: { cards: [{ img: "assets/img/banner-marca-01.webp" }, { img: "assets/img/banner-marca-02.webp" }] } }, { id: "banner-ancho", type: "banner", data: { img: "assets/img/banner-inferior-01.webp" } }],
+      blocks: [{ id: "hero", type: "hero", data: { slides: [{ img: "assets/img/banner-asus-z790.webp" }] } }, { id: "tarjetas", type: "tarjetas", data: { cards: [{ img: "assets/img/categoria-01.webp" }, { img: "assets/img/categoria-02.webp" }] } }, { id: "banner-ancho", type: "banner", data: { img: "assets/img/banner-inferior-01.webp" } }],
       products: [{ id: "asus-gtx1660", name: "ASUS GTX 1660", images: ["assets/img/products/asus-gtx1660-01.webp"] }, { id: "cooler-deepcool-ag400-plus", name: "Cooler DeepCool AG400 PLUS", images: ["assets/img/products/cooler-deepcool-02.webp"] }],
     };
     const [d, b, p] = await Promise.all([
