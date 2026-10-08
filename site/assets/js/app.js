@@ -91,9 +91,9 @@
   const CASE_NOTE = "el gabinete solo no incluye componentes dentro";
   function renderProducts() {
     const q = query.toLowerCase();
-    const list = products.filter(
-      (p) => (filter === "Todos" || p.category === filter) &&
-        (!q || `${p.name} ${p.brand || ""} ${p.category || ""} ${(p.tags || []).join(" ")}`.toLowerCase().includes(q)) &&
+    // Todos los filtros menos la categoría (sirve también para contar cuántos productos hay en cada categoría)
+    const rest = products.filter(
+      (p) => (!q || `${p.name} ${p.brand || ""} ${p.category || ""} ${(p.tags || []).join(" ")}`.toLowerCase().includes(q)) &&
         (!fp.brands.size || fp.brands.has(p.brand)) &&
         (!fp.tags.size || (p.tags || []).some((t) => fp.tags.has(t))) &&
         (fp.min == null || (p.price > 0 && p.price >= fp.min)) &&
@@ -102,6 +102,16 @@
         (!fp.logo || brandMatches(p, fp.logo)) &&
         (!fp.ids || fp.ids.has(p.id))
     );
+    const list = rest.filter((p) => filter === "Todos" || p.category === filter);
+    // Número de productos de cada categoría en los filtros (según la búsqueda y los filtros activos)
+    document.querySelectorAll("#filters .chip[data-cat]").forEach((chip) => {
+      const c = chip.dataset.cat, n = c === "Todos" ? rest.length : rest.filter((p) => p.category === c).length;
+      let badge = chip.querySelector(".chip-count");
+      if (!badge) { badge = document.createElement("span"); badge.className = "chip-count"; chip.appendChild(badge); }
+      badge.textContent = n;
+      chip.classList.toggle("chip-empty", n === 0);
+      chip.setAttribute("aria-label", `${c}: ${n} ${n === 1 ? "producto" : "productos"}`);
+    });
     const byPrice = (p) => (p.price > 0 ? p.price : Infinity);   // "Consultar" siempre al final
     if (sortBy === "price-asc") list.sort((a, b) => byPrice(a) - byPrice(b));
     if (sortBy === "price-desc") list.sort((a, b) => (b.price || -1) - (a.price || -1));
