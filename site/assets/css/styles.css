@@ -190,11 +190,11 @@ button { font: inherit; }
 .feature p { margin: 0; font-size: .95rem; }
 
 /* df67cbb / 36e744c: carrusel de logos (5 visibles, 3 en tablet) */
-.logos { overflow: hidden; margin-top: 30px; }
+.logos { overflow: hidden; }
 /* El fondo del track es el de la sección: la animación lo aísla, y así los logos se funden con él en ambos modos. */
 .logos-track { display: flex; animation: logos var(--logos-dur, 25s) linear infinite; width: max-content; background: var(--c4); will-change: transform; }
 .logos:hover .logos-track { animation-play-state: paused; }
-.logos-track img { width: calc(min(1400px, 100vw) / 5); max-width: 240px; height: auto; padding: 10px 20px; object-fit: contain; aspect-ratio: 150 / 134;
+.logos-track img { width: calc(min(1400px, 100vw) / 5); max-width: 240px; height: auto; padding: 10px 20px; object-fit: cover; aspect-ratio: 150 / 100;   /* recorta el margen vacío de arriba y abajo que traen las imágenes (el logo de ROG, el más alto, entra entero) */
   filter: var(--brand-filter); opacity: .75; transition: filter .3s, opacity .3s; mix-blend-mode: var(--brand-blend); }
 .logos-track img:hover { filter: var(--brand-filter-hover); opacity: 1; }
 @keyframes logos { to { transform: translateX(-50%); } }
@@ -338,8 +338,9 @@ html[data-wa-float="off"] .wa-float { display: none; }
 .overlay { position: fixed; inset: 0; z-index: 60; background: #0008; opacity: 0; pointer-events: none; transition: opacity .3s; }
 .overlay.show { opacity: 1; pointer-events: auto; }
 .cart { position: fixed; top: 0; right: 0; z-index: 70; width: min(420px, 100%); height: 100%; background: var(--surface); display: flex; flex-direction: column;
-  transform: translateX(100%); transition: transform .4s var(--ease); box-shadow: -10px 0 40px -10px var(--shadow-strong); }
-.cart.open { transform: none; }
+  transform: translateX(100%); transition: transform .4s var(--ease), visibility 0s linear .4s; box-shadow: -10px 0 40px -10px var(--shadow-strong);
+  visibility: hidden; }   /* cerrado: oculto también para el teclado y lectores de pantalla (se oculta al terminar de deslizar) */
+.cart.open { transform: none; visibility: visible; transition: transform .4s var(--ease); }
 .cart-head { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; border-bottom: 1px solid var(--line); }
 .cart-head h3 { margin: 0; }
 .cart-items { list-style: none; margin: 0; padding: 0 20px; flex: 1; overflow-y: auto; }
@@ -497,7 +498,7 @@ html[data-wa-float="off"] .wa-float { display: none; }
 .brands.brands-banner { padding-bottom: 0; }
 .brands.brands-features { padding-top: 0; padding-bottom: 0; }
 .brands.brands-features .features { margin-top: 60px; }
-.brands.brands-logos { padding-top: 30px; padding-bottom: 30px; }
+.brands.brands-logos { padding-top: 20px; padding-bottom: 0; }
 .section.contact { padding-top: 30px; }   /* logos → contacto: mismo aire arriba y abajo de los logos */
 .brands.brands-banner + .brands.brands-features .features { margin-top: 80px; }
 /* Secciones nuevas creadas desde el panel */
@@ -640,3 +641,8 @@ html { touch-action: manipulation; }
 /* Íconos en los filtros de categoría */
 .chip { display: inline-flex; align-items: center; gap: 7px; }
 .chip-ico { width: 17px; height: 17px; flex: none; }
+/* Cantidad de productos en cada filtro de categoría */
+.chip-count { min-width: 22px; padding: 1px 7px; border-radius: 999px; background: var(--c4); background: color-mix(in srgb, currentColor 13%, transparent); color: inherit; font-size: .78em; font-weight: 600; line-height: 1.5;
+  text-align: center; font-variant-numeric: tabular-nums; }
+.chip.active .chip-count { background: #ffffff38; color: inherit; }
+.chip.chip-empty { opacity: .55; }
