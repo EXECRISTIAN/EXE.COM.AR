@@ -388,14 +388,14 @@
         </section>
 
         <section class="panel ed-sec"><h3>2. Precio</h3>
-          ${w ? `<div class="ed-cur"><span>Moneda del precio:</span>
-            <label><input type="radio" name="cur" value="ARS" ${p.price_usd == null ? "checked" : ""}> Pesos (ARS)</label>
-            <label><input type="radio" name="cur" value="USD" ${p.price_usd != null ? "checked" : ""}> Dólares (USD)</label>
-            <small id="edFx">${rate() ? `Cotización vigente: ${money(rate())} por dólar` : "Todavía no hay cotización: configurala en 💵 Dólar."}</small></div>` : ""}
+          ${w ? `<p class="ed-hint" id="edFx">${rate() ? `Cotización vigente: ${money(rate())} por dólar. El costo y la venta pueden estar en monedas distintas: el margen y la ganancia se calculan convirtiendo con esta cotización.` : "Todavía no hay cotización: configurala en 💵 Dólar."}</p>` : ""}
           <div class="ed-grid ed-grid-4">
-            ${w ? `<label class="field"><span data-cur-label="Costo de compra">Costo de compra ($)</span><input name="cost" inputmode="decimal" value="${p.price_usd != null ? (c.cost_usd ?? "") : (c.cost ?? "")}" placeholder="Solo lo ven admins"></label>
+            ${w ? `<div class="field"><span data-cur-label="Costo de compra" data-cur-of="costcur">Costo de compra ($)</span><input name="cost" inputmode="decimal" value="${c.cost_usd != null ? c.cost_usd : (c.cost ?? "")}" placeholder="Solo lo ven admins" aria-label="Costo de compra">
+              <span class="ed-curpick" role="radiogroup" aria-label="Moneda del costo"><label><input type="radio" name="costcur" value="ARS" ${c.cost_usd == null ? "checked" : ""}> Pesos</label><label><input type="radio" name="costcur" value="USD" ${c.cost_usd != null ? "checked" : ""}> Dólares</label></span></div>
             <label class="field">Margen (%)<input name="margin" inputmode="decimal" value="${isFinite(m) ? Math.round(m) : DEFAULT_MARGIN}"></label>` : ""}
-            <label class="field"><span data-cur-label="Precio de venta">Precio de venta ($)</span><input name="price" inputmode="decimal" value="${p.price_usd != null ? p.price_usd : p.price || 0}" ${ro}><small id="edArs">0 = "Consultar precio por WhatsApp"</small></label>
+            <div class="field"><span data-cur-label="Precio de venta" data-cur-of="cur">Precio de venta ($)</span><input name="price" inputmode="decimal" value="${p.price_usd != null ? p.price_usd : p.price || 0}" ${ro} aria-label="Precio de venta">
+              ${w ? `<span class="ed-curpick" role="radiogroup" aria-label="Moneda de venta"><label><input type="radio" name="cur" value="ARS" ${p.price_usd == null ? "checked" : ""}> Pesos</label><label><input type="radio" name="cur" value="USD" ${p.price_usd != null ? "checked" : ""}> Dólares</label></span>` : ""}
+              <small id="edArs">0 = "Consultar precio por WhatsApp"</small></div>
             ${w ? `<label class="field ed-check"><input type="checkbox" name="round" checked> Redondear a $100</label>` : ""}
           </div>
           ${w ? `<p class="ed-hint" id="edProfit"></p>
@@ -605,21 +605,33 @@
     if (ed.isNew) el("name").addEventListener("input", () => { if (!el("id").dataset.touched) el("id").value = slug(el("name").value); });
     if (ed.isNew) el("id").addEventListener("input", () => (el("id").dataset.touched = "1"));
     // Costo / margen / precio enlazados
-    const profit = () => { const p = $("edProfit"); if (!p) return; const c = val("cost"), v = val("price"); p.textContent = c > 0 && v > 0 ? `Ganancia por unidad: ${isUsd() ? usd(v - c) + (rate() ? ` (≈ ${money((v - c) * rate())})` : "") : money(v - c)} · margen ${pct(margin(v, c))} sobre costo` : "Cargá el costo para ver la ganancia."; };
+    // Cada campo con su moneda: el costo en pesos o dólares y la venta en pesos o dólares, por separado
     const isUsd = () => w && el("cur") && f.querySelector("[name=cur]:checked").value === "USD";
+    const costUsd = () => w && el("costcur") && f.querySelector("[name=costcur]:checked").value === "USD";
     const dec = (v) => Number(String(v).replace(",", ".")) || 0;          // USD con decimales
-    const val = (n) => (isUsd() ? dec(el(n).value) : num(el(n).value));
+    const raw = (n, usd) => (usd ? dec(el(n).value) : num(el(n).value));
+    const toArs = (v, usd) => (usd ? (rate() ? v * rate() : NaN) : v);
+    const costArs = () => toArs(raw("cost", costUsd()), costUsd());
+    const priceArs = () => toArs(raw("price", isUsd()), isUsd());
+    const val = (n) => raw(n, n === "cost" ? costUsd() : isUsd());
+    const profit = () => { const p = $("edProfit"); if (!p) return; const c = costArs(), v = priceArs();
+      p.textContent = c > 0 && v > 0 ? `Ganancia por unidad: ${money(v - c)}${isUsd() && rate() ? ` (≈ ${usd((v - c) / rate())})` : ""} · margen ${Math.round(margin(v, c))}%` : (costUsd() !== isUsd() && !rate() ? "Para calcular la ganancia con monedas distintas hace falta la cotización del dólar." : ""); };
     const curUi = () => {
-      f.querySelectorAll("[data-cur-label]").forEach((s) => (s.textContent = `${s.dataset.curLabel} (${isUsd() ? "US$" : "$"})`));
+      f.querySelectorAll("[data-cur-label]").forEach((s) => (s.textContent = `${s.dataset.curLabel} (${(s.dataset.curOf === "costcur" ? costUsd() : isUsd()) ? "US$" : "$"})`));
       const ars = $("edArs"); if (!ars) return;
-      ars.textContent = isUsd() ? (rate() ? `≈ ${money(Math.round(val("price") * rate() / 100) * 100)} en la tienda (se actualiza solo con el dólar)` : "Sin cotización todavía") : '0 = "Consultar precio por WhatsApp"';
+      ars.textContent = isUsd() ? (rate() ? `≈ ${money(Math.round(raw("price", true) * rate() / 100) * 100)} en la tienda (se actualiza solo con el dólar)` : "Sin cotización todavía") : '0 = "Consultar precio por WhatsApp"';
     };
-    const fromMargin = () => { const c = val("cost"); if (c > 0) { const v = c * (1 + num(el("margin").value) / 100); el("price").value = isUsd() ? Math.round(v * 100) / 100 : el("round").checked ? round100(v) : Math.round(v); } profit(); curUi(); };
+    // Precio = costo × (1 + margen), pasado a la moneda de venta
+    const fromMargin = () => { const c = costArs(); if (c > 0) { const vArs = c * (1 + num(el("margin").value) / 100);
+      if (isUsd()) { if (rate()) el("price").value = Math.round((vArs / rate()) * 100) / 100; }
+      else el("price").value = el("round").checked ? round100(vArs) : Math.round(vArs); } profit(); curUi(); };
     if (w) {
       el("cost").addEventListener("input", fromMargin);
       el("margin").addEventListener("input", fromMargin);
-      el("price").addEventListener("input", () => { const c = val("cost"), v = val("price"); if (c > 0 && v > 0) el("margin").value = Math.round(margin(v, c)); profit(); curUi(); });
-      f.querySelectorAll("[name=cur]").forEach((r) => r.addEventListener("change", () => { profit(); curUi(); }));
+      el("price").addEventListener("input", () => { const c = costArs(), v = priceArs(); if (c > 0 && v > 0) el("margin").value = Math.round(margin(v, c)); profit(); curUi(); });
+      // Cambiar la moneda del costo solo cambia cómo se lee ese número; cambiar la de venta recalcula el precio desde el costo y el margen
+      f.querySelectorAll("[name=costcur]").forEach((r) => r.addEventListener("change", fromMargin));
+      f.querySelectorAll("[name=cur]").forEach((r) => r.addEventListener("change", () => { if (costArs() > 0) fromMargin(); else { profit(); curUi(); } }));
       profit(); curUi();
     }
     el("show_stock").addEventListener("change", () => { el("stock").disabled = !el("show_stock").checked; });
@@ -697,7 +709,7 @@
       if (ed.isNew) prod.sort = cache.products.length;
       if (!w) { delete prod.name; }   // moderador (stock.write): solo stock / visibilidad
       const costV = el("cost").value.trim() === "" ? null : val("cost");
-      const cost = w ? { ...(isUsd() ? { cost_usd: costV, cost: costV != null && rate() ? Math.round(costV * rate()) : null } : { cost: costV, cost_usd: null }), supplier: el("supplier").value.trim() || null, notes: el("notes").value.trim() || null } : null;
+      const cost = w ? { ...(costUsd() ? { cost_usd: costV, cost: costV != null && rate() ? Math.round(costV * rate()) : null } : { cost: costV, cost_usd: null }), supplier: el("supplier").value.trim() || null, notes: el("notes").value.trim() || null } : null;
       // Referencias de compra: precio obligatorio (con decimales), link opcional pero válido
       const dec = (v) => { const x = Number(String(v ?? "").replace(/[^\d.,]/g, "").replace(/\.(?=\d{3}(\D|$))/g, "").replace(",", ".")); return isFinite(x) ? x : 0; };
       const bad = ed.sources.find((s) => (s.store || "").trim() && !(dec(s.ref_price) > 0));
