@@ -11,22 +11,25 @@
 
   /* ---------- Vocabulario: lo cargado en productos + lo guardado antes ---------- */
   const store = new Map();   // kind → Map(norm → { value, n })
-  const add = (kind, value, n = 1) => {
+  const add = (kind, value, n = 1, hidden = false) => {
     const v = String(value ?? "").replace(/\s+/g, " ").trim(); if (!v || v.length > 200) return;
     if (!store.has(kind)) store.set(kind, new Map());
     const m = store.get(kind), k = fold(v), cur = m.get(k);
-    if (cur) cur.n += n; else m.set(k, { value: v, n });
+    if (cur) { cur.n += n; if (hidden) cur.hidden = true; } else m.set(k, { value: v, n, hidden });
   };
+  const LS_HIDE = "exe-vocab-hidden";
+  const hiddenSet = () => { try { return new Set(JSON.parse(localStorage.getItem(LS_HIDE) || "[]")); } catch { return new Set(); } };
   const LS = "exe-vocab";
   let loaded = false;
   async function load(seed) {
     seed && seed(add);
     if (loaded) return; loaded = true;
     try { (JSON.parse(localStorage.getItem(LS) || "[]")).forEach(([k, v]) => add(k, v, 0.5)); } catch { /* sin almacenamiento */ }
+    hiddenSet().forEach((key) => { const [k, ...rest] = key.split("|"); add(k, rest.join("|"), 0, true); });
     if (A && !A.demo && sb()) {
       for (let i = 0; ; i += 1000) {
-        const { data, error } = await sb().from("panel_vocab").select("kind, value, uses").range(i, i + 999);
-        if (error || !data) break; data.forEach((r) => add(r.kind, r.value, r.uses || 1)); if (data.length < 1000) break;
+        const { data, error } = await sb().from("panel_vocab").select("kind, value, uses, hidden").range(i, i + 999);
+        if (error || !data) break; data.forEach((r) => add(r.kind, r.value, r.uses || 1, !!r.hidden)); if (data.length < 1000) break;
       }
     }
   }
@@ -34,14 +37,21 @@
   async function remember(pairs) {
     const fresh = pairs.map(([k, v]) => [k, String(v ?? "").replace(/\s+/g, " ").trim()]).filter(([k, v]) => k && v && v.length <= 200);
     if (!fresh.length) return;
-    fresh.forEach(([k, v]) => add(k, v));
+    fresh.forEach(([k, v]) => { add(k, v); const e = store.get(k).get(fold(v)); if (e) e.hidden = false; });   // volver a usarla la vuelve a mostrar
+    try { const h = hiddenSet(); fresh.forEach(([k, v]) => h.delete(k + "|" + v)); localStorage.setItem(LS_HIDE, JSON.stringify([...h])); } catch { /* sin almacenamiento */ }
     try { const old = JSON.parse(localStorage.getItem(LS) || "[]"); localStorage.setItem(LS, JSON.stringify([...old, ...fresh].slice(-3000))); } catch { /* sin almacenamiento */ }
     if (A && !A.demo && sb()) {
-      const rows = [...new Map(fresh.map(([k, v]) => [k + "|" + fold(v), { kind: k.slice(0, 80), norm: fold(v), value: v }])).values()];
-      await sb().from("panel_vocab").upsert(rows, { onConflict: "kind,norm", ignoreDuplicates: true }).then(() => {}, () => {});
+      const rows = [...new Map(fresh.map(([k, v]) => [k + "|" + fold(v), { kind: k.slice(0, 80), norm: fold(v), value: v, hidden: false }])).values()];
+      await sb().from("panel_vocab").upsert(rows, { onConflict: "kind,norm" }).then(() => {}, () => {});
     }
   }
-  const options = (kind) => [...(store.get(kind) || new Map()).values()].sort((a, b) => b.n - a.n || a.value.localeCompare(b.value, "es"));
+  // ✕ en la lista: oculta esa opción para siempre (en la base y en este navegador) hasta que se vuelva a usar
+  async function forget(kind, value) {
+    const e = (store.get(kind) || new Map()).get(fold(value)); if (e) e.hidden = true;
+    try { const h = hiddenSet(); h.add(kind + "|" + value); localStorage.setItem(LS_HIDE, JSON.stringify([...h])); } catch { /* sin almacenamiento */ }
+    if (A && !A.demo && sb()) await sb().from("panel_vocab").upsert({ kind: kind.slice(0, 80), norm: fold(value), value, hidden: true }, { onConflict: "kind,norm" }).then(() => {}, () => {});
+  }
+  const options = (kind) => [...(store.get(kind) || new Map()).values()].filter((o) => !o.hidden).sort((a, b) => b.n - a.n || a.value.localeCompare(b.value, "es"));
   const canonical = (kind, v) => { const hit = (store.get(kind) || new Map()).get(fold(v)); return hit ? hit.value : null; };
 
   /* ---------- Lista desplegable con búsqueda ---------- */
@@ -55,9 +65,12 @@
     if (q) list = list.filter((o) => fold(o.value).includes(q)).sort((a, b) => (fold(b.value).startsWith(q) - fold(a.value).startsWith(q)) || b.n - a.n);
     list = list.slice(0, 40);
     if (!pop) { pop = document.createElement("div"); pop.className = "sg-pop"; pop.setAttribute("role", "listbox"); document.body.appendChild(pop);
-      pop.addEventListener("mousedown", (e) => { const b = e.target.closest("[data-v]"); if (b) { e.preventDefault(); pick(b.dataset.v); } }); }
+      pop.addEventListener("mousedown", (e) => {
+        const x = e.target.closest("[data-x]");
+        if (x) { e.preventDefault(); if (cur) { forget(cur.dataset.suggest, x.dataset.x); render(cur); } return; }
+        const b = e.target.closest("[data-v]"); if (b) { e.preventDefault(); pick(b.dataset.v); } }); }
     const exact = list.some((o) => fold(o.value) === q);
-    pop.innerHTML = (list.length ? list.map((o, i) => `<button type="button" role="option" data-v="${esc(o.value)}" class="${i === idx ? "on" : ""}">${hl(o.value, q)}</button>`).join("")
+    pop.innerHTML = (list.length ? list.map((o, i) => `<div class="sg-opt"><button type="button" role="option" data-v="${esc(o.value)}" class="${i === idx ? "on" : ""}">${hl(o.value, q)}</button><button type="button" class="sg-x" data-x="${esc(o.value)}" title="Borrar esta opción de la lista" aria-label="Borrar ${esc(o.value)} de la lista">✕</button></div>`).join("")
       : "") + (q && !exact ? `<p class="sg-new">＋ “${esc(token(inp).trim())}” se guarda como nueva opción</p>` : "") + (!list.length && !q ? `<p class="sg-new">Todavía no hay opciones guardadas: escribí una y queda para la próxima.</p>` : "");
     const r = inp.getBoundingClientRect();
     Object.assign(pop.style, { left: Math.max(8, Math.min(r.left, innerWidth - Math.max(r.width, 220) - 8)) + "px", top: r.bottom + 4 + "px", width: Math.max(r.width, 220) + "px" });
@@ -136,5 +149,5 @@
     return { out, final: acc };
   }
 
-  window.EXE_SUGGEST = { load, remember, attach, close, canonical, titleCase, sentenceCase, firstUpper, suggest, fold };
+  window.EXE_SUGGEST = { load, remember, forget, attach, close, canonical, titleCase, sentenceCase, firstUpper, suggest, fold };
 })();

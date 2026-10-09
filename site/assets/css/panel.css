@@ -498,3 +498,7 @@ a.kpi-link:hover, a.kpi-link:focus-visible { transform: translateY(-2px); outlin
 .fix-list small { color: var(--c1); font-weight: 700; font-size: .75rem; }
 .fix-list del { color: #dc2626; opacity: .8; }
 .fix-list ins { color: #16a34a; text-decoration: none; font-weight: 600; }
+.sg-opt { display: flex; align-items: stretch; gap: 2px; }
+.sg-opt [data-v] { flex: 1; }
+.sg-x { flex: none; width: 30px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); cursor: pointer; font-size: .8rem; opacity: .55; }
+.sg-x:hover, .sg-x:focus-visible { opacity: 1; color: #dc2626; background: #dc26261a; }
