@@ -75,6 +75,15 @@
   }
 
   // Opciones de venta por producto (se ven en la tabla, el editor y las acciones masivas)
+  // Íconos dibujados para cada opción (más claros que emojis): etiqueta de precio con "?", caja con "?",
+  // carrito con "+", ojo tachado.
+  const svgI = (body) => `<svg class="flag-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+  const FLAG_ICONS = {
+    ask_price: svgI('<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="M9.2 8.6a1.8 1.8 0 1 1 2.6 1.6c-.6.3-.9.7-.9 1.3"/><path d="M10.9 14h.01"/>'),
+    ask_stock: svgI('<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/><path d="M10.4 9.4a1.6 1.6 0 1 1 2.3 1.4"/>'),
+    cart_ok: svgI('<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.4a1.5 1.5 0 0 0 1.5 1.1h8.6a1.5 1.5 0 0 0 1.5-1.2L21 8H6"/><path d="M13.5 9.5v4M11.5 11.5h4"/>'),
+    hide_no_stock: svgI('<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6 0 9.5 7 9.5 7a17 17 0 0 1-2.6 3.5M6.4 6.4A17 17 0 0 0 2.5 12S6 19 12 19a9.6 9.6 0 0 0 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>'),
+  };
   const FLAGS = [
     ["ask_price", "💲", "Consultar precio", "Muestra \"Consultar precio\" en vez del precio"],
     ["ask_stock", "📦", "Consultar stock", "Muestra \"Consultar stock\" en vez del stock (con los dos: \"Consultar precio y stock\")"],
@@ -100,6 +109,48 @@
     { icon: "🏷", name: "Etiquetas", items: [["tagadd", "Agregar una etiqueta", ""], ["tagrm", "Quitar una etiqueta", ""]] },
   ];
   const bkItem = ([k, t, d]) => `<button type="button" role="menuitem" data-bulk="${k}"><b>${esc(t)}</b>${d ? `<small>${esc(d)}</small>` : ""}</button>`;
+  // ---------- Vista previa: cómo se ve el producto en la tienda con la opción apagada y encendida ----------
+  function miniCard(p, f, on) {
+    const img = imgUrl((p.images || [])[0] || p.image) || "../assets/img/placeholder.svg";
+    const price = p.price > 0 ? money(p.price) : "Consultar precio";
+    const noStock = f === "hide_no_stock" || f === "cart_ok";
+    const stockTxt = noStock ? "Sin stock" : p.show_stock ? `${Math.max(1, p.stock)} disponibles` : "Disponible";
+    let priceHtml = `<b class="fp-price">${f === "cart_ok" ? "Consultar precio" : esc(price)}</b>`, stockHtml = `<span class="fp-stock${noStock ? " out" : ""}">${stockTxt}</span>`;
+    let btn = `<span class="fp-btn">Agregar al carrito</span>`, ghost = "";
+    if (f === "ask_price" && on) priceHtml = `<b class="fp-ask">💬 Consultar precio</b>`;
+    if (f === "ask_stock" && on) stockHtml = `<span class="fp-ask">💬 Consultar stock</span>`;
+    if (f === "cart_ok") btn = on ? `<span class="fp-btn">Agregar al carrito</span>` : `<span class="fp-btn wa">Consultar por WhatsApp</span>`;
+    if (f === "hide_no_stock" && on) ghost = `<span class="fp-hidden">🚫 No aparece en la tienda</span>`;
+    return `<div class="fp-card${ghost ? " is-ghost" : ""}"><img src="${esc(img)}" alt="">${ghost}<small class="fp-name">${esc(p.name)}</small>${priceHtml}${stockHtml}${btn}</div>`;
+  }
+  const FLAG_CASE = { cart_ok: "Ejemplo: producto sin precio ni stock", hide_no_stock: "Ejemplo: cuando el stock llega a 0" };
+  function flagPreview(p, f) {
+    const [, , n, d] = FLAGS.find((x) => x[0] === f);
+    return `<div class="fp-head">${FLAG_ICONS[f]}<b>${esc(n)}</b></div><p class="fp-desc">${esc(d)}</p>${FLAG_CASE[f] ? `<p class="fp-case">${FLAG_CASE[f]}</p>` : ""}
+      <div class="fp-pair"><figure><figcaption>Apagado</figcaption>${miniCard(p, f, false)}</figure><figure class="fp-on"><figcaption>Encendido</figcaption>${miniCard(p, f, true)}</figure></div>`;
+  }
+  let fpEl = null, fpTimer = null;
+  function showFlagPreview(target, p, f) {
+    if (!fpEl) { fpEl = document.createElement("div"); fpEl.className = "flag-pop"; fpEl.setAttribute("role", "tooltip"); document.body.appendChild(fpEl); }
+    fpEl.innerHTML = flagPreview(p, f); fpEl.hidden = false;
+    const r = target.getBoundingClientRect(), w = fpEl.offsetWidth, h = fpEl.offsetHeight;
+    const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
+    const top = r.bottom + 8 + h < innerHeight ? r.bottom + 8 : Math.max(8, r.top - h - 8);
+    fpEl.style.left = left + "px"; fpEl.style.top = top + "px";
+  }
+  const hideFlagPreview = () => { clearTimeout(fpTimer); if (fpEl) fpEl.hidden = true; };
+  // Pasar el mouse (o dejar apretado en el celular) sobre un ícono o una acción de "Consultas y carrito" muestra el ejemplo
+  function wireFlagPreviews(root, productOf) {
+    const flagOfEl = (el) => el.dataset.flag || (el.dataset.bulk || "").split(":")[0];
+    const sel = "[data-flag], .bk-menu [data-bulk^='ask_'], .bk-menu [data-bulk^='cart_ok'], .bk-menu [data-bulk^='hide_no_stock']";
+    root.addEventListener("mouseover", (e) => { const t = e.target.closest(sel); if (!t || !root.contains(t)) return; clearTimeout(fpTimer); fpTimer = setTimeout(() => showFlagPreview(t, productOf(t), flagOfEl(t)), 250); });
+    root.addEventListener("mouseout", (e) => { if (e.target.closest(sel) && !e.relatedTarget?.closest?.(sel)) hideFlagPreview(); });
+    root.addEventListener("focusin", (e) => { const t = e.target.closest(sel); if (t) showFlagPreview(t, productOf(t), flagOfEl(t)); });
+    root.addEventListener("focusout", hideFlagPreview);
+    root.addEventListener("touchstart", (e) => { const t = e.target.closest(sel); if (!t) return; clearTimeout(fpTimer); fpTimer = setTimeout(() => showFlagPreview(t, productOf(t), flagOfEl(t)), 450); }, { passive: true });
+    root.addEventListener("touchend", () => setTimeout(hideFlagPreview, 2500), { passive: true });
+    addEventListener("scroll", hideFlagPreview, { passive: true });
+  }
   const flagOn = (p, f) => (f === "cart_ok" ? p.cart_ok !== false : !!p[f]);
 
   /* ---------- Listado ---------- */
@@ -207,7 +258,7 @@
         ${w ? `<td class="${m < 15 ? "pr-low" : ""}">${pct(m)}</td>` : ""}
         <td>${sw ? `<input class="pr-in pr-in-sm" data-f="stock" inputmode="numeric" value="${p.show_stock ? p.stock : ""}" placeholder="∞" title="Vacío = sin control de stock">` : (p.show_stock ? p.stock : "∞")}</td>
         <td>${sw ? `<label class="switch"><input type="checkbox" data-f="active" ${p.active ? "checked" : ""}><span></span></label>` : (p.active ? "Sí" : "No")}</td>
-        <td class="pr-flags">${FLAGS.map(([f, ic, n, d]) => `<button type="button" class="pr-flag ${flagOn(p, f) ? "on" : ""}" data-flag="${f}" title="${esc(n + ": " + d)}" aria-pressed="${flagOn(p, f)}" ${w ? "" : "disabled"}>${ic}</button>`).join("")}</td>
+        <td class="pr-flags">${FLAGS.map(([f, ic, n, d]) => `<button type="button" class="pr-flag ${flagOn(p, f) ? "on" : ""}" data-flag="${f}" aria-label="${esc(n + ": " + d)}" aria-pressed="${flagOn(p, f)}" ${w ? "" : "disabled"}>${FLAG_ICONS[f]}</button>`).join("")}</td>
         <td class="pr-actions"><a href="#editar/${encodeURIComponent(p.id)}" title="Editar">✏️</a>${w ? `<button class="link-btn" data-dup title="Duplicar">⧉</button>` : ""}<a class="pr-view" href="../index.html#producto/${encodeURIComponent(p.id)}" target="_blank" rel="noopener" title="${p.active ? "Ver el producto como lo ve un cliente" : "Está oculto: los clientes no lo ven. Activalo para verlo en la tienda."}">👁 Ver</a></td>
       </tr>`;
     }).join("") || `<tr><td colspan="11" class="pr-empty">No hay productos con ese filtro.</td></tr>`;
@@ -257,6 +308,8 @@
         const patch = p.price_usd != null ? { price_usd: null, price: round100(p.price_usd * fx) } : { price_usd: p.price > 0 ? Math.round((p.price / fx) * 100) / 100 : 0 };
         try { await patchProduct(id, patch); if (patch.price_usd != null) p.price = p.price || 0; renderRows(); } catch (err) { A.alertView("No se pudo cambiar la moneda: " + err.message); } return; }
       const b = e.target.closest("[data-dup]"); if (b) duplicate(b.closest("tr").dataset.id); });
+    wireFlagPreviews($("prRows"), (t) => cache.products.find((x) => x.id === t.closest("tr")?.dataset.id) || cache.products[0]);
+    wireFlagPreviews($("prBulk"), () => cache.products.find((x) => listState.sel.has(x.id)) || cache.products[0]);
     const bar = $("prBulk");
     const closeMenus = () => bar.querySelectorAll(".bk-menu").forEach((m) => { m.hidden = true; const t = m.previousElementSibling; if (t) t.setAttribute("aria-expanded", "false"); });
     bar.addEventListener("click", (e) => {
@@ -443,7 +496,7 @@
             <label class="field">Peso (kg, para envíos)<input name="weight_kg" inputmode="decimal" value="${p.weight_kg ?? 1}" ${ro}></label>
             <label class="field">Ubicación en depósito (sale en la lista de armado)<input name="location" maxlength="40" placeholder="Ej: Estante A2" value="${esc(p.location || "")}" ${ro}></label>
           </div>
-          <div class="ed-flags">${FLAGS.map(([f, ic, n, d]) => `<label class="ed-flag"><input type="checkbox" name="${f}" ${flagOn(p, f) ? "checked" : ""} ${ro}><span><b>${ic} ${n}</b><small>${d}</small></span></label>`).join("")}</div>
+          <div class="ed-flags">${FLAGS.map(([f, ic, n, d]) => `<label class="ed-flag"><input type="checkbox" name="${f}" ${flagOn(p, f) ? "checked" : ""} ${ro}><span><b>${FLAG_ICONS[f]} ${n}</b><small>${d}</small></span></label>`).join("")}</div>
         </section>
 
         <section class="panel ed-sec"><h3>4. Fotos</h3>
