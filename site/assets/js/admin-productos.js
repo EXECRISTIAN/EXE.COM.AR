@@ -81,6 +81,25 @@
     ["cart_ok", "🛒", "Carrito sin precio/stock", "Se puede agregar al carrito aunque no tenga precio o stock (si no, solo \"Consultar por WhatsApp\")"],
     ["hide_no_stock", "🙈", "Ocultar sin stock", "No se muestra en la tienda cuando el stock llega a 0"],
   ];
+  // Acciones masivas agrupadas por tema (con buscador): fácil de encontrar para cualquier empleado
+  const BULK_GROUPS = [
+    { icon: "💲", name: "Precio", items: [
+      ["pct", "Subir o bajar un %", "Ej: +10 sube 10 %, -5 baja 5 %"], ["amt", "Sumar o restar un monto", "En la moneda de cada producto"],
+      ["set", "Fijar un precio", "El mismo precio para todos"], ["round", "Redondear precios", "A $100 o al número que elijas"],
+      ["margin", "Aplicar margen sobre el costo", "Precio = costo + margen %"], ["ref", "Precio = referencia + %", "Desde el precio de compra de referencia"],
+      ["consult", "Poner \"a consultar\"", "Precio 0: se consulta por WhatsApp"]] },
+    { icon: "💱", name: "Moneda de venta", items: [
+      ["toars", "Vender en pesos", "Convierte con la cotización vigente"], ["tousd", "Vender en dólares", "El precio en pesos sigue al dólar solo"]] },
+    { icon: "👁", name: "Visibilidad", items: [
+      ["on", "Mostrar en la tienda", "Activa los productos"], ["off", "Ocultar de la tienda", "Desactiva los productos"],
+      ["hide_no_stock:1", "Ocultar cuando no hay stock", ""], ["hide_no_stock:0", "Mostrar aunque no haya stock", ""]] },
+    { icon: "💬", name: "Consultas y carrito", items: [
+      ["ask_price:1", "Mostrar \"Consultar precio\"", "En vez del precio"], ["ask_price:0", "Mostrar el precio", "Quita \"Consultar precio\""],
+      ["ask_stock:1", "Mostrar \"Consultar stock\"", "En vez del stock"], ["ask_stock:0", "Mostrar el stock", "Quita \"Consultar stock\""],
+      ["cart_ok:1", "Permitir carrito sin precio/stock", ""], ["cart_ok:0", "Solo \"Consultar por WhatsApp\"", "Si no tiene precio o stock"]] },
+    { icon: "🏷", name: "Etiquetas", items: [["tagadd", "Agregar una etiqueta", ""], ["tagrm", "Quitar una etiqueta", ""]] },
+  ];
+  const bkItem = ([k, t, d]) => `<button type="button" role="menuitem" data-bulk="${k}"><b>${esc(t)}</b>${d ? `<small>${esc(d)}</small>` : ""}</button>`;
   const flagOn = (p, f) => (f === "cart_ok" ? p.cart_ok !== false : !!p[f]);
 
   /* ---------- Listado ---------- */
@@ -130,21 +149,11 @@
       <div class="pr-selbar"><span id="prCount"></span> <button class="link-btn" id="prSelAll" type="button">Seleccionar todos los filtrados</button></div>
       <div class="pr-bulk" id="prBulk" hidden>
         <b id="prBulkN"></b>
-        ${w ? `<button class="btn btn-outline" data-bulk="on">Activar</button>
-        <button class="btn btn-outline" data-bulk="off">Desactivar</button>
-        <button class="btn btn-outline" data-bulk="pct">Subir/bajar precio %</button>
-        <button class="btn btn-outline" data-bulk="amt">Sumar/restar $</button>
-        <button class="btn btn-outline" data-bulk="set">Fijar precio</button>
-        <button class="btn btn-outline" data-bulk="round">Redondear precios</button>
-        ${w ? `<button class="btn btn-outline" data-bulk="ref">Precio = referencia + %</button>
-        <button class="btn btn-outline" data-bulk="tousd">Pasar a dólares</button>
-        <button class="btn btn-outline" data-bulk="toars">Pasar a pesos</button>` : ""}
-        ${FLAGS.map(([f, ic, n]) => `<span class="pr-bulk-flag">${ic} ${n}: <button class="link-btn" data-bulk="${f}:1">Activar</button> / <button class="link-btn" data-bulk="${f}:0">Desactivar</button></span>`).join("")}
-        <button class="btn btn-outline" data-bulk="margin">Aplicar margen sobre costo</button>
-        <button class="btn btn-outline" data-bulk="consult">Poner "a consultar"</button>
-        <button class="btn btn-outline" data-bulk="tagadd">🏷 Agregar etiqueta</button>
-        <button class="btn btn-outline" data-bulk="tagrm">Quitar etiqueta</button>
-        <button class="btn btn-outline danger" data-bulk="delete">Eliminar</button>` : ""}
+        ${w ? `<input type="search" class="pr-in bk-search" id="bkSearch" placeholder="🔍 Buscar acción (ej: dólares, etiqueta, ocultar…)" aria-label="Buscar una acción para los seleccionados">
+        ${BULK_GROUPS.map((g, i) => `<div class="bk-group"><button type="button" class="btn btn-outline bk-toggle" data-bk-open="${i}" aria-expanded="false" aria-haspopup="true">${g.icon} ${g.name} ▾</button>
+          <div class="bk-menu" hidden role="menu">${g.items.map(bkItem).join("")}</div></div>`).join("")}
+        <button class="btn btn-outline danger" data-bulk="delete">🗑 Eliminar</button>
+        <div class="bk-menu bk-results" id="bkResults" hidden role="menu"></div>` : ""}
         <button class="link-btn" data-bulk="clear">Quitar selección</button>
       </div>
       <div class="panel pr-table-wrap"><table class="table pr-table">
@@ -193,7 +202,8 @@
         ${w ? `<td><input class="pr-in" data-f="cost" inputmode="numeric" value="${c ?? ""}" placeholder="—"></td>` : ""}
         <td>${p.price_usd != null
           ? (w ? `<input class="pr-in" data-f="price_usd" inputmode="decimal" value="${p.price_usd}" title="Precio en dólares"><small class="pr-meta">US$ → ${p.price ? money(p.price) : "sin cotización"}</small>` : `${usd(p.price_usd)}<small class="pr-meta">${money(p.price)}</small>`)
-          : (w ? `<input class="pr-in" data-f="price" inputmode="numeric" value="${p.price || 0}">` : (p.price ? money(p.price) : "Consultar"))}</td>
+          : (w ? `<input class="pr-in" data-f="price" inputmode="numeric" value="${p.price || 0}">` : (p.price ? money(p.price) : "Consultar"))}
+          ${w ? `<button type="button" class="pr-curbtn" data-curswap title="Cambiar la moneda de venta de este producto">${p.price_usd != null ? "US$ → $" : "$ → US$"}</button>` : ""}</td>
         ${w ? `<td class="${m < 15 ? "pr-low" : ""}">${pct(m)}</td>` : ""}
         <td>${sw ? `<input class="pr-in pr-in-sm" data-f="stock" inputmode="numeric" value="${p.show_stock ? p.stock : ""}" placeholder="∞" title="Vacío = sin control de stock">` : (p.show_stock ? p.stock : "∞")}</td>
         <td>${sw ? `<label class="switch"><input type="checkbox" data-f="active" ${p.active ? "checked" : ""}><span></span></label>` : (p.active ? "Sí" : "No")}</td>
@@ -241,8 +251,30 @@
       const fl = e.target.closest("[data-flag]");
       if (fl) { const id = fl.closest("tr").dataset.id, f = fl.dataset.flag, p = cache.products.find((x) => x.id === id), v = !flagOn(p, f);
         try { await patchProduct(id, { [f]: v }); fl.classList.toggle("on", v); fl.setAttribute("aria-pressed", v); flash(fl, true); } catch (err) { flash(fl, false); A.alertView("No se pudo guardar: " + err.message); } return; }
+      const cs = e.target.closest("[data-curswap]");
+      if (cs) { const id = cs.closest("tr").dataset.id, p = cache.products.find((x) => x.id === id), fx = rate();
+        if (!fx) return A.alertView("Todavía no hay cotización del dólar: configurala en 💵 Dólar.");
+        const patch = p.price_usd != null ? { price_usd: null, price: round100(p.price_usd * fx) } : { price_usd: p.price > 0 ? Math.round((p.price / fx) * 100) / 100 : 0 };
+        try { await patchProduct(id, patch); if (patch.price_usd != null) p.price = p.price || 0; renderRows(); } catch (err) { A.alertView("No se pudo cambiar la moneda: " + err.message); } return; }
       const b = e.target.closest("[data-dup]"); if (b) duplicate(b.closest("tr").dataset.id); });
-    $("prBulk").addEventListener("click", (e) => { const b = e.target.closest("[data-bulk]"); if (b) bulk(b.dataset.bulk); });
+    const bar = $("prBulk");
+    const closeMenus = () => bar.querySelectorAll(".bk-menu").forEach((m) => { m.hidden = true; const t = m.previousElementSibling; if (t) t.setAttribute("aria-expanded", "false"); });
+    bar.addEventListener("click", (e) => {
+      const t = e.target.closest("[data-bk-open]");
+      if (t) { const m = t.nextElementSibling, open = m.hidden; closeMenus(); m.hidden = !open; t.setAttribute("aria-expanded", String(open)); return; }
+      const b = e.target.closest("[data-bulk]"); if (b) { closeMenus(); if ($("bkSearch")) $("bkSearch").value = ""; bulk(b.dataset.bulk); }
+    });
+    document.addEventListener("click", (e) => { if (!e.target.closest("#prBulk")) closeMenus(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenus(); });
+    if ($("bkSearch")) $("bkSearch").addEventListener("input", (e) => {
+      const q = e.target.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); const box = $("bkResults");
+      closeMenus();
+      if (!q) return;
+      const all = BULK_GROUPS.flatMap((g) => g.items.map((it) => [it, `${g.name} ${it[1]} ${it[2]}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")]));
+      const hits = all.filter(([, txt]) => q.split(/\s+/).every((w) => txt.includes(w)));
+      box.innerHTML = hits.length ? hits.map(([it]) => bkItem(it)).join("") : "<p class=\"bk-none\">No hay acciones con esas palabras.</p>";
+      box.hidden = false;
+    });
   }
   async function saveCost(id, fields) {
     const cur = cache.costs.get(id) || { product_id: id };

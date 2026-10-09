@@ -432,3 +432,18 @@ a.kpi-link:hover, a.kpi-link:focus-visible { transform: translateY(-2px); outlin
 .ed-curpick label:has(input:checked) { background: var(--surface); color: var(--c2); box-shadow: 0 1px 3px #0002; }
 .ed-curpick label:has(input:focus-visible) { outline: 2px solid var(--c1); }
 .ed-sec .ed-grid-4 { align-items: start; }
+/* Acciones masivas: menús por tema + buscador */
+.pr-bulk { position: relative; }
+.bk-search { flex: 1 1 260px; min-width: 0; max-width: 380px; }
+.bk-group { position: relative; }
+.bk-toggle[aria-expanded="true"] { background: var(--c2); color: var(--bg); }
+.bk-menu { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; min-width: 270px; max-width: min(360px, 90vw); max-height: 60vh; overflow: auto; display: grid; gap: 2px; padding: 6px; border-radius: 12px; background: var(--surface); border: 1px solid var(--c6); box-shadow: 0 16px 32px -12px var(--shadow); }
+.bk-menu[hidden] { display: none; }
+.bk-menu button { display: grid; gap: 1px; text-align: left; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--c2); font: inherit; cursor: pointer; }
+.bk-menu button:hover, .bk-menu button:focus-visible { background: var(--c4); }
+.bk-menu button b { font-weight: 600; font-size: .9rem; }
+.bk-menu button small { color: var(--muted); font-size: .78rem; }
+.bk-results { left: 12px; top: 100%; }
+.bk-none { margin: 6px 10px; color: var(--muted); font-size: .85rem; }
+.pr-curbtn { display: block; margin-top: 4px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--c6); background: transparent; color: var(--muted); font-size: .72rem; font-weight: 600; cursor: pointer; }
+.pr-curbtn:hover { color: var(--c1); border-color: var(--c1); }
