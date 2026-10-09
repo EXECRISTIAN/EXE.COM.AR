@@ -447,7 +447,7 @@
     const m = margin(p.price, c.cost);
     const ro = w ? "" : "disabled";
     return `
-      <form id="edForm" class="ed" autocomplete="off">
+      <form id="edForm" class="ed" autocomplete="off" spellcheck="true" lang="es">
         <div class="ed-bar">
           <a class="btn btn-outline" href="#productos">← Volver a productos</a>
           ${isNew ? "" : `<a class="btn btn-outline" href="../index.html#producto/${encodeURIComponent(p.id)}" target="_blank" rel="noopener" title="${p.active ? "Abre la ficha tal como la ve un cliente" : "Está oculto: guardalo como visible para verlo en la tienda"}">👁 Ver como cliente${p.active ? "" : " (oculto)"}</a>`}
@@ -458,21 +458,19 @@
         </div>
         <p class="notice" id="edMsg" hidden></p>
 
-        <section class="panel ed-sec"><h3>1. Datos básicos</h3>
+        <section class="panel ed-sec"><h3>Datos básicos</h3>
           <div class="ed-grid">
-            <label class="field ed-wide">Nombre del producto *<input name="name" required value="${esc(p.name)}" placeholder="Ej: Placa de Video MSI GeForce RTX 3060 12GB" ${ro}></label>
+            <label class="field ed-wide"><span class="ed-lbl">Nombre del producto * ${w ? '<button type="button" class="link-btn ed-fix" data-fix="name">✨ Sugerir correcciones</button>' : ""}</span><input name="name" required value="${esc(p.name)}" placeholder="Ej: Placa de Video MSI GeForce RTX 3060 12GB" ${ro}></label>
             <label class="field">Código (para el link)<input name="id" value="${esc(p.id)}" ${isNew ? "" : "readonly"} placeholder="se genera solo desde el nombre" pattern="[a-z0-9\-]+"><small>${isNew ? "Solo minúsculas, números y guiones." : "No se puede cambiar (lo usan los links y pedidos)."}</small></label>
-            <label class="field">Marca<input name="brand" list="edBrands" value="${esc(p.brand || "")}" ${ro}></label>
-            <label class="field">Categoría<input name="category" list="edCats" value="${esc(p.category || "")}" placeholder="Elegí o escribí una nueva" ${ro}></label>
-            <label class="field ed-wide">Etiquetas (separadas por coma)<input name="tags" list="edTags" value="${esc((p.tags || []).join(", "))}" placeholder="Ej: Gamer, Oferta, Oficina" ${ro}><small>Se muestran en la tienda y sirven para filtrar. Existentes: ${[...new Set(products.flatMap((x) => x.tags || []))].sort().map(esc).join(", ") || "ninguna"}</small></label>
+            <label class="field">Marca<input name="brand" data-suggest="brand" value="${esc(p.brand || "")}" placeholder="Elegí o escribí una nueva" ${ro}></label>
+            <label class="field">Categoría<input name="category" data-suggest="category" value="${esc(p.category || "")}" placeholder="Elegí o escribí una nueva" ${ro}></label>
+            <label class="field ed-wide">Etiquetas (separadas por coma)<input name="tags" data-suggest="tag" data-suggest-multi="1" value="${esc((p.tags || []).join(", "))}" placeholder="Ej: Gamer, Oferta, Oficina" ${ro}><small>Se muestran en la tienda y sirven para filtrar. Existentes: ${[...new Set(products.flatMap((x) => x.tags || []))].sort().map(esc).join(", ") || "ninguna"}</small></label>
             <label class="field ed-check"><input type="checkbox" name="outlet" ${p.outlet ? "checked" : ""} ${ro}> Es producto outlet</label>
-            <label class="field">Estado / condición<input name="condition" value="${esc(p.condition || "")}" placeholder="Ej: Sin caja, con cooler" ${ro}></label>
+            <label class="field">Estado / condición<input name="condition" data-suggest="condition" value="${esc(p.condition || "")}" placeholder="Ej: Sin caja, con cooler" ${ro}></label>
           </div>
-          <datalist id="edBrands">${brands.map((b) => `<option value="${esc(b)}">`).join("")}</datalist>
-          <datalist id="edCats">${cats.map((b) => `<option value="${esc(b)}">`).join("")}</datalist>
         </section>
 
-        <section class="panel ed-sec"><h3>2. Precio</h3>
+        <section class="panel ed-sec"><h3>Precio</h3>
           ${w ? `<p class="ed-hint" id="edFx">${rate() ? `Cotización vigente: ${money(rate())} por dólar. El costo y la venta pueden estar en monedas distintas: el margen y la ganancia se calculan convirtiendo con esta cotización.` : "Todavía no hay cotización: configurala en 💵 Dólar."}</p>` : ""}
           <div class="ed-grid ed-grid-4">
             ${w ? `<div class="field"><span data-cur-label="Costo de compra" data-cur-of="costcur">Costo de compra ($)</span><input name="cost" inputmode="decimal" value="${c.cost_usd != null ? c.cost_usd : (c.cost ?? "")}" placeholder="Solo lo ven admins" aria-label="Costo de compra">
@@ -484,22 +482,27 @@
             ${w ? `<label class="field ed-check"><input type="checkbox" name="round" checked> Redondear a $100</label>` : ""}
           </div>
           ${w ? `<p class="ed-hint" id="edProfit"></p>
-          <div class="ed-grid"><label class="field">Proveedor<input name="supplier" value="${esc(c.supplier || "")}" placeholder="Solo lo ven admins"></label>
+          <div class="ed-grid"><label class="field">Proveedor<input name="supplier" data-suggest="supplier" value="${esc(c.supplier || "")}" placeholder="Solo lo ven admins"></label>
           <label class="field">Notas internas<input name="notes" value="${esc(c.notes || "")}" placeholder="Solo lo ven admins"></label></div>` : ""}
         </section>
 
-        <section class="panel ed-sec"><h3>3. Stock y visibilidad</h3>
+        ${w ? `<section class="panel ed-sec"><h3>Precio de referencia (solo admins)</h3>
+          <p class="ed-hint">Dónde lo comprás y a cuánto. Se ve en la ficha solo con sesión de administrador.</p>
+          <div id="edSources"></div>
+          <button class="btn btn-outline" type="button" id="edAddSrc">＋ Agregar referencia</button>
+        </section>` : ""}
+        <section class="panel ed-sec"><h3>Stock y visibilidad</h3>
           <div class="ed-grid ed-grid-4">
             <label class="field ed-check"><input type="checkbox" name="show_stock" ${p.show_stock ? "checked" : ""}> Controlar stock</label>
             <label class="field">Unidades<input name="stock" inputmode="numeric" value="${p.show_stock ? p.stock : ""}"></label>
             <label class="field ed-check"><input type="checkbox" name="active" ${p.active ? "checked" : ""}> Visible en la tienda</label>
             <label class="field">Peso (kg, para envíos)<input name="weight_kg" inputmode="decimal" value="${p.weight_kg ?? 1}" ${ro}></label>
-            <label class="field">Ubicación en depósito (sale en la lista de armado)<input name="location" maxlength="40" placeholder="Ej: Estante A2" value="${esc(p.location || "")}" ${ro}></label>
+            <label class="field">Ubicación en depósito (sale en la lista de armado)<input name="location" data-suggest="location" maxlength="40" placeholder="Ej: Estante A2" value="${esc(p.location || "")}" ${ro}></label>
           </div>
           <div class="ed-flags">${FLAGS.map(([f, ic, n, d]) => `<label class="ed-flag"><input type="checkbox" name="${f}" ${flagOn(p, f) ? "checked" : ""} ${ro}><span><b>${FLAG_ICONS[f]} ${n}</b><small>${d}</small></span></label>`).join("")}</div>
         </section>
 
-        <section class="panel ed-sec"><h3>4. Fotos</h3>
+        <section class="panel ed-sec"><h3>Fotos</h3>
           <p class="ed-hint">La primera es la principal. Arrastrá fotos acá, pegalas (Ctrl+V) o elegilas. Se achican y convierten solas (WebP, máx. 1200 px) para que la web cargue rápido.</p>
           <div class="ed-photos" id="edPhotos"></div>
           ${w ? `<div class="ed-drop" id="edDrop"><input type="file" id="edFile" accept="image/*" multiple hidden>
@@ -513,25 +516,21 @@
               <div id="edMakerOut"></div></div>` : ""}
         </section>
 
-        <section class="panel ed-sec"><h3>5. Descripción</h3>
-          <label class="field"><textarea name="description" rows="6" placeholder="Para qué sirve, qué incluye, con qué combina…" ${ro}>${esc(p.description || "")}</textarea></label>
+        <section class="panel ed-sec"><h3>Descripción</h3>
+          ${w ? '<div class="ed-fixrow"><button type="button" class="link-btn ed-fix" data-fix="description">✨ Sugerir correcciones</button></div>' : ""}<label class="field"><textarea name="description" rows="6" placeholder="Para qué sirve, qué incluye, con qué combina…" ${ro}>${esc(p.description || "")}</textarea></label>
           ${w ? `<div class="ed-quick"><span>Frases rápidas:</span>
             <button type="button" class="link-btn" data-snip="Producto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.">Outlet</button>
             <button type="button" class="link-btn" data-snip="Producto nuevo, sellado, con garantía oficial.">Nuevo con garantía</button>
             <button type="button" class="link-btn" data-snip="Envíos a todo el país. Consultá disponibilidad por WhatsApp.">Envíos</button></div>` : ""}
         </section>
 
-        <section class="panel ed-sec"><h3>6. Especificaciones</h3>
+        <section class="panel ed-sec"><h3>Especificaciones</h3>
           <div id="edSpecs"></div>
           ${w ? `<div class="ed-row-btns"><button class="btn btn-outline" type="button" id="edAddSec">＋ Agregar sección</button>
-            <button class="btn btn-outline" type="button" id="edPasteSpecs">📋 Pegar ficha técnica como texto</button></div>` : ""}
+            <button class="btn btn-outline" type="button" id="edPasteSpecs">📋 Pegar ficha técnica como texto</button>
+            <button class="btn btn-outline ed-fix" type="button" data-fix="specs">✨ Sugerir correcciones</button></div>` : ""}
         </section>
 
-        ${w ? `<section class="panel ed-sec"><h3>7. Precio de referencia (solo admins)</h3>
-          <p class="ed-hint">Dónde lo comprás y a cuánto. Se ve en la ficha solo con sesión de administrador.</p>
-          <div id="edSources"></div>
-          <button class="btn btn-outline" type="button" id="edAddSrc">＋ Agregar referencia</button>
-        </section>` : ""}
         <div class="ed-bar ed-bar-bottom"><span class="ed-spacer"></span>${w ? `<button class="btn btn-outline" type="submit" data-next="new">Guardar y crear otro</button>` : ""}<button class="btn btn-primary" type="submit">Guardar</button></div>
       </form>`;
   };
@@ -547,8 +546,8 @@
   function renderSpecs() {
     const ro = can("products.write") ? "" : "disabled";
     $("edSpecs").innerHTML = ed.specs.map((s, i) => `<div class="ed-spec" data-s="${i}">
-      <div class="ed-spec-head"><input class="pr-in" data-st value="${esc(s.title)}" placeholder="Título de la sección (ej: Memoria)" ${ro}>${ro ? "" : `<button type="button" class="link-btn" data-srm>Quitar sección</button>`}</div>
-      ${s.rows.map((r, j) => `<div class="ed-spec-row" data-r="${j}"><input class="pr-in" data-k value="${esc(r[0])}" placeholder="Dato (ej: Capacidad)" ${ro}><input class="pr-in" data-v value="${esc(r[1])}" placeholder="Valor (ej: 16 GB)" ${ro}>${ro ? "" : `<button type="button" class="link-btn" data-rrm title="Quitar fila">✕</button>`}</div>`).join("")}
+      <div class="ed-spec-head"><input class="pr-in" data-st data-suggest="spec_title" value="${esc(s.title)}" placeholder="Título de la sección (ej: Memoria)" ${ro}>${ro ? "" : `<button type="button" class="link-btn" data-srm>Quitar sección</button>`}</div>
+      ${s.rows.map((r, j) => `<div class="ed-spec-row" data-r="${j}"><input class="pr-in" data-k data-suggest="spec_key" value="${esc(r[0])}" placeholder="Dato (ej: Capacidad)" ${ro}><input class="pr-in" data-v data-suggest="spec_val" value="${esc(r[1])}" placeholder="Valor (ej: 16 GB)" ${ro}>${ro ? "" : `<button type="button" class="link-btn" data-rrm title="Quitar fila">✕</button>`}</div>`).join("")}
       ${ro ? "" : `<button type="button" class="link-btn" data-radd>＋ Agregar fila</button>`}
     </div>`).join("") || `<p class="ed-hint">Sin especificaciones. Agregá una sección o pegá la ficha técnica como texto.</p>`;
   }
@@ -557,7 +556,7 @@
   function renderSources() {
     const box = $("edSources"); if (!box) return;
     box.innerHTML = ed.sources.map((s, i) => `<div class="ed-src" data-x="${i}">
-      <input class="pr-in" data-sf="store" value="${esc(s.store || "")}" placeholder="Tienda (ej: CompraGamer)">
+      <input class="pr-in" data-sf="store" data-suggest="store" value="${esc(s.store || "")}" placeholder="Tienda (ej: CompraGamer)">
       <input class="pr-in" data-sf="url" value="${esc(s.url || "")}" placeholder="https://… link del producto">
       <span class="ed-src-money"><input class="pr-in" data-sf="ref_price" inputmode="decimal" value="${s.ref_price ?? ""}" placeholder="Precio de compra" title="Precio de compra del producto"><select class="pr-in pr-cur" data-sf="currency" title="Moneda">${["ARS", "USD"].map((c) => `<option ${(s.currency || "ARS") === c ? "selected" : ""}>${c}</option>`).join("")}</select></span>
       <span class="ed-src-money"><select class="pr-in pr-ship" data-sf="ship_mode" title="Envío">${[["ask", "Envío: a consultar"], ["free", "Envío gratis"], ["cost", "Envío con costo"]].map(([v, t]) => `<option value="${v}" ${shipMode(s) === v ? "selected" : ""}>${t}</option>`).join("")}</select></span>
@@ -683,9 +682,64 @@
     renderSpecs();
   }
 
+  /* ---------- Ayudas de escritura: listas con lo cargado antes, mayúsculas y correcciones ---------- */
+  const SG = () => window.EXE_SUGGEST;
+  const vocabSeed = (add) => {
+    const { products, costs, sources } = cache;
+    products.forEach((x) => { add("brand", x.brand); add("category", x.category); add("condition", x.condition); add("location", x.location); (x.tags || []).forEach((t) => add("tag", t));
+      (x.specs || []).forEach((sec) => { add("spec_title", sec.title); (sec.rows || []).forEach(([k, v]) => { add("spec_key", k); add("spec_val:" + SG().fold(k), v); }); }); });
+    costs.forEach((c) => add("supplier", c.supplier));
+    sources.forEach((list) => list.forEach((r) => add("store", r.store)));
+  };
+  function rememberProduct(prod, cost) {
+    if (!SG()) return;
+    const pairs = [["brand", prod.brand], ["category", prod.category], ["condition", prod.condition], ["location", prod.location], ...(prod.tags || []).map((t) => ["tag", t]),
+      ...(cost && cost.supplier ? [["supplier", cost.supplier]] : []), ...ed.sources.map((x) => ["store", x.store])];
+    (prod.specs || []).forEach((sec) => { pairs.push(["spec_title", sec.title]); sec.rows.forEach(([k, v]) => { pairs.push(["spec_key", k], ["spec_val:" + SG().fold(k), v]); }); });
+    SG().remember(pairs);
+  }
+  function wireWriting(f, w) {
+    if (!SG() || !w) return;
+    SG().load(vocabSeed);
+    // El valor de una especificación sugiere lo usado antes para ese mismo dato (ej: "Capacidad" → 16 GB, 32 GB…)
+    f.addEventListener("focusin", (e) => { const v = e.target.closest("[data-v]"); if (v) v.dataset.suggest = "spec_val:" + SG().fold(v.closest(".ed-spec-row").querySelector("[data-k]").value); }, true);
+    SG().attach(f);
+    // Mayúsculas automáticas al salir del campo
+    f.addEventListener("focusout", (e) => {
+      const t = e.target; if (!(t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) || !t.value.trim()) return;
+      const before = t.value;
+      if (t.name === "name") t.value = SG().titleCase(t.value);
+      else if (t.name === "brand") t.value = SG().canonical("brand", t.value) || SG().firstUpper(t.value.trim());
+      else if (["category", "condition", "supplier", "location"].includes(t.name) || t.matches("[data-st],[data-k],[data-sf=store]")) t.value = SG().canonical(t.dataset.suggest || t.name, t.value) || SG().firstUpper(t.value.trim());
+      else if (t.name === "tags") t.value = t.value.split(",").map((x) => x.trim()).filter(Boolean).map((x) => SG().canonical("tag", x) || SG().firstUpper(x)).join(", ");
+      else if (t.name === "description") t.value = SG().sentenceCase(t.value);
+      if (t.value !== before) t.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    // "✨ Sugerir correcciones": muestra cada cambio propuesto y se aplica con un clic
+    f.addEventListener("click", (e) => { const b = e.target.closest("[data-fix]"); if (b) fixDialog(b.dataset.fix, f); });
+  }
+  function fixDialog(kind, f) {
+    const targets = kind === "specs" ? [...f.querySelectorAll("[data-st],[data-k],[data-v]")].filter((i) => i.value.trim()) : [f.elements[kind]];
+    const items = [];
+    targets.forEach((inp) => { const r = SG().suggest(kind === "name" ? "name" : "text", inp.value); if (r.final !== inp.value) items.push({ inp, ...r }); });
+    const d = document.createElement("dialog"); d.className = "confirm fix-dlg";
+    d.innerHTML = `<form method="dialog"><h2>✨ Correcciones sugeridas</h2>
+      ${items.length ? `<p class="fix-sub">Elegí cuáles aplicar. Nada cambia hasta que tocás “Aplicar”.</p><ul class="fix-list">${items.map((it, i) => `<li><label><input type="checkbox" data-i="${i}" checked>
+        <span><small>${esc(it.out.map((o) => o.label).join(" · "))}</small><del>${esc(it.inp.value)}</del><ins>${esc(it.final)}</ins></span></label></li>`).join("")}</ul>`
+      : `<p>¡Está todo bien escrito! No hay correcciones para sugerir.</p>`}
+      <p class="fix-note">Además, el navegador subraya en rojo las palabras mal escritas: clic derecho no está disponible, así que corregilas escribiendo encima.</p>
+      <div class="confirm-actions"><button class="btn btn-outline" value="cancel">${items.length ? "Cancelar" : "Cerrar"}</button>${items.length ? '<button class="btn btn-primary" value="ok">Aplicar</button>' : ""}</div></form>`;
+    document.body.appendChild(d); d.showModal();
+    d.addEventListener("close", () => {
+      if (d.returnValue === "ok") d.querySelectorAll("[data-i]:checked").forEach((c) => { const it = items[+c.dataset.i]; it.inp.value = it.final; it.inp.dispatchEvent(new Event("input", { bubbles: true })); it.inp.dispatchEvent(new Event("change", { bubbles: true })); });
+      d.remove();
+    });
+  }
+
   function bindEditor() {
     const f = $("edForm"); const w = can("products.write");
     const el = (n) => f.elements[n];
+    wireWriting(f, w);
     // Nombre → código automático (solo productos nuevos)
     if (ed.isNew) el("name").addEventListener("input", () => { if (!el("id").dataset.touched) el("id").value = slug(el("name").value); });
     if (ed.isNew) el("id").addEventListener("input", () => (el("id").dataset.touched = "1"));
@@ -805,7 +859,7 @@
       if (badUrl) return msg(`El link de "${badUrl.store || "la referencia"}" tiene que empezar con https://`, "error");
       try {
         msg("Guardando…", "info");
-        if (w) await saveProduct(prod, cost);
+        if (w) { await saveProduct(prod, cost); rememberProduct(prod, cost); }
         else await patchProduct(ed.orig, { show_stock: prod.show_stock, stock: prod.stock, active: prod.active });
         if (w && !A.demo) {
           for (const sid of ed.removedSources) await sb().from("product_sources").delete().eq("id", sid);
