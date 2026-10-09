@@ -1,8 +1,8 @@
 // Barrera básica contra curiosos: bloquea los atajos de las herramientas de desarrollador y el clic
 // derecho. No es seguridad real (el menú del navegador siempre permite abrirlas): la protección de
-// verdad está en el servidor. No se carga en el panel.
+// verdad está en el servidor. Se carga primero en TODAS las páginas (tools/csp.py lo exige en el deploy).
 (() => {
-  document.addEventListener("keydown", (e) => {
+  window.addEventListener("keydown", (e) => {
     // e.code no cambia con Alt/Opción (en Mac Opción+C da "ç"), así que se compara por tecla física.
     const k = e.key === "F12" ? "f12" : (e.code || "").replace(/^Key/, "").toLowerCase();
     const mod = e.ctrlKey || e.metaKey;
@@ -13,9 +13,7 @@
       (mod && !e.shiftKey && !e.altKey && ["u", "s"].includes(k)); // ver código fuente / guardar página
     if (blocked) { e.preventDefault(); e.stopPropagation(); }
   }, true);
-  // Clic derecho bloqueado en toda la página, salvo en los campos de texto (para poder pegar).
-  // Copiar sigue andando con Ctrl+C.
-  const isField = (t) => t instanceof Element && t.closest("input, textarea, [contenteditable]");
-  document.addEventListener("contextmenu", (e) => { if (!isField(e.target)) e.preventDefault(); }, true);
-  document.addEventListener("dragstart", (e) => { if (e.target instanceof HTMLImageElement) e.preventDefault(); }, true);
+  // Clic derecho bloqueado en toda la página, sin excepciones (copiar y pegar siguen con Ctrl+C / Ctrl+V).
+  window.addEventListener("contextmenu", (e) => e.preventDefault(), true);
+  window.addEventListener("dragstart", (e) => { if (e.target instanceof HTMLImageElement) e.preventDefault(); }, true);
 })();
