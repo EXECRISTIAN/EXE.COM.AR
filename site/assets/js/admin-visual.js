@@ -29,7 +29,7 @@
     if (!user) return ($("veGateMsg").innerHTML = 'Tenés que <a href="../cuenta.html">iniciar sesión</a>.');
     const perms = await be.permissions().catch(() => new Set());
     if (!perms.has("site.edit")) return ($("veGateMsg").textContent = "Tu usuario no tiene permiso para editar la página.");
-    if (window.EXE_MFA && !(await window.EXE_MFA.gate($("veGateMsg"), { required: true }))) return ($("veGateMsg").innerHTML = 'Para editar hace falta la verificación en dos pasos. <a href="">Reintentar</a>');
+    if (window.EXE_MFA && !(await window.EXE_MFA.staffGate($("veGateMsg")))) return ($("veGateMsg").innerHTML = 'Para editar hace falta la verificación en dos pasos. <a href="">Reintentar</a>');
     const r = await be.sb.from("site_blocks").select("*").eq("page", "inicio").order("position");
     if (r.error) return ($("veGateMsg").textContent = "No se pudieron cargar las secciones: " + r.error.message);
     blocks = r.data;

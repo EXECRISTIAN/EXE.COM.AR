@@ -420,3 +420,8 @@
 .tbl-scroll { overflow-x: auto; }
 .usr-t td, .usr-t th { white-space: nowrap; }
 .usr-t small { color: var(--muted); }
+
+/* Tarjetas del resumen que llevan a su sección */
+a.kpi-link { display: block; text-decoration: none; color: inherit; transition: transform .15s, box-shadow .15s, outline-color .15s; outline: 2px solid transparent; }
+a.kpi-link:hover, a.kpi-link:focus-visible { transform: translateY(-2px); outline-color: var(--c1); }
+.kpi-go { display: block; margin-top: 6px; font-size: .8rem; font-weight: 600; color: var(--c1); }

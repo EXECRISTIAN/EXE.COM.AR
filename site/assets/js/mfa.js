@@ -17,7 +17,13 @@
     .mfa-row button{padding:10px 16px;border-radius:8px;border:1px solid #0084d6;background:transparent;color:inherit;font:inherit;cursor:pointer}
     .mfa-row .ok{background:#0084d6;color:#fff;font-weight:700}
     .mfa-msg{font-size:.9rem;min-height:1.2em}.mfa-msg.err{color:#ef4444}
-    .mfa small{opacity:.75}`;
+    .mfa small{opacity:.75}
+    .mfa-tabs{display:flex;gap:6px}.mfa-tabs button{flex:1;padding:9px;border-radius:8px;border:1px solid #0084d6;background:transparent;color:inherit;font:inherit;cursor:pointer}
+    .mfa-tabs button[aria-selected=true]{background:#0084d6;color:#fff;font-weight:700}
+    .mfa-qr svg{width:210px;height:210px;display:block}
+    .mfa-num{font:800 2.4rem/1 ui-monospace,Consolas,monospace;text-align:center;letter-spacing:.1em}
+    .mfa-choices{display:flex;gap:10px;justify-content:center}.mfa-choices button{width:76px;height:64px;border-radius:12px;border:2px solid #0084d6;background:transparent;color:inherit;font:800 1.6rem ui-monospace,Consolas,monospace;cursor:pointer}
+    .mfa-choices button:hover{background:#0084d6;color:#fff}`;
   document.head.appendChild(css);
 
   async function status() {
@@ -93,5 +99,110 @@
     await sb.auth.refreshSession().catch(() => {});
   }
 
-  window.EXE_MFA = { status, gate, enroll, challenge, remove };
+  // ---------- Equipo (administradores y moderadores) ----------
+  // La base exige una verificación vigente (código de la app o aprobación por QR desde el celular) que se renueva
+  // cada 12 h, y para acciones críticas que tenga menos de 30 minutos. Además la sesión queda atada a este navegador.
+  const staffStatus = async () => { const { data, error } = await sb.rpc("staff_status"); if (error) throw error; return data || {}; };
+  const device = () => window.EXE_DEVICE;
+  const deviceName = () => { const u = navigator.userAgent;
+    const os = /Windows/.test(u) ? "Windows" : /Android/.test(u) ? "Android" : /iPhone|iPad/.test(u) ? "iPhone/iPad" : /Mac OS/.test(u) ? "Mac" : /Linux/.test(u) ? "Linux" : "Otro sistema";
+    const br = /Edg\//.test(u) ? "Edge" : /OPR\//.test(u) ? "Opera" : /Firefox\//.test(u) ? "Firefox" : /Chrome\//.test(u) ? "Chrome" : /Safari\//.test(u) ? "Safari" : "Navegador";
+    return `${os} · ${br}`; };
+  const approveUrl = (token) => new URL(`${location.pathname.includes("/admin/") ? "../" : ""}cuenta.html#aprobar/${token}`, location.href).href;
+  function qrSvg(text) {
+    if (!window.qrcode) return "";
+    const q = window.qrcode(0, "M"); q.addData(text); q.make();
+    return q.createSvgTag({ cellSize: 5, margin: 2, scalable: true, alt: "Código QR para aprobar el ingreso" });
+  }
+
+  // QR en la computadora: se aprueba desde un celular ya verificado (misma cuenta o vinculada)
+  function qrApprove(el, { cancelText = "Cancelar" } = {}) {
+    return new Promise((done) => {
+      let poll = null, stop = false;
+      const finish = (v) => { stop = true; clearInterval(poll); done(v); };
+      async function start() {
+        clearInterval(poll);
+        el.querySelector(".mfa-body").innerHTML = "<p>Generando código…</p>";
+        const { data, error } = await sb.rpc("qr_start", { p_device: deviceName() });
+        const box = el.querySelector(".mfa-body");
+        if (error || !data?.[0]) { box.innerHTML = `<p class="mfa-msg err">${esc(error?.message || "No se pudo generar el código")}</p>`; return; }
+        const r = data[0];
+        box.innerHTML = `<p>Escaneá este código con tu celular (con la sesión de EXE iniciada) y elegí el número:</p>
+          <div class="mfa-qr">${qrSvg(approveUrl(r.token))}</div><div class="mfa-num" aria-label="Número de control">${esc(r.code)}</div>
+          <p class="mfa-msg" aria-live="polite">Esperando la aprobación… <small data-left></small></p>`;
+        const left = box.querySelector("[data-left]"), msg = box.querySelector(".mfa-msg"), end = new Date(r.expires_at).getTime();
+        poll = setInterval(async () => {
+          if (stop) return;
+          const s = Math.max(0, Math.round((end - Date.now()) / 1000)); left.textContent = `(vence en ${s} s)`;
+          const { data: st } = await sb.rpc("qr_status", { p_token: r.token });
+          if (st === "approved") { clearInterval(poll); msg.textContent = "¡Aprobado! Entrando…"; if (device()) await device().bind().catch(() => {}); finish(true); }
+          else if (st === "rejected" || st === "expired" || s === 0) {
+            clearInterval(poll); msg.className = "mfa-msg err";
+            msg.innerHTML = `${st === "rejected" ? "Rechazado o número incorrecto." : "El código venció."} <button type="button" class="link-btn" data-again>Generar otro</button>`;
+            msg.querySelector("[data-again]").onclick = start;
+          }
+        }, 2000);
+      }
+      el.querySelector("[data-mfa-cancel]").onclick = () => finish(false);
+      el._stop = () => finish(null);  // cambió de pestaña: deja de esperar sin cerrar la pantalla
+      start();
+    });
+  }
+
+  // Pide la verificación del equipo eligiendo código de la app o QR
+  function staffVerify(el, factor, { title = "🔐 Verificá tu identidad", note = "", cancelText = "Salir" } = {}) {
+    return new Promise((done) => {
+      el.innerHTML = `<div class="mfa"><h2>${title}</h2>${note ? `<p>${note}</p>` : ""}
+        <div class="mfa-tabs" role="tablist"><button type="button" role="tab" aria-selected="true" data-t="code">Código de la app</button><button type="button" role="tab" aria-selected="false" data-t="qr">QR con el celular</button></div>
+        <div class="mfa-pane"></div></div>`;
+      const pane = el.querySelector(".mfa-pane");
+      const show = async (t) => {
+        if (pane._stop) { pane._stop(); pane._stop = null; }
+        el.querySelectorAll("[data-t]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.t === t)));
+        if (t === "code") {
+          pane.innerHTML = `<p>Escribí el código de 6 números de tu app (Google Authenticator u otra):</p>
+            <form>${codeInput}<p class="mfa-msg" aria-live="polite"></p><div class="mfa-row"><button type="button" data-mfa-cancel>${esc(cancelText)}</button><button class="ok">Verificar</button></div></form>`;
+          wire(pane, async (code) => {
+            const { error } = await sb.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
+            if (error) return bad(error);
+            if (device()) await device().bind().catch(() => {});
+            done(true);
+          }, () => done(false));
+        } else {
+          pane.innerHTML = `<div class="mfa-body"></div><div class="mfa-row"><button type="button" data-mfa-cancel>${esc(cancelText)}</button></div>`;
+          const v = await qrApprove(pane, { cancelText }); if (v !== null) done(v);
+        }
+      };
+      el.querySelectorAll("[data-t]").forEach((b) => (b.onclick = () => show(b.dataset.t)));
+      show("code");
+    });
+  }
+
+  // Entrada al panel: activar la verificación si falta, y que la sesión tenga una verificación vigente
+  async function staffGate(el) {
+    const st = await status();
+    if (!st.factors.length && !(await enroll(el, { required: true, cancelText: "Salir" }))) return false;
+    let ss = await staffStatus();
+    if (ss.verified) { if (device()) { await device().ensure().catch(() => {}); device().keepAlive(); } ss = await staffStatus(); }
+    if (!ss.verified && ss.device_binding && ss.device_bound && device()) { await device().prove().catch(() => {}); ss = await staffStatus(); }
+    if (!ss.verified) {
+      const f = (await status()).factors[0];
+      if (!(await staffVerify(el, f, { note: ss.device_bound || ss.alive ? `Por seguridad, la verificación se renueva cada ${ss.reverify_hours || 12} horas.` : "" }))) return false;
+      ss = await staffStatus();
+    }
+    if (ss.verified && device()) device().keepAlive();
+    return !!ss.verified;
+  }
+
+  // Acciones críticas (sancionar, cambiar roles): verificación de menos de 30 minutos
+  async function reverify(el) {
+    let ss = await staffStatus();
+    if (ss.recent) return true;
+    const f = (await status()).factors[0]; if (!f) return false;
+    const ok = await staffVerify(el, f, { title: "🔐 Confirmá que sos vos", note: "Esta acción es delicada: confirmá tu identidad otra vez.", cancelText: "Cancelar" });
+    ss = ok ? await staffStatus() : ss;
+    return !!ss.recent;
+  }
+
+  window.EXE_MFA = { status, gate, enroll, challenge, remove, staffStatus, staffGate, reverify, deviceName };
 })();

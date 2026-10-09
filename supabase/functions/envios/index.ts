@@ -16,6 +16,7 @@
 //   track   { numero, carrier? }        público          → estado e historial
 //   create  { order_id }                shipping.manage  → genera la guía y la guarda en el pedido
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requirePermFor } from "../_shared/sesion.ts";
 
 const env = (k: string) => Deno.env.get(k) ?? "";
 const PROD = env("ENVIA_ENV") === "prod";
@@ -83,13 +84,7 @@ const origin = () => JSON.parse(env("ENVIA_ORIGEN") || "{}");
 const carriers = () => env("ENVIA_CARRIERS").split(",").map((s) => s.trim()).filter(Boolean);
 const cpOk = (cp: unknown) => /^\d{4}$/.test(String(cp ?? ""));
 
-async function requirePerm(req: Request, perm: string) {
-  const user = createClient(env("SUPABASE_URL"), env("SUPABASE_ANON_KEY"), {
-    global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },
-  });
-  const { data } = await user.rpc("has_perm", { p: perm });
-  if (data !== true) throw Object.assign(new Error("Sin permiso"), { status: 403 });
-}
+const requirePerm = (req: Request, perm: string) => requirePermFor(req, db, perm);  // mismo control que la base, con la IP real
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
