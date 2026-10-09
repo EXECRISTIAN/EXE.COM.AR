@@ -1,0 +1,10 @@
+name: tmp dbg headers
+on: { push: { branches: ["claude/tmp-dbg-headers"] } }
+permissions: { contents: read }
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -s -X POST "https://sbayacwjvnxwktrhkgnk.supabase.co/rest/v1/rpc/_dbg_headers" -H "apikey: sb_publishable_vtcKfnXsn9UXQopzVFdAOQ_NFe4v4mK" -H "Content-Type: application/json" -H "User-Agent: PruebaEXE/1.0" -d '{}' | python3 -m json.tool
+          echo "IP runner: $(curl -s https://api.ipify.org)"
