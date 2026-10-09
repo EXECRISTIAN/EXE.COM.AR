@@ -65,7 +65,9 @@
     const n = new URLSearchParams(location.search).get("next");
     return n && /^[\w\-./?=&#%]+$/.test(n) && !n.startsWith("//") && !/^[a-z]+:/i.test(n) ? n : "index.html";
   })();
+  const approving = () => /^#aprobar\/[0-9a-f-]{36}$/i.test(location.hash);
   async function afterAuth() {
+    if (approving()) return false;  // vino desde un QR: se queda para aprobar
     const perms = await be.permissions().catch(() => new Set());
     if (!perms.has("dashboard.access")) { location.replace(nextUrl); return true; }
     return false;
@@ -211,6 +213,7 @@
     $("accVerified").textContent = prof?.email_verified_at || user.email_confirmed_at ? "✔ Verificado" : "Sin verificar";
     accMsg("");
     renderMfa();
+    renderSessions();
     scrollTo(0, 0);
   }
   addEventListener("hashchange", showSettings);
@@ -259,6 +262,91 @@
   }
   if ($("mfaNeedBtn")) $("mfaNeedBtn").onclick = async () => { const ok = await mfaScreen((el) => MFA.enroll(el, { required: true })); render(); if (ok) show("¡Listo! Ya podés entrar al panel.", "ok"); };
 
+  /* ---------- Aprobar un ingreso escaneando el QR de la computadora ---------- */
+  async function approveScreen() {
+    const token = location.hash.split("/")[1];
+    const leave = () => { history.replaceState("", "", location.pathname + location.search); render(); };
+    await mfaScreen(async (el) => {
+      const st = MFA ? await MFA.status().catch(() => null) : null;
+      if (!st || !st.factors.length) {
+        el.innerHTML = `<div class="mfa"><h2>🔐 Aprobar ingreso</h2><p>Para aprobar ingresos desde este celular, primero activá la verificación en dos pasos en esta cuenta.</p><div class="mfa-row"><button type="button" class="ok" data-x>Entendido</button></div></div>`;
+        return new Promise((ok) => (el.querySelector("[data-x]").onclick = ok));
+      }
+      const { data, error } = await sb.rpc("qr_view", { p_token: token });
+      if (error) {
+        el.innerHTML = `<div class="mfa"><h2>🔐 Aprobar ingreso</h2><p class="mfa-msg err">${esc(error.message)}</p><div class="mfa-row"><button type="button" class="ok" data-x>Volver</button></div></div>`;
+        return new Promise((ok) => (el.querySelector("[data-x]").onclick = ok));
+      }
+      el.innerHTML = `<div class="mfa"><h2>🔐 ¿Estás entrando ahora?</h2>
+        <p>Alguien quiere entrar al panel con <b>${esc(data.email)}</b> desde <b>${esc(data.device || "un dispositivo")}</b> (hora: ${new Date(data.created_at).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })})</p>
+        <p><b>Si sos vos</b>, tocá el número que ves en la pantalla de la computadora:</p>
+        <div class="mfa-choices">${data.choices.map((n) => `<button type="button" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>
+        <p class="mfa-msg" aria-live="polite"></p>
+        <div class="mfa-row"><button type="button" data-no>No fui yo — rechazar</button></div>
+        <small>Nunca apruebes un ingreso que no estés haciendo vos, aunque te lo pidan por mensaje o teléfono.</small></div>`;
+      const msg = el.querySelector(".mfa-msg");
+      return new Promise((ok) => {
+        const decide = async (code, approve) => {
+          el.querySelectorAll("button").forEach((b) => (b.disabled = true));
+          const { data: r, error: e } = await sb.rpc("qr_decide", { p_token: token, p_code: code, p_approve: approve });
+          msg.className = "mfa-msg" + (r === "approved" ? "" : " err");
+          msg.textContent = e ? e.message : r === "approved" ? "✔ Ingreso aprobado. Ya podés seguir en la computadora." : r === "wrong_code" ? "Número incorrecto: el ingreso se bloqueó. Si eras vos, generá otro QR." : "Ingreso rechazado.";
+          setTimeout(ok, 2500);
+        };
+        el.querySelectorAll("[data-n]").forEach((b) => (b.onclick = () => decide(Number(b.dataset.n), true)));
+        el.querySelector("[data-no]").onclick = () => decide(null, false);
+      });
+    });
+    leave();
+  }
+
+  /* ---------- Sesiones abiertas (cerrar a distancia) y cuentas que aprueban ingresos ---------- */
+  const devName = (ua) => { const u = String(ua || "");
+    const os = /Windows/.test(u) ? "Windows" : /Android/.test(u) ? "Android" : /iPhone|iPad/.test(u) ? "iPhone/iPad" : /Mac OS/.test(u) ? "Mac" : /Linux/.test(u) ? "Linux" : "Dispositivo";
+    const br = /Edg\//.test(u) ? "Edge" : /OPR\//.test(u) ? "Opera" : /Firefox\//.test(u) ? "Firefox" : /Chrome\//.test(u) ? "Chrome" : /Safari\//.test(u) ? "Safari" : "";
+    return br ? `${os} · ${br}` : os; };
+  const when = (d) => d ? new Date(d).toLocaleString("es-AR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
+  async function renderSessions() {
+    const box = $("accSessions"); if (!box) return;
+    const { data, error } = await sb.rpc("my_sessions");
+    if (error) { box.innerHTML = ""; return; }
+    const others = data.filter((x) => !x.current).length;
+    box.innerHTML = `<div class="acc-sess"><b>💻 Sesiones abiertas</b><small>Dispositivos donde tu cuenta está iniciada. Si no reconocés alguno, cerralo. Cada sesión se cierra sola al mes.</small>
+      <ul>${data.map((x) => `<li><span><b>${esc(devName(x.user_agent))}</b>${x.current ? ' <em class="acc-here">este dispositivo</em>' : ""}<small>Desde ${when(x.created_at)} · última actividad ${when(x.last_seen)}${x.ip ? ` · IP ${esc(x.ip)}` : ""}</small></span>
+        ${x.current ? "" : `<button type="button" class="btn btn-outline" data-sclose="${esc(x.id)}">Cerrar</button>`}</li>`).join("")}</ul>
+      ${others > 1 ? '<button type="button" class="btn btn-outline" id="sessAll">Cerrar todas las demás</button>' : ""}</div><div id="accLinks"></div>`;
+    const done = (e, t) => { accMsg(e ? (/Verific/.test(e.message) ? "Por seguridad, primero ingresá el código de tu app (cerrá sesión y volvé a entrar)." : "No se pudo: " + e.message) : t, e ? "error" : "ok"); renderSessions(); };
+    box.querySelectorAll("[data-sclose]").forEach((b) => (b.onclick = async () => { const { error: e } = await sb.rpc("revoke_my_session", { p_id: b.dataset.sclose }); done(e, "Sesión cerrada en ese dispositivo."); }));
+    if ($("sessAll")) $("sessAll").onclick = async () => { const { error: e } = await sb.rpc("revoke_my_other_sessions"); done(e, "Cerramos tu cuenta en todos los demás dispositivos."); };
+    renderLinks();
+  }
+  async function renderLinks() {
+    const box = $("accLinks"); if (!box) return;
+    const perms = await be.permissions().catch(() => new Set());
+    const { data: links } = await sb.rpc("approver_list");
+    if (!perms.has("dashboard.access") && !(links || []).length) { box.innerHTML = `<div class="acc-sess"><b>📱 Aprobar ingresos de otra cuenta</b><small>Si alguien del equipo te pasó un código de vínculo, escribilo acá.</small>
+      <div class="acc-link-row"><input id="linkCode" maxlength="8" placeholder="Código" aria-label="Código de vínculo"><button type="button" class="btn btn-outline" id="linkOk">Vincular</button></div></div>`; wireLinkCode(); return; }
+    box.innerHTML = `<div class="acc-sess"><b>📱 Aprobación con el celular</b><small>Para entrar al panel podés escanear un QR con tu celular en vez de escribir el código. Lo puede aprobar esta misma cuenta o las cuentas que vincules acá (con la verificación en dos pasos activada).</small>
+      <ul>${(links || []).map((l) => `<li><span><b>${esc(l.email)}</b><small>${esc(l.role)} · desde ${when(l.created_at)}</small></span><button type="button" class="btn btn-outline" data-lrm="${esc(l.other)}">Quitar</button></li>`).join("") || "<li><small>Todavía no vinculaste otra cuenta.</small></li>"}</ul>
+      <div class="acc-link-row">${perms.has("dashboard.access") ? '<button type="button" class="btn btn-outline" id="linkNew">Generar código para vincular</button>' : ""}<input id="linkCode" maxlength="8" placeholder="Código de otra cuenta" aria-label="Código de vínculo"><button type="button" class="btn btn-outline" id="linkOk">Vincular</button></div>
+      <p class="acc-link-code" id="linkShow" hidden></p></div>`;
+    box.querySelectorAll("[data-lrm]").forEach((b) => (b.onclick = async () => { const { error: e } = await sb.rpc("approver_remove", { p_other: b.dataset.lrm }); accMsg(e ? "No se pudo: " + e.message : "Vínculo quitado.", e ? "error" : "ok"); renderLinks(); }));
+    if ($("linkNew")) $("linkNew").onclick = async () => {
+      const { data: code, error: e } = await sb.rpc("approver_link_start");
+      const p = $("linkShow"); p.hidden = false;
+      p.innerHTML = e ? esc(e.message) : `Código: <b>${esc(code)}</b> — escribilo en la otra cuenta (Mi cuenta → Aprobación con el celular). Vence en 10 minutos.`;
+    };
+    wireLinkCode();
+  }
+  function wireLinkCode() {
+    $("linkOk").onclick = async () => {
+      const code = $("linkCode").value.trim(); if (!code) return;
+      const { data: email, error: e } = await sb.rpc("approver_link_confirm", { p_code: code });
+      accMsg(e ? (/dos pasos/.test(e.message) ? "Para vincular, esta cuenta necesita la verificación en dos pasos activada y verificada." : e.message) : `Listo: desde esta cuenta podés aprobar los ingresos de ${email}.`, e ? "error" : "ok");
+      renderLinks();
+    };
+  }
+
   let mfaAsking = false;
   async function render() {
     let user = await be.user();
@@ -273,6 +361,7 @@
       }
     }
     if (mfaAsking) return;
+    if (user && approving()) return approveScreen();
     $("guest").hidden = !!user;
     $("logged").hidden = !user;
     await showSettings();

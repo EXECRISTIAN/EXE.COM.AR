@@ -9,6 +9,7 @@
 // Deploy: supabase functions deploy fabricante
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { DOMParser, Element } from "https://deno.land/x/deno_dom@v0.1.45/deno-dom-wasm.ts";
+import { requirePermFor } from "../_shared/sesion.ts";
 
 const env = (k: string) => Deno.env.get(k) ?? "";
 const cors = {
@@ -268,11 +269,9 @@ async function lookup(body: any) {
   return best;
 }
 
-async function requirePerm(req: Request, perm: string) {
-  const user = createClient(env("SUPABASE_URL"), env("SUPABASE_ANON_KEY"), { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } } });
-  const { data } = await user.rpc("has_perm", { p: perm });
-  if (data !== true) throw Object.assign(new Error("Sin permiso"), { status: 403 });
-}
+// Permiso con el mismo control que la base (verificación vigente y dispositivo), usando la IP real del navegador
+const admin = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"));
+const requirePerm = (req: Request, perm: string) => requirePermFor(req, admin, perm);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });

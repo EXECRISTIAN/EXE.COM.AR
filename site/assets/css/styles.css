@@ -646,3 +646,34 @@ html { touch-action: manipulation; }
   text-align: center; font-variant-numeric: tabular-nums; }
 .chip.active .chip-count { background: #ffffff38; color: inherit; }
 .chip.chip-empty { opacity: .55; }
+
+/* ---------- Mi cuenta: sesiones abiertas y aprobación con el celular ---------- */
+.acc-sess { display: grid; gap: 8px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; margin: 14px 0; }
+.acc-sess > small { color: var(--muted); }
+.acc-sess ul { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 8px; }
+.acc-sess li { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 10px 12px; border-radius: 10px; background: var(--surface); }
+.acc-sess li > span { display: grid; gap: 2px; min-width: 0; flex: 1 1 220px; }
+.acc-sess li small { color: var(--muted); overflow-wrap: anywhere; }
+.acc-sess .btn { padding: 8px 14px; }
+.acc-here { font-style: normal; font-size: .75rem; font-weight: 700; color: var(--c1); margin-left: 6px; }
+.acc-link-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.acc-link-row input { flex: 1 1 140px; min-width: 0; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--c6); background: var(--bg); color: var(--c2); font: inherit; text-transform: uppercase; letter-spacing: .1em; }
+.acc-link-code { margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--surface); }
+.acc-link-code b { font: 800 1.2rem ui-monospace, Consolas, monospace; letter-spacing: .15em; color: var(--c2); }
+
+/* ---------- Panel: moderación de usuarios ---------- */
+.btn-mod { padding: 6px 12px; font-size: .85rem; }
+.mod-dlg { max-width: 460px; }
+.mod-dlg form { display: grid; gap: 12px; text-align: left; }
+.mod-dlg h2 { text-align: center; }
+.mod-sub { margin: 0; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.mod-acts { display: grid; gap: 8px; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin: 0; }
+.mod-acts legend { font-weight: 700; padding: 0 6px; color: var(--c2); }
+.mod-acts label { display: flex; gap: 8px; align-items: center; justify-content: flex-start; text-align: left; cursor: pointer; }
+.mod-time { display: flex; gap: 8px; padding-left: 26px; }
+.mod-time input, .mod-time select { padding: 7px 10px; border-radius: 8px; border: 1px solid var(--c6); background: var(--bg); color: var(--c2); font: inherit; }
+.mod-time input { width: 80px; }
+.mod-note { margin: 0; font-size: .85rem; color: var(--muted); }
+.mod-hist summary { cursor: pointer; font-weight: 600; color: var(--c2); }
+.mod-hist ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 6px; font-size: .9rem; }
+.mod-hist small { color: var(--muted); }
