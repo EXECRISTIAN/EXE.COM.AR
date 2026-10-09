@@ -15,7 +15,10 @@
   // tools/imagenes_muestra.py); si tampoco existe, el dibujo genérico. Al subir una foto real la reemplaza sola.
   const sampleImg = (p) => `assets/img/products/muestra/${encodeURIComponent(p.id)}.webp`;
   const mainImg = (p) => (p.images && p.images[0]) || p.image || sampleImg(p);
-  const priceLabel = (p) => (p.price > 0 ? money(p.price) : p.askStock ? "Consultar precio y stock" : "Consultar precio por WhatsApp");
+  const usdMoney = (n) => "US$ " + Number(n).toLocaleString(cfg.locale, { maximumFractionDigits: 2 });
+  // Precio en la moneda elegida en el panel: pesos (por defecto) o dólares
+  const priceOf = (p, qty = 1) => (p.priceUsd ? usdMoney(p.priceUsd * qty) : money(p.price * qty));
+  const priceLabel = (p) => (p.price > 0 ? priceOf(p) : p.askStock ? "Consultar precio y stock" : "Consultar precio por WhatsApp");
   const esc = (s) =>
     String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
   const waLink = (text) => `https://wa.me/${cfg.whatsappNumber}?text=${encodeURIComponent(text)}`;
@@ -376,7 +379,9 @@
     const total = lines.reduce((n, l) => n + l.qty * (l.product.price || 0), 0);
     const hasConsult = lines.some((l) => !(l.product.price > 0));
     $("cartCount").textContent = count;
-    $("cartTotal").textContent = total ? money(total) + (hasConsult ? " + a consultar" : "") : hasConsult ? "A consultar" : money(0);
+    // Con productos en dólares, el total se estima en pesos con el dólar del día
+    const anyUsd = lines.some((l) => l.product.priceUsd);
+    $("cartTotal").textContent = total ? (anyUsd ? "≈ " : "") + money(total) + (hasConsult ? " + a consultar" : "") : hasConsult ? "A consultar" : money(0);
     $("sendWa").disabled = count === 0;
     $("cartItems").innerHTML = lines.length
       ? lines.map((l, i) => `
@@ -441,7 +446,7 @@
     const name = $("customerName").value.trim();
     const note = $("customerNote").value.trim();
     const rows = lines.map((l) => {
-      const sub = l.product.price > 0 ? money(l.qty * l.product.price) : "a consultar";
+      const sub = l.product.price > 0 ? priceOf(l.product, l.qty) + (l.product.priceUsd ? ` (≈ ${money(l.qty * l.product.price)})` : "") : "a consultar";
       const tag = l.product.noStock ? " (a pedido)" : l.product.askStock ? " (consultar stock)" : "";
       const empty = caseOnly(l.product) ? ` (${CASE_NOTE})` : "";
       return `• ${l.qty} x ${l.product.name}${l.variant ? ` (${l.variant})` : ""}${tag}${empty} — ${sub}`;
@@ -451,7 +456,7 @@
       "",
       ...rows,
       "",
-      total ? `*Total estimado: ${money(total)}*${hasConsult ? " (+ productos a consultar)" : ""}` : "*Precio a consultar*",
+      total ? `*Total estimado: ${money(total)}*${lines.some((l) => l.product.priceUsd) ? " (en pesos, con el dólar del día)" : ""}${hasConsult ? " (+ productos a consultar)" : ""}` : "*Precio a consultar*",
       shipping ? `Envío ${shipping.label} (CP ${shipping.cp}): ${money(shipping.cost)} — cotización estimada` : "",
       note ? `\nNota: ${note}` : "",
     ].join("\n").trim();
@@ -537,8 +542,8 @@
     if (!cart.length) return toast("Agregá productos al carrito para compartir el presupuesto");
     const { lines, total, hasConsult } = renderCart();
     const code = cart.map((l) => [l.id, l.qty, l.variant || ""].map(encodeURIComponent).join("~")).join(".");
-    const rows = lines.map((l) => `• ${l.qty} x ${l.product.name}${l.variant ? ` (${l.variant})` : ""} — ${l.product.price > 0 ? money(l.qty * l.product.price) : "a consultar"}`);
-    const text = ["Presupuesto EXE:", ...rows, total ? `Total estimado: ${money(total)}${hasConsult ? " (+ productos a consultar)" : ""}` : "Precio a consultar"].join("\n");
+    const rows = lines.map((l) => `• ${l.qty} x ${l.product.name}${l.variant ? ` (${l.variant})` : ""} — ${l.product.price > 0 ? priceOf(l.product, l.qty) : "a consultar"}`);
+    const text = ["Presupuesto EXE:", ...rows, total ? `Total estimado: ${money(total)}${lines.some((l) => l.product.priceUsd) ? " (en pesos, con el dólar del día)" : ""}${hasConsult ? " (+ productos a consultar)" : ""}` : "Precio a consultar"].join("\n");
     share({ title: "Presupuesto EXE", text, url: `${siteBase()}#presupuesto/${code}` });
   }
   function routeBudget() {
@@ -1066,6 +1071,8 @@
   // (sin stock + cart_ok = "a pedido", sin límite); hide_no_stock: no se muestra si el stock llega a 0.
   const fromDb = (r) => ({
     id: r.id, name: r.name, brand: r.brand, category: r.category, description: r.description, price: r.ask_price ? 0 : Number(r.price) || 0,
+    // Vendido en dólares: la tienda muestra US$ (el precio en pesos sigue al dólar del día y se usa para el total)
+    ...(!r.ask_price && r.price_usd != null && Number(r.price_usd) > 0 ? { priceUsd: Number(r.price_usd) } : {}),
     askStock: !!r.ask_stock, cartOk: r.cart_ok !== false, noStock: !r.ask_stock && r.show_stock && r.stock <= 0 && r.cart_ok !== false,
     ...(r.show_stock && !r.ask_stock && !(r.stock <= 0 && r.cart_ok !== false) ? { stock: r.stock } : {}), images: r.images && r.images.length ? r.images : (r.image ? [r.image] : []),
     specs: r.specs && r.specs.length ? r.specs : undefined, outlet: r.outlet, condition: r.condition, weightKg: Number(r.weight_kg) || 1,
@@ -1073,7 +1080,7 @@
   });
   const loadDb = () => {
     if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) return Promise.reject();
-    const cols = "id,name,brand,category,description,price,stock,show_stock,image,images,specs,outlet,condition,weight_kg,variants,tags,ask_price,ask_stock,cart_ok,hide_no_stock";
+    const cols = "id,name,brand,category,description,price,price_usd,stock,show_stock,image,images,specs,outlet,condition,weight_kg,variants,tags,ask_price,ask_stock,cart_ok,hide_no_stock";
     return fetch(`${cfg.supabaseUrl}/rest/v1/products?select=${cols}&active=eq.true&order=sort.asc,name.asc`, { headers: { apikey: cfg.supabaseAnonKey } })
       .then((r) => (r.ok ? r.json() : Promise.reject())).then((rows) => (rows.length ? rows.filter((r) => !(r.hide_no_stock && r.show_stock && r.stock <= 0)).map(fromDb) : Promise.reject()));
   };

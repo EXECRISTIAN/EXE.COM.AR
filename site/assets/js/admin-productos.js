@@ -75,12 +75,82 @@
   }
 
   // Opciones de venta por producto (se ven en la tabla, el editor y las acciones masivas)
+  // Íconos dibujados para cada opción (más claros que emojis): etiqueta de precio con "?", caja con "?",
+  // carrito con "+", ojo tachado.
+  const svgI = (body) => `<svg class="flag-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+  const FLAG_ICONS = {
+    ask_price: svgI('<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><path d="M9.2 8.6a1.8 1.8 0 1 1 2.6 1.6c-.6.3-.9.7-.9 1.3"/><path d="M10.9 14h.01"/>'),
+    ask_stock: svgI('<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/><path d="M10.4 9.4a1.6 1.6 0 1 1 2.3 1.4"/>'),
+    cart_ok: svgI('<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.4a1.5 1.5 0 0 0 1.5 1.1h8.6a1.5 1.5 0 0 0 1.5-1.2L21 8H6"/><path d="M13.5 9.5v4M11.5 11.5h4"/>'),
+    hide_no_stock: svgI('<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6 0 9.5 7 9.5 7a17 17 0 0 1-2.6 3.5M6.4 6.4A17 17 0 0 0 2.5 12S6 19 12 19a9.6 9.6 0 0 0 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>'),
+  };
   const FLAGS = [
     ["ask_price", "💲", "Consultar precio", "Muestra \"Consultar precio\" en vez del precio"],
     ["ask_stock", "📦", "Consultar stock", "Muestra \"Consultar stock\" en vez del stock (con los dos: \"Consultar precio y stock\")"],
     ["cart_ok", "🛒", "Carrito sin precio/stock", "Se puede agregar al carrito aunque no tenga precio o stock (si no, solo \"Consultar por WhatsApp\")"],
     ["hide_no_stock", "🙈", "Ocultar sin stock", "No se muestra en la tienda cuando el stock llega a 0"],
   ];
+  // Acciones masivas agrupadas por tema (con buscador): fácil de encontrar para cualquier empleado
+  const BULK_GROUPS = [
+    { icon: "💲", name: "Precio", items: [
+      ["pct", "Subir o bajar un %", "Ej: +10 sube 10 %, -5 baja 5 %"], ["amt", "Sumar o restar un monto", "En la moneda de cada producto"],
+      ["set", "Fijar un precio", "El mismo precio para todos"], ["round", "Redondear precios", "A $100 o al número que elijas"],
+      ["margin", "Aplicar margen sobre el costo", "Precio = costo + margen %"], ["ref", "Precio = referencia + %", "Desde el precio de compra de referencia"],
+      ["consult", "Poner \"a consultar\"", "Precio 0: se consulta por WhatsApp"]] },
+    { icon: "💱", name: "Moneda de venta", items: [
+      ["toars", "Vender en pesos", "Convierte con la cotización vigente"], ["tousd", "Vender en dólares", "El precio en pesos sigue al dólar solo"]] },
+    { icon: "👁", name: "Visibilidad", items: [
+      ["on", "Mostrar en la tienda", "Activa los productos"], ["off", "Ocultar de la tienda", "Desactiva los productos"],
+      ["hide_no_stock:1", "Ocultar cuando no hay stock", ""], ["hide_no_stock:0", "Mostrar aunque no haya stock", ""]] },
+    { icon: "💬", name: "Consultas y carrito", items: [
+      ["ask_price:1", "Mostrar \"Consultar precio\"", "En vez del precio"], ["ask_price:0", "Mostrar el precio", "Quita \"Consultar precio\""],
+      ["ask_stock:1", "Mostrar \"Consultar stock\"", "En vez del stock"], ["ask_stock:0", "Mostrar el stock", "Quita \"Consultar stock\""],
+      ["cart_ok:1", "Permitir carrito sin precio/stock", ""], ["cart_ok:0", "Solo \"Consultar por WhatsApp\"", "Si no tiene precio o stock"]] },
+    { icon: "🏷", name: "Etiquetas", items: [["tagadd", "Agregar una etiqueta", ""], ["tagrm", "Quitar una etiqueta", ""]] },
+  ];
+  const bkItem = ([k, t, d]) => `<button type="button" role="menuitem" data-bulk="${k}"><b>${esc(t)}</b>${d ? `<small>${esc(d)}</small>` : ""}</button>`;
+  // ---------- Vista previa: cómo se ve el producto en la tienda con la opción apagada y encendida ----------
+  function miniCard(p, f, on) {
+    const img = imgUrl((p.images || [])[0] || p.image) || "../assets/img/placeholder.svg";
+    const price = p.price > 0 ? money(p.price) : "Consultar precio";
+    const noStock = f === "hide_no_stock" || f === "cart_ok";
+    const stockTxt = noStock ? "Sin stock" : p.show_stock ? `${Math.max(1, p.stock)} disponibles` : "Disponible";
+    let priceHtml = `<b class="fp-price">${f === "cart_ok" ? "Consultar precio" : esc(price)}</b>`, stockHtml = `<span class="fp-stock${noStock ? " out" : ""}">${stockTxt}</span>`;
+    let btn = `<span class="fp-btn">Agregar al carrito</span>`, ghost = "";
+    if (f === "ask_price" && on) priceHtml = `<b class="fp-ask">💬 Consultar precio</b>`;
+    if (f === "ask_stock" && on) stockHtml = `<span class="fp-ask">💬 Consultar stock</span>`;
+    if (f === "cart_ok") btn = on ? `<span class="fp-btn">Agregar al carrito</span>` : `<span class="fp-btn wa">Consultar por WhatsApp</span>`;
+    if (f === "hide_no_stock" && on) ghost = `<span class="fp-hidden">🚫 No aparece en la tienda</span>`;
+    return `<div class="fp-card${ghost ? " is-ghost" : ""}"><img src="${esc(img)}" alt="">${ghost}<small class="fp-name">${esc(p.name)}</small>${priceHtml}${stockHtml}${btn}</div>`;
+  }
+  const FLAG_CASE = { cart_ok: "Ejemplo: producto sin precio ni stock", hide_no_stock: "Ejemplo: cuando el stock llega a 0" };
+  function flagPreview(p, f) {
+    const [, , n, d] = FLAGS.find((x) => x[0] === f);
+    return `<div class="fp-head">${FLAG_ICONS[f]}<b>${esc(n)}</b></div><p class="fp-desc">${esc(d)}</p>${FLAG_CASE[f] ? `<p class="fp-case">${FLAG_CASE[f]}</p>` : ""}
+      <div class="fp-pair"><figure><figcaption>Apagado</figcaption>${miniCard(p, f, false)}</figure><figure class="fp-on"><figcaption>Encendido</figcaption>${miniCard(p, f, true)}</figure></div>`;
+  }
+  let fpEl = null, fpTimer = null;
+  function showFlagPreview(target, p, f) {
+    if (!fpEl) { fpEl = document.createElement("div"); fpEl.className = "flag-pop"; fpEl.setAttribute("role", "tooltip"); document.body.appendChild(fpEl); }
+    fpEl.innerHTML = flagPreview(p, f); fpEl.hidden = false;
+    const r = target.getBoundingClientRect(), w = fpEl.offsetWidth, h = fpEl.offsetHeight;
+    const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), innerWidth - w - 8);
+    const top = r.bottom + 8 + h < innerHeight ? r.bottom + 8 : Math.max(8, r.top - h - 8);
+    fpEl.style.left = left + "px"; fpEl.style.top = top + "px";
+  }
+  const hideFlagPreview = () => { clearTimeout(fpTimer); if (fpEl) fpEl.hidden = true; };
+  // Pasar el mouse (o dejar apretado en el celular) sobre un ícono o una acción de "Consultas y carrito" muestra el ejemplo
+  function wireFlagPreviews(root, productOf) {
+    const flagOfEl = (el) => el.dataset.flag || (el.dataset.bulk || "").split(":")[0];
+    const sel = "[data-flag], .bk-menu [data-bulk^='ask_'], .bk-menu [data-bulk^='cart_ok'], .bk-menu [data-bulk^='hide_no_stock']";
+    root.addEventListener("mouseover", (e) => { const t = e.target.closest(sel); if (!t || !root.contains(t)) return; clearTimeout(fpTimer); fpTimer = setTimeout(() => showFlagPreview(t, productOf(t), flagOfEl(t)), 250); });
+    root.addEventListener("mouseout", (e) => { if (e.target.closest(sel) && !e.relatedTarget?.closest?.(sel)) hideFlagPreview(); });
+    root.addEventListener("focusin", (e) => { const t = e.target.closest(sel); if (t) showFlagPreview(t, productOf(t), flagOfEl(t)); });
+    root.addEventListener("focusout", hideFlagPreview);
+    root.addEventListener("touchstart", (e) => { const t = e.target.closest(sel); if (!t) return; clearTimeout(fpTimer); fpTimer = setTimeout(() => showFlagPreview(t, productOf(t), flagOfEl(t)), 450); }, { passive: true });
+    root.addEventListener("touchend", () => setTimeout(hideFlagPreview, 2500), { passive: true });
+    addEventListener("scroll", hideFlagPreview, { passive: true });
+  }
   const flagOn = (p, f) => (f === "cart_ok" ? p.cart_ok !== false : !!p[f]);
 
   /* ---------- Listado ---------- */
@@ -130,21 +200,11 @@
       <div class="pr-selbar"><span id="prCount"></span> <button class="link-btn" id="prSelAll" type="button">Seleccionar todos los filtrados</button></div>
       <div class="pr-bulk" id="prBulk" hidden>
         <b id="prBulkN"></b>
-        ${w ? `<button class="btn btn-outline" data-bulk="on">Activar</button>
-        <button class="btn btn-outline" data-bulk="off">Desactivar</button>
-        <button class="btn btn-outline" data-bulk="pct">Subir/bajar precio %</button>
-        <button class="btn btn-outline" data-bulk="amt">Sumar/restar $</button>
-        <button class="btn btn-outline" data-bulk="set">Fijar precio</button>
-        <button class="btn btn-outline" data-bulk="round">Redondear precios</button>
-        ${w ? `<button class="btn btn-outline" data-bulk="ref">Precio = referencia + %</button>
-        <button class="btn btn-outline" data-bulk="tousd">Pasar a dólares</button>
-        <button class="btn btn-outline" data-bulk="toars">Pasar a pesos</button>` : ""}
-        ${FLAGS.map(([f, ic, n]) => `<span class="pr-bulk-flag">${ic} ${n}: <button class="link-btn" data-bulk="${f}:1">Activar</button> / <button class="link-btn" data-bulk="${f}:0">Desactivar</button></span>`).join("")}
-        <button class="btn btn-outline" data-bulk="margin">Aplicar margen sobre costo</button>
-        <button class="btn btn-outline" data-bulk="consult">Poner "a consultar"</button>
-        <button class="btn btn-outline" data-bulk="tagadd">🏷 Agregar etiqueta</button>
-        <button class="btn btn-outline" data-bulk="tagrm">Quitar etiqueta</button>
-        <button class="btn btn-outline danger" data-bulk="delete">Eliminar</button>` : ""}
+        ${w ? `<input type="search" class="pr-in bk-search" id="bkSearch" placeholder="🔍 Buscar acción (ej: dólares, etiqueta, ocultar…)" aria-label="Buscar una acción para los seleccionados">
+        ${BULK_GROUPS.map((g, i) => `<div class="bk-group"><button type="button" class="btn btn-outline bk-toggle" data-bk-open="${i}" aria-expanded="false" aria-haspopup="true">${g.icon} ${g.name} ▾</button>
+          <div class="bk-menu" hidden role="menu">${g.items.map(bkItem).join("")}</div></div>`).join("")}
+        <button class="btn btn-outline danger" data-bulk="delete">🗑 Eliminar</button>
+        <div class="bk-menu bk-results" id="bkResults" hidden role="menu"></div>` : ""}
         <button class="link-btn" data-bulk="clear">Quitar selección</button>
       </div>
       <div class="panel pr-table-wrap"><table class="table pr-table">
@@ -193,11 +253,12 @@
         ${w ? `<td><input class="pr-in" data-f="cost" inputmode="numeric" value="${c ?? ""}" placeholder="—"></td>` : ""}
         <td>${p.price_usd != null
           ? (w ? `<input class="pr-in" data-f="price_usd" inputmode="decimal" value="${p.price_usd}" title="Precio en dólares"><small class="pr-meta">US$ → ${p.price ? money(p.price) : "sin cotización"}</small>` : `${usd(p.price_usd)}<small class="pr-meta">${money(p.price)}</small>`)
-          : (w ? `<input class="pr-in" data-f="price" inputmode="numeric" value="${p.price || 0}">` : (p.price ? money(p.price) : "Consultar"))}</td>
+          : (w ? `<input class="pr-in" data-f="price" inputmode="numeric" value="${p.price || 0}">` : (p.price ? money(p.price) : "Consultar"))}
+          ${w ? `<button type="button" class="pr-curbtn" data-curswap title="Cambiar la moneda de venta de este producto">${p.price_usd != null ? "US$ → $" : "$ → US$"}</button>` : ""}</td>
         ${w ? `<td class="${m < 15 ? "pr-low" : ""}">${pct(m)}</td>` : ""}
         <td>${sw ? `<input class="pr-in pr-in-sm" data-f="stock" inputmode="numeric" value="${p.show_stock ? p.stock : ""}" placeholder="∞" title="Vacío = sin control de stock">` : (p.show_stock ? p.stock : "∞")}</td>
         <td>${sw ? `<label class="switch"><input type="checkbox" data-f="active" ${p.active ? "checked" : ""}><span></span></label>` : (p.active ? "Sí" : "No")}</td>
-        <td class="pr-flags">${FLAGS.map(([f, ic, n, d]) => `<button type="button" class="pr-flag ${flagOn(p, f) ? "on" : ""}" data-flag="${f}" title="${esc(n + ": " + d)}" aria-pressed="${flagOn(p, f)}" ${w ? "" : "disabled"}>${ic}</button>`).join("")}</td>
+        <td class="pr-flags">${FLAGS.map(([f, ic, n, d]) => `<button type="button" class="pr-flag ${flagOn(p, f) ? "on" : ""}" data-flag="${f}" aria-label="${esc(n + ": " + d)}" aria-pressed="${flagOn(p, f)}" ${w ? "" : "disabled"}>${FLAG_ICONS[f]}</button>`).join("")}</td>
         <td class="pr-actions"><a href="#editar/${encodeURIComponent(p.id)}" title="Editar">✏️</a>${w ? `<button class="link-btn" data-dup title="Duplicar">⧉</button>` : ""}<a class="pr-view" href="../index.html#producto/${encodeURIComponent(p.id)}" target="_blank" rel="noopener" title="${p.active ? "Ver el producto como lo ve un cliente" : "Está oculto: los clientes no lo ven. Activalo para verlo en la tienda."}">👁 Ver</a></td>
       </tr>`;
     }).join("") || `<tr><td colspan="11" class="pr-empty">No hay productos con ese filtro.</td></tr>`;
@@ -241,8 +302,32 @@
       const fl = e.target.closest("[data-flag]");
       if (fl) { const id = fl.closest("tr").dataset.id, f = fl.dataset.flag, p = cache.products.find((x) => x.id === id), v = !flagOn(p, f);
         try { await patchProduct(id, { [f]: v }); fl.classList.toggle("on", v); fl.setAttribute("aria-pressed", v); flash(fl, true); } catch (err) { flash(fl, false); A.alertView("No se pudo guardar: " + err.message); } return; }
+      const cs = e.target.closest("[data-curswap]");
+      if (cs) { const id = cs.closest("tr").dataset.id, p = cache.products.find((x) => x.id === id), fx = rate();
+        if (!fx) return A.alertView("Todavía no hay cotización del dólar: configurala en 💵 Dólar.");
+        const patch = p.price_usd != null ? { price_usd: null, price: round100(p.price_usd * fx) } : { price_usd: p.price > 0 ? Math.round((p.price / fx) * 100) / 100 : 0 };
+        try { await patchProduct(id, patch); if (patch.price_usd != null) p.price = p.price || 0; renderRows(); } catch (err) { A.alertView("No se pudo cambiar la moneda: " + err.message); } return; }
       const b = e.target.closest("[data-dup]"); if (b) duplicate(b.closest("tr").dataset.id); });
-    $("prBulk").addEventListener("click", (e) => { const b = e.target.closest("[data-bulk]"); if (b) bulk(b.dataset.bulk); });
+    wireFlagPreviews($("prRows"), (t) => cache.products.find((x) => x.id === t.closest("tr")?.dataset.id) || cache.products[0]);
+    wireFlagPreviews($("prBulk"), () => cache.products.find((x) => listState.sel.has(x.id)) || cache.products[0]);
+    const bar = $("prBulk");
+    const closeMenus = () => bar.querySelectorAll(".bk-menu").forEach((m) => { m.hidden = true; const t = m.previousElementSibling; if (t) t.setAttribute("aria-expanded", "false"); });
+    bar.addEventListener("click", (e) => {
+      const t = e.target.closest("[data-bk-open]");
+      if (t) { const m = t.nextElementSibling, open = m.hidden; closeMenus(); m.hidden = !open; t.setAttribute("aria-expanded", String(open)); return; }
+      const b = e.target.closest("[data-bulk]"); if (b) { closeMenus(); if ($("bkSearch")) $("bkSearch").value = ""; bulk(b.dataset.bulk); }
+    });
+    document.addEventListener("click", (e) => { if (!e.target.closest("#prBulk")) closeMenus(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenus(); });
+    if ($("bkSearch")) $("bkSearch").addEventListener("input", (e) => {
+      const q = e.target.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); const box = $("bkResults");
+      closeMenus();
+      if (!q) return;
+      const all = BULK_GROUPS.flatMap((g) => g.items.map((it) => [it, `${g.name} ${it[1]} ${it[2]}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")]));
+      const hits = all.filter(([, txt]) => q.split(/\s+/).every((w) => txt.includes(w)));
+      box.innerHTML = hits.length ? hits.map(([it]) => bkItem(it)).join("") : "<p class=\"bk-none\">No hay acciones con esas palabras.</p>";
+      box.hidden = false;
+    });
   }
   async function saveCost(id, fields) {
     const cur = cache.costs.get(id) || { product_id: id };
@@ -388,14 +473,14 @@
         </section>
 
         <section class="panel ed-sec"><h3>2. Precio</h3>
-          ${w ? `<div class="ed-cur"><span>Moneda del precio:</span>
-            <label><input type="radio" name="cur" value="ARS" ${p.price_usd == null ? "checked" : ""}> Pesos (ARS)</label>
-            <label><input type="radio" name="cur" value="USD" ${p.price_usd != null ? "checked" : ""}> Dólares (USD)</label>
-            <small id="edFx">${rate() ? `Cotización vigente: ${money(rate())} por dólar` : "Todavía no hay cotización: configurala en 💵 Dólar."}</small></div>` : ""}
+          ${w ? `<p class="ed-hint" id="edFx">${rate() ? `Cotización vigente: ${money(rate())} por dólar. El costo y la venta pueden estar en monedas distintas: el margen y la ganancia se calculan convirtiendo con esta cotización.` : "Todavía no hay cotización: configurala en 💵 Dólar."}</p>` : ""}
           <div class="ed-grid ed-grid-4">
-            ${w ? `<label class="field"><span data-cur-label="Costo de compra">Costo de compra ($)</span><input name="cost" inputmode="decimal" value="${p.price_usd != null ? (c.cost_usd ?? "") : (c.cost ?? "")}" placeholder="Solo lo ven admins"></label>
+            ${w ? `<div class="field"><span data-cur-label="Costo de compra" data-cur-of="costcur">Costo de compra ($)</span><input name="cost" inputmode="decimal" value="${c.cost_usd != null ? c.cost_usd : (c.cost ?? "")}" placeholder="Solo lo ven admins" aria-label="Costo de compra">
+              <span class="ed-curpick" role="radiogroup" aria-label="Moneda del costo"><label><input type="radio" name="costcur" value="ARS" ${c.cost_usd == null ? "checked" : ""}> Pesos</label><label><input type="radio" name="costcur" value="USD" ${c.cost_usd != null ? "checked" : ""}> Dólares</label></span></div>
             <label class="field">Margen (%)<input name="margin" inputmode="decimal" value="${isFinite(m) ? Math.round(m) : DEFAULT_MARGIN}"></label>` : ""}
-            <label class="field"><span data-cur-label="Precio de venta">Precio de venta ($)</span><input name="price" inputmode="decimal" value="${p.price_usd != null ? p.price_usd : p.price || 0}" ${ro}><small id="edArs">0 = "Consultar precio por WhatsApp"</small></label>
+            <div class="field"><span data-cur-label="Precio de venta" data-cur-of="cur">Precio de venta ($)</span><input name="price" inputmode="decimal" value="${p.price_usd != null ? p.price_usd : p.price || 0}" ${ro} aria-label="Precio de venta">
+              ${w ? `<span class="ed-curpick" role="radiogroup" aria-label="Moneda de venta"><label><input type="radio" name="cur" value="ARS" ${p.price_usd == null ? "checked" : ""}> Pesos</label><label><input type="radio" name="cur" value="USD" ${p.price_usd != null ? "checked" : ""}> Dólares</label></span>` : ""}
+              <small id="edArs">0 = "Consultar precio por WhatsApp"</small></div>
             ${w ? `<label class="field ed-check"><input type="checkbox" name="round" checked> Redondear a $100</label>` : ""}
           </div>
           ${w ? `<p class="ed-hint" id="edProfit"></p>
@@ -411,7 +496,7 @@
             <label class="field">Peso (kg, para envíos)<input name="weight_kg" inputmode="decimal" value="${p.weight_kg ?? 1}" ${ro}></label>
             <label class="field">Ubicación en depósito (sale en la lista de armado)<input name="location" maxlength="40" placeholder="Ej: Estante A2" value="${esc(p.location || "")}" ${ro}></label>
           </div>
-          <div class="ed-flags">${FLAGS.map(([f, ic, n, d]) => `<label class="ed-flag"><input type="checkbox" name="${f}" ${flagOn(p, f) ? "checked" : ""} ${ro}><span><b>${ic} ${n}</b><small>${d}</small></span></label>`).join("")}</div>
+          <div class="ed-flags">${FLAGS.map(([f, ic, n, d]) => `<label class="ed-flag"><input type="checkbox" name="${f}" ${flagOn(p, f) ? "checked" : ""} ${ro}><span><b>${FLAG_ICONS[f]} ${n}</b><small>${d}</small></span></label>`).join("")}</div>
         </section>
 
         <section class="panel ed-sec"><h3>4. Fotos</h3>
@@ -605,21 +690,33 @@
     if (ed.isNew) el("name").addEventListener("input", () => { if (!el("id").dataset.touched) el("id").value = slug(el("name").value); });
     if (ed.isNew) el("id").addEventListener("input", () => (el("id").dataset.touched = "1"));
     // Costo / margen / precio enlazados
-    const profit = () => { const p = $("edProfit"); if (!p) return; const c = val("cost"), v = val("price"); p.textContent = c > 0 && v > 0 ? `Ganancia por unidad: ${isUsd() ? usd(v - c) + (rate() ? ` (≈ ${money((v - c) * rate())})` : "") : money(v - c)} · margen ${pct(margin(v, c))} sobre costo` : "Cargá el costo para ver la ganancia."; };
+    // Cada campo con su moneda: el costo en pesos o dólares y la venta en pesos o dólares, por separado
     const isUsd = () => w && el("cur") && f.querySelector("[name=cur]:checked").value === "USD";
+    const costUsd = () => w && el("costcur") && f.querySelector("[name=costcur]:checked").value === "USD";
     const dec = (v) => Number(String(v).replace(",", ".")) || 0;          // USD con decimales
-    const val = (n) => (isUsd() ? dec(el(n).value) : num(el(n).value));
+    const raw = (n, usd) => (usd ? dec(el(n).value) : num(el(n).value));
+    const toArs = (v, usd) => (usd ? (rate() ? v * rate() : NaN) : v);
+    const costArs = () => toArs(raw("cost", costUsd()), costUsd());
+    const priceArs = () => toArs(raw("price", isUsd()), isUsd());
+    const val = (n) => raw(n, n === "cost" ? costUsd() : isUsd());
+    const profit = () => { const p = $("edProfit"); if (!p) return; const c = costArs(), v = priceArs();
+      p.textContent = c > 0 && v > 0 ? `Ganancia por unidad: ${money(v - c)}${isUsd() && rate() ? ` (≈ ${usd((v - c) / rate())})` : ""} · margen ${Math.round(margin(v, c))}%` : (costUsd() !== isUsd() && !rate() ? "Para calcular la ganancia con monedas distintas hace falta la cotización del dólar." : ""); };
     const curUi = () => {
-      f.querySelectorAll("[data-cur-label]").forEach((s) => (s.textContent = `${s.dataset.curLabel} (${isUsd() ? "US$" : "$"})`));
+      f.querySelectorAll("[data-cur-label]").forEach((s) => (s.textContent = `${s.dataset.curLabel} (${(s.dataset.curOf === "costcur" ? costUsd() : isUsd()) ? "US$" : "$"})`));
       const ars = $("edArs"); if (!ars) return;
-      ars.textContent = isUsd() ? (rate() ? `≈ ${money(Math.round(val("price") * rate() / 100) * 100)} en la tienda (se actualiza solo con el dólar)` : "Sin cotización todavía") : '0 = "Consultar precio por WhatsApp"';
+      ars.textContent = isUsd() ? (rate() ? `≈ ${money(Math.round(raw("price", true) * rate() / 100) * 100)} en la tienda (se actualiza solo con el dólar)` : "Sin cotización todavía") : '0 = "Consultar precio por WhatsApp"';
     };
-    const fromMargin = () => { const c = val("cost"); if (c > 0) { const v = c * (1 + num(el("margin").value) / 100); el("price").value = isUsd() ? Math.round(v * 100) / 100 : el("round").checked ? round100(v) : Math.round(v); } profit(); curUi(); };
+    // Precio = costo × (1 + margen), pasado a la moneda de venta
+    const fromMargin = () => { const c = costArs(); if (c > 0) { const vArs = c * (1 + num(el("margin").value) / 100);
+      if (isUsd()) { if (rate()) el("price").value = Math.round((vArs / rate()) * 100) / 100; }
+      else el("price").value = el("round").checked ? round100(vArs) : Math.round(vArs); } profit(); curUi(); };
     if (w) {
       el("cost").addEventListener("input", fromMargin);
       el("margin").addEventListener("input", fromMargin);
-      el("price").addEventListener("input", () => { const c = val("cost"), v = val("price"); if (c > 0 && v > 0) el("margin").value = Math.round(margin(v, c)); profit(); curUi(); });
-      f.querySelectorAll("[name=cur]").forEach((r) => r.addEventListener("change", () => { profit(); curUi(); }));
+      el("price").addEventListener("input", () => { const c = costArs(), v = priceArs(); if (c > 0 && v > 0) el("margin").value = Math.round(margin(v, c)); profit(); curUi(); });
+      // Cambiar la moneda del costo solo cambia cómo se lee ese número; cambiar la de venta recalcula el precio desde el costo y el margen
+      f.querySelectorAll("[name=costcur]").forEach((r) => r.addEventListener("change", fromMargin));
+      f.querySelectorAll("[name=cur]").forEach((r) => r.addEventListener("change", () => { if (costArs() > 0) fromMargin(); else { profit(); curUi(); } }));
       profit(); curUi();
     }
     el("show_stock").addEventListener("change", () => { el("stock").disabled = !el("show_stock").checked; });
@@ -697,7 +794,7 @@
       if (ed.isNew) prod.sort = cache.products.length;
       if (!w) { delete prod.name; }   // moderador (stock.write): solo stock / visibilidad
       const costV = el("cost").value.trim() === "" ? null : val("cost");
-      const cost = w ? { ...(isUsd() ? { cost_usd: costV, cost: costV != null && rate() ? Math.round(costV * rate()) : null } : { cost: costV, cost_usd: null }), supplier: el("supplier").value.trim() || null, notes: el("notes").value.trim() || null } : null;
+      const cost = w ? { ...(costUsd() ? { cost_usd: costV, cost: costV != null && rate() ? Math.round(costV * rate()) : null } : { cost: costV, cost_usd: null }), supplier: el("supplier").value.trim() || null, notes: el("notes").value.trim() || null } : null;
       // Referencias de compra: precio obligatorio (con decimales), link opcional pero válido
       const dec = (v) => { const x = Number(String(v ?? "").replace(/[^\d.,]/g, "").replace(/\.(?=\d{3}(\D|$))/g, "").replace(",", ".")); return isFinite(x) ? x : 0; };
       const bad = ed.sources.find((s) => (s.store || "").trim() && !(dec(s.ref_price) > 0));
