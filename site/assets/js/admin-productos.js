@@ -806,7 +806,7 @@
   };
   /* Gráfico histórico (Chart.js se carga solo al abrir esta sección) */
   const FX_COLORS = { oficial: "#0084d6", blue: "#2563eb", bolsa: "#16a34a", contadoconliqui: "#9333ea", mayorista: "#64748b", cripto: "#f59e0b", tarjeta: "#dc2626" };
-  const loadChart = () => window.Chart ? Promise.resolve() : new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
+  const loadChart = () => window.Chart ? Promise.resolve() : new Promise((ok, ko) => { const sc = document.createElement("script"); sc.src = "../assets/vendor/chart-4.4.4.umd.min.js"; sc.onload = ok; sc.onerror = ko; document.head.appendChild(sc); });
   let fxChart = null;
   // Accesos rápidos de "Ver cada" (se guardan en fx_settings.quick_steps, iguales para todos los administradores)
   const QDEF = [0, 10, 30, 60, 360, 720, 1440];

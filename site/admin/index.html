@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
+  <!-- Seguridad: solo corre JavaScript propio del sitio. Si editás un script escrito dentro de este archivo, corré tools/csp.py --fix -->
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'sha256-LzNxremwgj+T/wdwFd/B7YByEb3QuVAGVHHZWHGJBDA='; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Panel | EXE</title>
   <meta name="robots" content="noindex, nofollow">
@@ -59,7 +61,7 @@
   </div>
 
   <script src="../assets/js/config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../assets/vendor/supabase-js-2.117.2.min.js"></script>
   <script src="../assets/js/backend.js"></script>
   <script src="../assets/js/mfa.js"></script>
   <script src="../assets/js/admin.js"></script>

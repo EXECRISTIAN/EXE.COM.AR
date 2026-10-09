@@ -2,6 +2,12 @@
   const cfg = window.SITE_CONFIG;
   const STORAGE_KEY = "exe-cart";
   const PLACEHOLDER = "assets/img/placeholder.svg";
+  // Foto que no carga → imagen de reemplazo. Va como listener (no como onerror="…" en el HTML)
+  // para que la política de seguridad (CSP) pueda bloquear todo JavaScript escrito dentro del HTML.
+  document.addEventListener("error", (e) => {
+    const img = e.target;
+    if (img instanceof HTMLImageElement && img.hasAttribute("data-fallback")) { img.removeAttribute("data-fallback"); img.src = PLACEHOLDER; }
+  }, true);
   const $ = (id) => document.getElementById(id);
   const money = (n) =>
     new Intl.NumberFormat(cfg.locale, { style: "currency", currency: cfg.currency, maximumFractionDigits: 0 }).format(n);
@@ -123,7 +129,7 @@
           return `
           <article class="card reveal" style="--d:${(i % 4) * 0.08}s">
             <a class="card-media" href="#producto/${encodeURIComponent(p.id)}" aria-label="Ver detalles de ${esc(p.name)}">
-              <img src="${esc(mainImg(p))}" alt="${esc(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
+              <img src="${esc(mainImg(p))}" alt="${esc(p.name)}" loading="lazy" data-fallback>
               ${p.images && p.images[1] ? `<img class="alt" src="${esc(p.images[1])}" alt="" loading="lazy">` : ""}
               ${p.category ? `<span class="tag">${esc(p.category)}</span>` : ""}
               ${p.outlet ? `<span class="tag tag-outlet">Outlet</span>` : ""}
@@ -172,7 +178,7 @@
       <button class="pd-close icon-btn" id="pdClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <div class="pd-gallery">
         <div class="pd-stage">
-          <img id="pdMain" src="${esc(imgs[0])}" alt="" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
+          <img id="pdMain" src="${esc(imgs[0])}" alt="" data-fallback>
           ${imgs.length > 1 ? `
             <button class="pd-nav prev" data-pd-step="-1" aria-label="Foto anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg></button>
             <button class="pd-nav next" data-pd-step="1" aria-label="Foto siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5l7 7-7 7"/></svg></button>
@@ -254,7 +260,7 @@
   const hasSession = (() => { try { return Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k)); } catch { return false; } })();
   const loadScript = (src) => new Promise((ok, fail) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = fail; document.head.appendChild(s); });
   const adminReady = hasSession && cfg.supabaseUrl
-    ? loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js")
+    ? loadScript("assets/vendor/supabase-js-2.117.2.min.js")
         .then(() => loadScript("assets/js/backend.js"))
         .then(async () => {
           const be = window.EXE_BACKEND; if (!be) return;
@@ -375,7 +381,7 @@
     $("cartItems").innerHTML = lines.length
       ? lines.map((l, i) => `
         <li>
-          <img src="${esc(mainImg(l.product))}" alt="" onerror="this.onerror=null;this.src='${PLACEHOLDER}'">
+          <img src="${esc(mainImg(l.product))}" alt="" data-fallback>
           <div class="info">${esc(l.product.name)}
             <small>${l.variant ? esc(l.variant) + " · " : ""}${priceLabel(l.product)}${l.product.noStock ? " · a pedido" : l.product.askStock ? " · stock a consultar" : ""}${caseOnly(l.product) ? ` · ${CASE_NOTE}` : ""}</small>
           </div>

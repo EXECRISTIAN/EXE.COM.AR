@@ -24,6 +24,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # Seguridad: cada página solo deja correr sus propios scripts (CSP). Si un script escrito dentro
+      # del HTML cambió y su huella no se actualizó, el deploy se frena acá en vez de publicar algo roto.
+      - name: Verificar política de seguridad (CSP)
+        run: python3 tools/csp.py
       # Plantillas de email: el panel usa el mismo archivo que el envío real (vista previa idéntica)
       - name: Copiar generador de emails
         run: cp supabase/functions/_shared/emails.js site/assets/js/emails.mjs
