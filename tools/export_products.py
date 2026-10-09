@@ -1,7 +1,7 @@
 """Regenera site/data/products.json (respaldo de la tienda si Supabase no responde).
 
 Uso: guardar en un archivo el resultado JSON de
-  select id,name,brand,category,description,price,stock,show_stock,images,image,specs,outlet,condition,
+  select id,name,brand,category,description,price,price_usd,stock,show_stock,images,image,specs,outlet,condition,
          weight_kg,variants,tags,ask_price,ask_stock,cart_ok,hide_no_stock,active,sort
   from products order by sort, name;
 y correr:  python3 tools/export_products.py <archivo.json>
@@ -20,6 +20,8 @@ for r in rows:
     p = {"id": r["id"], "name": r["name"], "brand": r.get("brand"), "category": r.get("category"),
          "description": r.get("description"), "price": 0 if r.get("ask_price") else float(r.get("price") or 0),
          "askStock": ask_stock, "cartOk": cart_ok, "noStock": not ask_stock and show and stock <= 0 and cart_ok}
+    if not r.get("ask_price") and r.get("price_usd") is not None and float(r["price_usd"]) > 0:
+        p["priceUsd"] = float(r["price_usd"])   # vendido en dólares: la tienda muestra US$
     if show and not ask_stock and not (stock <= 0 and cart_ok):
         p["stock"] = stock
     p["images"] = r.get("images") or ([r["image"]] if r.get("image") else [])
