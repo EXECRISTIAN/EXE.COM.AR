@@ -138,6 +138,7 @@
               ${p.outlet ? `<span class="tag tag-outlet">Outlet</span>` : ""}
               ${p.images && p.images.length > 1 ? `<span class="img-count" aria-hidden="true">${p.images.length} fotos</span>` : ""}
             </a>
+            ${shareActs(p.id)}
             <div class="card-body">
               ${p.brand ? `<button class="tag-brand" type="button" data-brand-tag="${esc(p.brand)}" title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
               <h3><a href="#producto/${encodeURIComponent(p.id)}">${esc(p.name)}</a></h3>
@@ -182,6 +183,7 @@
       <div class="pd-gallery">
         <div class="pd-stage">
           <img id="pdMain" src="${esc(imgs[0])}" alt="" data-fallback>
+          ${shareActs(p.id, " sh-pulse")}
           ${imgs.length > 1 ? `
             <button class="pd-nav prev" data-pd-step="-1" aria-label="Foto anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg></button>
             <button class="pd-nav next" data-pd-step="1" aria-label="Foto siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5l7 7-7 7"/></svg></button>
@@ -208,7 +210,6 @@
             </div></div>`}
           ${addBtn(p, "data-pd-add")}
           <a class="btn btn-outline" href="${esc(waAsk)}" target="_blank" rel="noopener">Consultar por WhatsApp</a>
-          <button type="button" class="btn btn-outline btn-share" data-share-product="${esc(p.id)}">${SHARE_ICON} Compartir</button>
         </div>
         ${caseOnly(p) ? `<p class="pd-note">⚠️ Se vende solo el gabinete: ${CASE_NOTE}.</p>` : ""}
         ${p.description ? `<div class="pd-desc">${esc(p.description)}</div>` : ""}
@@ -383,6 +384,13 @@
     const anyUsd = lines.some((l) => l.product.priceUsd);
     $("cartTotal").textContent = total ? (anyUsd ? "≈ " : "") + money(total) + (hasConsult ? " + a consultar" : "") : hasConsult ? "A consultar" : money(0);
     $("sendWa").disabled = count === 0;
+    // Vista previa de lo que se comparte (fotos + cantidad + total) y botones de compartir solo con productos
+    $("cartShareBox").hidden = $("cartActs").hidden = count === 0;
+    if (count) {
+      $("cartPrevImgs").innerHTML = lines.slice(0, 4).map((l) => `<img src="${esc(mainImg(l.product))}" alt="" data-fallback>`).join("");
+      $("cartPrevTitle").textContent = `Tu presupuesto · ${count} producto${count === 1 ? "" : "s"}`;
+      $("cartPrevSub").textContent = `${total ? "Total " + (anyUsd ? "≈ " : "") + money(total) + (hasConsult ? " + a consultar" : "") : "Precio a consultar"} · exe.com.ar`;
+    }
     $("cartItems").innerHTML = lines.length
       ? lines.map((l, i) => `
         <li>
@@ -464,6 +472,7 @@
 
   function toggleCart(open) {
     $("cart").classList.toggle("open", open);
+    if (open && cart.length) pulse($("cartActs"));
     $("cart").setAttribute("aria-hidden", String(!open));
     $("overlay").classList.toggle("show", open);
   }
@@ -496,6 +505,30 @@
     PLATFORM === "ios" || PLATFORM === "mac" ? '<path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5v10h14V11h-1"/>'
     : PLATFORM === "windows" ? '<path d="M14 5l5 4-5 4"/><path d="M19 9h-6a6 6 0 0 0-6 6v1"/><path d="M4 11v9h14v-3"/>'
     : '<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/>'}</svg>`;
+
+  const COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>';
+  const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
+  // Botones redondos "Copiar link" y "Compartir" (sobre la foto del producto y arriba del carrito).
+  // Sombra marcada + se levantan al pasar el mouse + se hunden al tocar; extra " sh-pulse" = laten 2 veces al aparecer.
+  function shareActs(id, extra = "") {
+    const n = esc(products.find((x) => x.id === id)?.name || "este producto");
+    return `<div class="sh-acts${extra}"><button type="button" class="sh-btn" data-copy-product="${esc(id)}" aria-label="Copiar link de ${n}"><span class="sh-tip">Copiar link</span>${COPY_ICON}</button>`
+      + `<button type="button" class="sh-btn" data-share-product="${esc(id)}" aria-label="Compartir ${n}"><span class="sh-tip">Compartir</span>${SHARE_ICON}</button></div>`;
+  }
+  // Copia solo el link y lo confirma: el botón se pone verde con ✓ y aparece "Link copiado".
+  async function copyLink(url, btn) {
+    try { await navigator.clipboard.writeText(url); }
+    catch (e) { return shareMenu({ title: "Copiar link", text: "", url }); }   // sin permiso de portapapeles: se muestra el link para copiarlo
+    toast("✓ Link copiado");
+    if (!btn || btn.classList.contains("ok")) return;
+    const old = btn.innerHTML;
+    btn.classList.add("ok"); btn.querySelector("svg").outerHTML = CHECK_ICON;
+    setTimeout(() => { btn.classList.remove("ok"); btn.innerHTML = old; }, 1400);
+  }
+  const productUrl = (id) => `${siteBase()}#producto/${encodeURIComponent(id)}`;
+  const budgetUrl = () => `${siteBase()}#presupuesto/${cart.map((l) => [l.id, l.qty, l.variant || ""].map(encodeURIComponent).join("~")).join(".")}`;
+  // Vuelve a disparar el latido (ej. cada vez que se abre el carrito)
+  function pulse(el) { if (!el) return; el.classList.remove("sh-pulse"); void el.offsetWidth; el.classList.add("sh-pulse"); }
 
   function shareMenu(data) {
     let dlg = $("shareDlg");
@@ -535,16 +568,15 @@
   }
   function shareProduct(id) {
     const p = products.find((x) => x.id === id); if (!p) return;
-    share({ title: p.name, text: `Mirá este producto en EXE: ${p.name} — ${priceLabel(p)}`, url: `${siteBase()}#producto/${encodeURIComponent(p.id)}` });
+    share({ title: p.name, text: `Mirá este producto en EXE: ${p.name} — ${priceLabel(p)}`, url: productUrl(p.id) });
   }
   // Presupuesto: el link lleva los productos del carrito; quien lo abre los puede cargar en su carrito con un toque.
   function shareBudget() {
     if (!cart.length) return toast("Agregá productos al carrito para compartir el presupuesto");
     const { lines, total, hasConsult } = renderCart();
-    const code = cart.map((l) => [l.id, l.qty, l.variant || ""].map(encodeURIComponent).join("~")).join(".");
     const rows = lines.map((l) => `• ${l.qty} x ${l.product.name}${l.variant ? ` (${l.variant})` : ""} — ${l.product.price > 0 ? priceOf(l.product, l.qty) : "a consultar"}`);
     const text = ["Presupuesto EXE:", ...rows, total ? `Total estimado: ${money(total)}${lines.some((l) => l.product.priceUsd) ? " (en pesos, con el dólar del día)" : ""}${hasConsult ? " (+ productos a consultar)" : ""}` : "Precio a consultar"].join("\n");
-    share({ title: "Presupuesto EXE", text, url: `${siteBase()}#presupuesto/${code}` });
+    share({ title: "Presupuesto EXE", text, url: budgetUrl() });
   }
   function routeBudget() {
     const m = location.hash.match(/^#presupuesto\/(.+)$/);
@@ -686,7 +718,11 @@
   $("cartClose").onclick = () => toggleCart(false);
   $("overlay").onclick = () => toggleCart(false);
   document.addEventListener("keydown", (e) => e.key === "Escape" && $("pdOverlay").hidden && toggleCart(false));
+  $("cartShare").querySelector("svg").outerHTML = SHARE_ICON;   // ícono de compartir del sistema de quien mira
   $("cartShare").onclick = shareBudget;
+  $("cartPrev").onclick = shareBudget;
+  $("cartCopy").onclick = (e) => { if (cart.length) copyLink(budgetUrl(), e.currentTarget); };
+  document.addEventListener("click", (e) => { const b = e.target.closest("[data-copy-product]"); if (b) copyLink(productUrl(b.dataset.copyProduct), b); });
   document.addEventListener("click", (e) => { const b = e.target.closest("[data-share-product]"); if (b) shareProduct(b.dataset.shareProduct); });
   $("cartClear").onclick = () => { cart = []; shipping = null; if (shipOn) $("shipOpts").innerHTML = ""; save(); renderCart(); renderProducts(); };
   $("sendWa").onclick = () => window.open(waLink(buildMessage()), "_blank", "noopener");

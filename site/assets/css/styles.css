@@ -677,3 +677,43 @@ html { touch-action: manipulation; }
 .mod-hist summary { cursor: pointer; font-weight: 600; color: var(--c2); }
 .mod-hist ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 6px; font-size: .9rem; }
 .mod-hist small { color: var(--muted); }
+
+/* ---------- Botones "Copiar link" y "Compartir" (sobre la foto y en el carrito) ----------
+   Sombra marcada para que se lean como botones y no como parte de la foto; se levantan al pasar el mouse,
+   se hunden al tocar, muestran qué hacen y, al copiar, se ponen verdes con ✓. */
+.sh-acts { position: absolute; top: 10px; right: 10px; z-index: 2; display: flex; flex-direction: column; gap: 8px; }
+.sh-acts.sh-inline { position: static; flex-direction: row; margin-left: auto; margin-right: 10px; }
+.sh-btn { position: relative; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border-radius: 50%; cursor: pointer;
+  background: var(--surface); color: var(--c2); border: 1px solid var(--c6);
+  box-shadow: 0 4px 10px rgba(0,0,0,.24), 0 1px 3px rgba(0,0,0,.2); transition: transform .15s var(--ease), box-shadow .15s, color .15s, border-color .15s, background .15s; }
+.sh-btn svg { width: 18px; height: 18px; }
+.sh-btn:hover, .sh-btn:focus-visible { transform: translateY(-2px) scale(1.08); color: var(--c0); border-color: var(--c0);
+  box-shadow: 0 8px 18px rgba(0,0,0,.3), 0 2px 4px rgba(0,0,0,.2); }
+.sh-btn:active { transform: scale(.92); box-shadow: 0 2px 4px rgba(0,0,0,.28); }
+.sh-btn.ok { background: var(--ok); border-color: var(--ok); color: #fff; }
+.sh-tip { position: absolute; right: calc(100% + 8px); top: 50%; transform: translateY(-50%); padding: 4px 8px; border-radius: 6px; white-space: nowrap;
+  background: var(--inverse-bg); color: var(--inverse-fg); font-size: .75rem; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .15s; }
+.sh-inline .sh-tip { right: auto; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); }
+@media (hover: hover) { .sh-btn:hover .sh-tip { opacity: 1; } }
+.sh-btn:focus-visible .sh-tip { opacity: 1; }
+/* Latido azul 2 veces al aparecer (ficha del producto y al abrir el carrito) */
+.sh-btn::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--c0); opacity: 0; pointer-events: none; }
+.sh-pulse .sh-btn::after { animation: sh-ring 1.3s ease-out .45s 2; }
+.sh-pulse .sh-btn + .sh-btn::after { animation-delay: .6s; }
+@keyframes sh-ring { 0% { opacity: .9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.6); } }
+@media (prefers-reduced-motion: reduce) { .sh-btn, .sh-tip { transition: none; } .sh-pulse .sh-btn::after { animation: none; } .sh-btn:hover { transform: none; } }
+/* En la ficha del celular la X de cerrar queda arriba a la derecha: los botones van debajo */
+@media (max-width: 860px) { .pd-stage .sh-acts { top: 58px; } }
+/* Vista previa de lo que se comparte, en el carrito */
+.share-box-cart { margin-top: 12px; }
+.sh-label { font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.share-prev { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 10px; text-align: left; cursor: pointer; font: inherit; color: inherit;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; transition: border-color .15s, box-shadow .15s; }
+.share-prev:hover, .share-prev:focus-visible { border-color: var(--c0); box-shadow: 0 4px 12px var(--shadow-strong); }
+.sp-imgs { display: flex; flex: none; }
+.sp-imgs img { width: 34px; height: 34px; object-fit: contain; background: var(--media-bg); border: 1px solid var(--line); border-radius: 6px; margin-right: -8px; }
+.sp-txt { display: flex; flex-direction: column; min-width: 0; margin-left: 8px; font-size: .85rem; }
+.sp-txt small { color: var(--muted); font-size: .78rem; }
+/* La esquina derecha de la foto es de los botones de compartir: la etiqueta Outlet va debajo de la categoría */
+.card-media .tag.tag-outlet { left: 10px; right: auto; top: 36px; }
+.card-media .tag.tag-outlet:first-of-type { top: 10px; }
