@@ -176,6 +176,7 @@
   function openProduct(id) {
     const p = products.find((x) => x.id === id);
     if (!p) return;
+    stat("product", { product_id: id });
     pdProduct = p;
     const imgs = pdImages(p), out = tracksStock(p) && p.stock <= 0;
     const waAsk = waLink(`Hola EXE! Quería consultar por: ${p.name}`);
@@ -274,6 +275,56 @@
           if (perms.has("products.write")) adminApi = be.sb;
         }).catch(() => {})
     : Promise.resolve();
+  /* ---------- Analítica propia (anónima) ----------
+     Un número al azar por navegador (no se relaciona con la cuenta), tipo de dispositivo, sistema, navegador y de qué
+     link vino (primera visita o ?origen=...). Sin IP, nombre ni GPS. Se envía a la base con la función track().
+     No se cuenta al equipo de EXE (con acceso al panel) ni las vistas previas del editor. */
+  // ¿Es del equipo de EXE (acceso al panel)? Se resuelve antes de mandar cualquier evento.
+  const staffReady = adminReady.then(async () => { try { const be = window.EXE_BACKEND; return !!(be && (await be.permissions()).has("dashboard.access")); } catch (e) { return false; } });
+  const stat = (() => {
+    const q = [], rnd = () => Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+    const store = (k, v) => { try { if (v !== undefined) localStorage.setItem(k, v); return localStorage.getItem(k); } catch (e) { return v || null; } };
+    const visitor = (store("exe-v") || store("exe-v", rnd())).replace(/[^a-z0-9]/g, "").slice(0, 32);
+    const ua = navigator.userAgent || "";
+    const device = /iPad|Tablet|(Android(?!.*Mobile))/i.test(ua) || (/Mac/.test(navigator.platform || "") && navigator.maxTouchPoints > 1) ? "tablet" : /Mobi|Android|iPhone/i.test(ua) ? "mobile" : "desktop";
+    const os = /Android/.test(ua) ? "Android" : /iPhone|iPad|iPod/.test(ua) || (/Mac/.test(navigator.platform || "") && navigator.maxTouchPoints > 1) ? "iPhone/iPad" : /Windows/.test(ua) ? "Windows" : /Mac OS/.test(ua) ? "Mac" : /Linux/.test(ua) ? "Linux" : "Otro";
+    const browser = /Edg\//.test(ua) ? "Edge" : /OPR\/|Opera/.test(ua) ? "Opera" : /SamsungBrowser/.test(ua) ? "Samsung" : /Firefox\//.test(ua) ? "Firefox" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "Otro";
+    // De dónde llegó: ?origen=xxx (links con etiqueta) o el sitio anterior. Se guarda el primero (primera visita).
+    const params = new URLSearchParams(location.search);
+    const camp = (params.get("origen") || params.get("utm_campaign") || params.get("utm_source") || "").toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 60);
+    let ref = ""; try { ref = document.referrer ? new URL(document.referrer).hostname : ""; } catch (e) {}
+    const srcOf = (h) => !h || h === location.hostname ? "" : /instagram/.test(h) ? "Instagram" : /facebook|fb\.com|messenger/.test(h) ? "Facebook" : /google\./.test(h) ? "Google"
+      : /whatsapp|wa\.me/.test(h) ? "WhatsApp" : /mercadoli(bre|vre)/.test(h) ? "Mercado Libre" : /tiktok/.test(h) ? "TikTok" : /youtube|youtu\.be/.test(h) ? "YouTube" : /(^|\.)(x|twitter|t)\.(com|co)$/.test(h) ? "X / Twitter" : "Otro sitio";
+    // Etiquetas como "historia-ig", "fb-promo", "wa-estado", "ml-perfil": se reconoce la red por la palabra
+    const has = (re) => new RegExp(`(^|[-_])(${re})([-_]|$)`).test(camp);
+    const fromCamp = has("ig|insta|instagram") ? "Instagram" : has("fb|face|facebook") ? "Facebook" : has("wa|whats|whatsapp") ? "WhatsApp"
+      : has("ml|mercado|mercadolibre") ? "Mercado Libre" : has("tt|tiktok") ? "TikTok" : has("yt|youtube") ? "YouTube" : has("google|gads") ? "Google" : camp ? "Link con etiqueta" : "";
+    const src = fromCamp || srcOf(ref);
+    const first = store("exe-src") || (src ? store("exe-src", src) : null);
+    if (camp) store("exe-camp", camp);
+    const off = window.parent !== window || !cfg.supabaseUrl || !visitor || /[?&]demo=1/.test(location.search);
+    let timer;
+    function flush() {
+      timer = null; if (!q.length || off) return;
+      const batch = q.splice(0, 20);
+      staffReady.then((staff) => {
+        if (staff || adminApi) return;   // el equipo de EXE no suma visitas
+        fetch(`${cfg.supabaseUrl}/rest/v1/rpc/track`, { method: "POST", keepalive: true,
+          headers: { "Content-Type": "application/json", apikey: cfg.supabaseAnonKey, Authorization: `Bearer ${cfg.supabaseAnonKey}` },
+          body: JSON.stringify({ p_events: batch }) }).catch(() => {});
+      });
+    }
+    function track(type, extra = {}) {
+      if (off) return;
+      q.push({ visitor, type, device, os, browser, source: src || first || null, campaign: camp || store("exe-camp") || null, ...extra });
+      if (!timer) timer = setTimeout(flush, 1500);
+    }
+    addEventListener("pagehide", flush);
+    return track;
+  })();
+  stat("view");
+
+
   async function adminSources(id) {
     await adminReady;
     const cur = (v, c) => (c === "USD" ? "US$ " + Number(v).toLocaleString("es-AR") : money(v));
@@ -360,6 +411,7 @@
 
   /* ---------- Carrito ---------- */
   function add(id, variant, qty = 1) {
+    stat("add", { product_id: id });
     const p = products.find((x) => x.id === id);
     if (!p) return;
     if (available(p) <= 0) return toast("No hay más stock disponible de este producto");
@@ -527,6 +579,7 @@
       promo.res ? `Código de descuento ${promo.res.code} (${promo.res.label}): −${money(promo.res.discount)}` : "",
       promo.res ? `*Total con descuento: ${money(Math.max(0, total - promo.res.discount))}*${hasConsult ? " (+ productos a consultar)" : ""}` : "",
       promo.res && promo.res.check ? `Verificación del código: #${promo.res.check}` : "",
+      $("customerProv").value ? `Provincia: ${$("customerProv").value}` : "",
       shipping ? `Envío ${shipping.label} (CP ${shipping.cp}): ${money(shipping.cost)} — cotización estimada` : "",
       note ? `\nNota: ${note}` : "",
     ].filter((x, i, all) => x !== "" || all[i - 1] !== "").join("\n").trim();   // sin líneas vacías repetidas
@@ -534,6 +587,7 @@
 
   function toggleCart(open) {
     $("cart").classList.toggle("open", open);
+    if (open && cart.length) stat("cart");
     if (open && cart.length) pulse($("cartActs"));
     $("cart").setAttribute("aria-hidden", String(!open));
     $("overlay").classList.toggle("show", open);
@@ -795,6 +849,7 @@
   document.addEventListener("click", (e) => { const b = e.target.closest("[data-share-product]"); if (b) shareProduct(b.dataset.shareProduct, b); });
   $("cartClear").onclick = () => { cart = []; shipping = null; if (shipOn) $("shipOpts").innerHTML = ""; save(); renderCart(); renderProducts(); };
   $("sendWa").onclick = async () => {
+    stat("wa", { province: $("customerProv").value || null, amount: Math.round(renderCart().total) || null });
     if (!promo.code) return window.open(waLink(buildMessage()), "_blank", "noopener");
     // Con código: la base registra el uso y da el número de verificación antes de abrir WhatsApp.
     const w = window.open("about:blank", "_blank");   // se abre ya (si no, el navegador lo bloquea por esperar)
