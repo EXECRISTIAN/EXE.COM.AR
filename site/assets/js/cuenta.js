@@ -140,14 +140,75 @@
     render();
   });
 
+  /* ---------- Fecha de nacimiento: DÍA / MES / AÑO ----------
+     Se escribe solo con números y salta sola al casillero siguiente; borrar en un casillero vacío vuelve al anterior;
+     se puede pegar "14/03/1995". Avisa fechas que no existen (31/02) y edades menores a 13 años (la base también lo valida). */
+  const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  function birthField(box) {
+    const [d, m, y] = ["d", "m", "y"].map((k) => box.querySelector(`[data-bd="${k}"]`));
+    const err = box.querySelector(".bd-err"), parts = [d, m, y];
+    const say = (t) => { err.hidden = !t; err.textContent = t ? "⚠ " + t : ""; box.classList.toggle("bad", !!t); };
+    parts.forEach((inp, i) => {
+      inp.addEventListener("input", () => {
+        inp.value = inp.value.replace(/\D/g, "").slice(0, inp.maxLength);
+        // Día o mes de un dígito que no puede ser el primero de dos (ej. 4 → 04) también avanza
+        if (i < 2 && inp.value.length === 1 && Number(inp.value) > (i === 0 ? 3 : 1)) inp.value = "0" + inp.value;
+        if (inp.value.length === inp.maxLength && parts[i + 1]) parts[i + 1].focus();
+        if (err.hidden === false) check(true);
+      });
+      inp.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && !inp.value && parts[i - 1]) { e.preventDefault(); parts[i - 1].focus(); parts[i - 1].value = parts[i - 1].value.slice(0, -1); }
+        if (e.key === "ArrowLeft" && inp.selectionStart === 0 && parts[i - 1]) { e.preventDefault(); parts[i - 1].focus(); }
+        if (e.key === "ArrowRight" && inp.selectionStart === inp.value.length && parts[i + 1]) { e.preventDefault(); parts[i + 1].focus(); }
+        if ((e.key === "/" || e.key === "-" || e.key === ".") && parts[i + 1]) { e.preventDefault(); if (inp.value.length === 1) inp.value = "0" + inp.value; parts[i + 1].focus(); }
+      });
+      inp.addEventListener("paste", (e) => {
+        const t = (e.clipboardData || window.clipboardData).getData("text");
+        const g = t.match(/(\d{1,2})\D+(\d{1,2})\D+(\d{4})/) || t.match(/^(\d{2})(\d{2})(\d{4})$/);
+        if (!g) return;
+        e.preventDefault(); d.value = g[1].padStart(2, "0"); m.value = g[2].padStart(2, "0"); y.value = g[3]; y.focus(); check(true);
+      });
+      inp.addEventListener("focus", () => box.classList.add("on"));
+      inp.addEventListener("blur", () => { box.classList.remove("on"); if (d.value && m.value && y.value.length === 4) check(true); });
+    });
+    // Devuelve el texto del error (o "") y, si show, lo muestra
+    function check(show) {
+      const dd = Number(d.value), mm = Number(m.value), yy = Number(y.value);
+      let t = "";
+      if (!d.value || !m.value || !y.value) t = "Completá día, mes y año.";
+      else if (y.value.length < 4) t = "Escribí el año completo (ej: 1995).";
+      else if (mm < 1 || mm > 12) t = "El mes va del 01 al 12.";
+      else {
+        const last = new Date(yy, mm, 0).getDate();
+        if (dd < 1 || dd > last) t = `Esa fecha no existe (${MESES[mm - 1]} tiene ${last} días).`;
+        else if (yy < 1900) t = "Revisá el año.";
+        else {
+          const now = new Date(), age = now.getFullYear() - yy - (now.getMonth() + 1 < mm || (now.getMonth() + 1 === mm && now.getDate() < dd) ? 1 : 0);
+          if (age < 0) t = "Esa fecha todavía no llegó.";
+          else if (age < 13) t = "Para tener una cuenta tenés que tener al menos 13 años.";
+          else if (age > 110) t = "Revisá el año.";
+        }
+      }
+      if (show) say(t);
+      return t;
+    }
+    return {
+      value: () => (check(false) ? null : `${y.value}-${m.value.padStart(2, "0")}-${d.value.padStart(2, "0")}`),
+      set: (v) => { const g = String(v || "").match(/^(\d{4})-(\d{2})-(\d{2})/); [y.value, m.value, d.value] = g ? [g[1], g[2], g[3]] : ["", "", ""]; say(""); },
+      check: () => { const t = check(true); if (t) (parts.find((p) => !p.value) || d).focus(); return !t; },
+    };
+  }
+  const regBirth = birthField($("regBirth")), accBirth = birthField($("accBirth"));
+
   $("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
+    if (!regBirth.check()) return;
     const c = captcha("register"); if (!c) return needCaptcha();
     const { error } = await sb.auth.signUp({
       email: f.get("email"),
       password: f.get("password"),
-      options: { data: { full_name: f.get("full_name"), phone: f.get("phone") }, emailRedirectTo: location.href, ...c },
+      options: { data: { full_name: f.get("full_name"), phone: f.get("phone"), birthdate: regBirth.value() }, emailRedirectTo: location.href, ...c },
     });
     resetCaptcha("register");
     if (error) return show(authError(error, "No pudimos crear la cuenta. Revisá los datos e intentá de nuevo."));
@@ -203,10 +264,11 @@
     $("settings").hidden = !(on && user);
     if (user) $("logged").hidden = on;
     if (!on || !user) return;
-    const { data: prof } = await sb.from("profiles").select("full_name, phone, email, created_at, email_verified_at, marketing_opt_in").eq("id", user.id).maybeSingle();
+    const { data: prof } = await sb.from("profiles").select("full_name, phone, email, created_at, email_verified_at, marketing_opt_in, birthdate").eq("id", user.id).maybeSingle();
     const { count } = await sb.from("orders").select("id", { count: "exact", head: true }).eq("user_id", user.id);
     accForm.full_name.value = prof?.full_name || user.user_metadata?.full_name || "";
     accForm.phone.value = prof?.phone || ""; accForm.marketing_opt_in.checked = !!prof?.marketing_opt_in; accForm.email.value = user.email;
+    accBirth.set(prof?.birthdate || user.user_metadata?.birthdate);
     $("accInitials").textContent = initials(accForm.full_name.value || user.email);
     $("accSince").textContent = `Cliente desde ${new Date(prof?.created_at || user.created_at).toLocaleDateString("es-AR", { month: "long", year: "numeric" })}`;
     $("accOrders").textContent = count || 0;
@@ -221,9 +283,11 @@
   accForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const user = await be.user(); if (!user) return;
+    if (!accBirth.check()) return accMsg("Revisá la fecha de nacimiento.", "error");
     const full_name = accForm.full_name.value.trim().slice(0, 80), phone = accForm.phone.value.trim().slice(0, 30);
-    const { error } = await sb.from("profiles").update({ full_name, phone, marketing_opt_in: accForm.marketing_opt_in.checked }).eq("id", user.id);
-    if (error) return accMsg("No se pudo guardar. Probá de nuevo.", "error");
+    const { error } = await sb.from("profiles").update({ full_name, phone, marketing_opt_in: accForm.marketing_opt_in.checked, birthdate: accBirth.value() }).eq("id", user.id);
+    if (error) return accMsg(/13 años/.test(error.message) ? "Para tener una cuenta tenés que tener al menos 13 años." : "No se pudo guardar. Probá de nuevo.", "error");
+    $("birthNeed").hidden = true;
     await sb.auth.updateUser({ data: { full_name } }).catch(() => {});
     accMsg("¡Datos guardados!", "ok");
     $("who").textContent = full_name || user.email; $("accInitials").textContent = initials(full_name || user.email);
@@ -367,6 +431,8 @@
     await showSettings();
     if (!user) return;
     $("who").textContent = user.user_metadata?.full_name || user.email;
+    // La fecha de nacimiento es obligatoria: a quien no la tiene (cuentas anteriores) se le pide completarla
+    sb.from("profiles").select("birthdate").eq("id", user.id).maybeSingle().then(({ data }) => { $("birthNeed").hidden = !data || !!data.birthdate; }).catch(() => {});
     $("dashLink").hidden = true; // oculto por defecto; solo se muestra si la base confirma el permiso
     const perms = await be.permissions().catch(() => new Set());
     $("dashLink").hidden = !perms.has("dashboard.access");
