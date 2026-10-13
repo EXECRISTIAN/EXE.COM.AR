@@ -34,6 +34,7 @@
     return bf.match.some((m) => hay.includes(` ${m} `));
   };
   let cart = load();
+  let promo = { code: "", res: null, sig: "" };   // código de descuento aplicado (ver "Códigos de descuento")
 
   function load() {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
@@ -260,7 +261,7 @@
   /* ---------- Solo administradores: precio de referencia y link de compra ----------
      Los links NO están en products.json (es público): viven en Supabase (tabla product_sources, RLS products.write).
      Supabase solo se carga si hay una sesión iniciada en este navegador. */
-  let adminApi = null;
+  let adminApi = null, userApi = null;   // userApi: cliente de Supabase si hay sesión (códigos de descuento)
   const hasSession = (() => { try { return Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k)); } catch { return false; } })();
   const loadScript = (src) => new Promise((ok, fail) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = fail; document.head.appendChild(s); });
   const adminReady = hasSession && cfg.supabaseUrl
@@ -268,6 +269,7 @@
         .then(() => loadScript("assets/js/backend.js"))
         .then(async () => {
           const be = window.EXE_BACKEND; if (!be) return;
+          if (await be.user().catch(() => null)) userApi = be.sb;
           const perms = await be.permissions();
           if (perms.has("products.write")) adminApi = be.sb;
         }).catch(() => {})
@@ -383,6 +385,8 @@
     // Con productos en dólares, el total se estima en pesos con el dólar del día
     const anyUsd = lines.some((l) => l.product.priceUsd);
     $("cartTotal").textContent = total ? (anyUsd ? "≈ " : "") + money(total) + (hasConsult ? " + a consultar" : "") : hasConsult ? "A consultar" : money(0);
+    promoShow(total, anyUsd, hasConsult);
+    if (promo.code && promo.sig !== cartSig()) promoRecheck();
     $("sendWa").disabled = count === 0;
     // Vista previa de lo que se comparte (fotos + cantidad + total) y botones de compartir solo con productos
     $("cartShareBox").hidden = $("cartActs").hidden = count === 0;
@@ -447,6 +451,61 @@
 
   const cartSig = () => cart.map((l) => `${l.id}:${l.variant || ""}:${l.qty}`).join("|");
 
+  /* ---------- Códigos de descuento ----------
+     Solo con cuenta. La base calcula el descuento con los precios reales (promo_check) y, al enviar el pedido,
+     registra el uso y devuelve un número de verificación que va en el mensaje de WhatsApp (promo_redeem). */
+  const promoItems = () => cart.map((l) => ({ id: l.id, qty: l.qty }));
+  const promoMsg = (t, kind) => { const m = $("promoMsg"); m.hidden = !t; m.className = `promo-msg ${kind || ""}`; m.innerHTML = t || ""; };
+  function promoOpen(open = true) { $("promoRow").hidden = !open; $("promoToggle").setAttribute("aria-expanded", String(open)); if (open) $("promoCode").focus(); }
+  function promoShow(total, anyUsd, hasConsult) {
+    const r = promo.res, on = !!(r && r.ok && cart.length);
+    $("promoLine").hidden = !on; $("promoToggle").hidden = on; $("cartTotalLbl").textContent = on ? "Total con descuento" : "Total estimado";
+    if (!on) return;
+    $("promoLbl").textContent = `Código ${r.code} (${r.label})`;
+    $("promoAmt").textContent = "−" + money(r.discount);
+    $("cartTotal").textContent = (anyUsd ? "≈ " : "") + money(Math.max(0, total - r.discount)) + (hasConsult ? " + a consultar" : "");
+  }
+  async function promoApi(fn, code) {
+    await adminReady;
+    if (!userApi) throw new Error("login");
+    const { data, error } = await userApi.rpc(fn, { p_code: code, p_items: promoItems() });
+    if (error) throw new Error(error.message);
+    return data;
+  }
+  async function promoApply(code) {
+    code = String(code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (!code) return promoMsg("Escribí el código.", "err");
+    if (!cart.length) return promoMsg("Agregá productos al carrito para usar el código.", "err");
+    $("promoApply").disabled = true; promoMsg("Verificando…");
+    try {
+      const r = await promoApi("promo_check", code);
+      if (!r.ok) { promo = { code: "", res: null, sig: "" }; promoMsg(esc(r.error), "err"); }
+      else { promo = { code, res: r, sig: cartSig() }; promoMsg(`✓ Código aplicado: ${esc(r.label)}`, "ok"); promoOpen(false); }
+    } catch (e) {
+      promoMsg(e.message === "login" || /cuenta/.test(e.message) ? `Para usar un código tenés que <a href="cuenta.html">ingresar a tu cuenta</a> (o crear una, es gratis).` : esc(e.message), "err");
+    }
+    $("promoApply").disabled = false;
+    renderCart();
+  }
+  let promoTimer;
+  function promoRecheck() {   // el carrito cambió: el descuento se vuelve a calcular en la base
+    promo.sig = cartSig(); clearTimeout(promoTimer);
+    if (!cart.length) return;
+    promoTimer = setTimeout(async () => {
+      try { const r = await promoApi("promo_check", promo.code); promo.res = r.ok ? r : null; if (!r.ok) { promoMsg(esc(r.error), "err"); promo.code = ""; } }
+      catch (e) { promo.res = null; promo.code = ""; }
+      renderCart();
+    }, 400);
+  }
+  function promoRemove() { promo = { code: "", res: null, sig: "" }; promoMsg(""); renderCart(); }
+  // Link con código (ej. exe.com.ar/?codigo=ABC123): queda escrito en el carrito para aplicarlo
+  try {
+    const qc = new URLSearchParams(location.search).get("codigo");
+    if (qc) { localStorage.setItem("exe-codigo", qc.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 20)); }
+    const saved = localStorage.getItem("exe-codigo");
+    if (saved) { $("promoCode").value = saved; promoOpen(false); $("promoRow").hidden = false; }
+  } catch (e) {}
+
   function buildMessage() {
     const { lines, total, hasConsult } = renderCart();
     // Si el carrito cambió después de cotizar, la tarifa ya no vale.
@@ -464,10 +523,13 @@
       "",
       ...rows,
       "",
-      total ? `*Total estimado: ${money(total)}*${lines.some((l) => l.product.priceUsd) ? " (en pesos, con el dólar del día)" : ""}${hasConsult ? " (+ productos a consultar)" : ""}` : "*Precio a consultar*",
+      total ? `${promo.res ? "Subtotal" : "*Total estimado"}: ${money(total)}${promo.res ? "" : "*"}${lines.some((l) => l.product.priceUsd) ? " (en pesos, con el dólar del día)" : ""}${hasConsult ? " (+ productos a consultar)" : ""}` : "*Precio a consultar*",
+      promo.res ? `Código de descuento ${promo.res.code} (${promo.res.label}): −${money(promo.res.discount)}` : "",
+      promo.res ? `*Total con descuento: ${money(Math.max(0, total - promo.res.discount))}*${hasConsult ? " (+ productos a consultar)" : ""}` : "",
+      promo.res && promo.res.check ? `Verificación del código: #${promo.res.check}` : "",
       shipping ? `Envío ${shipping.label} (CP ${shipping.cp}): ${money(shipping.cost)} — cotización estimada` : "",
       note ? `\nNota: ${note}` : "",
-    ].join("\n").trim();
+    ].filter((x, i, all) => x !== "" || all[i - 1] !== "").join("\n").trim();   // sin líneas vacías repetidas
   }
 
   function toggleCart(open) {
@@ -732,7 +794,23 @@
   document.addEventListener("click", (e) => { const b = e.target.closest("[data-copy-product]"); if (b) copyLink(productUrl(b.dataset.copyProduct), b); });
   document.addEventListener("click", (e) => { const b = e.target.closest("[data-share-product]"); if (b) shareProduct(b.dataset.shareProduct, b); });
   $("cartClear").onclick = () => { cart = []; shipping = null; if (shipOn) $("shipOpts").innerHTML = ""; save(); renderCart(); renderProducts(); };
-  $("sendWa").onclick = () => window.open(waLink(buildMessage()), "_blank", "noopener");
+  $("sendWa").onclick = async () => {
+    if (!promo.code) return window.open(waLink(buildMessage()), "_blank", "noopener");
+    // Con código: la base registra el uso y da el número de verificación antes de abrir WhatsApp.
+    const w = window.open("about:blank", "_blank");   // se abre ya (si no, el navegador lo bloquea por esperar)
+    try {
+      const r = await promoApi("promo_redeem", promo.code);
+      if (!r.ok) { if (w) w.close(); promo = { code: "", res: null, sig: "" }; promoMsg(esc(r.error) + " El pedido no se envió: revisalo y volvé a tocar Enviar.", "err"); return renderCart(); }
+      promo.res = r; promo.sig = cartSig();
+    } catch (e) { if (w) w.close(); promoMsg(esc(e.message), "err"); return; }
+    const url = waLink(buildMessage());
+    if (w) { w.opener = null; w.location.href = url; } else window.open(url, "_blank", "noopener");
+  };
+  $("promoToggle").onclick = () => promoOpen($("promoRow").hidden);
+  $("promoApply").onclick = () => promoApply($("promoCode").value);
+  $("promoCode").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); promoApply($("promoCode").value); } });
+  $("promoCode").addEventListener("input", (e) => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); });
+  $("promoRemove").onclick = promoRemove;
 
   /* ---------- Header / menú ---------- */
   // ---------- Tema: claro / automático / oscuro ----------

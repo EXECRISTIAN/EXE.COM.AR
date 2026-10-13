@@ -270,7 +270,16 @@
         <div class="ship-opts" id="shipOpts"></div>
       </div>
       <label class="field">Nota (opcional)<textarea id="customerNote" rows="2" placeholder="Ej: envío a CABA, factura A…"></textarea></label>
-      <div class="total"><span>Total estimado</span><strong id="cartTotal">$0</strong></div>
+      <div class="promo" id="promo">
+        <button type="button" class="link-btn promo-toggle" id="promoToggle" aria-expanded="false">🏷️ ¿Tenés un código de descuento?</button>
+        <div class="promo-row" id="promoRow" hidden>
+          <input id="promoCode" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Escribí tu código" aria-label="Código de descuento">
+          <button class="btn btn-outline" id="promoApply" type="button">Aplicar</button>
+        </div>
+        <p class="promo-msg" id="promoMsg" role="status" hidden></p>
+      </div>
+      <div class="promo-line" id="promoLine" hidden><span id="promoLbl"></span><span><strong id="promoAmt"></strong><button type="button" class="promo-x" id="promoRemove" aria-label="Quitar el código">✕</button></span></div>
+      <div class="total"><span id="cartTotalLbl">Total estimado</span><strong id="cartTotal">$0</strong></div>
       <button class="btn btn-wa" id="sendWa">Enviar pedido por WhatsApp</button>
       <div class="share-box-cart" id="cartShareBox" hidden>
         <div class="sh-label">Esto es lo que vas a compartir</div>
