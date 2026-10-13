@@ -544,3 +544,35 @@ a.kpi-link:hover, a.kpi-link:focus-visible { transform: translateY(-2px); outlin
 .cd-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
 .cd-msg { font-size: .9rem; font-weight: 600; } .cd-msg.ok { color: var(--ok); } .cd-msg.err { color: var(--err); }
 #cdFind { width: 100%; max-width: 420px; margin-bottom: 10px; }
+
+/* ---------- Analítica ---------- */
+.an-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; }
+.an-grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+@media (max-width: 900px) { .an-grid, .an-grid3 { grid-template-columns: 1fr; } }
+.an-mapwrap { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+.an-map { display: grid; grid-template-columns: repeat(6, 46px); grid-template-rows: repeat(10, 38px); gap: 4px; }
+.an-pv { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; font: inherit; font-size: .68rem; border: 0; border-radius: 6px; cursor: pointer;
+  background: color-mix(in srgb, var(--c0) calc(var(--a) * 100%), var(--surface)); transition: transform .12s, outline-color .12s; outline: 2px solid transparent; }
+.an-pv small { font-size: .6rem; opacity: .85; }
+.an-pv:hover, .an-pv:focus-visible { transform: scale(1.08); outline-color: var(--c2); }
+.an-pv.sel { outline-color: var(--c2); }
+.an-leg { flex: 1; min-width: 200px; }
+.an-bar, .an-funnel > div { display: grid; grid-template-columns: 130px 1fr 52px; gap: 8px; align-items: center; font-size: .86rem; margin: 7px 0; }
+.an-bar i, .an-funnel i { display: block; height: 9px; border-radius: 5px; background: color-mix(in srgb, var(--c0) 12%, var(--surface)); overflow: hidden; }
+.an-funnel i { height: 22px; border-radius: 6px; }
+.an-bar i b, .an-funnel i b { display: block; height: 100%; background: var(--c0); border-radius: inherit; }
+.an-bar strong, .an-funnel strong { text-align: right; font-variant-numeric: tabular-nums; }
+.an-scale { display: flex; align-items: center; gap: 6px; font-size: .72rem; color: var(--muted); margin-top: 12px; }
+.an-scale i { width: 90px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, color-mix(in srgb, var(--c0) 12%, var(--surface)), var(--c0)); }
+.an-spark { display: flex; align-items: flex-end; gap: 3px; height: 130px; border-bottom: 1px solid var(--line); margin-top: 8px; }
+.an-spark i { flex: 1; background: var(--c0); border-radius: 3px 3px 0 0; min-width: 3px; }
+.an-donut { width: 130px; height: 130px; border-radius: 50%; margin: 8px auto 12px; position: relative; }
+.an-donut::after { content: ""; position: absolute; inset: 28px; border-radius: 50%; background: var(--surface); }
+.an-li { display: flex; justify-content: space-between; font-size: .9rem; margin: 6px 0; }
+.an-li i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+.an-prod { display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; font-size: .86rem; margin: 9px 0; }
+.an-prod img, .an-prod > span:first-child { width: 40px; height: 40px; object-fit: contain; border: 1px solid var(--line); border-radius: 6px; background: var(--media-bg); }
+.an-prod small { display: block; color: var(--muted); }
+.an-ads { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 8px 0; font-size: .9rem; }
+.an-ads small { display: block; color: var(--muted); font-size: .8rem; }
+@media (max-width: 560px) { .an-map { grid-template-columns: repeat(6, 1fr); } .an-bar, .an-funnel > div { grid-template-columns: 110px 1fr 46px; } }
