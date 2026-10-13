@@ -252,6 +252,10 @@
   <aside class="cart" id="cart" aria-hidden="true" aria-label="Carrito">
     <div class="cart-head">
       <h3>Tu pedido</h3>
+      <div class="sh-acts sh-inline" id="cartActs" hidden>
+        <button type="button" class="sh-btn" id="cartCopy" aria-label="Copiar link del presupuesto"><span class="sh-tip">Copiar link</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button>
+        <button type="button" class="sh-btn" id="cartShare" aria-label="Compartir presupuesto"><span class="sh-tip">Compartir</span><svg class="share-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg></button>
+      </div>
       <button class="icon-btn" id="cartClose" aria-label="Cerrar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
@@ -268,7 +272,11 @@
       <label class="field">Nota (opcional)<textarea id="customerNote" rows="2" placeholder="Ej: envío a CABA, factura A…"></textarea></label>
       <div class="total"><span>Total estimado</span><strong id="cartTotal">$0</strong></div>
       <button class="btn btn-wa" id="sendWa">Enviar pedido por WhatsApp</button>
-      <div class="cart-links"><button class="link-btn" id="cartShare">Compartir presupuesto</button><button class="link-btn" id="cartClear">Vaciar carrito</button></div>
+      <div class="share-box-cart" id="cartShareBox" hidden>
+        <div class="sh-label">Esto es lo que vas a compartir</div>
+        <button type="button" class="share-prev" id="cartPrev" aria-label="Compartir este presupuesto"><span class="sp-imgs" id="cartPrevImgs"></span><span class="sp-txt"><b id="cartPrevTitle"></b><small id="cartPrevSub"></small></span></button>
+      </div>
+      <div class="cart-links"><button class="link-btn" id="cartClear">Vaciar carrito</button></div>
     </div>
   </aside>
   <div class="toast" id="toast" role="status"></div>
