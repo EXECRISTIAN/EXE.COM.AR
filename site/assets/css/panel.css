@@ -533,3 +533,14 @@ a.kpi-link:hover, a.kpi-link:focus-visible { transform: translateY(-2px); outlin
 .vt-meter b { font-variant-numeric: tabular-nums; }
 .vt-track { grid-column: 1 / -1; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--c0) 14%, var(--surface)); overflow: hidden; }
 .vt-track i { display: block; height: 100%; background: var(--c0); }
+
+/* ---------- Códigos de descuento ---------- */
+.cd-form h3, .cd-form h4 { margin-top: 0; }
+.cd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 12px 0; }
+.cd-grid .field select, .cd-grid .field input { padding: 8px 10px; border: 1px solid var(--c6); border-radius: 6px; font: inherit; background: var(--surface); color: var(--c2); }
+.cd-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.cd-head h3 { margin: 0; }
+.cd-edit { border: 1px solid var(--c6); border-radius: 10px; padding: 14px; margin-bottom: 16px; background: var(--c4); }
+.cd-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+.cd-msg { font-size: .9rem; font-weight: 600; } .cd-msg.ok { color: var(--ok); } .cd-msg.err { color: var(--err); }
+#cdFind { width: 100%; max-width: 420px; margin-bottom: 10px; }

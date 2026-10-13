@@ -140,6 +140,33 @@
     render();
   });
 
+  /* ---------- Mi código de descuento para compartir ----------
+     Cada cliente tiene uno (si EXE activó los códigos personales); los embajadores ven el suyo. Lo genera la base. */
+  async function renderMyCode() {
+    const box = $("myCode");
+    let c = null; try { ({ data: c } = await sb.rpc("my_promo_code")); } catch (e) { c = null; }
+    if (!c || !c.code || !c.active) { box.hidden = true; return; }
+    const money = (n) => "$" + Number(n || 0).toLocaleString("es-AR");
+    const what = c.type === "percent" ? `${Number(c.value)}% de descuento` : `${money(c.value)} de descuento`;
+    const link = `${location.origin}${location.pathname.replace(/[^/]*$/, "")}?codigo=${encodeURIComponent(c.code)}`;
+    const rules = [c.min > 0 ? `compra mínima ${money(c.min)}` : "", c.expires ? `válido hasta el ${new Date(c.expires).toLocaleDateString("es-AR")}` : ""].filter(Boolean).join(" · ");
+    box.innerHTML = `<h3>${c.kind === "embajador" ? "⭐ Tu código de embajador" : "🎁 Tu código para compartir"}</h3>
+      <p>Pasáselo a tus amigos: con su cuenta tienen <b>${esc(what)}</b> en su compra${rules ? ` (${esc(rules)})` : ""}.</p>
+      <div class="my-code-row"><span class="my-code-val">${esc(c.code)}</span>
+        <div class="sh-acts sh-inline"><button type="button" class="sh-btn" id="myCodeCopy" aria-label="Copiar el link con tu código"><span class="sh-tip">Copiar link</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button>
+        <button type="button" class="sh-btn" id="myCodeShare" aria-label="Compartir tu código"><span class="sh-tip">Compartir</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg></button></div></div>
+      <small>Usado ${c.uses} ${c.uses === 1 ? "vez" : "veces"}${c.max_uses ? ` de ${c.max_uses}` : ""}.</small>`;
+    box.hidden = false;
+    const ok = (btn) => { if (btn.classList.contains("ok")) return; const old = btn.innerHTML; btn.classList.add("ok"); btn.querySelector("svg").outerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>'; setTimeout(() => { btn.classList.remove("ok"); btn.innerHTML = old; }, 1400); };
+    const text = `Te paso mi código ${c.code} para comprar en EXE con ${what}:`;
+    $("myCodeCopy").onclick = async (e) => { const b = e.currentTarget; try { await navigator.clipboard.writeText(link); ok(b); } catch (er) { prompt("Copiá este link:", link); } };
+    $("myCodeShare").onclick = async (e) => {
+      const b = e.currentTarget;
+      if (navigator.share) { try { await navigator.share({ title: "Código EXE", text, url: link }); ok(b); return; } catch (er) { if (er && er.name === "AbortError") return; } }
+      window.open(`https://wa.me/?text=${encodeURIComponent(text + "\n" + link)}`, "_blank", "noopener"); ok(b);
+    };
+  }
+
   /* ---------- Fecha de nacimiento: DÍA / MES / AÑO ----------
      Se escribe solo con números y salta sola al casillero siguiente; borrar en un casillero vacío vuelve al anterior;
      se puede pegar "14/03/1995". Avisa fechas que no existen (31/02) y edades menores a 13 años (la base también lo valida). */
@@ -437,6 +464,7 @@
     $("who").textContent = user.user_metadata?.full_name || user.email;
     // La fecha de nacimiento es obligatoria: a quien no la tiene (cuentas anteriores) se le pide completarla
     sb.from("profiles").select("birthdate").eq("id", user.id).maybeSingle().then(({ data }) => { $("birthNeed").hidden = !data || !!data.birthdate; }).catch(() => {});
+    renderMyCode();
     $("dashLink").hidden = true; // oculto por defecto; solo se muestra si la base confirma el permiso
     const perms = await be.permissions().catch(() => new Set());
     $("dashLink").hidden = !perms.has("dashboard.access");

@@ -737,3 +737,26 @@ html { touch-action: manipulation; }
 .bd input::placeholder { color: var(--muted); opacity: .6; }
 .bd-err { display: flex; align-items: center; gap: 6px; margin: 4px 0 0; color: var(--err); font-size: .82rem; }
 .bd-err::before { content: "!"; display: grid; place-items: center; flex: none; width: 16px; height: 16px; border-radius: 50%; background: var(--err); color: #fff; font-size: .7rem; font-weight: 800; }
+
+/* ---------- Código de descuento en el carrito ---------- */
+.promo { margin: 4px 0 10px; }
+.promo-toggle { font-size: .9rem; }
+.promo-row { display: flex; gap: 8px; margin-top: 8px; }
+.promo-row input { flex: 1; min-width: 0; padding: 9px 10px; border: 1px solid var(--c6); border-radius: 6px; font: inherit; letter-spacing: .08em; text-transform: uppercase; background: var(--surface); color: var(--c2); }
+.promo-row .btn { padding: 8px 14px; }
+.promo-msg { margin: 6px 0 0; font-size: .85rem; color: var(--muted); }
+.promo-msg.ok { color: var(--ok); font-weight: 700; } .promo-msg.err { color: var(--err); }
+.promo-line { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; padding: 8px 10px; border-radius: 8px;
+  background: color-mix(in srgb, var(--ok) 12%, var(--surface)); color: var(--ok); font-size: .9rem; font-weight: 600; }
+.promo-line strong { margin-right: 6px; }
+.promo-x { border: 0; background: none; color: inherit; cursor: pointer; font-size: .85rem; opacity: .7; padding: 2px 4px; border-radius: 4px; }
+.promo-x:hover, .promo-x:focus-visible { opacity: 1; background: color-mix(in srgb, var(--ok) 18%, transparent); }
+/* Mi cuenta: mi código para compartir */
+.my-code { margin: 18px 0; padding: 16px; border: 1px dashed color-mix(in srgb, var(--c0) 55%, var(--c6)); border-radius: 12px; background: color-mix(in srgb, var(--c0) 6%, var(--surface)); }
+.my-code h3 { margin: 0 0 4px; font-size: 1.05rem; }
+.my-code p { margin: 0 0 10px; color: var(--c3); font-size: .9rem; }
+.my-code-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.my-code-val { font: 800 1.4rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; padding: 10px 14px; border-radius: 8px; background: var(--surface); border: 1px solid var(--c6); color: var(--c2); }
+.my-code small { display: block; margin-top: 10px; color: var(--muted); }
+.promo-line > span:first-child { flex: 1; min-width: 0; }
+.promo-line > span:last-child { white-space: nowrap; }
