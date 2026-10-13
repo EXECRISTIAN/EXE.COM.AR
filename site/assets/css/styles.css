@@ -717,3 +717,15 @@ html { touch-action: manipulation; }
 /* La esquina derecha de la foto es de los botones de compartir: la etiqueta Outlet va debajo de la categoría */
 .card-media .tag.tag-outlet { left: 10px; right: auto; top: 36px; }
 .card-media .tag.tag-outlet:first-of-type { top: 10px; }
+
+/* ---------- Fecha de nacimiento: DÍA / MES / AÑO (registro y Mi cuenta) ---------- */
+.bd { display: grid; grid-template-columns: 1fr 1fr 1.4fr; border: 1px solid var(--c6); border-radius: 6px; overflow: hidden; background: var(--surface); transition: border-color .15s, box-shadow .15s; }
+.bd-field.on .bd { border-color: var(--c0); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c0) 22%, transparent); }
+.bd-field.bad .bd { border-color: var(--err); box-shadow: 0 0 0 3px color-mix(in srgb, var(--err) 18%, transparent); }
+.bd label { display: flex; flex-direction: column; padding: 6px 10px 6px; border-left: 1px solid var(--c6); cursor: text; }
+.bd label:first-child { border-left: 0; }
+.bd small { font-size: .66rem; font-weight: 700; letter-spacing: .08em; color: var(--muted); }
+.bd label:focus-within small { color: var(--c0); }
+.field .bd input { border: 0; padding: 2px 0 0; border-radius: 0; background: transparent; font-size: 1.1rem; font-variant-numeric: tabular-nums; width: 100%; min-width: 0; outline: none; }
+.bd input::placeholder { color: var(--muted); opacity: .55; }
+.bd-err { margin: 2px 0 0; color: var(--err); font-size: .82rem; }

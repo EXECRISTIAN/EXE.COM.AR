@@ -41,6 +41,14 @@
         <form class="form" id="registerForm" hidden>
           <label class="field">Nombre y apellido<input name="full_name" required autocomplete="name"></label>
           <label class="field">Teléfono (WhatsApp)<input name="phone" type="tel" autocomplete="tel"></label>
+          <div class="field bd-field" id="regBirth"><span id="regBirthLbl">Fecha de nacimiento</span>
+            <div class="bd" role="group" aria-labelledby="regBirthLbl">
+              <label><small>DÍA</small><input data-bd="d" inputmode="numeric" maxlength="2" placeholder="DD" autocomplete="bday-day" aria-label="Día"></label>
+              <label><small>MES</small><input data-bd="m" inputmode="numeric" maxlength="2" placeholder="MM" autocomplete="bday-month" aria-label="Mes"></label>
+              <label class="bd-y"><small>AÑO</small><input data-bd="y" inputmode="numeric" maxlength="4" placeholder="AAAA" autocomplete="bday-year" aria-label="Año"></label>
+            </div>
+            <p class="bd-err" role="alert" hidden></p>
+          </div>
           <label class="field">Email<input type="email" name="email" required autocomplete="email"></label>
           <label class="field">Contraseña<input type="password" name="password" minlength="8" required autocomplete="new-password"></label>
           <div class="captcha" data-captcha="register"></div>
@@ -67,6 +75,7 @@
       <section id="logged" hidden>
         <h1>Hola, <span id="who"></span></h1>
         <p style="color:var(--c3)">Desde acá vas a ver tu historial de pedidos.</p>
+        <p class="notice info" id="birthNeed" hidden>🎂 Falta tu fecha de nacimiento. <a href="#configuracion">Completala en Mi cuenta</a> (es obligatoria).</p>
         <p class="notice info" id="mfaNeed" hidden>🔐 Para usar el panel de administración tenés que activar la verificación en dos pasos. <button type="button" class="link-btn" id="mfaNeedBtn">Activarla ahora</button></p>
         <div id="orders"></div>
         <div class="account-actions">
@@ -83,6 +92,14 @@
       <div class="acc-head"><span class="my-acc-avatar big" id="accInitials" aria-hidden="true">?</span><div><h1 id="accTitle">Configuración de mi cuenta</h1><small id="accSince"></small></div></div>
       <label class="field">Nombre y apellido<input name="full_name" autocomplete="name" maxlength="80"></label>
       <label class="field">Teléfono / WhatsApp<input name="phone" autocomplete="tel" inputmode="tel" maxlength="30"></label>
+      <div class="field bd-field" id="accBirth"><span id="accBirthLbl">Fecha de nacimiento</span>
+        <div class="bd" role="group" aria-labelledby="accBirthLbl">
+          <label><small>DÍA</small><input data-bd="d" inputmode="numeric" maxlength="2" placeholder="DD" autocomplete="bday-day" aria-label="Día"></label>
+          <label><small>MES</small><input data-bd="m" inputmode="numeric" maxlength="2" placeholder="MM" autocomplete="bday-month" aria-label="Mes"></label>
+          <label class="bd-y"><small>AÑO</small><input data-bd="y" inputmode="numeric" maxlength="4" placeholder="AAAA" autocomplete="bday-year" aria-label="Año"></label>
+        </div>
+        <p class="bd-err" role="alert" hidden></p>
+      </div>
       <label class="field">Email<input name="email" readonly></label>
       <label class="field ed-check acc-optin"><input type="checkbox" name="marketing_opt_in"> Quiero recibir ofertas y novedades de EXE por email (podés darte de baja cuando quieras)</label>
       <div class="acc-stats"><div><b id="accOrders">0</b><small>Pedidos</small></div><div><b id="accVerified">—</b><small>Email</small></div></div>

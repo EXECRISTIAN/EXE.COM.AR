@@ -520,6 +520,10 @@
     try { await navigator.clipboard.writeText(url); }
     catch (e) { return shareMenu({ title: "Copiar link", text: "", url }); }   // sin permiso de portapapeles: se muestra el link para copiarlo
     toast("✓ Link copiado");
+    flashOk(btn);
+  }
+  // Confirmación en el botón: verde con ✓ por un momento (copiar y compartir)
+  function flashOk(btn) {
     if (!btn || btn.classList.contains("ok")) return;
     const old = btn.innerHTML;
     btn.classList.add("ok"); btn.querySelector("svg").outerHTML = CHECK_ICON;
@@ -530,7 +534,7 @@
   // Vuelve a disparar el latido (ej. cada vez que se abre el carrito)
   function pulse(el) { if (!el) return; el.classList.remove("sh-pulse"); void el.offsetWidth; el.classList.add("sh-pulse"); }
 
-  function shareMenu(data) {
+  function shareMenu(data, btn) {
     let dlg = $("shareDlg");
     if (!dlg) {
       dlg = document.createElement("dialog");
@@ -552,31 +556,34 @@
           <button type="button" data-copy style="--c:#0084d6"><span>⧉</span>Copiar</button></div>
         <input class="share-url" readonly value="${esc(data.url)}" aria-label="Link para compartir">
       </div>`;
+    // Al elegir una app del menú, el botón que lo abrió confirma con ✓
+    dlg.querySelectorAll(".share-grid a").forEach((a) => a.addEventListener("click", () => { flashOk(btn); dlg.close(); }));
     dlg.querySelector("[data-copy]").onclick = async () => {
       const txt = `${data.text}\n${data.url}`;
-      try { await navigator.clipboard.writeText(txt); toast("Copiado: pegalo donde quieras"); }
+      try { await navigator.clipboard.writeText(txt); toast("Copiado: pegalo donde quieras"); flashOk(btn); }
       catch (e) { const i = dlg.querySelector(".share-url"); i.select(); document.execCommand && document.execCommand("copy"); toast("Link seleccionado para copiar"); }
     };
     dlg.showModal();
   }
-  async function share(data) {
+  async function share(data, btn) {
     if (navigator.share) {
-      try { await navigator.share({ title: data.title, text: data.text, url: data.url }); return; }
+      try { await navigator.share({ title: data.title, text: data.text, url: data.url }); flashOk(btn); toast("✓ Compartido"); return; }
       catch (e) { if (e && e.name === "AbortError") return; }   // la persona canceló: no hacer nada
     }
-    shareMenu(data);
+    shareMenu(data, btn);
   }
-  function shareProduct(id) {
+  function shareProduct(id, btn) {
     const p = products.find((x) => x.id === id); if (!p) return;
-    share({ title: p.name, text: `Mirá este producto en EXE: ${p.name} — ${priceLabel(p)}`, url: productUrl(p.id) });
+    share({ title: p.name, text: `Mirá este producto en EXE: ${p.name} — ${priceLabel(p)}`, url: productUrl(p.id) }, btn);
   }
   // Presupuesto: el link lleva los productos del carrito; quien lo abre los puede cargar en su carrito con un toque.
   function shareBudget() {
+    const btn = $("cartShare");
     if (!cart.length) return toast("Agregá productos al carrito para compartir el presupuesto");
     const { lines, total, hasConsult } = renderCart();
     const rows = lines.map((l) => `• ${l.qty} x ${l.product.name}${l.variant ? ` (${l.variant})` : ""} — ${l.product.price > 0 ? priceOf(l.product, l.qty) : "a consultar"}`);
     const text = ["Presupuesto EXE:", ...rows, total ? `Total estimado: ${money(total)}${lines.some((l) => l.product.priceUsd) ? " (en pesos, con el dólar del día)" : ""}${hasConsult ? " (+ productos a consultar)" : ""}` : "Precio a consultar"].join("\n");
-    share({ title: "Presupuesto EXE", text, url: budgetUrl() });
+    share({ title: "Presupuesto EXE", text, url: budgetUrl() }, btn);
   }
   function routeBudget() {
     const m = location.hash.match(/^#presupuesto\/(.+)$/);
@@ -723,7 +730,7 @@
   $("cartPrev").onclick = shareBudget;
   $("cartCopy").onclick = (e) => { if (cart.length) copyLink(budgetUrl(), e.currentTarget); };
   document.addEventListener("click", (e) => { const b = e.target.closest("[data-copy-product]"); if (b) copyLink(productUrl(b.dataset.copyProduct), b); });
-  document.addEventListener("click", (e) => { const b = e.target.closest("[data-share-product]"); if (b) shareProduct(b.dataset.shareProduct); });
+  document.addEventListener("click", (e) => { const b = e.target.closest("[data-share-product]"); if (b) shareProduct(b.dataset.shareProduct, b); });
   $("cartClear").onclick = () => { cart = []; shipping = null; if (shipOn) $("shipOpts").innerHTML = ""; save(); renderCart(); renderProducts(); };
   $("sendWa").onclick = () => window.open(waLink(buildMessage()), "_blank", "noopener");
 
