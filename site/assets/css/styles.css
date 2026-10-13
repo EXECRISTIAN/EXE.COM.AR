@@ -718,14 +718,22 @@ html { touch-action: manipulation; }
 .card-media .tag.tag-outlet { left: 10px; right: auto; top: 36px; }
 .card-media .tag.tag-outlet:first-of-type { top: 10px; }
 
-/* ---------- Fecha de nacimiento: DÍA / MES / AÑO (registro y Mi cuenta) ---------- */
-.bd { display: grid; grid-template-columns: 1fr 1fr 1.4fr; border: 1px solid var(--c6); border-radius: 6px; overflow: hidden; background: var(--surface); transition: border-color .15s, box-shadow .15s; }
-.bd-field.on .bd { border-color: var(--c0); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c0) 22%, transparent); }
-.bd-field.bad .bd { border-color: var(--err); box-shadow: 0 0 0 3px color-mix(in srgb, var(--err) 18%, transparent); }
-.bd label { display: flex; flex-direction: column; padding: 6px 10px 6px; border-left: 1px solid var(--c6); cursor: text; }
-.bd label:first-child { border-left: 0; }
-.bd small { font-size: .66rem; font-weight: 700; letter-spacing: .08em; color: var(--muted); }
+/* ---------- Fecha de nacimiento: DÍA / MES / AÑO (registro y Mi cuenta) ----------
+   Como el modelo que eligió Cristian: la etiqueta está centrada en el casillero vacío y, al tocarlo o completarlo,
+   sube chiquita y en color; separadores cortos; borde grueso de color al escribir; error con ícono. */
+.bd { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); height: 56px; border: 2px solid var(--c6); border-radius: 6px; background: var(--surface); transition: border-color .15s; }
+.bd-field.on .bd { border-color: var(--c0); }
+.bd-field.bad .bd { border-color: var(--err); }
+.bd label { position: relative; display: block; cursor: text; }
+.bd label + label::before { content: ""; position: absolute; left: 0; top: 30%; height: 40%; border-left: 1px solid var(--c6); }
+.bd small { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: .72rem; font-weight: 700; letter-spacing: .08em; color: var(--c3);
+  pointer-events: none; transition: top .15s var(--ease), font-size .15s var(--ease), color .15s; }
+.bd label.up small { top: 13px; font-size: .62rem; }
 .bd label:focus-within small { color: var(--c0); }
-.field .bd input { border: 0; padding: 2px 0 0; border-radius: 0; background: transparent; font-size: 1.1rem; font-variant-numeric: tabular-nums; width: 100%; min-width: 0; outline: none; }
-.bd input::placeholder { color: var(--muted); opacity: .55; }
-.bd-err { margin: 2px 0 0; color: var(--err); font-size: .82rem; }
+.bd-field.bad .bd label:focus-within small { color: var(--err); }
+.field .bd input { position: absolute; inset: 0; width: 100%; border: 0; border-radius: 0; background: transparent; padding: 20px 14px 0; font-size: 1.05rem;
+  font-variant-numeric: tabular-nums; color: var(--c2); outline: none; opacity: 0; transition: opacity .1s; }
+.bd label.up input { opacity: 1; }
+.bd input::placeholder { color: var(--muted); opacity: .6; }
+.bd-err { display: flex; align-items: center; gap: 6px; margin: 4px 0 0; color: var(--err); font-size: .82rem; }
+.bd-err::before { content: "!"; display: grid; place-items: center; flex: none; width: 16px; height: 16px; border-radius: 50%; background: var(--err); color: #fff; font-size: .7rem; font-weight: 800; }

@@ -147,7 +147,9 @@
   function birthField(box) {
     const [d, m, y] = ["d", "m", "y"].map((k) => box.querySelector(`[data-bd="${k}"]`));
     const err = box.querySelector(".bd-err"), parts = [d, m, y];
-    const say = (t) => { err.hidden = !t; err.textContent = t ? "⚠ " + t : ""; box.classList.toggle("bad", !!t); };
+    const say = (t) => { err.hidden = !t; err.textContent = t || ""; box.classList.toggle("bad", !!t); };
+    // Etiqueta flotante: sube cuando el casillero tiene foco o tiene algo escrito
+    const lift = () => parts.forEach((p) => p.parentElement.classList.toggle("up", !!p.value || document.activeElement === p));
     parts.forEach((inp, i) => {
       inp.addEventListener("input", () => {
         inp.value = inp.value.replace(/\D/g, "").slice(0, inp.maxLength);
@@ -166,16 +168,18 @@
         const t = (e.clipboardData || window.clipboardData).getData("text");
         const g = t.match(/(\d{1,2})\D+(\d{1,2})\D+(\d{4})/) || t.match(/^(\d{2})(\d{2})(\d{4})$/);
         if (!g) return;
-        e.preventDefault(); d.value = g[1].padStart(2, "0"); m.value = g[2].padStart(2, "0"); y.value = g[3]; y.focus(); check(true);
+        e.preventDefault(); d.value = g[1].padStart(2, "0"); m.value = g[2].padStart(2, "0"); y.value = g[3]; y.focus(); lift(); check(true);
       });
-      inp.addEventListener("focus", () => box.classList.add("on"));
-      inp.addEventListener("blur", () => { box.classList.remove("on"); if (d.value && m.value && y.value.length === 4) check(true); });
+      inp.addEventListener("focus", () => { box.classList.add("on"); lift(); });
+      inp.addEventListener("blur", () => { box.classList.remove("on"); lift(); if (d.value && m.value && y.value.length === 4) check(true); });
     });
+    parts.forEach((p) => p.parentElement.addEventListener("mousedown", (e) => { if (e.target !== p) { e.preventDefault(); p.focus(); } }));
+    lift();
     // Devuelve el texto del error (o "") y, si show, lo muestra
     function check(show) {
       const dd = Number(d.value), mm = Number(m.value), yy = Number(y.value);
       let t = "";
-      if (!d.value || !m.value || !y.value) t = "Completá día, mes y año.";
+      if (!d.value || !m.value || !y.value) t = "Ingresá una fecha válida: día, mes y año.";
       else if (y.value.length < 4) t = "Escribí el año completo (ej: 1995).";
       else if (mm < 1 || mm > 12) t = "El mes va del 01 al 12.";
       else {
@@ -194,7 +198,7 @@
     }
     return {
       value: () => (check(false) ? null : `${y.value}-${m.value.padStart(2, "0")}-${d.value.padStart(2, "0")}`),
-      set: (v) => { const g = String(v || "").match(/^(\d{4})-(\d{2})-(\d{2})/); [y.value, m.value, d.value] = g ? [g[1], g[2], g[3]] : ["", "", ""]; say(""); },
+      set: (v) => { const g = String(v || "").match(/^(\d{4})-(\d{2})-(\d{2})/); [y.value, m.value, d.value] = g ? [g[1], g[2], g[3]] : ["", "", ""]; say(""); lift(); },
       check: () => { const t = check(true); if (t) (parts.find((p) => !p.value) || d).focus(); return !t; },
     };
   }
