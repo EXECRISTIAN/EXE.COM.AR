@@ -111,8 +111,8 @@
       try { fx = demo ? 1550 : (await be.sb.from("fx_settings").select("effective_rate").eq("id", 1).single()).data?.effective_rate; } catch (e) { fx = null; }
       const last = orders.slice(0, 5);
       return `<div class="kpis">
-        <a class="kpi kpi-link" href="#pedidos" title="Ver los pedidos"><small>Ventas de hoy</small><strong>${sum(sold.filter((o) => day(o.created_at) === today))}</strong><span class="kpi-go">Ver pedidos →</span></a>
-        <a class="kpi kpi-link" href="#pedidos" title="Ver los pedidos"><small>Ventas del mes</small><strong>${sum(sold.filter((o) => day(o.created_at).startsWith(month)))}</strong><span class="kpi-go">Ver pedidos →</span></a>
+        <a class="kpi kpi-link" href="#ventas/hoy" title="Ver el detalle de las ventas de hoy"><small>Ventas de hoy</small><strong>${sum(sold.filter((o) => day(o.paid_at || o.created_at) === today))}</strong><span class="kpi-go">Ver ventas →</span></a>
+        <a class="kpi kpi-link" href="#ventas/mes" title="Ver el detalle de las ventas del mes"><small>Ventas del mes</small><strong>${sum(sold.filter((o) => day(o.paid_at || o.created_at).startsWith(month)))}</strong><span class="kpi-go">Ver ventas →</span></a>
         <a class="kpi kpi-link" href="#pedidos" title="Ver los pedidos pendientes"><small>Pedidos pendientes</small><strong>${orders.filter((o) => o.status === "pending").length}</strong><span class="kpi-go">Ver pedidos →</span></a>
         ${fx ? (perms.has("products.write") ? `<a class="kpi kpi-link" href="#dolar" title="Ir a la sección Dólar"><small>Dólar usado hoy</small><strong>${money(fx)}</strong><span class="kpi-go">Ver dólar →</span></a>` : `<div class="kpi"><small>Dólar usado hoy</small><strong>${money(fx)}</strong></div>`) : ""}
       </div>
@@ -257,7 +257,7 @@
   async function load(kind) {
     if (demo) return DEMO[kind];
     const q = {
-      orders: () => be.sb.from("orders").select("id, created_at, status, total, carrier, tracking_number, label_url, customer_name, packed_at, source, customer:profiles(full_name)").order("created_at", { ascending: false }),
+      orders: () => be.sb.from("orders").select("id, created_at, paid_at, status, total, carrier, tracking_number, label_url, customer_name, packed_at, source, customer:profiles(full_name)").order("created_at", { ascending: false }),
       products: () => be.sb.from("products").select("id, name, price, stock, show_stock, active").order("name"),
       users: () => be.sb.rpc("admin_users_list"),
       legacy: () => be.sb.rpc("admin_legacy_customers"),
