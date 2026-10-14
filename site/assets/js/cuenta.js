@@ -169,7 +169,7 @@
 
   /* ---------- Fecha de nacimiento: DÍA / MES / AÑO ----------
      Se escribe solo con números y salta sola al casillero siguiente; borrar en un casillero vacío vuelve al anterior;
-     se puede pegar "14/03/1995". Avisa fechas que no existen (31/02) y edades menores a 13 años (la base también lo valida). */
+     se puede pegar "14/03/1995". Avisa fechas que no existen (31/02) y edades menores a 18 años (la base también lo valida). */
   const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
   function birthField(box) {
     const [d, m, y] = ["d", "m", "y"].map((k) => box.querySelector(`[data-bd="${k}"]`));
@@ -216,7 +216,7 @@
         else {
           const now = new Date(), age = now.getFullYear() - yy - (now.getMonth() + 1 < mm || (now.getMonth() + 1 === mm && now.getDate() < dd) ? 1 : 0);
           if (age < 0) t = "Esa fecha todavía no llegó.";
-          else if (age < 13) t = "Para tener una cuenta tenés que tener al menos 13 años.";
+          else if (age < 18) t = "Para tener una cuenta tenés que ser mayor de 18 años.";
           else if (age > 110) t = "Revisá el año.";
         }
       }
@@ -317,7 +317,7 @@
     if (!accBirth.check()) return accMsg("Revisá la fecha de nacimiento.", "error");
     const full_name = accForm.full_name.value.trim().slice(0, 80), phone = accForm.phone.value.trim().slice(0, 30);
     const { error } = await sb.from("profiles").update({ full_name, phone, marketing_opt_in: accForm.marketing_opt_in.checked, birthdate: accBirth.value() }).eq("id", user.id);
-    if (error) return accMsg(/13 años/.test(error.message) ? "Para tener una cuenta tenés que tener al menos 13 años." : "No se pudo guardar. Probá de nuevo.", "error");
+    if (error) return accMsg(/18 años/.test(error.message) ? "Para tener una cuenta tenés que ser mayor de 18 años." : "No se pudo guardar. Probá de nuevo.", "error");
     $("birthNeed").hidden = true;
     await sb.auth.updateUser({ data: { full_name } }).catch(() => {});
     accMsg("¡Datos guardados!", "ok");
