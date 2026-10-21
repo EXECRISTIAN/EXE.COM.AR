@@ -576,3 +576,15 @@ a.kpi-link:hover, a.kpi-link:focus-visible { transform: translateY(-2px); outlin
 .an-ads { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 8px 0; font-size: .9rem; }
 .an-ads small { display: block; color: var(--muted); font-size: .8rem; }
 @media (max-width: 560px) { .an-map { grid-template-columns: repeat(6, 1fr); } .an-bar, .an-funnel > div { grid-template-columns: 110px 1fr 46px; } }
+
+/* Estado de resultados (admin-finanzas.js) */
+.fin-mods { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.fin-mod { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.fin-mod input { margin-top: 3px; width: 18px; height: 18px; flex: none; }
+.fin-mod b { display: block; } .fin-mod small { color: var(--muted); font-size: .8rem; }
+.fin-mod.soon { cursor: default; opacity: .65; }
+.fin-t tr[data-fin-month] { cursor: pointer; }
+.fin-t tr[data-fin-month]:hover td, .fin-t tr.sel td { background: var(--accent-bg-soft, rgba(0, 132, 214, .08)); }
+.fin-tot td { border-top: 2px solid var(--line); }
+.fin-neg { color: var(--err); }
+.fin-add { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; align-items: end; margin-bottom: 12px; }
