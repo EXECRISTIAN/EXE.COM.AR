@@ -10,7 +10,7 @@
   const money = (n) => "$" + Number(n || 0).toLocaleString("es-AR");
 
   const DEMO = {
-    perms: new Set(["site.edit", "dashboard.access", "orders.read", "orders.update_status", "orders.create", "orders.mark_paid", "products.read", "products.write", "stock.write", "users.read", "users.moderate", "roles.manage", "emails.manage", "shipping.manage", "promos.manage", "analytics.read"]),
+    perms: new Set(["site.edit", "dashboard.access", "orders.read", "orders.update_status", "orders.create", "orders.mark_paid", "products.read", "products.write", "stock.write", "users.read", "users.moderate", "roles.manage", "emails.manage", "shipping.manage", "promos.manage", "analytics.read", "finance.manage"]),
     orders: [
       { id: 1042, created_at: "2026-09-20", customer: "Juan Pérez", status: "paid", total: 452000, carrier: "andreani", tracking_number: "360000012345670", label_url: "#" },
       { id: 1043, created_at: "2026-09-22", customer: "Ana Gómez", status: "pending", total: 98000 },
