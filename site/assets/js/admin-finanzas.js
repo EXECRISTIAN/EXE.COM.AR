@@ -12,7 +12,7 @@
   const MODULES = [
     ["resultados", "📒 Estado de resultados", "Ingresos, costo de lo vendido, gastos y resultado de cada mes."],
     ["facturacion", "🧾 Facturación", "Facturas con y sin ARCA (monotributo, responsable inscripto). Próximamente.", true],
-    ["reportes", "📬 Reportes automáticos", "Resumen por email cada semana o mes. Próximamente.", true],
+    ["reportes", "📬 Reportes", "Resumen del negocio y ventas para ARCA, a mano o automáticos por email."],
   ];
   const MES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
   const r0 = (n) => Math.round(n);
@@ -34,7 +34,7 @@
         expenses.push({ id: k * 3 + 1, month: `${y}-${String(k + 1).padStart(2, "0")}-01`, category: "Publicidad", description: "Instagram", amount: 40000 + Math.floor(rnd() * 30000) });
         expenses.push({ id: k * 3 + 2, month: `${y}-${String(k + 1).padStart(2, "0")}-01`, category: "Comisiones de cobro", description: "Mercado Pago", amount: 15000 + Math.floor(rnd() * 10000) });
       }
-      D._fin = { modules: { resultados: true, facturacion: false, reportes: false }, orders, expenses,
+      D._fin = { modules: { resultados: true, facturacion: false, reportes: true }, orders, expenses,
         costs: [70000, 30000, 99000, 45000].map((p) => ({ product_id: "p" + p, cost: Math.round(p * 0.72) })), fx: 1550 };
     }
     return D._fin;
