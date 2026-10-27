@@ -1,17 +1,8 @@
 # Tareas pendientes / a futuro
 
-## Armador de PC (pedido el 28/09/2026)
-Herramienta para que el cliente arme su PC paso a paso y la mande como pedido.
-Idea base (a definir con Cristian antes de empezar):
-- Pasos: procesador → motherboard → memoria → placa de video → almacenamiento → fuente → gabinete → refrigeración.
-- **Compatibilidad automática** usando las especificaciones de cada producto (`specs` en `products.json` / tabla `products`):
-  socket CPU ↔ mother, tipo de memoria (DDR4/DDR5) ↔ mother, formato (ATX/M-ATX/ITX) ↔ gabinete,
-  consumo estimado ↔ potencia de la fuente, "incluye cooler" del procesador.
-- **Base ya hecha (27/10)**: columna `products.compat` (claves `LGA1200`, `AM4`, `DDR4`…, editable en el panel) que hoy alimenta
-  "Compatible con" en la ficha. El armador filtra cada paso con esas mismas claves: mother ↔ procesador por socket,
-  memoria ↔ mother por DDR. Para gabinete y fuente sumar claves de formato (`ATX`, `M-ATX`, `ITX`) y potencia (watts).
-- Resumen con total, botón "Agregar todo al carrito" y "Enviar por WhatsApp".
-- Requisito previo: cargar más productos (las fichas técnicas de los 10 actuales ya están completas).
+## Armador de PC — hecho (27/10)
+Tienda → "Armá tu PC" (#armador). Filtra por socket y DDR (claves de Compatibilidad) y la fuente por la placa de video.
+Para sumar a futuro: claves de formato (`ATX`, `M-ATX`, `ITX`) para gabinete ↔ mother y consumo del procesador.
 
 ## Necesitan a Cristian
 - **Revocar claves pegadas en el chat**: token `sbp_…` de Supabase, token de Envia.com y la primera clave de Resend (`re_CXX…`).

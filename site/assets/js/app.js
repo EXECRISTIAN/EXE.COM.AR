@@ -818,6 +818,113 @@
   }
   window.addEventListener("hashchange", routeBudget);
 
+  /* ---------- Armador de PC (#armador) ---------- */
+  // Paso a paso: cada lista muestra solo lo compatible con lo ya elegido, usando las claves de "Compatibilidad"
+  // (socket LGA/AM, memoria DDR) y la fuente recomendada para la placa de video. Al final: carrito o WhatsApp.
+  const PC_STEPS = [
+    { key: "cpu", label: "Procesador", cat: /procesador/i },
+    { key: "mb", label: "Motherboard", cat: /mother/i },
+    { key: "ram", label: "Memoria RAM", cat: /memoria/i },
+    { key: "gpu", label: "Placa de video", cat: /placa/i, optional: true },
+    { key: "psu", label: "Fuente", cat: /fuente/i },
+    { key: "case", label: "Gabinete", cat: /gabinete/i },
+    { key: "cool", label: "Refrigeración", cat: /refrig|cooler/i, optional: true },
+  ];
+  let pc = {}, pcStep = 0;
+  const sockets = (p) => (p && p.compat ? p.compat.filter((k) => /^(LGA\d+|AM\d)$/.test(k)) : []);
+  const ddrOf = (p) => (p && p.compat ? p.compat.filter((k) => /^DDR\d$/.test(k)) : []);
+  // Sin datos de un lado no se descarta (se avisa que hay que confirmarlo)
+  const shares = (a, b) => !a.length || !b.length || a.some((k) => b.includes(k));
+  const gpuWatts = (g) => { const s = g.name.toLowerCase(); for (const [re, f] of GPU_PSU) { const m = s.match(re); if (m) return f(m); } return 0; };
+  function pcFits(step, p) {
+    const { cpu, mb, ram, gpu, cool } = pc;
+    if (step === "cpu") return shares(sockets(p), sockets(mb));
+    if (step === "mb") return shares(sockets(p), sockets(cpu)) && shares(ddrOf(p), ddrOf(ram)) && (!cool || shares(sockets(p), sockets(cool)));
+    if (step === "ram") return shares(ddrOf(p), ddrOf(mb));
+    if (step === "cool") return shares(sockets(p), sockets(cpu || mb));
+    if (step === "psu" && gpu) { const w = gpuWatts(gpu); return !w || !psuWatts(p) || psuWatts(p) >= w; }
+    return true;
+  }
+  const pcPick = () => PC_STEPS.map((s) => pc[s.key]).filter(Boolean);
+  function pcNotes() {
+    const n = [], { cpu, mb, ram, gpu, psu } = pc;
+    const sk = sockets(cpu).find((k) => sockets(mb).includes(k));
+    if (cpu && mb) n.push(sk ? `✔ Procesador y mother compatibles (${sk})` : "⚠ Confirmá con nosotros el socket del procesador y el mother");
+    const dd = ddrOf(mb).find((k) => ddrOf(ram).includes(k));
+    if (mb && ram) n.push(dd ? `✔ Memoria compatible (${dd})` : "⚠ Confirmá con nosotros el tipo de memoria");
+    if (gpu) { const w = gpuWatts(gpu); if (w) n.push(psu && psuWatts(psu) ? `✔ Fuente de ${psuWatts(psu)} W (para esta placa se recomiendan ${w} W o más)` : `Para esta placa se recomienda una fuente de ${w} W o más`); }
+    if (cpu && /\bf\b|\d{4,5}f\b|sin gr[aá]ficos/i.test(cpu.name) && !gpu) n.push("⚠ Este procesador no tiene video integrado: necesitás una placa de video");
+    return n;
+  }
+  function renderPc() {
+    const total = pcPick().reduce((t, p) => t + p.price, 0);
+    const step = PC_STEPS[pcStep];
+    const all = step ? products.filter((p) => step.cat.test(p.category || "")) : [];
+    const ok = all.filter((p) => pcFits(step.key, p)).sort((a, b) => a.price - b.price);
+    const notes = pcNotes();
+    $("pcb").innerHTML = `
+      <button class="pd-close icon-btn" id="pcClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <div class="pcb-head"><h2 id="pcTitle">Armá tu PC</h2><p>Elegí paso a paso: en cada lista te mostramos solo lo compatible con lo que ya elegiste.</p></div>
+      <ol class="pcb-steps">${PC_STEPS.map((s, i) => { const p = pc[s.key];
+        return `<li class="pcb-step${i === pcStep ? " on" : ""}${p ? " done" : ""}">
+          <button type="button" class="pcb-step-btn" data-pc-go="${i}"><span class="pcb-n">${p ? "✔" : i + 1}</span><span class="pcb-l">${esc(s.label)}${s.optional ? " <small>(opcional)</small>" : ""}</span>
+          <span class="pcb-v">${p ? `${esc(p.name)} · <b>${money(p.price)}</b>` : i === pcStep ? "Elegí una opción" : "—"}</span></button>
+          ${p && i !== pcStep ? `<button type="button" class="link-btn pcb-x" data-pc-del="${s.key}" aria-label="Quitar ${esc(s.label)}">Quitar</button>` : ""}</li>`; }).join("")}</ol>
+      ${step ? `<section class="pcb-opts" aria-label="Opciones de ${esc(step.label)}">
+        <h3>${esc(step.label)}</h3>
+        ${ok.length ? `<div class="pcb-list">${ok.map((p) => `<button type="button" class="pcb-opt${pc[step.key] && pc[step.key].id === p.id ? " sel" : ""}" data-pc-sel="${esc(p.id)}">
+            <img src="${esc(mainImg(p))}" alt="" loading="lazy" data-fallback><span>${esc(p.name)}${p.condition ? `<small>${esc(p.condition)}</small>` : ""}</span><b>${money(p.price)}</b></button>`).join("")}</div>`
+          : `<p class="pcb-empty">No tenemos ${esc(step.label.toLowerCase())} publicado${all.length ? " compatible con lo que elegiste" : ""}. <a href="${esc(waLink(`Hola EXE! Estoy armando una PC y busco ${step.label.toLowerCase()}${pc.cpu ? ` para ${pc.cpu.name}` : ""}.`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a>.</p>`}
+        ${all.length > ok.length ? `<p class="pcb-hidden">${all.length - ok.length} ${all.length - ok.length === 1 ? "opción oculta" : "opciones ocultas"} por no ser compatibles.</p>` : ""}
+        <div class="pcb-step-actions">${pcStep > 0 ? `<button type="button" class="btn btn-outline" data-pc-go="${pcStep - 1}">Anterior</button>` : ""}
+          <button type="button" class="btn btn-outline" data-pc-go="${pcStep + 1}">${pc[step.key] ? "Siguiente" : step.optional || !ok.length ? "Saltear" : "Saltear por ahora"}</button></div>
+      </section>` : ""}
+      <aside class="pcb-sum">
+        ${notes.length ? `<ul class="pcb-notes">${notes.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
+        <div class="pcb-total"><span>Total (${pcPick().length} ${pcPick().length === 1 ? "producto" : "productos"})</span><b>${money(total)}</b></div>
+        <div class="pcb-actions">
+          <button type="button" class="btn btn-primary" id="pcCart"${pcPick().length ? "" : " disabled"}>Agregar todo al carrito</button>
+          <a class="btn btn-outline" id="pcWa" href="${esc(waLink(["Hola EXE! Armé esta PC en la web:", ...PC_STEPS.filter((s) => pc[s.key]).map((s) => `• ${s.label}: ${pc[s.key].name} (${money(pc[s.key].price)})`), `Total: ${money(total)}`, "¿Me confirman stock y compatibilidad?"].join("\n")))}" target="_blank" rel="noopener"${pcPick().length ? "" : ' aria-disabled="true" tabindex="-1"'}>Enviar por WhatsApp</a>
+          ${pcPick().length ? `<button type="button" class="link-btn" id="pcReset">Empezar de nuevo</button>` : ""}
+        </div>
+        <p class="pd-illus">Te confirmamos stock, precio final y compatibilidad antes de cerrar la compra.</p>
+      </aside>`;
+  }
+  function openPc() {
+    renderPc();
+    $("pcOverlay").hidden = false;
+    requestAnimationFrame(() => $("pcOverlay").classList.add("show"));
+    document.body.classList.add("no-scroll");
+  }
+  function closePc(fromHash) {
+    if ($("pcOverlay").hidden) return;
+    $("pcOverlay").classList.remove("show");
+    document.body.classList.remove("no-scroll");
+    setTimeout(() => { $("pcOverlay").hidden = true; }, 250);
+    if (!fromHash) history.replaceState(null, "", location.pathname + location.search + "#productos");
+  }
+  const routePc = () => (location.hash === "#armador" ? openPc() : closePc(true));
+  window.addEventListener("hashchange", routePc);
+  $("pcOverlay").addEventListener("click", (e) => {
+    if (e.target === $("pcOverlay") || e.target.closest("#pcClose")) return closePc();
+    const go = e.target.closest("[data-pc-go]");
+    if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); renderPc(); $("pcb").scrollTop = 0; return; }
+    const sel = e.target.closest("[data-pc-sel]");
+    if (sel) {
+      const step = PC_STEPS[pcStep], p = products.find((x) => x.id === sel.dataset.pcSel);
+      pc[step.key] = p;
+      // Si lo nuevo deja incompatible algo ya elegido en otro paso, se quita (y se avisa)
+      PC_STEPS.forEach((s) => { if (s.key !== step.key && pc[s.key] && !pcFits(s.key, pc[s.key])) { toast(`Quitamos ${s.label.toLowerCase()}: no es compatible`); delete pc[s.key]; } });
+      pcStep = Math.min(PC_STEPS.length, pcStep + 1);
+      renderPc(); $("pcb").scrollTop = 0; return;
+    }
+    const del = e.target.closest("[data-pc-del]");
+    if (del) { delete pc[del.dataset.pcDel]; renderPc(); return; }
+    if (e.target.closest("#pcReset")) { pc = {}; pcStep = 0; renderPc(); return; }
+    if (e.target.closest("#pcCart")) { pcPick().forEach((p) => add(p.id, p.variants ? p.variants[0] : null)); closePc(); toggleCart(true); }
+  });
+  document.addEventListener("keydown", (e) => e.key === "Escape" && !$("pcOverlay").hidden && closePc());
+
   /* ---------- Eventos ---------- */
   document.addEventListener("click", (e) => {
     const t = e.target.closest("button, a[data-filter]");
@@ -1387,7 +1494,7 @@
   }
   loadDb().catch(loadJson)
     // Los productos sin precio cargado no se muestran en la tienda (siguen en el panel; aparecen solos al ponerles precio)
-    .then((data) => { products = data.filter((p) => Number(p.price) > 0); renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); routeSearch(); paintZones(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
+    .then((data) => { products = data.filter((p) => Number(p.price) > 0); renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); routeSearch(); routePc(); paintZones(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
 })();
 
