@@ -173,6 +173,22 @@
     document.querySelectorAll(".pd-thumbs button").forEach((b, k) => b.setAttribute("aria-current", String(k === pdIndex)));
     const c = $("pdCounter"); if (c) c.textContent = `${pdIndex + 1} / ${imgs.length}`;
   }
+  // Compatibles: otros productos de distinta categoría que comparten una clave de compatibilidad
+  // (socket, tipo de memoria…), agrupados por categoría. Se cargan en el panel → producto → "Compatibilidad".
+  function relatedHtml(p) {
+    const keys = new Set(p.compat || []);
+    if (!keys.size) return "";
+    const rel = products.filter((x) => x.id !== p.id && x.category !== p.category && (x.compat || []).some((k) => keys.has(k)));
+    if (!rel.length) return "";
+    const groups = {};
+    rel.forEach((x) => (groups[x.category || "Otros"] ||= []).push(x));
+    return `<section class="pd-related" aria-label="Productos compatibles">
+      <h3 class="pd-specs-title">Compatible con</h3>
+      <p class="pd-related-note">${[...keys].map(esc).join(" · ")} — como referencia, confirmá con nosotros antes de comprar.</p>
+      ${Object.entries(groups).map(([cat, list]) => `<div class="pd-rel-group"><h4>${esc(cat)}</h4><div class="pd-rel-list">${list.slice(0, 8).map((x) => `
+        <a class="pd-rel" href="#producto/${encodeURIComponent(x.id)}" data-rel="${esc(x.id)}"><img src="${esc(mainImg(x))}" alt="" loading="lazy" data-fallback><span>${esc(x.name)}</span><b>${esc(priceLabel(x))}</b></a>`).join("")}</div></div>`).join("")}
+    </section>`;
+  }
   function openProduct(id) {
     const p = products.find((x) => x.id === id);
     if (!p) return;
@@ -221,6 +237,7 @@
           ? p.specs.map((s, k) => `<details class="pd-spec"${k === 0 ? " open" : ""}><summary>${esc(s.title)}</summary>
               <table>${s.rows.map(([key, val]) => `<tr><th>${esc(key)}</th><td>${esc(val)}</td></tr>`).join("")}</table></details>`).join("")
           : `<p class="pd-nospecs">La ficha técnica de este producto está en revisión. Consultanos por WhatsApp y te pasamos todos los datos.</p>`}
+        ${relatedHtml(p)}
       </div>`;
     pdSetImage(0); pdSetQty(1); adminSources(p.id);
     $("pdOverlay").hidden = false;
@@ -350,6 +367,8 @@
   $("pdOverlay").addEventListener("change", (e) => { if (e.target.id === "pdQty") pdSetQty(pdQty()); });
   $("pdOverlay").addEventListener("click", (e) => {
     if (e.target === $("pdOverlay") || e.target.closest("#pdClose")) return closeProduct();
+    const rel = e.target.closest("[data-rel]");
+    if (rel) { e.preventDefault(); history.replaceState(null, "", "#producto/" + encodeURIComponent(rel.dataset.rel)); openProduct(rel.dataset.rel); $("pd").scrollTop = $("pdOverlay").scrollTop = 0; return; }
     const step = e.target.closest("[data-pd-step]"); if (step) return pdSetImage(pdIndex + Number(step.dataset.pdStep));
     const th = e.target.closest("[data-pd-img]"); if (th) return pdSetImage(Number(th.dataset.pdImg));
     const q = e.target.closest("[data-pd-qty]"); if (q) return pdSetQty(pdQty() + Number(q.dataset.pdQty));
@@ -1247,16 +1266,16 @@
   // (sin stock + cart_ok = "a pedido", sin límite); hide_no_stock: no se muestra si el stock llega a 0.
   const fromDb = (r) => ({
     id: r.id, name: r.name, brand: r.brand, category: r.category, description: r.description, price: r.ask_price ? 0 : Number(r.price) || 0,
-    // Vendido en dólares: la tienda muestra US$ (el precio en pesos sigue al dólar del día y se usa para el total)
+    // Valorado en dólares: el precio en pesos sigue al dólar del día (la tienda siempre muestra pesos)
     ...(!r.ask_price && r.price_usd != null && Number(r.price_usd) > 0 ? { priceUsd: Number(r.price_usd) } : {}),
     askStock: !!r.ask_stock, cartOk: r.cart_ok !== false, noStock: !r.ask_stock && r.show_stock && r.stock <= 0 && r.cart_ok !== false,
     ...(r.show_stock && !r.ask_stock && !(r.stock <= 0 && r.cart_ok !== false) ? { stock: r.stock } : {}), images: r.images && r.images.length ? r.images : (r.image ? [r.image] : []),
     specs: r.specs && r.specs.length ? r.specs : undefined, outlet: r.outlet, condition: r.condition, weightKg: Number(r.weight_kg) || 1,
-    variants: r.variants && r.variants.length ? r.variants : undefined, tags: r.tags || [],
+    variants: r.variants && r.variants.length ? r.variants : undefined, tags: r.tags || [], compat: r.compat || [],
   });
   const loadDb = () => {
     if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) return Promise.reject();
-    const cols = "id,name,brand,category,description,price,price_usd,stock,show_stock,image,images,specs,outlet,condition,weight_kg,variants,tags,ask_price,ask_stock,cart_ok,hide_no_stock";
+    const cols = "id,name,brand,category,description,price,price_usd,stock,show_stock,image,images,specs,outlet,condition,weight_kg,variants,tags,compat,ask_price,ask_stock,cart_ok,hide_no_stock";
     return fetch(`${cfg.supabaseUrl}/rest/v1/products?select=${cols}&active=eq.true&order=sort.asc,name.asc`, { headers: { apikey: cfg.supabaseAnonKey } })
       .then((r) => (r.ok ? r.json() : Promise.reject())).then((rows) => (rows.length ? rows.filter((r) => !(r.hide_no_stock && r.show_stock && r.stock <= 0)).map(fromDb) : Promise.reject()));
   };
