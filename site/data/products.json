@@ -2541,7 +2541,8 @@
     "compat": [
       "LGA1200",
       "DDR4"
-    ]
+    ],
+    "active": false
   },
   {
     "id": "outlet-msi-mpg-z490-gaming-plus",
