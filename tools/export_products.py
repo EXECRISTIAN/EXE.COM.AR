@@ -21,7 +21,7 @@ for r in rows:
          "description": r.get("description"), "price": 0 if r.get("ask_price") else float(r.get("price") or 0),
          "askStock": ask_stock, "cartOk": cart_ok, "noStock": not ask_stock and show and stock <= 0 and cart_ok}
     if not r.get("ask_price") and r.get("price_usd") is not None and float(r["price_usd"]) > 0:
-        p["priceUsd"] = float(r["price_usd"])   # vendido en dólares: la tienda muestra US$
+        p["priceUsd"] = float(r["price_usd"])   # valorado en dólares: la tienda muestra pesos y la conversión
     if show and not ask_stock and not (stock <= 0 and cart_ok):
         p["stock"] = stock
     p["images"] = r.get("images") or ([r["image"]] if r.get("image") else [])
