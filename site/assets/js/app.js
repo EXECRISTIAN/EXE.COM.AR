@@ -99,6 +99,86 @@
   // Gabinetes: se venden vacíos salvo que la descripción diga que incluye componentes
   const caseOnly = (p) => /gabinete/i.test(p.category || "") && !/(^|[^o]\s)incluye\s+(componentes|fuente|placa|procesador)/i.test(p.description || "");
   const CASE_NOTE = "el gabinete solo no incluye componentes dentro";
+  function cardHtml(p, i) {
+    return `
+    <article class="card reveal" style="--d:${(i % 4) * 0.08}s">
+      <a class="card-media" href="#producto/${encodeURIComponent(p.id)}" aria-label="Ver detalles de ${esc(p.name)}">
+        <img src="${esc(mainImg(p))}" alt="${esc(p.name)}" loading="lazy" data-fallback>
+        ${p.images && p.images[1] ? `<img class="alt" src="${esc(p.images[1])}" alt="" loading="lazy">` : ""}
+        ${p.category ? `<span class="tag">${esc(p.category)}</span>` : ""}
+        ${p.outlet ? `<span class="tag tag-outlet">Outlet</span>` : ""}
+        ${p.images && p.images.length > 1 ? `<span class="img-count" aria-hidden="true">${p.images.length} fotos</span>` : ""}
+      </a>
+      ${shareActs(p.id)}
+      <div class="card-body">
+        ${p.brand ? `<button class="tag-brand" type="button" data-brand-tag="${esc(p.brand)}" title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
+        <h3><a href="#producto/${encodeURIComponent(p.id)}">${esc(p.name)}</a></h3>
+        <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>
+        ${p.price > 0 ? `<span class="price-note">Consultar precio final</span>` : ""}
+        ${p.condition ? `<span class="condition">Estado: ${esc(p.condition)}</span>` : ""}
+        ${(p.tags || []).length ? `<div class="p-tags">${p.tags.filter((t) => t !== "Outlet").map((t) => `<button type="button" class="p-tag" data-tag="${esc(t)}">${esc(t)}</button>`).join("")}</div>` : ""}
+        ${stockBadge(p)}
+        ${p.variants ? `<select data-variant="${esc(p.id)}" aria-label="Variante">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select>` : ""}
+        ${addBtn(p, "data-add")}
+        <a class="card-more" href="#producto/${encodeURIComponent(p.id)}">Ver detalles${p.specs ? " y especificaciones" : ""}</a>
+      </div>
+    </article>`;
+  }
+
+  /* ---------- Búsqueda sin resultado: ofrecer algo compatible ---------- */
+  // Si el cliente busca un modelo que no tenemos (ej. "i7 9700k" o "rtx 3060"), deducimos el socket / la memoria
+  // o la fuente recomendada y mostramos lo publicado que le sirve. Las claves son las mismas de "Compatibilidad".
+  function intelSocket(n) {
+    const g = Math.floor(n / 1000);
+    if (n >= 10000) return g <= 11 ? "LGA1200" : g <= 14 ? "LGA1700" : null;
+    return g === 2 || g === 3 ? "LGA1155" : g === 4 ? "LGA1150" : g >= 6 && g <= 9 ? "LGA1151" : null;
+  }
+  // Fuente recomendada (W) por placa de video, según el fabricante
+  const GPU_PSU = [[/(rtx|gtx)\s*(\d{4})/, (m) => {
+    const n = +m[2], tier = n % 100, gen = Math.floor(n / 100);
+    if (gen <= 16) return tier >= 60 ? 450 : 350;
+    return tier >= 90 ? 850 : tier >= 80 ? 750 : tier >= 70 ? 650 : 550;
+  }], [/rx\s*(\d{4})/, (m) => { const tier = +m[1] % 1000; return tier >= 900 ? 800 : tier >= 800 ? 750 : tier >= 700 ? 650 : 500; }]];
+  function searchHints(q) {
+    const s = q.toLowerCase().replace(/[-_]/g, " ");
+    const keys = new Set(); let watts = 0, what = "";
+    const sock = s.match(/\b(lga\s?\d{4}|am[345])\b/); if (sock) { keys.add(sock[1].replace(/\s/, "").toUpperCase()); what = "socket"; }
+    const ddr = s.match(/\bddr([345])\b/); if (ddr) { keys.add("DDR" + ddr[1]); what ||= "memoria"; }
+    const intel = s.match(/\bi[3579]\s?(\d{4,5})|\b(?:celeron|pentium)?\s?g(\d{4})\b/);
+    if (intel) { const n = +(intel[1] || intel[2]); const k = intel[2] ? (n >= 5900 ? "LGA1200" : "LGA1151") : intelSocket(n); if (k) { keys.add(k); what = "cpu"; } }
+    const ryzen = s.match(/\bryzen\s?[3579]?\s?(\d{4})|\bathlon\s?(\d{3,4})/);
+    if (ryzen) { const n = +(ryzen[1] || ryzen[2]); keys.add(ryzen[2] || n < 7000 ? "AM4" : "AM5"); what = "cpu"; }
+    for (const [re, f] of GPU_PSU) { const m = s.match(re); if (m) { watts = f(m); what = "gpu"; break; } }
+    return { keys, watts, what };
+  }
+  const psuWatts = (p) => { const m = /(\d{3,4})\s?w\b/i.exec(p.name); return m ? +m[1] : 0; };
+  function suggestHtml(q) {
+    if (!q) return "";
+    const { keys, watts, what } = searchHints(q);
+    let items = [], why = "";
+    if (keys.size) {
+      items = products.filter((p) => (p.compat || []).some((k) => keys.has(k)));
+      why = `lo que tenemos compatible (${[...keys].join(" · ")})`;
+    } else if (watts) {
+      items = products.filter((p) => /fuente/i.test(p.category || "") && psuWatts(p) >= watts).sort((a, b) => psuWatts(a) - psuWatts(b));
+      why = `las fuentes recomendadas para esa placa (${watts} W o más)`;
+    }
+    // Sin modelo reconocible ("i7", "ryzen", "rtx"): lo más parecido de la misma familia
+    if (!items.length) {
+      const fam = /\bi[3579]\b|\bcore\b|intel/.test(q.toLowerCase()) ? /intel/i : /ryzen|amd/.test(q.toLowerCase()) ? /amd|ryzen/i
+        : /rtx|gtx|nvidia|geforce|radeon|\brx\b/.test(q.toLowerCase()) ? /placa/i : null;
+      if (fam) { items = products.filter((p) => fam.source === "placa" ? fam.test(p.category || "") : /procesador/i.test(p.category || "") && fam.test(p.name)); why = "opciones parecidas"; }
+    }
+    if (!items.length) return "";
+    const order = what === "cpu" ? ["Motherboards", "Refrigeración", "Memorias RAM", "Procesadores"] : [];
+    const groups = {};
+    items.forEach((p) => (groups[p.category || "Otros"] ||= []).push(p));
+    const cats = Object.keys(groups).sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));
+    let i = 0;
+    return `<div class="sugg-head"><p class="empty-state">No tenemos «${esc(q)}» publicado, pero te mostramos ${esc(why)}.
+      <br><a href="${esc(waLink(`Hola EXE! Busco: ${q}. ¿Lo pueden conseguir?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te lo conseguimos.</p></div>` +
+      cats.map((c) => `<h3 class="sugg-cat">${esc(c === "Procesadores" && what === "cpu" ? "Procesadores del mismo socket" : c)}</h3>` + groups[c].map((p) => cardHtml(p, i++)).join("")).join("");
+  }
   function renderProducts() {
     const q = query.toLowerCase();
     // Todos los filtros menos la categoría (sirve también para contar cuántos productos hay en cada categoría)
@@ -128,35 +208,10 @@
     if (sortBy === "name-asc") list.sort((a, b) => a.name.localeCompare(b.name, "es"));
     if (sortBy === "name-desc") list.sort((a, b) => b.name.localeCompare(a.name, "es"));
     $("productGrid").innerHTML = list.length
-      ? list.map((p, i) => {
-          const out = tracksStock(p) && p.stock <= 0;
-          return `
-          <article class="card reveal" style="--d:${(i % 4) * 0.08}s">
-            <a class="card-media" href="#producto/${encodeURIComponent(p.id)}" aria-label="Ver detalles de ${esc(p.name)}">
-              <img src="${esc(mainImg(p))}" alt="${esc(p.name)}" loading="lazy" data-fallback>
-              ${p.images && p.images[1] ? `<img class="alt" src="${esc(p.images[1])}" alt="" loading="lazy">` : ""}
-              ${p.category ? `<span class="tag">${esc(p.category)}</span>` : ""}
-              ${p.outlet ? `<span class="tag tag-outlet">Outlet</span>` : ""}
-              ${p.images && p.images.length > 1 ? `<span class="img-count" aria-hidden="true">${p.images.length} fotos</span>` : ""}
-            </a>
-            ${shareActs(p.id)}
-            <div class="card-body">
-              ${p.brand ? `<button class="tag-brand" type="button" data-brand-tag="${esc(p.brand)}" title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
-              <h3><a href="#producto/${encodeURIComponent(p.id)}">${esc(p.name)}</a></h3>
-              <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>
-              ${p.price > 0 ? `<span class="price-note">Consultar precio final</span>` : ""}
-              ${p.condition ? `<span class="condition">Estado: ${esc(p.condition)}</span>` : ""}
-              ${(p.tags || []).length ? `<div class="p-tags">${p.tags.filter((t) => t !== "Outlet").map((t) => `<button type="button" class="p-tag" data-tag="${esc(t)}">${esc(t)}</button>`).join("")}</div>` : ""}
-              ${stockBadge(p)}
-              ${p.variants ? `<select data-variant="${esc(p.id)}" aria-label="Variante">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select>` : ""}
-              ${addBtn(p, "data-add")}
-              <a class="card-more" href="#producto/${encodeURIComponent(p.id)}">Ver detalles${p.specs ? " y especificaciones" : ""}</a>
-            </div>
-          </article>`;
-        }).join("")
+      ? list.map(cardHtml).join("")
       : fp.logo
         ? `<p class="empty-state">Todavía no tenemos productos ${esc(fp.logo.brand)} publicados.<br><a href="${esc(waLink(`Hola EXE! Busco productos ${fp.logo.brand}. ¿Qué tienen disponible?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te conseguimos lo que buscás.</p>`
-        : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
+        : suggestHtml(query) || `<p class="empty-state">No encontramos productos con ese criterio.<br><a href="${esc(waLink(`Hola EXE! Busco: ${query}. ¿Lo tienen o algo parecido?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te lo conseguimos.</p>`;
     observeReveals();
   }
 
