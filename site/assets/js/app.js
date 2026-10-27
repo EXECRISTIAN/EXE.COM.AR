@@ -162,33 +162,51 @@
     ["PC armada / notebook", "una PC armada o notebook"], ["Otro", "este producto"]];
   const askHtml = (q) => `<div class="ask-cat"><p>¿Qué tipo de producto es? Elegí una opción y te respondemos por WhatsApp:</p>
     <div class="ask-cat-list">${ASK_CATS.map(([label, txt]) => `<a class="chip" href="${esc(waLink(`Hola EXE! Busco ${txt}: ${q}. ¿Lo tienen o algo parecido?`))}" target="_blank" rel="noopener">${esc(label)}</a>`).join("")}</div></div>`;
-  function suggestHtml(q) {
-    if (!q) return "";
-    const { keys, watts, what } = searchHints(q);
-    let items = [], why = "";
+  // Productos relacionados para lo buscado (como "relacionados" de Mercado Libre): primero lo compatible con
+  // lo encontrado o con el modelo buscado (socket, memoria, fuente recomendada), después lo parecido.
+  function relatedFor(q, found) {
+    if (!q) return { items: [], why: "" };
+    const seen = new Set(found.map((p) => p.id)), out = [], add = (p) => { if (!seen.has(p.id)) { seen.add(p.id); out.push(p); } };
+    const { keys, watts } = searchHints(q);
+    found.forEach((p) => (p.compat || []).forEach((k) => keys.add(k)));
+    const foundCats = new Set(found.map((p) => p.category));
+    let why = "";
     if (keys.size) {
-      items = products.filter((p) => (p.compat || []).some((k) => keys.has(k)));
-      why = `lo que tenemos compatible (${[...keys].join(" · ")})`;
-    } else if (watts) {
-      items = products.filter((p) => /fuente/i.test(p.category || "") && psuWatts(p) >= watts).sort((a, b) => psuWatts(a) - psuWatts(b));
-      why = `las fuentes recomendadas para esa placa (${watts} W o más)`;
+      products.filter((p) => !foundCats.has(p.category) && (p.compat || []).some((k) => keys.has(k))).forEach(add);
+      products.filter((p) => foundCats.has(p.category) && (p.compat || []).some((k) => keys.has(k))).forEach(add);
+      why = `compatibles (${[...keys].join(" · ")})`;
     }
-    // Sin modelo reconocible ("i7", "ryzen", "rtx"): lo más parecido de la misma familia
-    if (!items.length) {
-      const fam = /\bi[3579]\b|\bcore\b|intel/.test(q.toLowerCase()) ? /intel/i : /ryzen|amd/.test(q.toLowerCase()) ? /amd|ryzen/i
-        : /rtx|gtx|nvidia|geforce|radeon|\brx\b/.test(q.toLowerCase()) ? /placa/i : null;
-      if (fam) { items = products.filter((p) => fam.source === "placa" ? fam.test(p.category || "") : /procesador/i.test(p.category || "") && fam.test(p.name)); why = "opciones parecidas"; }
+    if (watts) {
+      products.filter((p) => /fuente/i.test(p.category || "") && psuWatts(p) >= watts).sort((a, b) => psuWatts(a) - psuWatts(b)).forEach(add);
+      why ||= `fuentes recomendadas (${watts} W o más)`;
     }
-    if (!items.length) return "";
-    const order = what === "cpu" ? ["Motherboards", "Refrigeración", "Memorias RAM", "Procesadores"] : [];
-    const groups = {};
-    items.forEach((p) => (groups[p.category || "Otros"] ||= []).push(p));
-    const cats = Object.keys(groups).sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));
-    let i = 0;
-    return `<div class="sugg-head"><p class="empty-state">No tenemos «${esc(q)}» publicado, pero te mostramos ${esc(why)}.
-</p>${askHtml(q)}</div>` +
-      cats.map((c) => `<h3 class="sugg-cat">${esc(c === "Procesadores" && what === "cpu" ? "Procesadores del mismo socket" : c)}</h3>` + groups[c].map((p) => cardHtml(p, i++)).join("")).join("");
+    const l = q.toLowerCase();
+    const fam = /\bi[3579]\b|\bcore\b|intel/.test(l) ? /intel/i : /ryzen|amd/.test(l) ? /amd|ryzen/i : null;
+    if (fam) products.filter((p) => /procesador/i.test(p.category || "") && fam.test(p.name)).forEach(add);
+    if (/rtx|gtx|nvidia|geforce|radeon|\brx\b|placa de video/.test(l)) products.filter((p) => /placa/i.test(p.category || "")).forEach(add);
+    // Lo que suele ir junto (una fuente con una placa de video, un gabinete con una fuente…)
+    const NEXT = { "Fuentes": ["Placas de video", "Gabinetes"], "Placas de video": ["Fuentes"], "Gabinetes": ["Fuentes", "Refrigeración"],
+      "Procesadores": ["Motherboards", "Refrigeración"], "Motherboards": ["Procesadores", "Memorias RAM"], "Memorias RAM": ["Motherboards"] };
+    foundCats.forEach((c) => (NEXT[c] || []).forEach((n) => products.filter((p) => p.category === n).forEach(add)));
+    found.forEach((f) => products.filter((p) => p.category === f.category).forEach(add));   // de la misma categoría
+    return { items: out.slice(0, 16), why };
   }
+  function renderRelated(found) {
+    const box = $("relatedRow"); if (!box) return;
+    const { items, why } = relatedFor(query.trim(), found);
+    box.hidden = !items.length;
+    if (!items.length) { box.innerHTML = ""; return; }
+    box.innerHTML = `<div class="rel-head"><h3>Productos relacionados</h3>${why ? `<span>${esc(why)}</span>` : ""}
+        <div class="rel-nav"><button type="button" class="icon-btn" data-rel-step="-1" aria-label="Anteriores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button type="button" class="icon-btn" data-rel-step="1" aria-label="Siguientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5l7 7-7 7"/></svg></button></div></div>
+      <div class="rel-track" id="relTrack">${items.map((p, i) => cardHtml(p, i)).join("")}</div>`;
+    observeReveals();
+  }
+
+  $("relatedRow")?.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-rel-step]"); if (!b) return;
+    const t = $("relTrack"); t.scrollBy({ left: Number(b.dataset.relStep) * t.clientWidth * 0.9, behavior: "smooth" });
+  });
   function renderProducts() {
     const q = query.toLowerCase();
     // Todos los filtros menos la categoría (sirve también para contar cuántos productos hay en cada categoría)
@@ -221,7 +239,8 @@
       ? list.map(cardHtml).join("")
       : fp.logo
         ? `<p class="empty-state">Todavía no tenemos productos ${esc(fp.logo.brand)} publicados.<br><a href="${esc(waLink(`Hola EXE! Busco productos ${fp.logo.brand}. ¿Qué tienen disponible?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te conseguimos lo que buscás.</p>`
-        : suggestHtml(query) || (query ? `<div class="sugg-head"><p class="empty-state">No encontramos «${esc(query)}» publicado, pero te lo podemos conseguir.</p>${askHtml(query)}</div>` : `<p class="empty-state">No encontramos productos con ese criterio.</p>`);
+        : query ? `<div class="sugg-head"><p class="empty-state">No encontramos «${esc(query)}» publicado${relatedFor(query.trim(), []).items.length ? ". Abajo te mostramos productos relacionados" : ", pero te lo podemos conseguir"}.</p>${askHtml(query)}</div>` : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
+    renderRelated(list);
     observeReveals();
   }
 
