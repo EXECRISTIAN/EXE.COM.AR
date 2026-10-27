@@ -154,6 +154,14 @@
     return { keys, watts, what };
   }
   const psuWatts = (p) => { const m = /(\d{3,4})\s?w\b/i.exec(p.name); return m ? +m[1] : 0; };
+  // Antes de mandar la consulta por WhatsApp, el cliente elige qué tipo de producto busca:
+  // así el mensaje llega con contexto ("Busco una placa de video: 7900") sin tener que repreguntar.
+  const ASK_CATS = [["Procesador", "un procesador"], ["Placa de video", "una placa de video"], ["Motherboard", "un motherboard"],
+    ["Memoria RAM", "memoria RAM"], ["Almacenamiento", "almacenamiento (SSD / disco)"], ["Fuente", "una fuente"], ["Gabinete", "un gabinete"],
+    ["Cooler / ventilador", "un cooler o ventilador"], ["Monitor", "un monitor"], ["Periférico", "un periférico (teclado, mouse, auriculares…)"],
+    ["PC armada / notebook", "una PC armada o notebook"], ["Otro", "este producto"]];
+  const askHtml = (q) => `<div class="ask-cat"><p>¿Qué tipo de producto es? Elegí una opción y te respondemos por WhatsApp:</p>
+    <div class="ask-cat-list">${ASK_CATS.map(([label, txt]) => `<a class="chip" href="${esc(waLink(`Hola EXE! Busco ${txt}: ${q}. ¿Lo tienen o algo parecido?`))}" target="_blank" rel="noopener">${esc(label)}</a>`).join("")}</div></div>`;
   function suggestHtml(q) {
     if (!q) return "";
     const { keys, watts, what } = searchHints(q);
@@ -178,7 +186,7 @@
     const cats = Object.keys(groups).sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));
     let i = 0;
     return `<div class="sugg-head"><p class="empty-state">No tenemos «${esc(q)}» publicado, pero te mostramos ${esc(why)}.
-      <br><a href="${esc(waLink(`Hola EXE! Busco: ${q}. ¿Lo pueden conseguir?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te lo conseguimos.</p></div>` +
+</p>${askHtml(q)}</div>` +
       cats.map((c) => `<h3 class="sugg-cat">${esc(c === "Procesadores" && what === "cpu" ? "Procesadores del mismo socket" : c)}</h3>` + groups[c].map((p) => cardHtml(p, i++)).join("")).join("");
   }
   function renderProducts() {
@@ -213,7 +221,7 @@
       ? list.map(cardHtml).join("")
       : fp.logo
         ? `<p class="empty-state">Todavía no tenemos productos ${esc(fp.logo.brand)} publicados.<br><a href="${esc(waLink(`Hola EXE! Busco productos ${fp.logo.brand}. ¿Qué tienen disponible?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te conseguimos lo que buscás.</p>`
-        : suggestHtml(query) || `<p class="empty-state">No encontramos productos con ese criterio.<br><a href="${esc(waLink(`Hola EXE! Busco: ${query}. ¿Lo tienen o algo parecido?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te lo conseguimos.</p>`;
+        : suggestHtml(query) || (query ? `<div class="sugg-head"><p class="empty-state">No encontramos «${esc(query)}» publicado, pero te lo podemos conseguir.</p>${askHtml(query)}</div>` : `<p class="empty-state">No encontramos productos con ese criterio.</p>`);
     observeReveals();
   }
 

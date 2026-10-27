@@ -234,6 +234,10 @@ button { font: inherit; }
 .empty-state { grid-column: 1/-1; text-align: center; padding: 40px 0; color: var(--muted); }
 .sugg-head { grid-column: 1/-1; }
 .sugg-head .empty-state { padding: 8px 0 4px; }
+.ask-cat { text-align: center; display: grid; gap: 10px; justify-items: center; padding-bottom: 8px; }
+.ask-cat p { margin: 0; color: var(--c3); font-size: .95rem; }
+.ask-cat-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 720px; }
+.ask-cat-list .chip { text-decoration: none; }
 .sugg-cat { grid-column: 1/-1; margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 
 /* Enlaces de la tarjeta hacia la ficha */
