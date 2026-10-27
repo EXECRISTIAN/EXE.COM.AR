@@ -15,9 +15,9 @@
   // tools/imagenes_muestra.py); si tampoco existe, el dibujo genérico. Al subir una foto real la reemplaza sola.
   const sampleImg = (p) => `assets/img/products/muestra/${encodeURIComponent(p.id)}.webp`;
   const mainImg = (p) => (p.images && p.images[0]) || p.image || sampleImg(p);
-  const usdMoney = (n) => "US$ " + Number(n).toLocaleString(cfg.locale, { maximumFractionDigits: 2 });
-  // Precio en la moneda elegida en el panel: pesos (por defecto) o dólares
-  const priceOf = (p, qty = 1) => (p.priceUsd ? usdMoney(p.priceUsd * qty) : money(p.price * qty));
+  // Al público siempre en pesos. Los productos valorados en dólares ya traen el precio en pesos
+  // calculado con el dólar del día (lo actualiza la base), así que se muestra ese.
+  const priceOf = (p, qty = 1) => money(p.price * qty);
   const priceLabel = (p) => (p.price > 0 ? priceOf(p) : p.askStock ? "Consultar precio y stock" : "Consultar precio por WhatsApp");
   const esc = (s) =>
     String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -565,7 +565,7 @@
     const name = $("customerName").value.trim();
     const note = $("customerNote").value.trim();
     const rows = lines.map((l) => {
-      const sub = l.product.price > 0 ? priceOf(l.product, l.qty) + (l.product.priceUsd ? ` (≈ ${money(l.qty * l.product.price)})` : "") : "a consultar";
+      const sub = l.product.price > 0 ? priceOf(l.product, l.qty) : "a consultar";
       const tag = l.product.noStock ? " (a pedido)" : l.product.askStock ? " (consultar stock)" : "";
       const empty = caseOnly(l.product) ? ` (${CASE_NOTE})` : "";
       return `• ${l.qty} x ${l.product.name}${l.variant ? ` (${l.variant})` : ""}${tag}${empty} — ${sub}`;
