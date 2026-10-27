@@ -38,6 +38,7 @@
       <nav class="nav" id="nav">
         <a href="#inicio" class="active">Inicio</a>
         <a href="#productos">Productos</a>
+        <a href="#armador">Armá tu PC</a>
         <a href="#marcas">Marcas</a>
         <a href="#contacto">Contacto</a>
       </nav>
@@ -103,6 +104,10 @@
         <div class="catalog-tools reveal">
           <input class="search" id="search" type="search" placeholder="Buscar producto o marca…" aria-label="Buscar">
           <div class="tool-btns">
+            <a class="tool-btn tool-pc" href="#armador">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+              Armá tu PC
+            </a>
             <button class="tool-btn" id="filtersBtn" type="button" aria-expanded="false" aria-controls="filtersPanel">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
               Filtros<span class="tool-count" id="filtersCount" hidden></span>
@@ -295,6 +300,11 @@
   <!-- ===== Ficha de producto (se abre con #producto/<id>) ===== -->
   <div class="pd-overlay" id="pdOverlay" hidden>
     <div class="pd" role="dialog" aria-modal="true" aria-labelledby="pdName" id="pd"></div>
+  </div>
+
+  <!-- ===== Armador de PC (se abre con #armador) ===== -->
+  <div class="pd-overlay" id="pcOverlay" hidden>
+    <div class="pd pcb" role="dialog" aria-modal="true" aria-labelledby="pcTitle" id="pcb"></div>
   </div>
 
   <script src="assets/js/config.js"></script>
