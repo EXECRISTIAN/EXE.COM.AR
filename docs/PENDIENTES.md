@@ -7,6 +7,9 @@ Idea base (a definir con Cristian antes de empezar):
 - **Compatibilidad automática** usando las especificaciones de cada producto (`specs` en `products.json` / tabla `products`):
   socket CPU ↔ mother, tipo de memoria (DDR4/DDR5) ↔ mother, formato (ATX/M-ATX/ITX) ↔ gabinete,
   consumo estimado ↔ potencia de la fuente, "incluye cooler" del procesador.
+- **Base ya hecha (27/10)**: columna `products.compat` (claves `LGA1200`, `AM4`, `DDR4`…, editable en el panel) que hoy alimenta
+  "Compatible con" en la ficha. El armador filtra cada paso con esas mismas claves: mother ↔ procesador por socket,
+  memoria ↔ mother por DDR. Para gabinete y fuente sumar claves de formato (`ATX`, `M-ATX`, `ITX`) y potencia (watts).
 - Resumen con total, botón "Agregar todo al carrito" y "Enviar por WhatsApp".
 - Requisito previo: cargar más productos (las fichas técnicas de los 10 actuales ya están completas).
 
