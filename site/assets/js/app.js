@@ -18,6 +18,8 @@
   // Al público siempre en pesos. Los productos valorados en dólares ya traen el precio en pesos
   // calculado con el dólar del día (lo actualiza la base), así que se muestra ese.
   const priceOf = (p, qty = 1) => money(p.price * qty);
+  // Valorados en dólares: debajo del precio en pesos, la conversión (US$ × dólar del día)
+  const usdNote = (p) => (p.priceUsd && p.price > 0 ? `<span class="price-usd">US$ ${Number(p.priceUsd).toLocaleString(cfg.locale)} × dólar ${money(Math.round(p.price / p.priceUsd))}</span>` : "");
   const priceLabel = (p) => (p.price > 0 ? priceOf(p) : p.askStock ? "Consultar precio y stock" : "Consultar precio por WhatsApp");
   const esc = (s) =>
     String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -113,7 +115,7 @@
       <div class="card-body">
         ${p.brand ? `<button class="tag-brand" type="button" data-brand-tag="${esc(p.brand)}" title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
         <h3><a href="#producto/${encodeURIComponent(p.id)}">${esc(p.name)}</a></h3>
-        <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>
+        <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>${usdNote(p)}
         ${p.price > 0 ? `<span class="price-note">Consultar precio final</span>` : ""}
         ${p.condition ? `<span class="condition">Estado: ${esc(p.condition)}</span>` : ""}
         ${(p.tags || []).length ? `<div class="p-tags">${p.tags.filter((t) => t !== "Outlet").map((t) => `<button type="button" class="p-tag" data-tag="${esc(t)}">${esc(t)}</button>`).join("")}</div>` : ""}
@@ -267,7 +269,7 @@
       <div class="pd-info">
         ${p.brand ? `<button class="tag-brand" type="button" data-brand-tag="${esc(p.brand)}" title="Ver todos los productos ${esc(p.brand)}">Marca: ${esc(p.brand)}</button>` : ""}
         <h2 id="pdName">${esc(p.name)}</h2>
-        <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>
+        <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>${usdNote(p)}
         ${p.price > 0 ? `<span class="price-note">Consultá el precio final actualizado</span>` : ""}
         ${p.outlet ? `<p class="pd-condition"><span class="tag-outlet">Outlet</span> ${esc(p.condition || "")}</p>` : ""}
         ${(p.tags || []).length ? `<div class="p-tags">${p.tags.map((t) => `<button type="button" class="p-tag" data-tag="${esc(t)}" data-close-pd>${esc(t)}</button>`).join("")}</div>` : ""}

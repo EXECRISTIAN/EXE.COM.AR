@@ -230,6 +230,7 @@ button { font: inherit; }
 .stock.ok { color: var(--ok); } .stock.low { color: var(--warn); } .stock.out { color: var(--err); }
 .card select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--c6); background: var(--surface); color: var(--c2); font: inherit; }
 .card .btn { margin-top: auto; padding: 12px 18px; }
+.price-usd { display: block; font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .empty-state { grid-column: 1/-1; text-align: center; padding: 40px 0; color: var(--muted); }
 .sugg-head { grid-column: 1/-1; }
 .sugg-head .empty-state { padding: 8px 0 4px; }
