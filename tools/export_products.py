@@ -2,7 +2,7 @@
 
 Uso: guardar en un archivo el resultado JSON de
   select id,name,brand,category,description,price,price_usd,stock,show_stock,images,image,specs,outlet,condition,
-         weight_kg,variants,tags,ask_price,ask_stock,cart_ok,hide_no_stock,active,sort
+         weight_kg,variants,tags,compat,ask_price,ask_stock,cart_ok,hide_no_stock,active,sort
   from products order by sort, name;
 y correr:  python3 tools/export_products.py <archivo.json>
 Solo columnas públicas (las mismas que la tienda lee de la base). Nunca costos ni links de proveedores.
@@ -29,6 +29,7 @@ for r in rows:
     p.update({"outlet": r.get("outlet"), "condition": r.get("condition"), "weightKg": float(r.get("weight_kg") or 1)})
     if r.get("variants"): p["variants"] = r["variants"]
     p["tags"] = r.get("tags") or []
+    p["compat"] = r.get("compat") or []
     if p["price"] == int(p["price"]): p["price"] = int(p["price"])
     if p["weightKg"] == int(p["weightKg"]): p["weightKg"] = int(p["weightKg"])
     if not active: p["active"] = False

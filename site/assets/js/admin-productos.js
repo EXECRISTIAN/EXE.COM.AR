@@ -37,7 +37,7 @@
   async function loadAll(force) {
     if (A.demo) return (cache = demoStore());
     if (cache && !force) return cache;
-    const cols = "id,name,brand,category,tags,description,price,price_usd,stock,show_stock,active,outlet,condition,image,images,specs,weight_kg,location,sort,variants,updated_at,ask_price,ask_stock,cart_ok,hide_no_stock";
+    const cols = "id,name,brand,category,tags,compat,description,price,price_usd,stock,show_stock,active,outlet,condition,image,images,specs,weight_kg,location,sort,variants,updated_at,ask_price,ask_stock,cart_ok,hide_no_stock";
     const fxr = await sb().from("fx_settings").select("*").eq("id", 1).maybeSingle();
     fx = fxr.data || null;
     const [p, c, s] = await Promise.all([
@@ -465,6 +465,7 @@
             <label class="field">Marca<input name="brand" data-suggest="brand" value="${esc(p.brand || "")}" placeholder="Elegí o escribí una nueva" ${ro}></label>
             <label class="field">Categoría<input name="category" data-suggest="category" value="${esc(p.category || "")}" placeholder="Elegí o escribí una nueva" ${ro}></label>
             <label class="field ed-wide">Etiquetas (separadas por coma)<input name="tags" data-suggest="tag" data-suggest-multi="1" value="${esc((p.tags || []).join(", "))}" placeholder="Ej: Gamer, Oferta, Oficina" ${ro}><small>Se muestran en la tienda y sirven para filtrar. Existentes: ${[...new Set(products.flatMap((x) => x.tags || []))].sort().map(esc).join(", ") || "ninguna"}</small></label>
+            <label class="field ed-wide">Compatibilidad (separada por coma)<input name="compat" value="${esc((p.compat || []).join(", "))}" placeholder="Ej: LGA1200, DDR4" ${ro}><small>Socket, tipo de memoria, etc. Los productos de otra categoría con la misma clave aparecen en la ficha como "Compatible con". Usadas: ${[...new Set(products.flatMap((x) => x.compat || []))].sort().map(esc).join(", ") || "ninguna"}</small></label>
             <label class="field ed-check"><input type="checkbox" name="outlet" ${p.outlet ? "checked" : ""} ${ro}> Es producto outlet</label>
             <label class="field">Estado / condición<input name="condition" data-suggest="condition" value="${esc(p.condition || "")}" placeholder="Ej: Sin caja, con cooler" ${ro}></label>
           </div>
@@ -842,6 +843,7 @@
         ...Object.fromEntries(FLAGS.map(([f]) => [f, el(f).checked])),
         show_stock: el("show_stock").checked, stock: el("show_stock").checked ? Math.max(0, Math.round(num(el("stock").value))) : 999,
         tags: [...new Set(el("tags").value.split(",").map((t) => t.trim()).filter(Boolean))],
+        compat: [...new Set(el("compat").value.split(",").map((t) => t.trim().toUpperCase().replace(/\s+/g, "")).filter(Boolean))],
         active: el("active").checked, weight_kg: Math.max(0.01, num(el("weight_kg").value) || 1), location: el("location").value.trim().slice(0, 40) || null, description: el("description").value.trim() || null,
         images: ed.images, specs: ed.specs.map((s) => ({ title: s.title.trim() || "Características", rows: s.rows.filter((r) => r[0].trim() && r[1].trim()).map((r) => [r[0].trim(), r[1].trim()]) })).filter((s) => s.rows.length),
       };
