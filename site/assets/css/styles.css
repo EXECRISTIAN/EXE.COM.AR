@@ -877,7 +877,10 @@ html { touch-action: manipulation; }
 @keyframes argb-spin { to { --argb-angle: 360deg; } }
 @media (prefers-reduced-motion: reduce) { .pcc-i { animation: none; } }
 .pcb-info { display: grid; gap: 14px; align-content: start; }
-.pcb-info > .link-btn { justify-self: start; }
+.pci-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pci-x { width: 36px; height: 36px; flex: none; display: grid; place-items: center; padding: 0; border: 2px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--c2); cursor: pointer; transition: border-color .15s, color .15s; }
+.pci-x:hover, .pci-x:focus-visible { border-color: var(--c0); color: var(--c0); }
+.pci-x svg { width: 18px; height: 18px; }
 .pci-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
 .pci-gal { display: grid; gap: 8px; }
 .pci-gal > img { width: 100%; aspect-ratio: 4/3; object-fit: contain; background: var(--media-bg); border-radius: 12px; padding: 10px; }
