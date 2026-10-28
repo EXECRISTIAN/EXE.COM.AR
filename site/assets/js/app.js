@@ -939,6 +939,53 @@
   };
   // El contenido del armador se desplaza dentro de .pcb-scroll; el selector de tema queda debajo, sin taparlo
   const pcTop = () => { const sc = $("pcb").querySelector(".pcb-scroll"); if (sc) sc.scrollTop = 0; };
+  /* ---------- Armados sugeridos y guardar el armado ----------
+     Se prenden y apagan desde el panel → Página web → Funciones (tabla site_blocks, page "funciones"). Apagadas por defecto. */
+  const PC_FEAT = { sugeridos: false, guardar: false };
+  fetch(`${cfg.supabaseUrl}/rest/v1/site_blocks?select=id,active&page=eq.funciones`, { headers: { apikey: cfg.supabaseAnonKey } })
+    .then((r) => (r.ok ? r.json() : [])).then((rows) => {
+      rows.forEach((b) => { if (b.id === "armador-sugeridos") PC_FEAT.sugeridos = !!b.active; if (b.id === "armador-guardar") PC_FEAT.guardar = !!b.active; });
+      if (!$("pcOverlay").hidden) { pcRestore(); renderPc(); }
+    }).catch(() => {});
+  const PC_SAVE_KEY = "exe-armado";
+  function pcSave() {
+    if (!PC_FEAT.guardar) return;
+    const ids = {}; PC_STEPS.forEach((s) => { const v = pc[s.key]; if (v) ids[s.key] = s.multi ? v.map((x) => x.id) : v.id; });
+    try { localStorage.setItem(PC_SAVE_KEY, JSON.stringify({ ids, step: pcStep })); } catch (e) { /* sin almacenamiento: no se guarda */ }
+  }
+  let pcRestored = false;
+  function pcRestore() {
+    if (!PC_FEAT.guardar || pcRestored || !products.length) return;
+    pcRestored = true;
+    let d = null; try { d = JSON.parse(localStorage.getItem(PC_SAVE_KEY) || "null"); } catch (e) { /* nada guardado */ }
+    if (!d || !d.ids || Object.keys(pc).length) return;
+    const byId = (id) => products.find((x) => x.id === id);
+    PC_STEPS.forEach((s) => {
+      const v = d.ids[s.key]; if (!v) return;
+      if (s.multi) { const a = v.map(byId).filter(Boolean); if (a.length) pc[s.key] = a; }
+      else if (v === STOCK_COOL) { if (cpuCooler(pc.cpu)) pc.cool = stockCool(pc.cpu); }
+      else { const p = byId(v); if (p) pc[s.key] = p; }
+    });
+    pcStep = Math.min(PC_STEPS.length, Math.max(0, +d.step || 0));
+  }
+  // Arma una PC con lo que hay publicado: paso a paso elige entre lo compatible según el criterio del armado
+  const hasIgpu = (p) => !/\b\d{4,5}f\b|sin gr[aá]ficos/i.test(p.name) && !/^no\b/i.test(specVal(p, /gr[aá]ficos integrados|chipset gpu/i));
+  const PC_PRESETS = [
+    { id: "oficina", name: "PC de oficina", desc: "Lo más económico, con video integrado", skip: ["gpu", "otros"], pick: (k, list) => (k === "cpu" ? list.filter(hasIgpu) : list).sort((a, b) => a.price - b.price)[0] },
+    { id: "gamer", name: "PC gamer", desc: "Con placa de video y buen procesador", skip: ["otros"], need: ["gpu"], pick: (k, list) => (["cpu", "gpu"].includes(k) ? list.sort((a, b) => pcPerf(b) - pcPerf(a)) : list.sort((a, b) => a.price - b.price))[0] },
+    { id: "tope", name: "Lo mejor que hay", desc: "Lo de mayor rendimiento en cada paso", skip: ["otros"], pick: (k, list) => list.sort((a, b) => pcPerf(b) - pcPerf(a) || b.price - a.price)[0] },
+  ];
+  function pcBuild(pre) {
+    const out = {};
+    for (const s of PC_STEPS) {
+      if (pre.skip.includes(s.key)) continue;
+      let list = products.filter((p) => s.cat.test(p.category || "") && p.price > 0 && pcFits(s.key, p, out));
+      if (s.key === "cool" && cpuCooler(out.cpu)) { out.cool = stockCool(out.cpu); continue; }
+      const p = list.length ? pre.pick(s.key, list) : null;
+      if (p) out[s.key] = s.multi ? [p] : p;
+    }
+    return out.cpu && out.mb && (pre.need || []).every((k) => out[k]) ? out : null;
+  }
   function renderPc() {
     const total = pcPick().reduce((t, p) => t + p.price, 0);
     const step = PC_STEPS[pcStep];
@@ -986,6 +1033,8 @@
       <div class="pcb-scroll">
       <button class="pd-close icon-btn" id="pcClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <div class="pcb-top"><h2 id="pcTitle">Armá tu PC</h2><p>Tocá una opción. Solo te dejamos elegir lo que es compatible con lo que ya elegiste.</p>
+        ${PC_FEAT.sugeridos ? (() => { const ok = PC_PRESETS.map((pr) => [pr, pcBuild(pr)]).filter(([, b]) => b);
+          return ok.length ? `<div class="pcb-pre"><span>Armados sugeridos:</span>${ok.map(([pr, b]) => `<button type="button" class="pcb-pre-b" data-pc-preset="${pr.id}" title="${esc(pr.desc)}"><b>${esc(pr.name)}</b><small>${money(PC_STEPS.flatMap((s) => b[s.key] || []).reduce((t, p) => t + p.price, 0))}</small></button>`).join("")}</div>` : ""; })() : ""}
         <nav class="pcb-bar" aria-label="Pasos">${PC_STEPS.map((s, i) => `<button type="button" class="pcb-st${i === pcStep ? " on" : ""}${i === burst ? " burst" : ""}${pc[s.key] ? " done" : ""}" data-pc-go="${i}"${i === pcStep ? ' aria-current="step"' : ""}>
           <i>${pc[s.key] && i !== pcStep ? "✔" : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s.ic}</svg>`}</i>${esc(s.short)}</button>`).join("")}</nav></div>
       <div class="pcb-main">
@@ -1019,8 +1068,10 @@
     // Selector de tema fuera del diálogo, debajo de todo (sin barra y sin tapar nada)
     $("pcTheme").innerHTML = `<div class="pcb-theme"><span>Tema</span>${pcThemeHtml()}</div>`;
     $("pcb").querySelector(".pcb-scroll").scrollTop = keep;
+    pcSave();
   }
   function openPc() {
+    pcRestore();
     renderPc();
     $("pcOverlay").hidden = false;
     requestAnimationFrame(() => $("pcOverlay").classList.add("show"));
@@ -1041,6 +1092,8 @@
     if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); pcBrand = ""; pcInfo = null; pcBurst = pcStep; renderPc(); pcTop(); return; }
     const th0 = e.target.closest("[data-pc-theme] button[data-mode]");
     if (th0) { applyTheme(th0.dataset.mode); renderPc(); return; }
+    const pre = e.target.closest("[data-pc-preset]");
+    if (pre) { const b = pcBuild(PC_PRESETS.find((x) => x.id === pre.dataset.pcPreset)); if (b) { pc = b; pcStep = PC_STEPS.length; pcInfo = null; renderPc(); pcTop(); toast("Listo: te armamos una PC. Podés cambiar lo que quieras tocando cada paso"); } return; }
     const inf = e.target.closest("[data-pc-info]");
     if (inf) { pcInfo = inf.dataset.pcInfo; renderPc(); pcTop(); return; }
     const sel = e.target.closest("[data-pc-sel]");
@@ -1067,7 +1120,7 @@
     if (e.target.closest("[data-pc-sort]")) return;
     const del = e.target.closest("[data-pc-del]");
     if (del) { delete pc[del.dataset.pcDel]; renderPc(); return; }
-    if (e.target.closest("#pcReset")) { pc = {}; pcStep = 0; pcInfo = null; renderPc(); return; }
+    if (e.target.closest("#pcReset")) { pc = {}; pcStep = 0; pcInfo = null; try { localStorage.removeItem(PC_SAVE_KEY); } catch (er) { /* nada */ } renderPc(); return; }
     if (e.target.closest("#pcCart")) { pcPick().filter((p) => p.id !== STOCK_COOL).forEach((p) => add(p.id, p.variants ? p.variants[0] : null)); closePc(); toggleCart(true); }
   });
   $("pcOverlay").addEventListener("change", (e) => { if (e.target.matches("[data-pc-sort]")) { pcSort = e.target.value; renderPc(); } });

@@ -52,8 +52,19 @@
 
   /* ---------- Listado de secciones ---------- */
   A.subviews["sitio-editar"] = { perm: "site.edit", parent: "sitio", title: () => "Editar sección" };
+  // Funciones de la web que se prenden y apagan (site_blocks con page "funciones")
+  let demoFns = null;
+  async function loadFns() {
+    if (A.demo) return (demoFns = demoFns || [
+      { id: "armador-sugeridos", title: "Armador: armados sugeridos", description: "Botones con PCs armadas listas (oficina, gamer…) que completan el armador con un toque", active: false },
+      { id: "armador-guardar", title: "Armador: guardar el armado", description: "El armado queda guardado en el navegador del cliente y lo encuentra al volver", active: false }]);
+    const r = await sb().from("site_blocks").select("id,title,description,active").eq("page", "funciones").order("position");
+    if (r.error) throw r.error;
+    return r.data;
+  }
   A.views.sitio = async function () {
     const blocks = await load();
+    const fns = await loadFns().catch(() => []);
     return `
       <div class="pr-toolbar">
         <button class="btn btn-primary" id="stAdd" type="button">＋ Agregar sección</button>
@@ -69,9 +80,24 @@
           ${b.builtin ? `<span class="st-lock" title="Sección original: se puede ocultar, no eliminar">🔒</span>` : `<button type="button" class="link-btn" data-del title="Eliminar">🗑</button>`}
         </li>`).join("")}</ol>
       </div>
+      ${fns.length ? `<div class="panel"><h3 style="margin-top:0">Funciones de la web</h3>
+        <ol class="st-list st-fns">${fns.map((f) => `<li class="st-item ${f.active ? "" : "is-off"}" data-fn="${esc(f.id)}">
+          <div class="st-info"><b>${esc(f.title)}</b><small>${f.active ? "Activada" : "Desactivada"}${f.description ? ` · ${esc(f.description)}` : ""}</small></div>
+          <label class="switch" title="Activar / desactivar"><input type="checkbox" data-fn-act ${f.active ? "checked" : ""}><span></span></label>
+        </li>`).join("")}</ol></div>` : ""}
       <p class="notice info">Los cambios se ven en la web apenas los guardás (recargá la página). Mi cuenta y el panel son páginas de funcionamiento, sin secciones para editar.</p>`;
   };
   A.views.sitio.after = () => {
+    const fl = document.querySelector(".st-fns");
+    if (fl) fl.addEventListener("change", async (e) => {
+      if (!e.target.matches("[data-fn-act]")) return;
+      const id = e.target.closest("[data-fn]").dataset.fn, on = e.target.checked;
+      try {
+        if (A.demo) demoFns.find((f) => f.id === id).active = on;
+        else { const r = await sb().from("site_blocks").update({ active: on, updated_at: new Date().toISOString() }).eq("id", id).eq("page", "funciones"); if (r.error) throw r.error; }
+        A.route();
+      } catch (err) { A.alertView("No se pudo guardar: " + err.message); }
+    });
     const list = document.querySelector(".st-list");
     list.addEventListener("change", async (e) => {
       if (!e.target.matches("[data-act]")) return;
