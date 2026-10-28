@@ -862,14 +862,15 @@ html { touch-action: manipulation; }
   display: block; margin: 2px -12px 0; padding: 7px 12px; text-align: center; font-size: .78rem; font-weight: 800; letter-spacing: .02em;
   color: var(--pcc-i-fg); border-top: 2px solid transparent;
   background: linear-gradient(var(--pcc-i-bg), var(--pcc-i-bg)) padding-box, var(--argb) border-box;
-  animation: argb-spin 2.4s linear infinite paused; opacity: 0; transition: opacity .2s;
+  animation: argb-spin 2.4s linear infinite paused; opacity: 0; max-height: 0; padding-block: 0; margin-top: -6px; overflow: hidden; border-top-width: 0;
+  transition: opacity .2s, max-height .25s, padding .25s, margin .25s;
 }
 :root { --pcc-i-bg: #fff; --pcc-i-fg: #111; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --pcc-i-bg: #000; --pcc-i-fg: #fff; } }
 :root[data-theme="dark"] { --pcc-i-bg: #000; --pcc-i-fg: #fff; }
-.pcc:hover .pcc-i, .pcc:focus-visible .pcc-i { opacity: 1; animation-play-state: running; }
+.pcc:hover .pcc-i, .pcc:focus-visible .pcc-i { opacity: 1; max-height: 40px; padding-block: 7px; margin-top: 2px; border-top-width: 2px; animation-play-state: running; }
 .pcc-i:hover { text-decoration: underline; }
-@media (hover: none) { .pcc-i { opacity: 1; animation-play-state: running; } }
+@media (hover: none) { .pcc-i { opacity: 1; max-height: 40px; padding-block: 7px; margin-top: 2px; border-top-width: 2px; animation-play-state: running; } }
 @keyframes argb-spin { to { --argb-angle: 360deg; } }
 @media (prefers-reduced-motion: reduce) { .pcc-i { animation: none; } }
 .pcb-info { display: grid; gap: 14px; align-content: start; }
