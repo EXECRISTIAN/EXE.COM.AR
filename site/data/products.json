@@ -1686,7 +1686,7 @@
     "name": "Procesador Intel Core i3-10100F 4.3GHz Turbo LGA1200 (10.ª gen, sin gráficos)",
     "brand": "Intel",
     "category": "Procesadores",
-    "description": "4 núcleos y 8 hilos hasta 4,3 GHz para una PC gamer de entrada con placa de video. La versión F no trae gráficos integrados: necesita placa de video.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
+    "description": "4 núcleos y 8 hilos hasta 4,3 GHz para una PC gamer de entrada con placa de video. La versión F no trae gráficos integrados: necesita placa de video. Completo, en caja y con cooler Intel.\n\nProducto outlet: funciona perfecto y está probado. Puede tener detalles en la caja o alguna marca estética mínima que no afecta el funcionamiento.",
     "price": 103000,
     "askStock": false,
     "cartOk": true,
@@ -1751,14 +1751,14 @@
         "rows": [
           [
             "Cooler",
-            "Consultar"
+            "Sí (cooler Intel)"
           ]
         ],
         "title": "Incluye"
       }
     ],
     "outlet": true,
-    "condition": "Con",
+    "condition": "Full, en caja",
     "weightKg": 0.3,
     "tags": [
       "Outlet"
