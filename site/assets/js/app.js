@@ -831,7 +831,7 @@
     { key: "cool", label: "Refrigeración", short: "Cooler", cat: /refrig|cooler/i, optional: true, ic: '<circle cx="12" cy="12" r="9"/><path d="M12 12c0-4 3-6 5-5M12 12c4 0 6 3 5 5M12 12c0 4-3 6-5 5M12 12c-4 0-6-3-5-5"/>' },
     { key: "otros", label: "Otros (monitor, periféricos, accesorios)", short: "Otros", cat: /^otros$|monitor|perif|accesor|teclado|mouse|auricular/i, optional: true, multi: true, ic: '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>' },
   ];
-  let pc = {}, pcStep = 0, pcBrand = "", pcCheap = true, pcInfo = null, pcBurst = -1;
+  let pc = {}, pcStep = 0, pcBrand = "", pcSort = "cheap", pcInfo = null, pcBurst = -1;
   const sockets = (p) => (p && p.compat ? p.compat.filter((k) => /^(LGA\d+|AM\d)$/.test(k)) : []);
   const ddrOf = (p) => (p && p.compat ? p.compat.filter((k) => /^DDR\d$/.test(k)) : []);
   // Sin datos de un lado no se descarta (se avisa que hay que confirmarlo)
@@ -895,6 +895,43 @@
     return `No compatible: ${sockets(p).join(" / ") || "otro socket"}`;
   }
   const pcShort = (p) => p.name.replace(/^(procesador|motherboard|mother|placa de video|fuente|gabinete|memoria|cooler cpu)\s+/i, "").replace(/\s*\(.*?\)\s*/g, " ").trim();
+  // Año de lanzamiento: de la ficha ("Año de lanzamiento") o por palabras clave del nombre
+  const specVal = (p, re) => { for (const g of p.specs || []) for (const [k, v] of g.rows || []) if (re.test(k)) return String(v); return ""; };
+  function pcYear(p) {
+    const y = +specVal(p, /año|lanzamiento/i); if (y) return y;
+    const n = p.name.toLowerCase(); let m;
+    if ((m = n.match(/core ultra \d+ (\d)\d{2}/))) return 2022 + +m[1];
+    if ((m = n.match(/\bi[3579]-?(1[0-4]|[2-9])\d{3}/))) { const g = +m[1]; return { 2: 2011, 3: 2012, 4: 2013, 5: 2015, 6: 2015, 7: 2017, 8: 2017, 9: 2018, 10: 2020, 11: 2021, 12: 2021, 13: 2022, 14: 2023 }[g]; }
+    if ((m = n.match(/\b(?:pentium gold |celeron )?g(\d)\d{3}/))) return { 4: 2016, 5: 2018, 6: 2020, 7: 2021 }[m[1]] + (/g59/.test(n) ? 2 : 0) || 0;
+    if ((m = n.match(/ryzen [3579] (\d)\d{3}/))) return { 1: 2017, 2: 2018, 3: 2019, 4: 2020, 5: 2020, 7: 2022, 8: 2024, 9: 2024 }[m[1]];
+    if ((m = n.match(/rtx\s?(\d{2})\d{2}/))) return { 20: 2018, 30: 2020, 40: 2022, 50: 2025 }[m[1]];
+    if ((m = n.match(/gtx\s?(\d{2})\d{2}/))) return { 10: 2016, 16: 2019 }[m[1]] || 2014;
+    if ((m = n.match(/rx\s?(\d)\d{3}/))) return { 5: 2019, 6: 2020, 7: 2022, 9: 2025 }[m[1]];
+    if (/rx\s?5\d0\b/.test(n)) return 2017;
+    if ((m = n.match(/\b[zbhxa](\d)(\d)0[a-z]?\b/))) { const k = +(m[1] + m[2]); return ({ 87: 2024, 85: 2024, 79: 2022, 76: 2023, 70: 2023, 69: 2021, 67: 2022, 66: 2021, 65: 2022, 61: 2021, 62: 2022, 59: 2021, 57: 2019, 56: 2021, 55: 2020, 51: 2021, 49: 2020, 47: 2019, 46: 2020, 45: 2018, 41: 2020, 39: 2018, 37: 2017, 36: 2018, 32: 2017, 31: 2018, 30: 2017 })[k] || 0; }
+    if (/ddr5/.test(n)) return 2022; if (/ddr4/.test(n)) return 2016; if (/ddr3/.test(n)) return 2010;
+    return 0;
+  }
+  // Rendimiento estimado (para ordenar dentro de la misma categoría)
+  function pcPerf(p) {
+    const n = p.name.toLowerCase(), y = pcYear(p) || 2015, age = 1 + (y - 2000) * 0.08, c = p.category || "";
+    if (/proces/i.test(c)) {
+      const th = +(specVal(p, /hilos/i).split("/").pop() || 0) || +specVal(p, /^hilos$/i) || +(specVal(p, /núcleos \/ hilos/i).split("/")[1] || 0) || 4;
+      const ghz = parseFloat((specVal(p, /turbo/i) || specVal(p, /frecuencia/i) || "0").replace(",", ".")) || 3;
+      return th * (ghz > 100 ? ghz / 1000 : ghz) * age * (/x3d/.test(n) ? 1.25 : 1);
+    }
+    if (/placa/i.test(c)) {
+      let m = n.match(/(?:rtx|gtx)\s?(\d{2})(\d{2})/), tier = m ? +m[2] : 0;
+      if (!m && (m = n.match(/rx\s?\d(\d)\d{2}/))) tier = +m[1] * 10;
+      if (!m && (m = n.match(/rx\s?5(\d)0/))) tier = +m[1] * 10;
+      return (tier || 50) * age * (/ti\b|super|xtx?\b/.test(n) ? 1.12 : 1);
+    }
+    if (/fuente/i.test(c)) return psuWatts(p) * (/gold|platinum|titanium/.test(n) ? 1.15 : /bronze/.test(n) ? 1.05 : 1);
+    if (/memoria/i.test(c)) { const gb = +(n.match(/(\d+)\s?gb/) || [0, 8])[1], mhz = +(n.match(/(\d{4})\s?mhz/) || [0, 2400])[1]; return gb * mhz; }
+    if (/mother/i.test(c)) { const t = /\b[zx]\d{3}/.test(n) ? 3 : /\bb\d{3}/.test(n) ? 2 : 1; return t * age; }
+    return p.price;
+  }
+  const PC_SORTS = [["cheap", "Más baratos"], ["exp", "Más caros"], ["new", "Más nuevos"], ["perf", "Mejor rendimiento"]];
   function renderPc() {
     const total = pcPick().reduce((t, p) => t + p.price, 0);
     const step = PC_STEPS[pcStep];
@@ -906,7 +943,8 @@
     // (si el cambio choca con algo de un paso posterior, eso se quita y se avisa)
     const prior = step ? Object.fromEntries(PC_STEPS.slice(0, pcStep).filter((s) => pc[s.key]).map((s) => [s.key, pc[s.key]])) : {};
     const ok = shown.filter((p) => pcFits(step.key, p, prior)), bad = shown.filter((p) => !pcFits(step.key, p, prior));
-    const by = (a, b) => (pcCheap ? a.price - b.price : b.price - a.price);
+    const by = (a, b) => pcSort === "new" ? pcYear(b) - pcYear(a) || pcPerf(b) - pcPerf(a)
+      : pcSort === "perf" ? pcPerf(b) - pcPerf(a) : pcSort === "exp" ? b.price - a.price : a.price - b.price;
     ok.sort(by); bad.sort(by);
     if (step && step.key === "cool" && cpuCooler(pc.cpu)) ok.unshift(stockCool(pc.cpu));
     const notes = pcNotes(), burst = pcBurst, next = PC_STEPS[pcStep + 1], picked = step && pc[step.key];
@@ -943,7 +981,7 @@
         ${step && info ? infoHtml(info) : step ? `<section class="pcb-opts" aria-label="Opciones de ${esc(step.label)}">
           <div class="pcb-fl">
             ${brands.length > 1 ? `<button type="button" class="chip${pcBrand ? "" : " active"}" data-pc-brand="">Todos</button>${brands.map((b) => `<button type="button" class="chip${pcBrand === b ? " active" : ""}" data-pc-brand="${esc(b)}">${esc(b)}</button>`).join("")}` : ""}
-            <button type="button" class="chip" data-pc-sort>${pcCheap ? "Más baratos primero" : "Más caros primero"}</button>
+            <label class="pcb-sort">Ordenar<select data-pc-sort>${PC_SORTS.map(([k, t]) => `<option value="${k}"${k === pcSort ? " selected" : ""}>${t}</option>`).join("")}</select></label>
             <small>${ok.length} ${ok.length === 1 ? "compatible" : "compatibles"}${keys.length && pcStep ? ` con ${esc(keys.join(" · "))}` : ""}${step.optional ? " · opcional" : ""}${step.multi ? " · podés elegir varios" : ""}</small>
           </div>
           ${ok.length ? `<div class="pcc-grid">${ok.map((p) => card(p, true)).join("")}</div>`
@@ -1009,12 +1047,13 @@
     if (th) { $("pciMain").src = th.dataset.pciImg; return; }
     const br = e.target.closest("[data-pc-brand]");
     if (br) { pcBrand = br.dataset.pcBrand; renderPc(); return; }
-    if (e.target.closest("[data-pc-sort]")) { pcCheap = !pcCheap; renderPc(); return; }
+    if (e.target.closest("[data-pc-sort]")) return;
     const del = e.target.closest("[data-pc-del]");
     if (del) { delete pc[del.dataset.pcDel]; renderPc(); return; }
     if (e.target.closest("#pcReset")) { pc = {}; pcStep = 0; pcInfo = null; renderPc(); return; }
     if (e.target.closest("#pcCart")) { pcPick().filter((p) => p.id !== STOCK_COOL).forEach((p) => add(p.id, p.variants ? p.variants[0] : null)); closePc(); toggleCart(true); }
   });
+  $("pcOverlay").addEventListener("change", (e) => { if (e.target.matches("[data-pc-sort]")) { pcSort = e.target.value; renderPc(); } });
   document.addEventListener("keydown", (e) => e.key === "Escape" && !$("pcOverlay").hidden && closePc());
 
   /* ---------- Eventos ---------- */
