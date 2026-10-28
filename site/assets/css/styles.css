@@ -853,21 +853,23 @@ html { touch-action: manipulation; }
   .pcb-sum { position: static; }
   .pcb-fl small { margin-left: 0; width: 100%; }
 }
-.pcc-w { position: relative; display: grid; min-width: 0; }
+.pcc-w { position: relative; display: grid; min-width: 0; container-type: inline-size; }
 .pcc-w > .pcc { height: 100%; }
-/* Botón Detalles: centrado abajo de la foto, con borde LED ARGB que gira (como el de Panel de administración) */
+/* Ver detalles: franja con línea ARGB arriba, entre etiquetas y precio; aparece al pasar el mouse */
 @property --argb-angle { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
-.pcc-w { container-type: inline-size; }
 .pcc-i {
   --argb: conic-gradient(from var(--argb-angle), #ff0040, #ff8000, #ffee00, #00ff5a, #00d0ff, #3a3aff, #c000ff, #ff0040);
-  position: absolute; top: calc(75cqw - 40px); left: 50%; transform: translateX(-50%); z-index: 2; isolation: isolate;
-  font: inherit; font-size: .74rem; font-weight: 800; letter-spacing: .02em; padding: 5px 14px; border-radius: 999px; cursor: pointer;
-  color: var(--c2); border: 2px solid transparent;
-  background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--argb) border-box;
-  animation: argb-spin 2.4s linear infinite;
+  display: block; margin: 2px -12px 0; padding: 7px 12px; text-align: center; font-size: .78rem; font-weight: 800; letter-spacing: .02em;
+  color: var(--pcc-i-fg); border-top: 2px solid transparent;
+  background: linear-gradient(var(--pcc-i-bg), var(--pcc-i-bg)) padding-box, var(--argb) border-box;
+  animation: argb-spin 2.4s linear infinite paused; opacity: 0; transition: opacity .2s;
 }
-.pcc-i::before { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; background: var(--argb); filter: blur(8px); opacity: .45; transition: opacity .2s; }
-.pcc-i:hover::before, .pcc-i:focus-visible::before { opacity: .85; }
+:root { --pcc-i-bg: #fff; --pcc-i-fg: #111; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --pcc-i-bg: #000; --pcc-i-fg: #fff; } }
+:root[data-theme="dark"] { --pcc-i-bg: #000; --pcc-i-fg: #fff; }
+.pcc:hover .pcc-i, .pcc:focus-visible .pcc-i { opacity: 1; animation-play-state: running; }
+.pcc-i:hover { text-decoration: underline; }
+@media (hover: none) { .pcc-i { opacity: 1; animation-play-state: running; } }
 @keyframes argb-spin { to { --argb-angle: 360deg; } }
 @media (prefers-reduced-motion: reduce) { .pcc-i { animation: none; } }
 .pcb-info { display: grid; gap: 14px; align-content: start; }
