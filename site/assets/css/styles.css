@@ -829,7 +829,7 @@ html { touch-action: manipulation; }
 .pcc-tags { display: flex; gap: 4px; flex-wrap: wrap; }
 .pcc-tags span { font-size: .7rem; padding: 2px 7px; border-radius: 6px; background: var(--c4); color: var(--muted); font-weight: 700; }
 .pcc-tags span.no { background: color-mix(in srgb, var(--err) 14%, transparent); color: var(--err-fg); }
-.pcc b { font-size: 1.05rem; color: var(--c2); font-variant-numeric: tabular-nums; }
+.pcc b { justify-self: center; text-align: center; font-size: 1.05rem; color: var(--c2); font-variant-numeric: tabular-nums; }
 .pcb-empty { margin: 0; color: var(--muted); }
 .pcb-done h3 { margin: 0 0 6px; } .pcb-done p { margin: 0; color: var(--muted); }
 .pcb-sum { position: sticky; top: 12px; display: grid; gap: 12px; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
