@@ -853,3 +853,19 @@ html { touch-action: manipulation; }
   .pcb-sum { position: static; }
   .pcb-fl small { margin-left: 0; width: 100%; }
 }
+.pcc-w { position: relative; display: grid; min-width: 0; }
+.pcc-w > .pcc { height: 100%; }
+.pcc-i { position: absolute; top: 10px; left: 10px; z-index: 2; font: inherit; font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--c4); background: var(--surface); color: var(--c2); cursor: pointer; box-shadow: 0 1px 4px var(--shadow); }
+.pcc-i:hover, .pcc-i:focus-visible { border-color: var(--c0); color: var(--c0); }
+.pcb-info { display: grid; gap: 14px; align-content: start; }
+.pcb-info > .link-btn { justify-self: start; }
+.pci-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.pci-gal { display: grid; gap: 8px; }
+.pci-gal > img { width: 100%; aspect-ratio: 4/3; object-fit: contain; background: var(--media-bg); border-radius: 12px; padding: 10px; }
+.pci-th { display: flex; gap: 6px; overflow-x: auto; }
+.pci-th button { flex: 0 0 56px; height: 56px; padding: 3px; border: 1px solid var(--c4); border-radius: 8px; background: var(--media-bg); cursor: pointer; }
+.pci-th img { width: 100%; height: 100%; object-fit: contain; }
+.pci-txt { display: grid; gap: 10px; align-content: start; }
+.pci-txt h3 { margin: 0; font-size: 1.1rem; line-height: 1.3; color: var(--c2); text-wrap: balance; }
+.pci-price { font-size: 1.4rem; color: var(--c2); font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .pci-grid { grid-template-columns: minmax(0, 1fr); } }
