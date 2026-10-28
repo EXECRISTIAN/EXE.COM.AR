@@ -951,11 +951,12 @@
     const isSel = (p) => !!picked && (step.multi ? picked.some((x) => x.id === p.id) : picked.id === p.id);
     const skip = ok.length ? "Omitir por ahora" : "Omitir";
     const keys = step ? [...new Set(ok.flatMap((p) => step.key === "mb" || step.key === "cool" || step.key === "cpu" ? sockets(p) : step.key === "ram" ? ddrOf(p) : []))] : [];
-    const card = (p, fits) => `<div class="pcc-w">${p.id === STOCK_COOL ? "" : `<button type="button" class="pcc-i" data-pc-info="${esc(p.id)}" aria-label="Ver detalles de ${esc(p.name)}">Detalles</button>`}<button type="button" class="pcc${isSel(p) ? " sel" : ""}${fits ? "" : " off"}"${fits ? ` data-pc-sel="${esc(p.id)}"` : ' disabled aria-disabled="true"'}>
+    const card = (p, fits) => `<div class="pcc-w"><button type="button" class="pcc${isSel(p) ? " sel" : ""}${fits ? "" : " off"}"${fits ? ` data-pc-sel="${esc(p.id)}"` : ' disabled aria-disabled="true"'}>
         ${isSel(p) ? '<span class="pcc-ok" aria-hidden="true">✔</span>' : ""}
         <span class="pcc-img"><img src="${esc(mainImg(p))}" alt="" loading="lazy" data-fallback></span>
         <span class="pcc-b"><span class="pcc-n">${esc(pcShort(p))}</span>
           <span class="pcc-tags">${fits ? pcTags(p).map((t) => `<span>${esc(t)}</span>`).join("") : `<span class="no">${esc(pcWhy(step.key, p))}</span>`}</span>
+          ${p.id === STOCK_COOL ? "" : `<span class="pcc-i" data-pc-info="${esc(p.id)}">Ver detalles</span>`}
           <b>${p.id === STOCK_COOL ? "Incluido · $0" : money(p.price)}</b></span></button></div>`;
     // Ficha del producto dentro del armador (sin salir)
     const info = pcInfo && products.find((x) => x.id === pcInfo);
@@ -1024,6 +1025,8 @@
     if (e.target === $("pcOverlay") || e.target.closest("#pcClose")) return closePc();
     const go = e.target.closest("[data-pc-go]");
     if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); pcBrand = ""; pcInfo = null; pcBurst = pcStep; renderPc(); $("pcb").scrollTop = 0; return; }
+    const inf = e.target.closest("[data-pc-info]");
+    if (inf) { pcInfo = inf.dataset.pcInfo; renderPc(); $("pcb").scrollTop = 0; return; }
     const sel = e.target.closest("[data-pc-sel]");
     if (sel) {
       const step = PC_STEPS[pcStep], p = sel.dataset.pcSel === STOCK_COOL ? stockCool(pc.cpu) : products.find((x) => x.id === sel.dataset.pcSel);
@@ -1040,8 +1043,6 @@
       setTimeout(() => { if (pcStep === at && !pcInfo) { pcStep++; pcBrand = ""; pcBurst = pcStep; renderPc(); $("pcb").scrollTop = 0; } }, 450);
       return;
     }
-    const inf = e.target.closest("[data-pc-info]");
-    if (inf) { pcInfo = inf.dataset.pcInfo; renderPc(); $("pcb").scrollTop = 0; return; }
     if (e.target.closest("[data-pc-back]")) { pcInfo = null; renderPc(); return; }
     const th = e.target.closest("[data-pci-img]");
     if (th) { $("pciMain").src = th.dataset.pciImg; return; }
