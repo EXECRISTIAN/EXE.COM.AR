@@ -862,21 +862,26 @@ html { touch-action: manipulation; }
 }
 .pcc-w { position: relative; display: grid; min-width: 0; container-type: inline-size; }
 .pcc-w > .pcc { height: 100%; }
-/* Ver detalles: franja negra con líneas ARGB arriba y abajo, entre etiquetas y precio; aparece al pasar el mouse */
-@property --argb-angle { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+/* Ver detalles: franja negra entre etiquetas y precio, aparece al pasar el mouse.
+   Líneas ARGB arriba y abajo con los mismos colores, sincronizadas y en espejo (la de abajo invertida). */
 .pcc-i {
-  --argb: conic-gradient(from var(--argb-angle), #ff0040, #ff8000, #ffee00, #00ff5a, #00d0ff, #3a3aff, #c000ff, #ff0040);
-  display: block; margin: 2px -12px 0; padding: 7px 12px; text-align: center; font-size: .78rem; font-weight: 800; letter-spacing: .02em;
-  color: #fff; border-block: 2px solid transparent;
-  background: linear-gradient(#000, #000) padding-box, var(--argb) border-box;
-  animation: argb-spin 2.4s linear infinite paused; opacity: 0; max-height: 0; padding-block: 0; margin-top: -6px; overflow: hidden; border-block-width: 0;
+  position: relative; display: block; margin: -6px -12px 0; padding: 0 12px; text-align: center; font-size: .78rem; font-weight: 800; letter-spacing: .02em;
+  color: #fff; background: #000; opacity: 0; max-height: 0; overflow: hidden;
   transition: opacity .2s, max-height .25s, padding .25s, margin .25s;
 }
-.pcc:hover .pcc-i, .pcc:focus-visible .pcc-i { opacity: 1; max-height: 40px; padding-block: 7px; margin-top: 2px; border-block-width: 2px; animation-play-state: running; }
+.pcc-i::before, .pcc-i::after {
+  content: ""; position: absolute; left: 0; right: 0; height: 2px; pointer-events: none;
+  background: linear-gradient(90deg, #ff0040, #ff8000, #ffee00, #00ff5a, #00d0ff, #3a3aff, #c000ff, #ff0040, #ff8000, #ffee00, #00ff5a, #00d0ff, #3a3aff, #c000ff, #ff0040) 0 0 / 200% 100%;
+  animation: pcc-flow 2.4s linear infinite paused;
+}
+.pcc-i::before { top: 0; }
+.pcc-i::after { bottom: 0; transform: scaleX(-1); }
+.pcc:hover .pcc-i, .pcc:focus-visible .pcc-i { opacity: 1; max-height: 40px; padding-block: 9px; margin-top: 2px; }
+.pcc:hover .pcc-i::before, .pcc:hover .pcc-i::after, .pcc:focus-visible .pcc-i::before, .pcc:focus-visible .pcc-i::after { animation-play-state: running; }
 .pcc-i:hover { text-decoration: underline; }
-@media (hover: none) { .pcc-i { opacity: 1; max-height: 40px; padding-block: 7px; margin-top: 2px; border-block-width: 2px; animation-play-state: running; } }
-@keyframes argb-spin { to { --argb-angle: 360deg; } }
-@media (prefers-reduced-motion: reduce) { .pcc-i { animation: none; } }
+@media (hover: none) { .pcc-i { opacity: 1; max-height: 40px; padding-block: 9px; margin-top: 2px; } .pcc-i::before, .pcc-i::after { animation-play-state: running; } }
+@keyframes pcc-flow { to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .pcc-i::before, .pcc-i::after { animation: none; } }
 .pcb-info { display: grid; gap: 14px; align-content: start; }
 .pci-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .pci-x { width: 36px; height: 36px; flex: none; display: grid; place-items: center; padding: 0; border: 2px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--c2); cursor: pointer; transition: border-color .15s, color .15s; }
