@@ -101,6 +101,14 @@
   // Gabinetes: se venden vacíos salvo que la descripción diga que incluye componentes
   const caseOnly = (p) => /gabinete/i.test(p.category || "") && !/(^|[^o]\s)incluye\s+(componentes|fuente|placa|procesador)/i.test(p.description || "");
   const CASE_NOTE = "el gabinete solo no incluye componentes dentro";
+  // Procesadores: ¿tienen gráficos integrados? Sale de la ficha; si no figura, por el nombre (los "F" no tienen).
+  // Devuelve true / false, o null si no es un procesador.
+  function cpuIgpu(p) {
+    if (!/proces/i.test(p.category || "")) return null;
+    for (const g of p.specs || []) for (const [k, v] of g.rows || []) if (/gr[aá]ficos integrados|chipset gpu/i.test(k)) return !/^no\b/i.test(String(v).trim());
+    return !/\b\d{4,5}f\b|\bkf\b|sin gr[aá]ficos/i.test(p.name);
+  }
+  const igpuNote = (p) => { const g = cpuIgpu(p); return g === null ? "" : `<span class="igpu ${g ? "si" : "no"}">${g ? "✔ Con video integrado" : "✖ Sin video integrado: necesita placa de video"}</span>`; };
   function cardHtml(p, i) {
     return `
     <article class="card reveal" style="--d:${(i % 4) * 0.08}s">
@@ -118,6 +126,7 @@
         <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>${usdNote(p)}
         ${p.price > 0 ? `<span class="price-note">Consultar precio final</span>` : ""}
         ${p.condition ? `<span class="condition">Estado: ${esc(p.condition)}</span>` : ""}
+        ${igpuNote(p)}
         ${(p.tags || []).length ? `<div class="p-tags">${p.tags.filter((t) => t !== "Outlet").map((t) => `<button type="button" class="p-tag" data-tag="${esc(t)}">${esc(t)}</button>`).join("")}</div>` : ""}
         ${stockBadge(p)}
         ${p.variants ? `<select data-variant="${esc(p.id)}" aria-label="Variante">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select>` : ""}
@@ -301,6 +310,7 @@
         ${p.outlet ? `<p class="pd-condition"><span class="tag-outlet">Outlet</span> ${esc(p.condition || "")}</p>` : ""}
         ${(p.tags || []).length ? `<div class="p-tags">${p.tags.map((t) => `<button type="button" class="p-tag" data-tag="${esc(t)}" data-close-pd>${esc(t)}</button>`).join("")}</div>` : ""}
         <div class="pd-admin" id="pdAdmin" hidden></div>
+        ${igpuNote(p)}
         ${stockBadge(p)}
         ${p.variants ? `<label class="field">Variante<select id="pdVariant">${p.variants.map((v) => `<option>${esc(v)}</option>`).join("")}</select></label>` : ""}
         <div class="pd-actions">
@@ -872,7 +882,7 @@
     const dd = ddrOf(mb).find((k) => ddrOf(ram).includes(k));
     if (mb && ram) n.push(dd ? `✔ Memoria compatible (${dd})` : "⚠ Confirmá con nosotros el tipo de memoria");
     if (gpu) { const w = gpuWatts(gpu); if (w) n.push(psu && psuWatts(psu) ? `✔ Fuente de ${psuWatts(psu)} W (para esta placa se recomiendan ${w} W o más)` : `Para esta placa se recomienda una fuente de ${w} W o más`); }
-    if (cpu && /\bf\b|\d{4,5}f\b|sin gr[aá]ficos/i.test(cpu.name) && !gpu) n.push("⚠ Este procesador no tiene video integrado: necesitás una placa de video");
+    if (cpu && cpuIgpu(cpu) === false && !gpu) n.push("⚠ Este procesador no tiene video integrado: necesitás una placa de video");
     return n;
   }
   // Etiquetas cortas de cada tarjeta (socket, memoria, formato, WiFi, potencia)
@@ -885,6 +895,7 @@
     const g = n.match(/(\d+)\s?gb/i); if (g) t.push(`${g[1]} GB`);
     if (p.id === STOCK_COOL) return ["Sin costo extra"];
     if (/proces/i.test(p.category || "") && cpuCooler(p)) t.unshift("Trae cooler");
+    if (cpuIgpu(p) !== null) t.unshift(cpuIgpu(p) ? "Video integrado" : "Sin video");
     return [...new Set(t)].slice(0, 4);
   }
   // Por qué no sirve con lo ya elegido (se muestra en la tarjeta apagada)
@@ -969,7 +980,7 @@
     pcStep = Math.min(PC_STEPS.length, Math.max(0, +d.step || 0));
   }
   // Arma una PC con lo que hay publicado: paso a paso elige entre lo compatible según el criterio del armado
-  const hasIgpu = (p) => !/\b\d{4,5}f\b|sin gr[aá]ficos/i.test(p.name) && !/^no\b/i.test(specVal(p, /gr[aá]ficos integrados|chipset gpu/i));
+  const hasIgpu = (p) => cpuIgpu(p) !== false;
   const PC_PRESETS = [
     { id: "oficina", name: "PC de oficina", desc: "Lo más económico, con video integrado", skip: ["gpu", "otros"], pick: (k, list) => (k === "cpu" ? list.filter(hasIgpu) : list).sort((a, b) => a.price - b.price)[0] },
     { id: "gamer", name: "PC gamer", desc: "Con placa de video y buen procesador", skip: ["otros"], need: ["gpu"], pick: (k, list) => (["cpu", "gpu"].includes(k) ? list.sort((a, b) => pcPerf(b) - pcPerf(a)) : list.sort((a, b) => a.price - b.price))[0] },

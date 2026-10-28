@@ -931,3 +931,7 @@ body:has(#pcOverlay.show) .wa-float { display: none; }
 .pcb-pre-b:hover, .pcb-pre-b:focus-visible { border-color: var(--c0); transform: translateY(-1px); }
 .pcb-pre-b b { font-size: .85rem; }
 .pcb-pre-b small { font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+/* Procesadores: aviso de gráficos integrados (tarjeta del catálogo y ficha) */
+.igpu { display: block; font-size: .78rem; font-weight: 700; margin-top: 2px; }
+.igpu.si { color: var(--ok); }
+.igpu.no { color: var(--warn, #d97706); }
