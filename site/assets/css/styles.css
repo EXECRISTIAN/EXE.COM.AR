@@ -910,6 +910,8 @@ html { touch-action: manipulation; }
 @media (prefers-reduced-motion: reduce) { .pcb-st.burst i, .pcb-st.burst i::before, .pcb-st.burst i::after { animation: none; } }
 .pcb-sort { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; font-weight: 700; color: var(--muted); }
 .pcb-sort select { font: inherit; font-size: .85rem; color: var(--c2); background: var(--surface); border: 1px solid var(--c4); border-radius: 999px; padding: 7px 12px; cursor: pointer; }
-/* Selector de tema en el armador: barra fija al pie del diálogo, fuera del resumen */
-.pcb-foot { position: sticky; bottom: 0; z-index: 5; display: flex; justify-content: flex-end; padding: 10px 16px; background: var(--surface); border-top: 1px solid var(--line); }
+/* Selector de tema en el armador: flotante abajo a la derecha del diálogo, sin barra (no ocupa lugar) */
+.pcb-foot { position: sticky; bottom: 0; z-index: 5; height: 0; pointer-events: none; }
+.pcb-foot .pcb-theme { position: absolute; right: 16px; bottom: 12px; pointer-events: auto; box-shadow: 0 4px 14px #0005; }
 .pcb-theme { display: flex; align-items: center; gap: 8px; padding: 5px 6px 5px 12px; border-radius: 999px; background: #0d1117; color: #8a919e; font-size: .75rem; font-weight: 700; }
+.pcb-main { padding-bottom: 64px; }
