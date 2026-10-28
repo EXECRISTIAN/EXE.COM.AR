@@ -841,11 +841,16 @@
     if (step === "cpu") return shares(sockets(p), sockets(mb));
     if (step === "mb") return shares(sockets(p), sockets(cpu)) && shares(ddrOf(p), ddrOf(ram)) && (!cool || shares(sockets(p), sockets(cool)));
     if (step === "ram") return shares(ddrOf(p), ddrOf(mb));
+    if (step === "cool" && p.id === STOCK_COOL) return cpuCooler(cpu);
     if (step === "cool") return shares(sockets(p), sockets(cpu || mb));
     if (step === "psu" && gpu) { const w = gpuWatts(gpu); return !w || !psuWatts(p) || psuWatts(p) >= w; }
     return true;
   }
   const pcPick = () => PC_STEPS.map((s) => pc[s.key]).filter(Boolean);
+  // ¿El procesador trae cooler? Se lee de la ficha (fila "Cooler" / "Incluye cooler")
+  const cpuCooler = (p) => !!p && (p.specs || []).some((g) => (g.rows || []).some(([k, v]) => /cooler/i.test(k) && /^s[ií]/i.test(String(v).trim())));
+  const STOCK_COOL = "__cooler-del-cpu";
+  const stockCool = (cpu) => ({ ...cpu, id: STOCK_COOL, name: "Uso el cooler que viene con el procesador", price: 0, variants: null, brand: "" });
   function pcNotes() {
     const n = [], { cpu, mb, ram, gpu, psu } = pc;
     const sk = sockets(cpu).find((k) => sockets(mb).includes(k));
@@ -864,6 +869,8 @@
     const f = n.match(/\b(m-?atx|micro-?atx|mini-?itx|e?atx)\b/i); if (f) t.push(f[1].toUpperCase().replace("MICRO-ATX", "M-ATX"));
     const w = psuWatts(p); if (w && /fuente/i.test(p.category || "")) t.push(`${w} W`);
     const g = n.match(/(\d+)\s?gb/i); if (g) t.push(`${g[1]} GB`);
+    if (p.id === STOCK_COOL) return ["Sin costo extra"];
+    if (/proces/i.test(p.category || "") && cpuCooler(p)) t.unshift("Trae cooler");
     return [...new Set(t)].slice(0, 4);
   }
   // Por qué no sirve con lo ya elegido (se muestra en la tarjeta apagada)
@@ -884,6 +891,7 @@
     const ok = shown.filter((p) => pcFits(step.key, p)), bad = shown.filter((p) => !pcFits(step.key, p));
     const by = (a, b) => (pcCheap ? a.price - b.price : b.price - a.price);
     ok.sort(by); bad.sort(by);
+    if (step && step.key === "cool" && cpuCooler(pc.cpu)) ok.unshift(stockCool(pc.cpu));
     const notes = pcNotes(), next = PC_STEPS[pcStep + 1], picked = step && pc[step.key];
     const keys = step ? [...new Set(ok.flatMap((p) => step.key === "mb" || step.key === "cool" || step.key === "cpu" ? sockets(p) : step.key === "ram" ? ddrOf(p) : []))] : [];
     const card = (p, fits) => `<button type="button" class="pcc${picked && picked.id === p.id ? " sel" : ""}${fits ? "" : " off"}"${fits ? ` data-pc-sel="${esc(p.id)}"` : ' disabled aria-disabled="true"'}>
@@ -891,7 +899,7 @@
         <span class="pcc-img"><img src="${esc(mainImg(p))}" alt="" loading="lazy" data-fallback></span>
         <span class="pcc-b"><span class="pcc-n">${esc(pcShort(p))}</span>
           <span class="pcc-tags">${fits ? pcTags(p).map((t) => `<span>${esc(t)}</span>`).join("") : `<span class="no">${esc(pcWhy(step.key, p))}</span>`}</span>
-          <b>${money(p.price)}</b></span></button>`;
+          <b>${p.id === STOCK_COOL ? "Incluido · $0" : money(p.price)}</b></span></button>`;
     $("pcb").innerHTML = `
       <button class="pd-close icon-btn" id="pcClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <div class="pcb-top"><h2 id="pcTitle">Armá tu PC</h2><p>Tocá una opción. Solo te dejamos elegir lo que es compatible con lo que ya elegiste.</p>
@@ -946,10 +954,11 @@
     if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); pcBrand = ""; renderPc(); $("pcb").scrollTop = 0; return; }
     const sel = e.target.closest("[data-pc-sel]");
     if (sel) {
-      const step = PC_STEPS[pcStep], p = products.find((x) => x.id === sel.dataset.pcSel);
+      const step = PC_STEPS[pcStep], p = sel.dataset.pcSel === STOCK_COOL ? stockCool(pc.cpu) : products.find((x) => x.id === sel.dataset.pcSel);
       pc[step.key] = p;
       // Si lo nuevo deja incompatible algo ya elegido en otro paso, se quita (y se avisa)
       PC_STEPS.forEach((s) => { if (s.key !== step.key && pc[s.key] && !pcFits(s.key, pc[s.key])) { toast(`Quitamos ${s.label.toLowerCase()}: no es compatible`); delete pc[s.key]; } });
+      if (pc.cool && pc.cool.id === STOCK_COOL) pc.cool = stockCool(pc.cpu);
       renderPc(); return;
     }
     const br = e.target.closest("[data-pc-brand]");
@@ -958,7 +967,7 @@
     const del = e.target.closest("[data-pc-del]");
     if (del) { delete pc[del.dataset.pcDel]; renderPc(); return; }
     if (e.target.closest("#pcReset")) { pc = {}; pcStep = 0; renderPc(); return; }
-    if (e.target.closest("#pcCart")) { pcPick().forEach((p) => add(p.id, p.variants ? p.variants[0] : null)); closePc(); toggleCart(true); }
+    if (e.target.closest("#pcCart")) { pcPick().filter((p) => p.id !== STOCK_COOL).forEach((p) => add(p.id, p.variants ? p.variants[0] : null)); closePc(); toggleCart(true); }
   });
   document.addEventListener("keydown", (e) => e.key === "Escape" && !$("pcOverlay").hidden && closePc());
 

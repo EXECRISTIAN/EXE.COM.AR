@@ -808,7 +808,7 @@ html { touch-action: manipulation; }
 .pcb-fl { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
 .pcb-fl small { margin-left: auto; color: var(--muted); font-size: .82rem; }
 .pcc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
-.pcc { position: relative; display: grid; grid-template-rows: auto 1fr; padding: 0; text-align: left; font: inherit; color: var(--c3); background: var(--surface); border: 2px solid transparent; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 8px var(--shadow); cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.pcc { position: relative; display: grid; grid-template-rows: auto 1fr; grid-template-columns: minmax(0, 1fr); min-width: 0; padding: 0; text-align: left; font: inherit; color: var(--c3); background: var(--surface); border: 2px solid transparent; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 8px var(--shadow); cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .15s; }
 .pcc:hover:not(.off), .pcc:focus-visible { border-color: var(--c0); transform: translateY(-2px); }
 .pcc.sel { border-color: var(--c0); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c0) 20%, transparent); }
 .pcc.off { cursor: not-allowed; }
