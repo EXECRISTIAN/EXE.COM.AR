@@ -1008,9 +1008,9 @@
             ${pcPick().length ? `<button type="button" class="link-btn" id="pcReset">Empezar de nuevo</button>` : ""}
           </div>
           <p class="pd-illus">Te confirmamos stock, precio final y compatibilidad antes de cerrar la compra.</p>
+          <div class="pcb-theme"><span>Tema</span>${pcThemeHtml()}</div>
         </aside>
-      </div>
-      <div class="pcb-theme"><span>Tema</span>${pcThemeHtml()}</div>`;
+      </div>`;
   }
   function openPc() {
     renderPc();
