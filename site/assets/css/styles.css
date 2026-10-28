@@ -815,8 +815,8 @@ html { touch-action: manipulation; }
 .pcc.off .pcc-img img { opacity: .35; filter: grayscale(1); }
 .pcc.off b { color: var(--muted); }
 .pcc-ok { position: absolute; top: 10px; right: 10px; z-index: 1; width: 28px; height: 28px; border-radius: 50%; background: var(--accent-bg); color: var(--on-accent); display: grid; place-items: center; font-weight: 900; }
-.pcc-img { aspect-ratio: 4/3; background: var(--media-bg); display: grid; place-items: center; padding: 10px; }
-.pcc-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.pcc-img { height: 75cqw; overflow: hidden; background: var(--media-bg); display: grid; place-items: center; padding: 10px; }
+.pcc-img img { max-width: 100%; max-height: 100%; min-height: 0; object-fit: contain; }
 .pcc-b { display: grid; gap: 6px; padding: 10px 12px 12px; align-content: start; }
 .pcc-n { font-weight: 700; font-size: .92rem; line-height: 1.25; color: var(--c2); overflow-wrap: anywhere; white-space: normal; }
 .pcc-tags { display: flex; gap: 4px; flex-wrap: wrap; }
@@ -855,8 +855,21 @@ html { touch-action: manipulation; }
 }
 .pcc-w { position: relative; display: grid; min-width: 0; }
 .pcc-w > .pcc { height: 100%; }
-.pcc-i { position: absolute; top: 10px; left: 10px; z-index: 2; font: inherit; font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--c4); background: var(--surface); color: var(--c2); cursor: pointer; box-shadow: 0 1px 4px var(--shadow); }
-.pcc-i:hover, .pcc-i:focus-visible { border-color: var(--c0); color: var(--c0); }
+/* Botón Detalles: centrado abajo de la foto, con borde LED ARGB que gira (como el de Panel de administración) */
+@property --argb-angle { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+.pcc-w { container-type: inline-size; }
+.pcc-i {
+  --argb: conic-gradient(from var(--argb-angle), #ff0040, #ff8000, #ffee00, #00ff5a, #00d0ff, #3a3aff, #c000ff, #ff0040);
+  position: absolute; top: calc(75cqw - 40px); left: 50%; transform: translateX(-50%); z-index: 2; isolation: isolate;
+  font: inherit; font-size: .74rem; font-weight: 800; letter-spacing: .02em; padding: 5px 14px; border-radius: 999px; cursor: pointer;
+  color: var(--c2); border: 2px solid transparent;
+  background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--argb) border-box;
+  animation: argb-spin 2.4s linear infinite;
+}
+.pcc-i::before { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; background: var(--argb); filter: blur(8px); opacity: .45; transition: opacity .2s; }
+.pcc-i:hover::before, .pcc-i:focus-visible::before { opacity: .85; }
+@keyframes argb-spin { to { --argb-angle: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .pcc-i { animation: none; } }
 .pcb-info { display: grid; gap: 14px; align-content: start; }
 .pcb-info > .link-btn { justify-self: start; }
 .pci-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
