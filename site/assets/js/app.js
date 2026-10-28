@@ -822,15 +822,15 @@
   // Paso a paso: cada lista muestra solo lo compatible con lo ya elegido, usando las claves de "Compatibilidad"
   // (socket LGA/AM, memoria DDR) y la fuente recomendada para la placa de video. Al final: carrito o WhatsApp.
   const PC_STEPS = [
-    { key: "cpu", label: "Procesador", cat: /procesador/i },
-    { key: "mb", label: "Motherboard", cat: /mother/i },
-    { key: "ram", label: "Memoria RAM", cat: /memoria/i },
-    { key: "gpu", label: "Placa de video", cat: /placa/i, optional: true },
-    { key: "psu", label: "Fuente", cat: /fuente/i },
-    { key: "case", label: "Gabinete", cat: /gabinete/i },
-    { key: "cool", label: "Refrigeración", cat: /refrig|cooler/i, optional: true },
+    { key: "cpu", label: "Procesador", short: "Procesador", cat: /procesador/i, ic: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>' },
+    { key: "mb", label: "Motherboard", short: "Mother", cat: /mother/i, ic: '<rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="6" height="6"/><path d="M16 7v10M7 17h6"/>' },
+    { key: "ram", label: "Memoria RAM", short: "Memoria", cat: /memoria/i, ic: '<rect x="2" y="7" width="20" height="9" rx="1"/><path d="M6 16v3M10 16v3M14 16v3M18 16v3M6 10v3M10 10v3M14 10v3M18 10v3"/>' },
+    { key: "gpu", label: "Placa de video", short: "Placa de video", cat: /placa/i, optional: true, ic: '<rect x="2" y="6" width="20" height="11" rx="2"/><circle cx="9" cy="11.5" r="3"/><circle cx="16" cy="11.5" r="2"/><path d="M5 17v3"/>' },
+    { key: "psu", label: "Fuente", short: "Fuente", cat: /fuente/i, ic: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>' },
+    { key: "case", label: "Gabinete", short: "Gabinete", cat: /gabinete/i, ic: '<rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="15" r="2.5"/><path d="M9 6h6"/>' },
+    { key: "cool", label: "Refrigeración", short: "Cooler", cat: /refrig|cooler/i, optional: true, ic: '<circle cx="12" cy="12" r="9"/><path d="M12 12c0-4 3-6 5-5M12 12c4 0 6 3 5 5M12 12c0 4-3 6-5 5M12 12c-4 0-6-3-5-5"/>' },
   ];
-  let pc = {}, pcStep = 0;
+  let pc = {}, pcStep = 0, pcBrand = "", pcCheap = true;
   const sockets = (p) => (p && p.compat ? p.compat.filter((k) => /^(LGA\d+|AM\d)$/.test(k)) : []);
   const ddrOf = (p) => (p && p.compat ? p.compat.filter((k) => /^DDR\d$/.test(k)) : []);
   // Sin datos de un lado no se descarta (se avisa que hay que confirmarlo)
@@ -856,39 +856,74 @@
     if (cpu && /\bf\b|\d{4,5}f\b|sin gr[aá]ficos/i.test(cpu.name) && !gpu) n.push("⚠ Este procesador no tiene video integrado: necesitás una placa de video");
     return n;
   }
+  // Etiquetas cortas de cada tarjeta (socket, memoria, formato, WiFi, potencia)
+  function pcTags(p) {
+    const t = [...(p.compat || [])];
+    const n = p.name;
+    if (/\bwi-?fi\b/i.test(n)) t.push("WiFi");
+    const f = n.match(/\b(m-?atx|micro-?atx|mini-?itx|e?atx)\b/i); if (f) t.push(f[1].toUpperCase().replace("MICRO-ATX", "M-ATX"));
+    const w = psuWatts(p); if (w && /fuente/i.test(p.category || "")) t.push(`${w} W`);
+    const g = n.match(/(\d+)\s?gb/i); if (g) t.push(`${g[1]} GB`);
+    return [...new Set(t)].slice(0, 4);
+  }
+  // Por qué no sirve con lo ya elegido (se muestra en la tarjeta apagada)
+  function pcWhy(step, p) {
+    const { cpu, mb, ram, gpu } = pc;
+    if (step === "psu" && gpu) return `Chica para esta placa: ${psuWatts(p)} W (se recomiendan ${gpuWatts(gpu)} W)`;
+    if (step === "ram" || (step === "mb" && ram && !shares(ddrOf(p), ddrOf(ram)))) return `No compatible: ${ddrOf(p).join(" / ") || "otra memoria"}`;
+    return `No compatible: ${sockets(p).join(" / ") || "otro socket"}`;
+  }
+  const pcShort = (p) => p.name.replace(/^(procesador|motherboard|mother|placa de video|fuente|gabinete|memoria|cooler cpu)\s+/i, "").replace(/\s*\(.*?\)\s*/g, " ").trim();
   function renderPc() {
     const total = pcPick().reduce((t, p) => t + p.price, 0);
     const step = PC_STEPS[pcStep];
     const all = step ? products.filter((p) => step.cat.test(p.category || "")) : [];
-    const ok = all.filter((p) => pcFits(step.key, p)).sort((a, b) => a.price - b.price);
-    const notes = pcNotes();
+    const brands = [...new Set(all.map((p) => p.brand).filter(Boolean))].sort();
+    if (pcBrand && !brands.includes(pcBrand)) pcBrand = "";
+    const shown = all.filter((p) => !pcBrand || p.brand === pcBrand);
+    const ok = shown.filter((p) => pcFits(step.key, p)), bad = shown.filter((p) => !pcFits(step.key, p));
+    const by = (a, b) => (pcCheap ? a.price - b.price : b.price - a.price);
+    ok.sort(by); bad.sort(by);
+    const notes = pcNotes(), next = PC_STEPS[pcStep + 1], picked = step && pc[step.key];
+    const keys = step ? [...new Set(ok.flatMap((p) => step.key === "mb" || step.key === "cool" || step.key === "cpu" ? sockets(p) : step.key === "ram" ? ddrOf(p) : []))] : [];
+    const card = (p, fits) => `<button type="button" class="pcc${picked && picked.id === p.id ? " sel" : ""}${fits ? "" : " off"}"${fits ? ` data-pc-sel="${esc(p.id)}"` : ' disabled aria-disabled="true"'}>
+        ${picked && picked.id === p.id ? '<span class="pcc-ok" aria-hidden="true">✔</span>' : ""}
+        <span class="pcc-img"><img src="${esc(mainImg(p))}" alt="" loading="lazy" data-fallback></span>
+        <span class="pcc-b"><span class="pcc-n">${esc(pcShort(p))}</span>
+          <span class="pcc-tags">${fits ? pcTags(p).map((t) => `<span>${esc(t)}</span>`).join("") : `<span class="no">${esc(pcWhy(step.key, p))}</span>`}</span>
+          <b>${money(p.price)}</b></span></button>`;
     $("pcb").innerHTML = `
       <button class="pd-close icon-btn" id="pcClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-      <div class="pcb-head"><h2 id="pcTitle">Armá tu PC</h2><p>Elegí paso a paso: en cada lista te mostramos solo lo compatible con lo que ya elegiste.</p></div>
-      <ol class="pcb-steps">${PC_STEPS.map((s, i) => { const p = pc[s.key];
-        return `<li class="pcb-step${i === pcStep ? " on" : ""}${p ? " done" : ""}">
-          <button type="button" class="pcb-step-btn" data-pc-go="${i}"><span class="pcb-n">${p ? "✔" : i + 1}</span><span class="pcb-l">${esc(s.label)}${s.optional ? " <small>(opcional)</small>" : ""}</span>
-          <span class="pcb-v">${p ? `${esc(p.name)} · <b>${money(p.price)}</b>` : i === pcStep ? "Elegí una opción" : "—"}</span></button>
-          ${p && i !== pcStep ? `<button type="button" class="link-btn pcb-x" data-pc-del="${s.key}" aria-label="Quitar ${esc(s.label)}">Quitar</button>` : ""}</li>`; }).join("")}</ol>
-      ${step ? `<section class="pcb-opts" aria-label="Opciones de ${esc(step.label)}">
-        <h3>${esc(step.label)}</h3>
-        ${ok.length ? `<div class="pcb-list">${ok.map((p) => `<button type="button" class="pcb-opt${pc[step.key] && pc[step.key].id === p.id ? " sel" : ""}" data-pc-sel="${esc(p.id)}">
-            <img src="${esc(mainImg(p))}" alt="" loading="lazy" data-fallback><span>${esc(p.name)}${p.condition ? `<small>${esc(p.condition)}</small>` : ""}</span><b>${money(p.price)}</b></button>`).join("")}</div>`
-          : `<p class="pcb-empty">No tenemos ${esc(step.label.toLowerCase())} publicado${all.length ? " compatible con lo que elegiste" : ""}. <a href="${esc(waLink(`Hola EXE! Estoy armando una PC y busco ${step.label.toLowerCase()}${pc.cpu ? ` para ${pc.cpu.name}` : ""}.`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a>.</p>`}
-        ${all.length > ok.length ? `<p class="pcb-hidden">${all.length - ok.length} ${all.length - ok.length === 1 ? "opción oculta" : "opciones ocultas"} por no ser compatibles.</p>` : ""}
-        <div class="pcb-step-actions">${pcStep > 0 ? `<button type="button" class="btn btn-outline" data-pc-go="${pcStep - 1}">Anterior</button>` : ""}
-          <button type="button" class="btn btn-outline" data-pc-go="${pcStep + 1}">${pc[step.key] ? "Siguiente" : step.optional || !ok.length ? "Saltear" : "Saltear por ahora"}</button></div>
-      </section>` : ""}
-      <aside class="pcb-sum">
-        ${notes.length ? `<ul class="pcb-notes">${notes.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
-        <div class="pcb-total"><span>Total (${pcPick().length} ${pcPick().length === 1 ? "producto" : "productos"})</span><b>${money(total)}</b></div>
-        <div class="pcb-actions">
-          <button type="button" class="btn btn-primary" id="pcCart"${pcPick().length ? "" : " disabled"}>Agregar todo al carrito</button>
-          <a class="btn btn-outline" id="pcWa" href="${esc(waLink(["Hola EXE! Armé esta PC en la web:", ...PC_STEPS.filter((s) => pc[s.key]).map((s) => `• ${s.label}: ${pc[s.key].name} (${money(pc[s.key].price)})`), `Total: ${money(total)}`, "¿Me confirman stock y compatibilidad?"].join("\n")))}" target="_blank" rel="noopener"${pcPick().length ? "" : ' aria-disabled="true" tabindex="-1"'}>Enviar por WhatsApp</a>
-          ${pcPick().length ? `<button type="button" class="link-btn" id="pcReset">Empezar de nuevo</button>` : ""}
-        </div>
-        <p class="pd-illus">Te confirmamos stock, precio final y compatibilidad antes de cerrar la compra.</p>
-      </aside>`;
+      <div class="pcb-top"><h2 id="pcTitle">Armá tu PC</h2><p>Tocá una opción. Solo te dejamos elegir lo que es compatible con lo que ya elegiste.</p>
+        <nav class="pcb-bar" aria-label="Pasos">${PC_STEPS.map((s, i) => `<button type="button" class="pcb-st${i === pcStep ? " on" : ""}${pc[s.key] ? " done" : ""}" data-pc-go="${i}"${i === pcStep ? ' aria-current="step"' : ""}>
+          <i>${pc[s.key] && i !== pcStep ? "✔" : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s.ic}</svg>`}</i>${esc(s.short)}</button>`).join("")}</nav></div>
+      <div class="pcb-main">
+        ${step ? `<section class="pcb-opts" aria-label="Opciones de ${esc(step.label)}">
+          <div class="pcb-fl">
+            ${brands.length > 1 ? `<button type="button" class="chip${pcBrand ? "" : " active"}" data-pc-brand="">Todos</button>${brands.map((b) => `<button type="button" class="chip${pcBrand === b ? " active" : ""}" data-pc-brand="${esc(b)}">${esc(b)}</button>`).join("")}` : ""}
+            <button type="button" class="chip" data-pc-sort>${pcCheap ? "Más baratos primero" : "Más caros primero"}</button>
+            <small>${ok.length} ${ok.length === 1 ? "compatible" : "compatibles"}${keys.length && pcStep ? ` con ${esc(keys.join(" · "))}` : ""}${bad.length ? ` · ${bad.length} no ${bad.length === 1 ? "sirve" : "sirven"}` : ""}${step.optional ? " · opcional" : ""}</small>
+          </div>
+          ${ok.length || bad.length ? `<div class="pcc-grid">${ok.map((p) => card(p, true)).join("")}${bad.map((p) => card(p, false)).join("")}</div>`
+            : `<p class="pcb-empty">No tenemos ${esc(step.label.toLowerCase())} publicado. <a href="${esc(waLink(`Hola EXE! Estoy armando una PC y busco ${step.label.toLowerCase()}${pc.cpu ? ` para ${pc.cpu.name}` : ""}.`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> o seguí con el próximo paso.</p>`}
+        </section>` : `<section class="pcb-opts pcb-done"><h3>¡Listo! Revisá tu PC</h3><p>Podés agregar todo al carrito o mandárnosla por WhatsApp para que te confirmemos stock y precio final.</p></section>`}
+        <aside class="pcb-sum"><h3>Tu PC</h3>
+          <ul class="pcb-items">${PC_STEPS.map((s, i) => { const p = pc[s.key];
+            return `<li>${p ? `<img src="${esc(mainImg(p))}" alt="" loading="lazy" data-fallback>` : `<button type="button" class="pcb-ph" data-pc-go="${i}" aria-label="Elegir ${esc(s.label)}">+</button>`}
+              <span><small>${esc(s.label)}</small><strong${p ? "" : ' class="muted"'}>${p ? esc(pcShort(p)) : i === pcStep ? "Eligiendo…" : s.optional ? "Opcional" : "Falta elegir"}</strong></span>
+              ${p ? `<button type="button" class="link-btn" data-pc-del="${s.key}" aria-label="Quitar ${esc(s.label)}">✕</button>` : ""}</li>`; }).join("")}</ul>
+          ${notes.length ? `<ul class="pcb-notes">${notes.map((t) => `<li class="${t.startsWith("✔") ? "ok" : "warn"}">${esc(t)}</li>`).join("")}</ul>` : ""}
+          <div class="pcb-total"><span>Total</span><b>${money(total)}</b></div>
+          <div class="pcb-actions">
+            ${step ? `<button type="button" class="btn btn-primary" data-pc-go="${pcStep + 1}">${next ? `${picked ? "Siguiente" : "Saltear"}: ${esc(next.short)} →` : picked ? "Terminar →" : "Saltear y terminar →"}</button>`
+              : `<button type="button" class="btn btn-primary" id="pcCart"${pcPick().length ? "" : " disabled"}>Agregar todo al carrito</button>`}
+            <a class="btn btn-outline" href="${esc(waLink(["Hola EXE! Armé esta PC en la web:", ...PC_STEPS.filter((s) => pc[s.key]).map((s) => `• ${s.label}: ${pc[s.key].name} (${money(pc[s.key].price)})`), `Total: ${money(total)}`, "¿Me confirman stock y compatibilidad?"].join("\n")))}" target="_blank" rel="noopener"${pcPick().length ? "" : ' aria-disabled="true" tabindex="-1"'}>Enviar por WhatsApp</a>
+            ${step && pcPick().length ? `<button type="button" class="link-btn" id="pcCart">Agregar al carrito lo elegido</button>` : ""}
+            ${pcPick().length ? `<button type="button" class="link-btn" id="pcReset">Empezar de nuevo</button>` : ""}
+          </div>
+          <p class="pd-illus">Te confirmamos stock, precio final y compatibilidad antes de cerrar la compra.</p>
+        </aside>
+      </div>`;
   }
   function openPc() {
     renderPc();
@@ -908,16 +943,18 @@
   $("pcOverlay").addEventListener("click", (e) => {
     if (e.target === $("pcOverlay") || e.target.closest("#pcClose")) return closePc();
     const go = e.target.closest("[data-pc-go]");
-    if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); renderPc(); $("pcb").scrollTop = 0; return; }
+    if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); pcBrand = ""; renderPc(); $("pcb").scrollTop = 0; return; }
     const sel = e.target.closest("[data-pc-sel]");
     if (sel) {
       const step = PC_STEPS[pcStep], p = products.find((x) => x.id === sel.dataset.pcSel);
       pc[step.key] = p;
       // Si lo nuevo deja incompatible algo ya elegido en otro paso, se quita (y se avisa)
       PC_STEPS.forEach((s) => { if (s.key !== step.key && pc[s.key] && !pcFits(s.key, pc[s.key])) { toast(`Quitamos ${s.label.toLowerCase()}: no es compatible`); delete pc[s.key]; } });
-      pcStep = Math.min(PC_STEPS.length, pcStep + 1);
-      renderPc(); $("pcb").scrollTop = 0; return;
+      renderPc(); return;
     }
+    const br = e.target.closest("[data-pc-brand]");
+    if (br) { pcBrand = br.dataset.pcBrand; renderPc(); return; }
+    if (e.target.closest("[data-pc-sort]")) { pcCheap = !pcCheap; renderPc(); return; }
     const del = e.target.closest("[data-pc-del]");
     if (del) { delete pc[del.dataset.pcDel]; renderPc(); return; }
     if (e.target.closest("#pcReset")) { pc = {}; pcStep = 0; renderPc(); return; }
