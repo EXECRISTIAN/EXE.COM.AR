@@ -908,7 +908,7 @@
     if (step && step.key === "cool" && cpuCooler(pc.cpu)) ok.unshift(stockCool(pc.cpu));
     const notes = pcNotes(), next = PC_STEPS[pcStep + 1], picked = step && pc[step.key];
     const isSel = (p) => !!picked && (step.multi ? picked.some((x) => x.id === p.id) : picked.id === p.id);
-    const skip = all.length ? "Omitir por ahora" : "Omitir";
+    const skip = ok.length ? "Omitir por ahora" : "Omitir";
     const keys = step ? [...new Set(ok.flatMap((p) => step.key === "mb" || step.key === "cool" || step.key === "cpu" ? sockets(p) : step.key === "ram" ? ddrOf(p) : []))] : [];
     const card = (p, fits) => `<div class="pcc-w">${p.id === STOCK_COOL ? "" : `<button type="button" class="pcc-i" data-pc-info="${esc(p.id)}" aria-label="Ver detalles de ${esc(p.name)}">Detalles</button>`}<button type="button" class="pcc${isSel(p) ? " sel" : ""}${fits ? "" : " off"}"${fits ? ` data-pc-sel="${esc(p.id)}"` : ' disabled aria-disabled="true"'}>
         ${isSel(p) ? '<span class="pcc-ok" aria-hidden="true">✔</span>' : ""}
@@ -940,10 +940,10 @@
           <div class="pcb-fl">
             ${brands.length > 1 ? `<button type="button" class="chip${pcBrand ? "" : " active"}" data-pc-brand="">Todos</button>${brands.map((b) => `<button type="button" class="chip${pcBrand === b ? " active" : ""}" data-pc-brand="${esc(b)}">${esc(b)}</button>`).join("")}` : ""}
             <button type="button" class="chip" data-pc-sort>${pcCheap ? "Más baratos primero" : "Más caros primero"}</button>
-            <small>${ok.length} ${ok.length === 1 ? "compatible" : "compatibles"}${keys.length && pcStep ? ` con ${esc(keys.join(" · "))}` : ""}${bad.length ? ` · ${bad.length} no ${bad.length === 1 ? "sirve" : "sirven"}` : ""}${step.optional ? " · opcional" : ""}${step.multi ? " · podés elegir varios" : ""}</small>
+            <small>${ok.length} ${ok.length === 1 ? "compatible" : "compatibles"}${keys.length && pcStep ? ` con ${esc(keys.join(" · "))}` : ""}${step.optional ? " · opcional" : ""}${step.multi ? " · podés elegir varios" : ""}</small>
           </div>
-          ${ok.length || bad.length ? `<div class="pcc-grid">${ok.map((p) => card(p, true)).join("")}${bad.map((p) => card(p, false)).join("")}</div>`
-            : `<p class="pcb-empty">No tenemos ${esc(step.label.toLowerCase())} publicado. <a href="${esc(waLink(`Hola EXE! Estoy armando una PC y busco ${step.label.toLowerCase()}${pc.cpu ? ` para ${pc.cpu.name}` : ""}.`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> o seguí con el próximo paso.</p>`}
+          ${ok.length ? `<div class="pcc-grid">${ok.map((p) => card(p, true)).join("")}</div>`
+            : `<p class="pcb-empty">No tenemos ${esc(step.label.toLowerCase())} ${bad.length ? "compatible con lo que elegiste" : "publicado"}. <a href="${esc(waLink(`Hola EXE! Estoy armando una PC y busco ${step.label.toLowerCase()}${pc.cpu ? ` para ${pc.cpu.name}` : ""}.`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> o seguí con el próximo paso.</p>`}
         </section>` : `<section class="pcb-opts pcb-done"><h3>¡Listo! Revisá tu PC</h3><p>Podés agregar todo al carrito o mandárnosla por WhatsApp para que te confirmemos stock y precio final.</p></section>`}
         <aside class="pcb-sum"><h3>Tu PC</h3>
           <ul class="pcb-items">${PC_STEPS.map((s, i) => { const v = pc[s.key], p = s.multi && v ? { ...v[0], name: v.map((x) => pcShort(x)).join(" + ") } : v;
