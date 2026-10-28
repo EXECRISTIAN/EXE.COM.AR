@@ -1233,14 +1233,17 @@
     const root = document.documentElement;
     if (mode === "auto") delete root.dataset.theme; else root.dataset.theme = mode;
     if (save) { try { mode === "auto" ? localStorage.removeItem("exe-theme") : localStorage.setItem("exe-theme", mode); } catch (e) {} }
-    themeSwitch.dataset.mode = mode;
-    themeSwitch.querySelectorAll("button").forEach((b) => {
+    document.querySelectorAll("#themeSwitch, [data-theme-copy]").forEach((sw) => (sw.dataset.mode = mode));
+    document.querySelectorAll("#themeSwitch button, [data-theme-copy] button").forEach((b) => {
       const on = b.dataset.mode === mode;
       b.setAttribute("aria-checked", String(on));
       b.tabIndex = on ? 0 : -1;
     });
     syncThemeMeta();
   }
+  // Copia del selector al final del menú del celular (las 3 líneas)
+  $("nav").insertAdjacentHTML("beforeend", `<div class="nav-theme"><span>Tema</span><div class="theme-switch" data-theme-copy role="radiogroup" aria-label="Tema de la página" data-mode="auto">${themeSwitch.innerHTML}</div></div>`);
+  $("nav").querySelector("[data-theme-copy]").addEventListener("click", (e) => { const b = e.target.closest("button[data-mode]"); if (b) applyTheme(b.dataset.mode); });
   let storedTheme = null;
   try { storedTheme = localStorage.getItem("exe-theme"); } catch (e) {}
   applyTheme(MODES.includes(storedTheme) ? storedTheme : "auto", false);
