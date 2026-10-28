@@ -932,6 +932,11 @@
     return p.price;
   }
   const PC_SORTS = [["cheap", "Más baratos"], ["exp", "Más caros"], ["new", "Más nuevos"], ["perf", "Mejor rendimiento"]];
+  // Selector de tema dentro del armador: copia del del pie (misma preferencia guardada)
+  const pcThemeHtml = () => {
+    const sw = $("themeSwitch"); if (!sw) return "";
+    return `<div class="theme-switch" data-pc-theme role="radiogroup" aria-label="Tema de la página" data-mode="${sw.dataset.mode}">${sw.innerHTML}</div>`;
+  };
   function renderPc() {
     const total = pcPick().reduce((t, p) => t + p.price, 0);
     const step = PC_STEPS[pcStep];
@@ -1004,7 +1009,8 @@
           </div>
           <p class="pd-illus">Te confirmamos stock, precio final y compatibilidad antes de cerrar la compra.</p>
         </aside>
-      </div>`;
+      </div>
+      <div class="pcb-theme"><span>Tema</span>${pcThemeHtml()}</div>`;
   }
   function openPc() {
     renderPc();
@@ -1025,6 +1031,8 @@
     if (e.target === $("pcOverlay") || e.target.closest("#pcClose")) return closePc();
     const go = e.target.closest("[data-pc-go]");
     if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); pcBrand = ""; pcInfo = null; pcBurst = pcStep; renderPc(); $("pcb").scrollTop = 0; return; }
+    const th0 = e.target.closest("[data-pc-theme] button[data-mode]");
+    if (th0) { applyTheme(th0.dataset.mode); renderPc(); return; }
     const inf = e.target.closest("[data-pc-info]");
     if (inf) { pcInfo = inf.dataset.pcInfo; renderPc(); $("pcb").scrollTop = 0; return; }
     const sel = e.target.closest("[data-pc-sel]");
