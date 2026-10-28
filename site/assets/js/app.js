@@ -831,7 +831,7 @@
     { key: "cool", label: "Refrigeración", short: "Cooler", cat: /refrig|cooler/i, optional: true, ic: '<circle cx="12" cy="12" r="9"/><path d="M12 12c0-4 3-6 5-5M12 12c4 0 6 3 5 5M12 12c0 4-3 6-5 5M12 12c-4 0-6-3-5-5"/>' },
     { key: "otros", label: "Otros (monitor, periféricos, accesorios)", short: "Otros", cat: /^otros$|monitor|perif|accesor|teclado|mouse|auricular/i, optional: true, multi: true, ic: '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>' },
   ];
-  let pc = {}, pcStep = 0, pcBrand = "", pcCheap = true;
+  let pc = {}, pcStep = 0, pcBrand = "", pcCheap = true, pcInfo = null;
   const sockets = (p) => (p && p.compat ? p.compat.filter((k) => /^(LGA\d+|AM\d)$/.test(k)) : []);
   const ddrOf = (p) => (p && p.compat ? p.compat.filter((k) => /^DDR\d$/.test(k)) : []);
   // Sin datos de un lado no se descarta (se avisa que hay que confirmarlo)
@@ -910,19 +910,33 @@
     const isSel = (p) => !!picked && (step.multi ? picked.some((x) => x.id === p.id) : picked.id === p.id);
     const skip = all.length ? "Omitir por ahora" : "Omitir";
     const keys = step ? [...new Set(ok.flatMap((p) => step.key === "mb" || step.key === "cool" || step.key === "cpu" ? sockets(p) : step.key === "ram" ? ddrOf(p) : []))] : [];
-    const card = (p, fits) => `<button type="button" class="pcc${isSel(p) ? " sel" : ""}${fits ? "" : " off"}"${fits ? ` data-pc-sel="${esc(p.id)}"` : ' disabled aria-disabled="true"'}>
+    const card = (p, fits) => `<div class="pcc-w">${p.id === STOCK_COOL ? "" : `<button type="button" class="pcc-i" data-pc-info="${esc(p.id)}" aria-label="Ver detalles de ${esc(p.name)}">Detalles</button>`}<button type="button" class="pcc${isSel(p) ? " sel" : ""}${fits ? "" : " off"}"${fits ? ` data-pc-sel="${esc(p.id)}"` : ' disabled aria-disabled="true"'}>
         ${isSel(p) ? '<span class="pcc-ok" aria-hidden="true">✔</span>' : ""}
         <span class="pcc-img"><img src="${esc(mainImg(p))}" alt="" loading="lazy" data-fallback></span>
         <span class="pcc-b"><span class="pcc-n">${esc(pcShort(p))}</span>
           <span class="pcc-tags">${fits ? pcTags(p).map((t) => `<span>${esc(t)}</span>`).join("") : `<span class="no">${esc(pcWhy(step.key, p))}</span>`}</span>
-          <b>${p.id === STOCK_COOL ? "Incluido · $0" : money(p.price)}</b></span></button>`;
+          <b>${p.id === STOCK_COOL ? "Incluido · $0" : money(p.price)}</b></span></button></div>`;
+    // Ficha del producto dentro del armador (sin salir)
+    const info = pcInfo && products.find((x) => x.id === pcInfo);
+    const infoHtml = (p) => { const imgs = pdImages(p), fits = pcFits(step.key, p);
+      return `<section class="pcb-opts pcb-info" aria-label="Detalles de ${esc(p.name)}">
+        <button type="button" class="link-btn" data-pc-back>← Volver a ${esc(step.short.toLowerCase())}</button>
+        <div class="pci-grid"><div class="pci-gal"><img id="pciMain" src="${esc(imgs[0])}" alt="" data-fallback>
+          ${imgs.length > 1 ? `<div class="pci-th">${imgs.map((src, k) => `<button type="button" data-pci-img="${esc(src)}" aria-label="Ver foto ${k + 1}"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}</div>
+        <div class="pci-txt"><h3>${esc(p.name)}</h3><b class="pci-price">${money(p.price)}</b>
+          ${p.outlet && p.condition ? `<p class="pd-condition"><span class="tag-outlet">Outlet</span> ${esc(p.condition)}</p>` : ""}
+          <span class="pcc-tags">${fits ? pcTags(p).map((t) => `<span>${esc(t)}</span>`).join("") : `<span class="no">${esc(pcWhy(step.key, p))}</span>`}</span>
+          ${fits ? `<button type="button" class="btn btn-primary" data-pc-sel="${esc(p.id)}">${isSel(p) ? "✔ Elegido" : "Elegir este"}</button>` : ""}</div></div>
+        ${p.description ? `<div class="pd-desc">${esc(p.description)}</div>` : ""}
+        ${(p.specs || []).map((g, k) => `<details class="pd-spec"${k === 0 ? " open" : ""}><summary>${esc(g.title)}</summary><table>${g.rows.map(([a, v]) => `<tr><th>${esc(a)}</th><td>${esc(v)}</td></tr>`).join("")}</table></details>`).join("")}
+      </section>`; };
     $("pcb").innerHTML = `
       <button class="pd-close icon-btn" id="pcClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <div class="pcb-top"><h2 id="pcTitle">Armá tu PC</h2><p>Tocá una opción. Solo te dejamos elegir lo que es compatible con lo que ya elegiste.</p>
         <nav class="pcb-bar" aria-label="Pasos">${PC_STEPS.map((s, i) => `<button type="button" class="pcb-st${i === pcStep ? " on" : ""}${pc[s.key] ? " done" : ""}" data-pc-go="${i}"${i === pcStep ? ' aria-current="step"' : ""}>
           <i>${pc[s.key] && i !== pcStep ? "✔" : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s.ic}</svg>`}</i>${esc(s.short)}</button>`).join("")}</nav></div>
       <div class="pcb-main">
-        ${step ? `<section class="pcb-opts" aria-label="Opciones de ${esc(step.label)}">
+        ${step && info ? infoHtml(info) : step ? `<section class="pcb-opts" aria-label="Opciones de ${esc(step.label)}">
           <div class="pcb-fl">
             ${brands.length > 1 ? `<button type="button" class="chip${pcBrand ? "" : " active"}" data-pc-brand="">Todos</button>${brands.map((b) => `<button type="button" class="chip${pcBrand === b ? " active" : ""}" data-pc-brand="${esc(b)}">${esc(b)}</button>`).join("")}` : ""}
             <button type="button" class="chip" data-pc-sort>${pcCheap ? "Más baratos primero" : "Más caros primero"}</button>
@@ -967,7 +981,7 @@
   $("pcOverlay").addEventListener("click", (e) => {
     if (e.target === $("pcOverlay") || e.target.closest("#pcClose")) return closePc();
     const go = e.target.closest("[data-pc-go]");
-    if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); pcBrand = ""; renderPc(); $("pcb").scrollTop = 0; return; }
+    if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); pcBrand = ""; pcInfo = null; renderPc(); $("pcb").scrollTop = 0; return; }
     const sel = e.target.closest("[data-pc-sel]");
     if (sel) {
       const step = PC_STEPS[pcStep], p = sel.dataset.pcSel === STOCK_COOL ? stockCool(pc.cpu) : products.find((x) => x.id === sel.dataset.pcSel);
@@ -976,14 +990,23 @@
       // Si lo nuevo deja incompatible algo ya elegido en otro paso, se quita (y se avisa)
       PC_STEPS.forEach((s) => { if (s.key !== step.key && pc[s.key] && !pcFits(s.key, pc[s.key])) { toast(`Quitamos ${s.label.toLowerCase()}: no es compatible`); delete pc[s.key]; } });
       if (pc.cool && pc.cool.id === STOCK_COOL) pc.cool = stockCool(pc.cpu);
-      renderPc(); return;
+      pcInfo = null; renderPc();
+      // Sigue solo al próximo paso (una pausa corta para ver el ✔)
+      const at = pcStep;
+      setTimeout(() => { if (pcStep === at && !pcInfo) { pcStep++; pcBrand = ""; renderPc(); $("pcb").scrollTop = 0; } }, 450);
+      return;
     }
+    const inf = e.target.closest("[data-pc-info]");
+    if (inf) { pcInfo = inf.dataset.pcInfo; renderPc(); $("pcb").scrollTop = 0; return; }
+    if (e.target.closest("[data-pc-back]")) { pcInfo = null; renderPc(); return; }
+    const th = e.target.closest("[data-pci-img]");
+    if (th) { $("pciMain").src = th.dataset.pciImg; return; }
     const br = e.target.closest("[data-pc-brand]");
     if (br) { pcBrand = br.dataset.pcBrand; renderPc(); return; }
     if (e.target.closest("[data-pc-sort]")) { pcCheap = !pcCheap; renderPc(); return; }
     const del = e.target.closest("[data-pc-del]");
     if (del) { delete pc[del.dataset.pcDel]; renderPc(); return; }
-    if (e.target.closest("#pcReset")) { pc = {}; pcStep = 0; renderPc(); return; }
+    if (e.target.closest("#pcReset")) { pc = {}; pcStep = 0; pcInfo = null; renderPc(); return; }
     if (e.target.closest("#pcCart")) { pcPick().filter((p) => p.id !== STOCK_COOL).forEach((p) => add(p.id, p.variants ? p.variants[0] : null)); closePc(); toggleCart(true); }
   });
   document.addEventListener("keydown", (e) => e.key === "Escape" && !$("pcOverlay").hidden && closePc());
