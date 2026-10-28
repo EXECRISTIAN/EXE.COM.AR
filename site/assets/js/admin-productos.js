@@ -443,7 +443,7 @@
     ed = { isNew, orig: p.id, images: [...(p.images || [])], specs: JSON.parse(JSON.stringify(p.specs || [])), sources: [...(sources.get(p.id) || [])], removedSources: [] };
     const w = can("products.write");
     const brands = [...new Set(products.map((x) => x.brand).filter(Boolean))].sort();
-    const cats = [...new Set(products.map((x) => x.category).filter(Boolean))].sort();
+    const cats = [...new Set([...products.map((x) => x.category), "Otros"].filter(Boolean))].sort();
     const m = margin(p.price, c.cost);
     const ro = w ? "" : "disabled";
     return `
