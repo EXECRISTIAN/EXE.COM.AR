@@ -967,7 +967,8 @@
     const info = pcInfo && products.find((x) => x.id === pcInfo);
     const infoHtml = (p) => { const imgs = pdImages(p), fits = pcFits(step.key, p);
       return `<section class="pcb-opts pcb-info" aria-label="Detalles de ${esc(p.name)}">
-        <button type="button" class="link-btn" data-pc-back>← Volver a ${esc(step.short.toLowerCase())}</button>
+        <div class="pci-head"><button type="button" class="link-btn" data-pc-back>← Volver a ${esc(step.short.toLowerCase())}</button>
+          <button type="button" class="pci-x" data-pc-back aria-label="Cerrar detalles y volver a ${esc(step.short.toLowerCase())}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
         <div class="pci-grid"><div class="pci-gal"><img id="pciMain" src="${esc(imgs[0])}" alt="" data-fallback>
           ${imgs.length > 1 ? `<div class="pci-th">${imgs.map((src, k) => `<button type="button" data-pci-img="${esc(src)}" aria-label="Ver foto ${k + 1}"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}</div>
         <div class="pci-txt"><h3>${esc(p.name)}</h3><b class="pci-price">${money(p.price)}</b>
