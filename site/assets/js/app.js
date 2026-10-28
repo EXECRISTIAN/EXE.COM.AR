@@ -937,6 +937,8 @@
     const sw = $("themeSwitch"); if (!sw) return "";
     return `<div class="theme-switch" data-pc-theme role="radiogroup" aria-label="Tema de la página" data-mode="${sw.dataset.mode}">${sw.innerHTML}</div>`;
   };
+  // El contenido del armador se desplaza dentro de .pcb-scroll; el selector de tema queda debajo, sin taparlo
+  const pcTop = () => { const sc = $("pcb").querySelector(".pcb-scroll"); if (sc) sc.scrollTop = 0; };
   function renderPc() {
     const total = pcPick().reduce((t, p) => t + p.price, 0);
     const step = PC_STEPS[pcStep];
@@ -979,7 +981,9 @@
         ${(p.specs || []).map((g, k) => `<details class="pd-spec"${k === 0 ? " open" : ""}><summary>${esc(g.title)}</summary><table>${g.rows.map(([a, v]) => `<tr><th>${esc(a)}</th><td>${esc(v)}</td></tr>`).join("")}</table></details>`).join("")}
       </section>`; };
     pcBurst = -1;
+    const keep = ($("pcb").querySelector(".pcb-scroll") || {}).scrollTop || 0;
     $("pcb").innerHTML = `
+      <div class="pcb-scroll">
       <button class="pd-close icon-btn" id="pcClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <div class="pcb-top"><h2 id="pcTitle">Armá tu PC</h2><p>Tocá una opción. Solo te dejamos elegir lo que es compatible con lo que ya elegiste.</p>
         <nav class="pcb-bar" aria-label="Pasos">${PC_STEPS.map((s, i) => `<button type="button" class="pcb-st${i === pcStep ? " on" : ""}${i === burst ? " burst" : ""}${pc[s.key] ? " done" : ""}" data-pc-go="${i}"${i === pcStep ? ' aria-current="step"' : ""}>
@@ -1011,7 +1015,9 @@
           <p class="pd-illus">Te confirmamos stock, precio final y compatibilidad antes de cerrar la compra.</p>
         </aside>
       </div>
+      </div>
       <div class="pcb-foot"><div class="pcb-theme"><span>Tema</span>${pcThemeHtml()}</div></div>`;
+    $("pcb").querySelector(".pcb-scroll").scrollTop = keep;
   }
   function openPc() {
     renderPc();
@@ -1031,11 +1037,11 @@
   $("pcOverlay").addEventListener("click", (e) => {
     if (e.target === $("pcOverlay") || e.target.closest("#pcClose")) return closePc();
     const go = e.target.closest("[data-pc-go]");
-    if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); pcBrand = ""; pcInfo = null; pcBurst = pcStep; renderPc(); $("pcb").scrollTop = 0; return; }
+    if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); pcBrand = ""; pcInfo = null; pcBurst = pcStep; renderPc(); pcTop(); return; }
     const th0 = e.target.closest("[data-pc-theme] button[data-mode]");
     if (th0) { applyTheme(th0.dataset.mode); renderPc(); return; }
     const inf = e.target.closest("[data-pc-info]");
-    if (inf) { pcInfo = inf.dataset.pcInfo; renderPc(); $("pcb").scrollTop = 0; return; }
+    if (inf) { pcInfo = inf.dataset.pcInfo; renderPc(); pcTop(); return; }
     const sel = e.target.closest("[data-pc-sel]");
     if (sel) {
       const step = PC_STEPS[pcStep], p = sel.dataset.pcSel === STOCK_COOL ? stockCool(pc.cpu) : products.find((x) => x.id === sel.dataset.pcSel);
@@ -1049,7 +1055,7 @@
       pcInfo = null; renderPc();
       // Sigue solo al próximo paso (una pausa corta para ver el ✔)
       const at = pcStep;
-      setTimeout(() => { if (pcStep === at && !pcInfo) { pcStep++; pcBrand = ""; pcBurst = pcStep; renderPc(); $("pcb").scrollTop = 0; } }, 450);
+      setTimeout(() => { if (pcStep === at && !pcInfo) { pcStep++; pcBrand = ""; pcBurst = pcStep; renderPc(); pcTop(); } }, 450);
       return;
     }
     if (e.target.closest("[data-pc-back]")) { pcInfo = null; renderPc(); return; }
