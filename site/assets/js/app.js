@@ -831,14 +831,14 @@
     { key: "cool", label: "Refrigeración", short: "Cooler", cat: /refrig|cooler/i, optional: true, ic: '<circle cx="12" cy="12" r="9"/><path d="M12 12c0-4 3-6 5-5M12 12c4 0 6 3 5 5M12 12c0 4-3 6-5 5M12 12c-4 0-6-3-5-5"/>' },
     { key: "otros", label: "Otros (monitor, periféricos, accesorios)", short: "Otros", cat: /^otros$|monitor|perif|accesor|teclado|mouse|auricular/i, optional: true, multi: true, ic: '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>' },
   ];
-  let pc = {}, pcStep = 0, pcBrand = "", pcCheap = true, pcInfo = null;
+  let pc = {}, pcStep = 0, pcBrand = "", pcCheap = true, pcInfo = null, pcBurst = -1;
   const sockets = (p) => (p && p.compat ? p.compat.filter((k) => /^(LGA\d+|AM\d)$/.test(k)) : []);
   const ddrOf = (p) => (p && p.compat ? p.compat.filter((k) => /^DDR\d$/.test(k)) : []);
   // Sin datos de un lado no se descarta (se avisa que hay que confirmarlo)
   const shares = (a, b) => !a.length || !b.length || a.some((k) => b.includes(k));
   const gpuWatts = (g) => { const s = g.name.toLowerCase(); for (const [re, f] of GPU_PSU) { const m = s.match(re); if (m) return f(m); } return 0; };
-  function pcFits(step, p) {
-    const { cpu, mb, ram, gpu, cool } = pc;
+  function pcFits(step, p, ctx = pc) {
+    const { cpu, mb, ram, gpu, cool } = ctx;
     if (step === "cpu") return shares(sockets(p), sockets(mb));
     if (step === "mb") return shares(sockets(p), sockets(cpu)) && shares(ddrOf(p), ddrOf(ram)) && (!cool || shares(sockets(p), sockets(cool)));
     if (step === "ram") return shares(ddrOf(p), ddrOf(mb));
@@ -902,11 +902,14 @@
     const brands = [...new Set(all.map((p) => p.brand).filter(Boolean))].sort();
     if (pcBrand && !brands.includes(pcBrand)) pcBrand = "";
     const shown = all.filter((p) => !pcBrand || p.brand === pcBrand);
-    const ok = shown.filter((p) => pcFits(step.key, p)), bad = shown.filter((p) => !pcFits(step.key, p));
+    // Solo se filtra por lo elegido en pasos anteriores: así se puede cambiar lo ya elegido
+    // (si el cambio choca con algo de un paso posterior, eso se quita y se avisa)
+    const prior = step ? Object.fromEntries(PC_STEPS.slice(0, pcStep).filter((s) => pc[s.key]).map((s) => [s.key, pc[s.key]])) : {};
+    const ok = shown.filter((p) => pcFits(step.key, p, prior)), bad = shown.filter((p) => !pcFits(step.key, p, prior));
     const by = (a, b) => (pcCheap ? a.price - b.price : b.price - a.price);
     ok.sort(by); bad.sort(by);
     if (step && step.key === "cool" && cpuCooler(pc.cpu)) ok.unshift(stockCool(pc.cpu));
-    const notes = pcNotes(), next = PC_STEPS[pcStep + 1], picked = step && pc[step.key];
+    const notes = pcNotes(), burst = pcBurst, next = PC_STEPS[pcStep + 1], picked = step && pc[step.key];
     const isSel = (p) => !!picked && (step.multi ? picked.some((x) => x.id === p.id) : picked.id === p.id);
     const skip = ok.length ? "Omitir por ahora" : "Omitir";
     const keys = step ? [...new Set(ok.flatMap((p) => step.key === "mb" || step.key === "cool" || step.key === "cpu" ? sockets(p) : step.key === "ram" ? ddrOf(p) : []))] : [];
@@ -930,10 +933,11 @@
         ${p.description ? `<div class="pd-desc">${esc(p.description)}</div>` : ""}
         ${(p.specs || []).map((g, k) => `<details class="pd-spec"${k === 0 ? " open" : ""}><summary>${esc(g.title)}</summary><table>${g.rows.map(([a, v]) => `<tr><th>${esc(a)}</th><td>${esc(v)}</td></tr>`).join("")}</table></details>`).join("")}
       </section>`; };
+    pcBurst = -1;
     $("pcb").innerHTML = `
       <button class="pd-close icon-btn" id="pcClose" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <div class="pcb-top"><h2 id="pcTitle">Armá tu PC</h2><p>Tocá una opción. Solo te dejamos elegir lo que es compatible con lo que ya elegiste.</p>
-        <nav class="pcb-bar" aria-label="Pasos">${PC_STEPS.map((s, i) => `<button type="button" class="pcb-st${i === pcStep ? " on" : ""}${pc[s.key] ? " done" : ""}" data-pc-go="${i}"${i === pcStep ? ' aria-current="step"' : ""}>
+        <nav class="pcb-bar" aria-label="Pasos">${PC_STEPS.map((s, i) => `<button type="button" class="pcb-st${i === pcStep ? " on" : ""}${i === burst ? " burst" : ""}${pc[s.key] ? " done" : ""}" data-pc-go="${i}"${i === pcStep ? ' aria-current="step"' : ""}>
           <i>${pc[s.key] && i !== pcStep ? "✔" : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s.ic}</svg>`}</i>${esc(s.short)}</button>`).join("")}</nav></div>
       <div class="pcb-main">
         ${step && info ? infoHtml(info) : step ? `<section class="pcb-opts" aria-label="Opciones de ${esc(step.label)}">
@@ -981,11 +985,13 @@
   $("pcOverlay").addEventListener("click", (e) => {
     if (e.target === $("pcOverlay") || e.target.closest("#pcClose")) return closePc();
     const go = e.target.closest("[data-pc-go]");
-    if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); pcBrand = ""; pcInfo = null; renderPc(); $("pcb").scrollTop = 0; return; }
+    if (go) { pcStep = Math.min(PC_STEPS.length, Math.max(0, +go.dataset.pcGo)); pcBrand = ""; pcInfo = null; pcBurst = pcStep; renderPc(); $("pcb").scrollTop = 0; return; }
     const sel = e.target.closest("[data-pc-sel]");
     if (sel) {
       const step = PC_STEPS[pcStep], p = sel.dataset.pcSel === STOCK_COOL ? stockCool(pc.cpu) : products.find((x) => x.id === sel.dataset.pcSel);
       if (step.multi) { const a = (pc[step.key] || []).filter((x) => x.id !== p.id); if (a.length === (pc[step.key] || []).length) a.push(p); if (a.length) pc[step.key] = a; else delete pc[step.key]; renderPc(); return; }
+      // Tocar de nuevo el elegido lo quita
+      if (pc[step.key] && pc[step.key].id === p.id) { delete pc[step.key]; renderPc(); return; }
       pc[step.key] = p;
       // Si lo nuevo deja incompatible algo ya elegido en otro paso, se quita (y se avisa)
       PC_STEPS.forEach((s) => { if (s.key !== step.key && pc[s.key] && !pcFits(s.key, pc[s.key])) { toast(`Quitamos ${s.label.toLowerCase()}: no es compatible`); delete pc[s.key]; } });
@@ -993,7 +999,7 @@
       pcInfo = null; renderPc();
       // Sigue solo al próximo paso (una pausa corta para ver el ✔)
       const at = pcStep;
-      setTimeout(() => { if (pcStep === at && !pcInfo) { pcStep++; pcBrand = ""; renderPc(); $("pcb").scrollTop = 0; } }, 450);
+      setTimeout(() => { if (pcStep === at && !pcInfo) { pcStep++; pcBrand = ""; pcBurst = pcStep; renderPc(); $("pcb").scrollTop = 0; } }, 450);
       return;
     }
     const inf = e.target.closest("[data-pc-info]");
