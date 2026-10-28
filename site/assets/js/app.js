@@ -1015,8 +1015,9 @@
           <p class="pd-illus">Te confirmamos stock, precio final y compatibilidad antes de cerrar la compra.</p>
         </aside>
       </div>
-      </div>
-      <div class="pcb-foot"><div class="pcb-theme"><span>Tema</span>${pcThemeHtml()}</div></div>`;
+      </div>`;
+    // Selector de tema fuera del diálogo, debajo de todo (sin barra y sin tapar nada)
+    $("pcTheme").innerHTML = `<div class="pcb-theme"><span>Tema</span>${pcThemeHtml()}</div>`;
     $("pcb").querySelector(".pcb-scroll").scrollTop = keep;
   }
   function openPc() {
