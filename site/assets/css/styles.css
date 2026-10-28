@@ -910,8 +910,17 @@ html { touch-action: manipulation; }
 @media (prefers-reduced-motion: reduce) { .pcb-st.burst i, .pcb-st.burst i::before, .pcb-st.burst i::after { animation: none; } }
 .pcb-sort { display: inline-flex; align-items: center; gap: 6px; font-size: .8rem; font-weight: 700; color: var(--muted); }
 .pcb-sort select { font: inherit; font-size: .85rem; color: var(--c2); background: var(--surface); border: 1px solid var(--c4); border-radius: 999px; padding: 7px 12px; cursor: pointer; }
-/* Selector de tema en el armador: fila al pie del diálogo, del mismo color que el fondo (sin barra) y sin tapar nada */
+/* Selector de tema del armador: fuera del diálogo, debajo de todo, sobre el fondo oscuro (sin barra y sin tapar nada) */
 .pd.pcb { display: flex; flex-direction: column; overflow: hidden; }
 .pcb-scroll { position: relative; flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
-.pcb-foot { flex: none; display: flex; justify-content: flex-end; padding: 8px 16px 10px; background: var(--c4); }
+#pcOverlay { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+#pcOverlay .pd.pcb { max-height: calc(100vh - 96px); }
+.pcb-out { width: min(1120px, 100%); display: flex; justify-content: flex-end; flex: none; }
+@media (max-width: 860px) {
+  #pcOverlay { justify-content: flex-end; gap: 8px; padding-bottom: 10px; }
+  #pcOverlay .pd.pcb { max-height: calc(94vh - 60px); border-radius: 16px; }
+  .pcb-out { padding: 0 12px; }
+}
 .pcb-theme { display: flex; align-items: center; gap: 8px; padding: 5px 6px 5px 12px; border-radius: 999px; background: #0d1117; color: #8a919e; font-size: .75rem; font-weight: 700; }
+/* Con el armador abierto se oculta el botón flotante de WhatsApp (el armador tiene el suyo y así no tapa el selector de tema) */
+body:has(#pcOverlay.show) .wa-float { display: none; }
