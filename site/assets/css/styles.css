@@ -400,6 +400,7 @@ html[data-wa-float="off"] .wa-float { display: none; }
 /* ---------- Animaciones de entrada (Motion Effects de Elementor) ---------- */
 .reveal { opacity: 0; transform: translateY(40px); transition: opacity .9s var(--ease), transform .9s var(--ease); transition-delay: var(--d, 0s); }
 .reveal.zoom { transform: scale(.94); }
+.card.reveal { transform: translateY(16px); transition-duration: .5s; }
 .reveal.in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

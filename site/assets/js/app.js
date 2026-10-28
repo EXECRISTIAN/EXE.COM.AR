@@ -1559,8 +1559,13 @@
   const revealer = new IntersectionObserver((entries) => {
     entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("in"); revealer.unobserve(en.target); } });
   }, { threshold: 0.12 });
+  // Tarjetas de productos: aparecen antes de entrar en pantalla, así siempre se asoma la fila siguiente
+  // y el cliente ve que hay más productos abajo (antes quedaba un hueco vacío hasta llegar)
+  const cardRevealer = new IntersectionObserver((entries) => {
+    entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("in"); cardRevealer.unobserve(en.target); } });
+  }, { threshold: 0, rootMargin: "0px 0px 260px 0px" });
   function observeReveals() {
-    document.querySelectorAll(".reveal:not(.in)").forEach((el) => revealer.observe(el));
+    document.querySelectorAll(".reveal:not(.in)").forEach((el) => (el.classList.contains("card") ? cardRevealer : revealer).observe(el));
   }
   observeReveals();
 
