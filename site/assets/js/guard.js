@@ -72,6 +72,54 @@
   }
   const later = () => { clearTimeout(timer); timer = setTimeout(show, 180); };
   document.addEventListener("selectionchange", later);
-  window.addEventListener("scroll", hide, true);
-  window.addEventListener("resize", hide);
+
+  // Pegar: clic derecho (o mantener apretado en el celular) sobre un campo de texto muestra un botón "Pegar"
+  const PASTE_ICON = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg>';
+  let pbtn = null, field = null;
+  const editable = (el) => el && !el.disabled && !el.readOnly && (el.tagName === "TEXTAREA" || (el.tagName === "INPUT" && /^(text|search|email|url|tel|number|password)$/i.test(el.type)) || el.isContentEditable);
+  function hidePaste() { if (pbtn) pbtn.style.display = "none"; field = null; }
+  function makePaste() {
+    pbtn = document.createElement("button");
+    pbtn.type = "button";
+    pbtn.setAttribute("aria-label", "Pegar en el campo");
+    Object.assign(pbtn.style, { position: "fixed", zIndex: "2147483000", display: "none", alignItems: "center", gap: "6px",
+      padding: "6px 12px", border: "1px solid #ffffff2e", borderRadius: "999px", background: "#0d1117", color: "#fff",
+      font: "700 13px/1 system-ui, -apple-system, Segoe UI, Roboto, sans-serif", boxShadow: "0 6px 18px #0006", cursor: "pointer", userSelect: "none" });
+    pbtn.addEventListener("pointerdown", (e) => e.preventDefault());   // que el campo no pierda el foco
+    pbtn.addEventListener("mousedown", (e) => e.preventDefault());
+    pbtn.addEventListener("click", paste);
+    document.body.appendChild(pbtn);
+  }
+  const plabel = (t) => { pbtn.innerHTML = PASTE_ICON + "<span>" + t + "</span>"; };
+  async function paste() {
+    const el = field;
+    let t = null;
+    try { t = await navigator.clipboard.readText(); } catch (e) { /* el navegador no dejó leer el portapapeles */ }
+    if (t == null || !el) { plabel("Usá Ctrl+V para pegar"); setTimeout(hidePaste, 1800); return; }
+    el.focus();
+    if (el.isContentEditable) document.execCommand("insertText", false, t);
+    else {
+      const a = el.selectionStart ?? el.value.length, b = el.selectionEnd ?? a;
+      try { el.setRangeText(t, a, b, "end"); } catch (e) { el.value += t; }   // los type="number"/"email" no aceptan setRangeText
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    hidePaste();
+  }
+  window.addEventListener("contextmenu", (e) => {
+    const el = e.target.closest ? e.target.closest("input, textarea, [contenteditable]") : null;
+    if (!editable(el)) return hidePaste();
+    if (!pbtn) makePaste();
+    field = el; plabel("Pegar");
+    pbtn.style.display = "inline-flex";
+    const w = pbtn.offsetWidth, h = pbtn.offsetHeight;
+    let x = e.clientX + 4, y = e.clientY + 6;
+    if (!e.clientX && !e.clientY) { const r = el.getBoundingClientRect(); x = r.left; y = r.bottom + 6; }   // abierto con el teclado
+    pbtn.style.left = Math.max(6, Math.min(innerWidth - w - 6, x)) + "px";
+    pbtn.style.top = Math.max(6, Math.min(innerHeight - h - 6, y)) + "px";
+  }, true);
+  document.addEventListener("pointerdown", (e) => { if (pbtn && e.target !== pbtn && !pbtn.contains(e.target)) hidePaste(); }, true);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") { hide(); hidePaste(); } });
+
+  window.addEventListener("scroll", () => { hide(); hidePaste(); }, true);
+  window.addEventListener("resize", () => { hide(); hidePaste(); });
 })();
