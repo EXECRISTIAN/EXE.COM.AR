@@ -835,13 +835,17 @@
     { key: "cpu", label: "Procesador", short: "Procesador", cat: /procesador/i, ic: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>' },
     { key: "mb", label: "Motherboard", short: "Mother", cat: /mother/i, ic: '<rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="6" height="6"/><path d="M16 7v10M7 17h6"/>' },
     { key: "ram", label: "Memoria RAM", short: "Memoria", cat: /memoria/i, ic: '<rect x="2" y="7" width="20" height="9" rx="1"/><path d="M6 16v3M10 16v3M14 16v3M18 16v3M6 10v3M10 10v3M14 10v3M18 10v3"/>' },
+    { key: "disk", label: "Almacenamiento", short: "Almacenamiento", cat: /almacen|ssd|disco/i, ic: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15h.01M11 15h6"/>' },
     { key: "gpu", label: "Placa de video", short: "Placa de video", cat: /placa/i, optional: true, ic: '<rect x="2" y="6" width="20" height="11" rx="2"/><circle cx="9" cy="11.5" r="3"/><circle cx="16" cy="11.5" r="2"/><path d="M5 17v3"/>' },
     { key: "psu", label: "Fuente", short: "Fuente", cat: /fuente/i, ic: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>' },
     { key: "case", label: "Gabinete", short: "Gabinete", cat: /gabinete/i, ic: '<rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="15" r="2.5"/><path d="M9 6h6"/>' },
     { key: "cool", label: "Refrigeración", short: "Cooler", cat: /refrig|cooler/i, optional: true, ic: '<circle cx="12" cy="12" r="9"/><path d="M12 12c0-4 3-6 5-5M12 12c4 0 6 3 5 5M12 12c0 4-3 6-5 5M12 12c-4 0-6-3-5-5"/>' },
     { key: "otros", label: "Otros (monitor, periféricos, accesorios)", short: "Otros", cat: /^otros$|monitor|perif|accesor|teclado|mouse|auricular/i, optional: true, multi: true, ic: '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>' },
   ];
-  let pc = {}, pcStep = 0, pcBrand = "", pcSort = "cheap", pcInfo = null, pcBurst = -1;
+  let pc = {}, pcStep = 0, pcBrand = "", pcSort = "cheap", pcInfo = null, pcBurst = -1, pcBarX = 0;
+  // Barra de pasos en celular: "center" = el paso actual siempre queda en el centro (los pasos se deslizan hacia él);
+  // "edge" = los primeros quedan a la izquierda y la barra se mueve recién cuando el paso actual se iría de la pantalla
+  const PC_BAR_MODE = "center";
   const sockets = (p) => (p && p.compat ? p.compat.filter((k) => /^(LGA\d+|AM\d)$/.test(k)) : []);
   const ddrOf = (p) => (p && p.compat ? p.compat.filter((k) => /^DDR\d$/.test(k)) : []);
   // Sin datos de un lado no se descarta (se avisa que hay que confirmarlo)
@@ -1079,6 +1083,20 @@
     // Selector de tema fuera del diálogo, debajo de todo (sin barra y sin tapar nada)
     $("pcTheme").innerHTML = `<div class="pcb-theme"><span>Tema</span>${pcThemeHtml()}</div>`;
     $("pcb").querySelector(".pcb-scroll").scrollTop = keep;
+    // Desliza la barra de pasos (desde donde estaba) para que el paso actual quede a la vista
+    const bar = $("pcb").querySelector(".pcb-bar"), on = bar && bar.querySelector(".pcb-st.on");
+    if (bar) {
+      bar.classList.toggle("centered", PC_BAR_MODE === "center");
+      bar.scrollLeft = pcBarX;
+      bar.addEventListener("scroll", () => { pcBarX = bar.scrollLeft; }, { passive: true });
+      if (on && bar.scrollWidth > bar.clientWidth) {
+        const target = on.offsetLeft - (bar.clientWidth - on.offsetWidth) / 2;
+        const max = bar.scrollWidth - bar.clientWidth;
+        const left = Math.max(0, Math.min(max, target));
+        const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+        requestAnimationFrame(() => bar.scrollTo({ left, behavior: smooth ? "smooth" : "auto" }));
+      }
+    }
     pcSave();
   }
   function openPc() {
