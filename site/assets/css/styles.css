@@ -802,7 +802,7 @@ html { touch-action: manipulation; }
 .pcb-top { background: var(--surface); padding: 22px 24px 0; border-bottom: 1px solid var(--line); }
 .pcb-top h2 { margin: 0; font-size: 1.5rem; padding-right: 44px; }
 .pcb-top p { margin: 4px 0 14px; color: var(--muted); font-size: .92rem; }
-.pcb-bar { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.pcb-bar { position: relative; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
 .pcb-bar::-webkit-scrollbar { display: none; }
 .pcb-st { flex: 1; min-width: 84px; display: grid; justify-items: center; gap: 6px; padding: 10px 6px 12px; border: 0; border-bottom: 3px solid transparent; background: none; color: var(--muted); font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; }
 .pcb-st i { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--c4); font-style: normal; font-size: 1.05rem; }
@@ -935,3 +935,6 @@ body:has(#pcOverlay.show) .wa-float { display: none; }
 .igpu { display: block; font-size: .78rem; font-weight: 700; margin-top: 2px; }
 .igpu.si { color: var(--ok); }
 .igpu.no { color: var(--warn, #d97706); }
+
+/* Celular: modo "centrado" de la barra de pasos: espacio a los costados para que cualquier paso (incluso el primero) pueda quedar en el centro */
+@media (max-width: 800px) { .pcb-bar.centered { padding-inline: calc(50% - 46px); } .pcb-bar.centered .pcb-st { flex: 0 0 auto; } }
