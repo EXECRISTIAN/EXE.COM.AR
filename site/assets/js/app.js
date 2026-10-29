@@ -845,7 +845,7 @@
   let pc = {}, pcStep = 0, pcBrand = "", pcSort = "cheap", pcInfo = null, pcBurst = -1, pcBarX = 0;
   // Barra de pasos en celular: "center" = el paso actual siempre queda en el centro (los pasos se deslizan hacia él);
   // "edge" = los primeros quedan a la izquierda y la barra se mueve recién cuando el paso actual se iría de la pantalla
-  const PC_BAR_MODE = "center";
+  const PC_BAR_MODE = "edge";
   const sockets = (p) => (p && p.compat ? p.compat.filter((k) => /^(LGA\d+|AM\d)$/.test(k)) : []);
   const ddrOf = (p) => (p && p.compat ? p.compat.filter((k) => /^DDR\d$/.test(k)) : []);
   // Sin datos de un lado no se descarta (se avisa que hay que confirmarlo)
