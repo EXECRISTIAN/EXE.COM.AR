@@ -29,7 +29,7 @@ jobs:
       - uses: actions/configure-pages@v5
       # Vista previa al compartir: una página por producto con su foto (Facebook/WhatsApp no leen el #)
       - name: Generar páginas de vista previa de productos
-        run: python3 tools/share_pages.py
+        run: pip install -q pillow && python3 tools/share_pages.py
       # Seguridad automática en TODAS las páginas, incluidas las que se agreguen en el futuro: política
       # CSP (solo corren scripts propios, con huellas recalculadas) y bloqueo del modo desarrollador.
       - name: Proteger todas las páginas (CSP + bloqueo del modo desarrollador)
