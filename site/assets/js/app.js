@@ -758,7 +758,8 @@
     btn.classList.add("ok"); btn.querySelector("svg").outerHTML = CHECK_ICON;
     setTimeout(() => { btn.classList.remove("ok"); btn.innerHTML = old; }, 1400);
   }
-  const productUrl = (id) => `${siteBase()}#producto/${encodeURIComponent(id)}`;
+  // Link con vista previa propia (foto y nombre del producto en Facebook/WhatsApp): /p/<id>/ redirige a la ficha
+  const productUrl = (id) => `${siteBase()}p/${encodeURIComponent(id)}/`;
   const budgetUrl = () => `${siteBase()}#presupuesto/${cart.map((l) => [l.id, l.qty, l.variant || ""].map(encodeURIComponent).join("~")).join(".")}`;
   // Vuelve a disparar el latido (ej. cada vez que se abre el carrito)
   function pulse(el) { if (!el) return; el.classList.remove("sh-pulse"); void el.offsetWidth; el.classList.add("sh-pulse"); }

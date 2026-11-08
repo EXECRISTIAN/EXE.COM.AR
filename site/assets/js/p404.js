@@ -5,6 +5,9 @@
   const $ = (id) => document.getElementById(id);
   const root = document.documentElement;
   const base = document.querySelector("base") ? document.querySelector("base").href : location.origin + "/";
+  // Link compartido de un producto cuya vista previa todavía no se generó (/p/<id>/): ir directo a su ficha
+  const shared = location.pathname.match(/\/p\/([^/]+)\/?$/);
+  if (shared) { location.replace(`${base}#producto/${shared[1]}`); return; }
   const wa = `https://wa.me/${cfg.whatsappNumber || "5491130095254"}`;
   const waHello = `${wa}?text=${encodeURIComponent("Hola EXE! Quería hacer una consulta.")}`;
   const waLost = `${wa}?text=${encodeURIComponent("Hola EXE! Llegué a una página que no existe (" + location.pathname + ") y quería hacer una consulta.")}`;
