@@ -3,7 +3,7 @@
 Facebook, WhatsApp, Telegram, etc. no leen lo que va después del # ni ejecutan JavaScript, así que un link
 https://exe.com.ar/#producto/<id> siempre mostraba la imagen general de la web. Este script crea, por cada
 producto activo, una página mínima con título, descripción y FOTO DEL PRODUCTO (etiquetas og:/twitter:) que
-redirige al instante a la ficha en la tienda. La tienda comparte ese link (https://exe.com.ar/p/<id>/).
+muestra solo el producto (foto, nombre, precio) con un botón a la tienda, sin redirección. La tienda comparte ese link (https://exe.com.ar/p/<id>/).
 
 Corre en cada deploy (pages.yml) y de forma programada, así cubre los productos que se agreguen después.
 Lee los productos públicos de Supabase (misma clave pública que usa la web); si no responde, usa
@@ -29,7 +29,7 @@ def load_products():
     try:
         url, key = config()
         req = urllib.request.Request(
-            f"{url}/rest/v1/products?select=id,name,brand,category,description,images,image&active=eq.true",
+            f"{url}/rest/v1/products?select=id,name,brand,category,description,images,image,price,ask_price&active=eq.true",
             headers={"apikey": key, "Authorization": f"Bearer {key}"})
         rows = json.load(urllib.request.urlopen(req, timeout=30))
         if isinstance(rows, list) and rows:
@@ -79,6 +79,14 @@ def og_image(p):
         return abs_url(src), (1200, 630)
 
 
+def price_label(p):
+    try:
+        v = 0 if p.get("ask_price") else float(p.get("price") or 0)
+    except (TypeError, ValueError):
+        v = 0
+    return f"$ {v:,.0f}".replace(",", ".") if v > 0 else "Consultar precio"
+
+
 def page(p):
     pid = p["id"]
     e = lambda s: html.escape(str(s or ""), quote=True)
@@ -99,7 +107,7 @@ def page(p):
   <title>{e(title)}</title>
   <meta name="description" content="{e(desc)}">
   <meta name="robots" content="noindex, follow">
-  <meta property="og:type" content="product">
+  <meta property="og:type" content="website">
   <meta property="og:site_name" content="EXE">
   <meta property="og:locale" content="es_AR">
   <meta property="og:title" content="{e(p['name'])}">
@@ -113,10 +121,26 @@ def page(p):
   <meta name="twitter:title" content="{e(p['name'])}">
   <meta name="twitter:description" content="{e(desc)}">
   <meta name="twitter:image" content="{e(img)}">
-  <script src="../../assets/js/go.js"></script>
+  <style>
+    body{{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f4f6f9;color:#16202b}}
+    main{{max-width:560px;margin:0 auto;padding:24px 16px;display:grid;gap:14px}}
+    .logo{{font:800 22px/1 system-ui;letter-spacing:.04em;color:#0084d6;text-decoration:none}}
+    img{{width:100%;height:auto;border-radius:12px;background:#fff}}
+    h1{{font-size:20px;margin:0}}
+    p{{margin:0;line-height:1.5;color:#4a5866}}
+    .price{{font-size:22px;font-weight:800;color:#16202b}}
+    .btn{{display:block;text-align:center;padding:14px;border-radius:10px;background:#0073bb;color:#fff;font-weight:700;text-decoration:none}}
+  </style>
 </head>
 <body>
-  <p><a href="{e(target)}">Ver {e(p['name'])} en EXE</a></p>
+  <main>
+    <a class="logo" href="../../">EXE</a>
+    <img src="{e(img)}" alt="{e(p['name'])}">
+    <h1>{e(p['name'])}</h1>
+    <div class="price">{e(price_label(p))}</div>
+    <p>{e(desc)}</p>
+    <a class="btn" href="{e(target)}">Ver en la tienda</a>
+  </main>
 </body>
 </html>
 """
