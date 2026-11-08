@@ -51,11 +51,38 @@ def safe_id(pid):
     return bool(re.fullmatch(r"[A-Za-z0-9._-]+", pid or "")) and pid not in (".", "..")
 
 
+def og_image(p):
+    """Copia JPG de la primera foto en site/p/<id>/og.jpg (Facebook/WhatsApp no siempre aceptan .webp).
+    Si no se puede convertir, usa la foto original."""
+    imgs = p.get("images") or ([p["image"]] if p.get("image") else [])
+    src = imgs[0] if imgs else None
+    if not src:
+        return abs_url(None), (1200, 630)
+    try:
+        from PIL import Image
+        import io
+        if re.match(r"^https?://", src):
+            data = urllib.request.urlopen(urllib.request.Request(src, headers={"User-Agent": "Mozilla/5.0"}), timeout=30).read()
+            im = Image.open(io.BytesIO(data))
+        else:
+            im = Image.open(SITE / src.lstrip("./"))
+        im = im.convert("RGBA")
+        im.thumbnail((1200, 1200))
+        bg = Image.new("RGB", im.size, (255, 255, 255))
+        bg.paste(im, mask=im.split()[3])
+        out = OUT / p["id"] / "og.jpg"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        bg.save(out, "JPEG", quality=85)
+        return f"{BASE}p/{p['id']}/og.jpg", bg.size
+    except Exception as e:
+        print(f"{p['id']}: no pude convertir la foto ({e}); uso la original", file=sys.stderr)
+        return abs_url(src), (1200, 630)
+
+
 def page(p):
     pid = p["id"]
     e = lambda s: html.escape(str(s or ""), quote=True)
-    imgs = p.get("images") or ([p["image"]] if p.get("image") else [])
-    img = abs_url(imgs[0] if imgs else None)
+    img, size = og_image(p)
     desc = re.sub(r"\s+", " ", p.get("description") or "").strip()
     if not desc:
         desc = f"{p.get('category') or 'Hardware'} {p.get('brand') or ''} en EXE. Consultá precio y stock por WhatsApp.".replace("  ", " ")
@@ -79,12 +106,14 @@ def page(p):
   <meta property="og:description" content="{e(desc)}">
   <meta property="og:url" content="{e(url)}">
   <meta property="og:image" content="{e(img)}">
+  <meta property="og:image:width" content="{size[0]}">
+  <meta property="og:image:height" content="{size[1]}">
   <meta property="og:image:alt" content="{e(p['name'])}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{e(p['name'])}">
   <meta name="twitter:description" content="{e(desc)}">
   <meta name="twitter:image" content="{e(img)}">
-  <meta http-equiv="refresh" content="0; url={e(target)}">
+  <script src="../../assets/js/go.js"></script>
 </head>
 <body>
   <p><a href="{e(target)}">Ver {e(p['name'])} en EXE</a></p>
