@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
 
   // 2) El pedido se identifica por external_reference, que se fija al crear la preferencia de pago
   const orderId = Number(pay.external_reference);
-  const { data: order } = await db.from("orders").select("id, total, status").eq("id", orderId).single();
+  const { data: order } = await db.from("orders").select("id, total, status, user_id").eq("id", orderId).single();
   if (!order) return new Response("order not found", { status: 404 });
 
   // 3) El monto pagado tiene que coincidir con el total calculado por la base
@@ -38,8 +38,44 @@ Deno.serve(async (req) => {
   }).eq("id", orderId);
   await db.from("order_events").insert({ order_id: orderId, from_status: "pending", to_status: "paid", actor: "mercadopago" });
 
-  // 4) Email automático de confirmación
+  // 4) Verificación automática de identidad (sin IA): documento de la cuenta vs. pagador y titular de la tarjeta
+  await checkIdentity(orderId, order.user_id, pay).catch(() => {});
+
+  // 5) Email automático de confirmación
   await db.functions.invoke("send-email", { body: { template: "order_paid", order_id: orderId } });
 
   return new Response("ok", { status: 200 });
 });
+
+// Compara el documento cargado en la cuenta con los que informa Mercado Pago. No frena el pago:
+// deja el pedido marcado para que se revise antes de despachar si algo no coincide.
+async function checkIdentity(orderId: number, userId: string | null, pay: any) {
+  const { data: prof } = userId
+    ? await db.from("profiles").select("full_name, doc_number").eq("id", userId).maybeSingle()
+    : { data: null };
+  const cuenta = prof?.doc_number ? await nucleo(prof.doc_number) : null;
+  const pagos = [pay?.payer?.identification?.number, pay?.card?.cardholder?.identification?.number]
+    .filter(Boolean).map(String);
+  const nucleos = (await Promise.all(pagos.map(nucleo))).filter(Boolean);
+
+  let res: "coincide" | "no_coincide" | "sin_datos";
+  if (!cuenta || !nucleos.length) res = "sin_datos";
+  else res = nucleos.includes(cuenta) ? "coincide" : "no_coincide";
+
+  const partes = [
+    `Cuenta: ${prof?.doc_number || "sin documento"}`,
+    `Mercado Pago: ${pagos.join(" / ") || "sin documento"}`,
+  ];
+  const titular = String(pay?.card?.cardholder?.name || "").trim();
+  if (titular) {
+    const norm = (t: string) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 2);
+    const a = new Set(norm(prof?.full_name || "")), comun = norm(titular).some((w) => a.has(w));
+    partes.push(`Titular de la tarjeta: ${titular} (${comun ? "el nombre coincide" : "el nombre NO coincide"})`);
+  }
+  await db.from("orders").update({ id_check: res, id_check_detail: partes.join(" · ") }).eq("id", orderId);
+}
+
+async function nucleo(t: string): Promise<string | null> {
+  const { data } = await db.rpc("doc_nucleo", { t });
+  return data || null;
+}

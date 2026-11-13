@@ -33,7 +33,7 @@
   async function listOrders() {
     if (A.demo) return [...demo().values(), ...A.DEMO.orders.filter((o) => !demo().has(o.id))].sort((a, b) => b.id - a.id);
     const { data, error } = await sb().from("orders")
-      .select("id, created_at, status, total, source, customer_name, packed_at, carrier, tracking_number, label_url, customer:profiles(full_name)")
+      .select("id, created_at, status, total, source, customer_name, packed_at, carrier, tracking_number, label_url, id_check, customer:profiles(full_name)")
       .order("created_at", { ascending: false }).limit(300);
     if (error) throw error;
     return data.map((o) => ({ ...o, customer: o.customer?.full_name || o.customer_name }));
@@ -41,7 +41,7 @@
   async function getOrder(id) {
     if (A.demo) return demo().get(Number(id)) || null;
     const { data, error } = await sb().from("orders")
-      .select("*, order_items(product_id, variant, qty, unit_price, products(name, location)), profile:profiles(full_name, email, phone)")
+      .select("*, order_items(product_id, variant, qty, unit_price, products(name, location)), profile:profiles(full_name, email, phone, doc_number, doc_type)")
       .eq("id", id).maybeSingle();
     if (error) throw error;
     if (data && data.profile) {                     // pedidos de la web: completar con los datos de la cuenta
@@ -72,7 +72,7 @@
       </div>
       <div class="panel"><table class="table"><tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Estado</th><th>Total</th><th>Armado</th><th>Envío</th><th></th></tr>
       ${rows.length ? rows.map((o) => `<tr><td>${o.id}${o.source === "manual" ? ` <span class="tag-mini" title="Armado desde el panel">panel</span>` : ""}</td>
-        <td>${esc(String(o.created_at).slice(0, 10))}</td><td>${esc(o.customer || "—")}</td>
+        <td>${esc(String(o.created_at).slice(0, 10))}</td><td>${esc(o.customer || "—")}${o.id_check === "no_coincide" ? ` <span title="El documento del pago no coincide con el de la cuenta">⚠</span>` : ""}</td>
         <td><span class="pill ${esc(o.status)}">${esc(STATUS[o.status] || o.status)}</span></td><td>${money(o.total)}</td>
         <td>${o.packed_at ? "✅ Embalado" : "—"}</td><td>${A.shipCell(o)}</td><td><a class="btn btn-outline btn-sm" href="#pedido/${o.id}">Abrir</a></td></tr>`).join("")
         : `<tr><td colspan="8">Todavía no hay pedidos.</td></tr>`}
@@ -137,7 +137,13 @@
     const packed = new Set(o.packed_items || []);
     const items = o.order_items || [];
     const sub = items.reduce((n, i) => n + i.qty * i.unit_price, 0);
-    return `<div class="order-actions">
+    const ID = { coincide: ["ok", "✔ Identidad verificada: el documento de la cuenta coincide con el del pago."],
+      no_coincide: ["error", "⚠ El documento del pago NO coincide con el de la cuenta. Revisá antes de despachar."],
+      sin_datos: ["info", "Identidad sin verificar: falta el documento en la cuenta o en el pago."] }[o.id_check];
+    const doc = o.profile?.doc_number ? `${o.profile.doc_type || "Documento"}: ${o.profile.doc_number}` : "";
+    return `${ID ? `<p class="notice ${ID[0]}">${ID[1]}${o.id_check_detail ? `<br><small>${esc(o.id_check_detail)}</small>` : ""}</p>` : ""}
+      ${doc ? `<p class="notice info">Cuenta del cliente · ${esc(doc)}</p>` : ""}
+      <div class="order-actions">
         <button class="btn btn-primary" id="printLabel">🖨 Etiqueta</button>
         <button class="btn btn-outline" id="printPick">📋 Lista de armado</button>
         <a class="btn btn-outline" href="#pedidos">← Volver</a>
