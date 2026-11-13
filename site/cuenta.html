@@ -49,6 +49,8 @@
             </div>
             <p class="bd-err" role="alert" hidden></p>
           </div>
+          <label class="field">DNI, CUIL o CUIT<input name="doc_number" required inputmode="numeric" maxlength="14" placeholder="Ej: 30123456 o 20-12345678-6" data-doc></label>
+          <p class="doc-err notice error" role="alert" hidden></p>
           <label class="field">Email<input type="email" name="email" required autocomplete="email"></label>
           <label class="field">Contraseña<input type="password" name="password" minlength="8" required autocomplete="new-password"></label>
           <div class="captcha" data-captcha="register"></div>
@@ -75,6 +77,7 @@
       <section id="logged" hidden>
         <h1>Hola, <span id="who"></span></h1>
         <p style="color:var(--c3)">Desde acá vas a ver tu historial de pedidos.</p>
+        <p class="notice info" id="docNeed" hidden>🪪 Falta tu DNI, CUIL o CUIT. <a href="#configuracion">Completalo en Mi cuenta</a>: lo usamos para verificar tus compras.</p>
         <p class="notice info" id="birthNeed" hidden>🎂 Falta tu fecha de nacimiento. <a href="#configuracion">Completala en Mi cuenta</a> (es obligatoria).</p>
         <p class="notice info" id="mfaNeed" hidden>🔐 Para usar el panel de administración tenés que activar la verificación en dos pasos. <button type="button" class="link-btn" id="mfaNeedBtn">Activarla ahora</button></p>
         <div class="my-code" id="myCode" hidden></div>
@@ -101,6 +104,8 @@
         </div>
         <p class="bd-err" role="alert" hidden></p>
       </div>
+      <label class="field">DNI, CUIL o CUIT<input name="doc_number" inputmode="numeric" maxlength="14" placeholder="Ej: 30123456 o 20-12345678-6" data-doc></label>
+      <p class="doc-err notice error" role="alert" hidden></p>
       <label class="field">Email<input name="email" readonly></label>
       <label class="field ed-check acc-optin"><input type="checkbox" name="marketing_opt_in"> Quiero recibir ofertas y novedades de EXE por email (podés darte de baja cuando quieras)</label>
       <div class="acc-stats"><div><b id="accOrders">0</b><small>Pedidos</small></div><div><b id="accVerified">—</b><small>Email</small></div></div>

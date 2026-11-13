@@ -231,15 +231,42 @@
   }
   const regBirth = birthField($("regBirth")), accBirth = birthField($("accBirth"));
 
+  /* ---------- DNI / CUIL / CUIT: verificación automática (mismas reglas que la base) ----------
+     DNI: 7 u 8 números. CUIL/CUIT: 11 números, prefijo válido y dígito verificador (módulo 11). */
+  const docDigits = (v) => String(v || "").replace(/\D/g, "");
+  function docTipo(v) {
+    const d = docDigits(v);
+    if (/^\d{7,8}$/.test(d)) return Number(d) >= 1000000 ? "DNI" : null;
+    if (!/^\d{11}$/.test(d) || !["20", "23", "24", "25", "26", "27", "30", "33", "34"].includes(d.slice(0, 2))) return null;
+    const s = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2].reduce((a, w, i) => a + w * Number(d[i]), 0);
+    let dv = 11 - (s % 11); if (dv === 11) dv = 0;
+    if (dv === 10 || dv !== Number(d[10])) return null;
+    return ["30", "33", "34"].includes(d.slice(0, 2)) ? "CUIT" : "CUIL";
+  }
+  // Revisa el campo; devuelve true si está bien (o vacío y no es obligatorio).
+  function checkDoc(input, required) {
+    const err = input.closest("form").querySelector(".doc-err");
+    const d = docDigits(input.value);
+    let msg = "";
+    if (!d) msg = required ? "Completá tu DNI, CUIL o CUIT." : "";
+    else if (d.length !== 11 && !/^\d{7,8}$/.test(d)) msg = "El DNI tiene 7 u 8 números y el CUIL/CUIT, 11.";
+    else if (!docTipo(d)) msg = d.length === 11 ? "Ese CUIL/CUIT no es válido: revisá los números (el último no coincide)." : "Ese DNI no es válido.";
+    err.hidden = !msg; err.textContent = msg;
+    if (msg) input.focus();
+    return !msg;
+  }
+  document.querySelectorAll("[data-doc]").forEach((i) => i.addEventListener("blur", () => { if (docDigits(i.value)) checkDoc(i, false); }));
+
   $("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
     if (!regBirth.check()) return;
+    if (!checkDoc(e.target.doc_number, true)) return;
     const c = captcha("register"); if (!c) return needCaptcha();
     const { error } = await sb.auth.signUp({
       email: f.get("email"),
       password: f.get("password"),
-      options: { data: { full_name: f.get("full_name"), phone: f.get("phone"), birthdate: regBirth.value() }, emailRedirectTo: location.href, ...c },
+      options: { data: { full_name: f.get("full_name"), phone: f.get("phone"), birthdate: regBirth.value(), doc_number: docDigits(f.get("doc_number")) }, emailRedirectTo: location.href, ...c },
     });
     resetCaptcha("register");
     if (error) return show(authError(error, "No pudimos crear la cuenta. Revisá los datos e intentá de nuevo."));
@@ -295,11 +322,12 @@
     $("settings").hidden = !(on && user);
     if (user) $("logged").hidden = on;
     if (!on || !user) return;
-    const { data: prof } = await sb.from("profiles").select("full_name, phone, email, created_at, email_verified_at, marketing_opt_in, birthdate").eq("id", user.id).maybeSingle();
+    const { data: prof } = await sb.from("profiles").select("full_name, phone, email, created_at, email_verified_at, marketing_opt_in, birthdate, doc_number").eq("id", user.id).maybeSingle();
     const { count } = await sb.from("orders").select("id", { count: "exact", head: true }).eq("user_id", user.id);
     accForm.full_name.value = prof?.full_name || user.user_metadata?.full_name || "";
     accForm.phone.value = prof?.phone || ""; accForm.marketing_opt_in.checked = !!prof?.marketing_opt_in; accForm.email.value = user.email;
     accBirth.set(prof?.birthdate || user.user_metadata?.birthdate);
+    accForm.doc_number.value = prof?.doc_number || ""; accForm.querySelector(".doc-err").hidden = true;
     $("accInitials").textContent = initials(accForm.full_name.value || user.email);
     $("accSince").textContent = `Cliente desde ${new Date(prof?.created_at || user.created_at).toLocaleDateString("es-AR", { month: "long", year: "numeric" })}`;
     $("accOrders").textContent = count || 0;
@@ -315,10 +343,11 @@
     e.preventDefault();
     const user = await be.user(); if (!user) return;
     if (!accBirth.check()) return accMsg("Revisá la fecha de nacimiento.", "error");
+    if (!checkDoc(accForm.doc_number, false)) return accMsg("Revisá el DNI, CUIL o CUIT.", "error");
     const full_name = accForm.full_name.value.trim().slice(0, 80), phone = accForm.phone.value.trim().slice(0, 30);
-    const { error } = await sb.from("profiles").update({ full_name, phone, marketing_opt_in: accForm.marketing_opt_in.checked, birthdate: accBirth.value() }).eq("id", user.id);
-    if (error) return accMsg(/18 años/.test(error.message) ? "Para tener una cuenta tenés que ser mayor de 18 años." : "No se pudo guardar. Probá de nuevo.", "error");
-    $("birthNeed").hidden = true;
+    const { error } = await sb.from("profiles").update({ full_name, phone, marketing_opt_in: accForm.marketing_opt_in.checked, birthdate: accBirth.value(), doc_number: docDigits(accForm.doc_number.value) || null }).eq("id", user.id);
+    if (error) return accMsg(/18 años/.test(error.message) ? "Para tener una cuenta tenés que ser mayor de 18 años." : /CUIL|CUIT|DNI/.test(error.message) ? "El DNI, CUIL o CUIT no es válido. Revisá los números." : "No se pudo guardar. Probá de nuevo.", "error");
+    $("birthNeed").hidden = true; if (docDigits(accForm.doc_number.value)) $("docNeed").hidden = true;
     await sb.auth.updateUser({ data: { full_name } }).catch(() => {});
     accMsg("¡Datos guardados!", "ok");
     $("who").textContent = full_name || user.email; $("accInitials").textContent = initials(full_name || user.email);
@@ -463,7 +492,10 @@
     if (!user) return;
     $("who").textContent = user.user_metadata?.full_name || user.email;
     // La fecha de nacimiento es obligatoria: a quien no la tiene (cuentas anteriores) se le pide completarla
-    sb.from("profiles").select("birthdate").eq("id", user.id).maybeSingle().then(({ data }) => { $("birthNeed").hidden = !data || !!data.birthdate; }).catch(() => {});
+    sb.from("profiles").select("birthdate, doc_number").eq("id", user.id).maybeSingle().then(({ data }) => {
+      $("birthNeed").hidden = !data || !!data.birthdate;
+      $("docNeed").hidden = !data || !!data.doc_number;
+    }).catch(() => {});
     renderMyCode();
     $("dashLink").hidden = true; // oculto por defecto; solo se muestra si la base confirma el permiso
     const perms = await be.permissions().catch(() => new Set());
