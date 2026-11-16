@@ -1510,15 +1510,17 @@
   // HERO_LAPS vueltas antes de volver a él. Funciona igual si se agregan o quitan banners.
   const HERO_LAPS = 3;
   let slideCount = 0, current = 0, timer, dots = [], cloneTarget = 0, laps = 0;
-  // Controles con el estilo del logo: 4 diseños (styles.css, .ctl-1 … .ctl-4). El recorrido empieza en el primer banner:
-  // cada vez que se vuelve a él (solo o a mano: flechas, puntos o el dedo) entra el juego de botones siguiente.
-  const CTL_STYLES = 4, heroNav = $("heroNav");
-  let ctl = 1, shownDot = 0;
+  // Controles: 0 = diseño original (píldora redonda) y 1 … 4 = diseños con el estilo del logo (styles.css, .ctl-N).
+  // El recorrido empieza en el primer banner: cada vez que se vuelve a él (solo o a mano: flechas, puntos o el dedo)
+  // entra el juego de botones siguiente: original → 1 → 2 → 3 → 4 → original…
+  const CTL_STYLES = 5, heroNav = $("heroNav");
+  let ctl = 0, shownDot = 0;
   function nextCtl() {
     heroNav.classList.remove(`ctl-${ctl}`, "ctl-in");
-    ctl = (ctl % CTL_STYLES) + 1;
+    ctl = (ctl + 1) % CTL_STYLES;
     void heroNav.offsetWidth;   // reinicia la animación de entrada
-    heroNav.classList.add(`ctl-${ctl}`, "ctl-in");
+    if (ctl) heroNav.classList.add(`ctl-${ctl}`);
+    heroNav.classList.add("ctl-in");
   }
   // Marca el indicador activo, los ya vistos (barra de progreso) y el contador "01 / 03"
   function markDot(k) {

@@ -164,11 +164,15 @@ button { font: inherit; }
 .dots button { width: 10px; height: 10px; padding: 0; border-radius: 50%; border: 0; background: #ffffff80; cursor: pointer; transition: background .3s, transform .3s; }
 .dots button.active { background: #fff; transform: scale(1.25); }
 .hero-count { display: none; }
+/* Flechas: el diseño original (sin clase ctl-*) usa las finas; los 4 diseños del logo, las mitades de la "X" */
+.hero-arrow .arr-x { display: none; }
+.hero-nav[class*="ctl-"] .hero-arrow .arr-orig { display: none; }
+.hero-nav[class*="ctl-"] .hero-arrow .arr-x { display: block; }
 
 /* ---------- Controles del carrusel con el estilo del logo EXE (4 diseños que se turnan) ----------
    Rasgos del logo: esquinas cortadas en diagonal (las "E"), brazos gruesos de la "X" y cortes inclinados.
-   Las flechas son las dos mitades de la "X". Cada vez que el carrusel termina una vuelta entra el diseño
-   siguiente (clase .ctl-1 … .ctl-4 en #heroNav, la pone app.js) con su animación de entrada. */
+   Las flechas son las dos mitades de la "X". Se turnan con el diseño original (sin clase): original → 1 → 2 → 3 → 4.
+   Cada vez que el carrusel vuelve al primer banner entra el siguiente (clase .ctl-N en #heroNav, la pone app.js). */
 .hero-nav[class*="ctl-"] { border-radius: 0; gap: 12px; --dur: 5s; }
 .hero-nav[class*="ctl-"] .hero-arrow { border-radius: 0; background: transparent; width: 34px; height: 34px; }
 .hero-nav[class*="ctl-"] .hero-arrow svg { width: 17px; height: 19px; transition: transform .25s var(--ease); }
