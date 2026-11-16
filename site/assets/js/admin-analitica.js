@@ -61,8 +61,20 @@
     const prov = {};
     Object.entries(r.provinces || {}).forEach(([n, c]) => { const p = provName(n); if (p) prov[p] = (prov[p] || 0) + c; });
     const pmax = Math.max(1, ...Object.values(prov));
-    const cell = ([ab, name, c, row]) => { const v = prov[name] || 0, tt = Math.sqrt(v / pmax);
-      return `<button type="button" class="an-pv${sel === name ? " sel" : ""}" style="grid-column:${c + 1};grid-row:${row + 1};--a:${(v ? 0.12 + 0.88 * tt : 0.05).toFixed(2)};color:${tt > 0.45 ? "#fff" : "var(--c2)"}" data-an-prov="${esc(name)}" title="${esc(name)}: ${v} pedido${v === 1 ? "" : "s"}" aria-label="${esc(name)}: ${v} pedidos"><b>${ab}</b><small>${v}</small></button>`; };
+    // Mapa real (site/assets/js/mapa-ar.js, Natural Earth). Más pedidos = más intenso. CABA, por chica, va con una llamada.
+    const M = window.EXE_MAPA_AR;
+    const lvl = (name) => { const v = prov[name] || 0, tt = Math.sqrt(v / pmax); return { v, tt, a: v ? 0.18 + 0.82 * tt : 0 }; };
+    const NUDGE = { "CABA": [44, -10], "Jujuy": [2, -4], "Salta": [14, 6], "Tucumán": [0, -2], "Santa Fe": [4, 0] };
+    const mapSvg = () => {
+      if (!M) return `<div class="an-map">${PROVS.map(([ab, name]) => { const { v } = lvl(name); return `<button type="button" class="an-pv" data-an-prov="${esc(name)}"><b>${ab}</b><small>${v}</small></button>`; }).join("")}</div>`;
+      const shapes = PROVS.map(([ab, name]) => { const { v, a } = lvl(name);
+        return `<path class="an-prov${sel === name ? " sel" : ""}" d="${M.paths[name] || ""}" style="--a:${a.toFixed(2)}" data-an-prov="${esc(name)}" tabindex="0" role="button" aria-label="${esc(name)}: ${v} pedidos"><title>${esc(name)}: ${v} pedido${v === 1 ? "" : "s"}</title></path>`; }).join("");
+      const texts = PROVS.map(([ab, name]) => { const { v, tt } = lvl(name); const [x0, y0] = M.labels[name] || [0, 0]; const [dx, dy] = NUDGE[name] || [0, 0]; const x = x0 + dx, y = y0 + dy;
+        const line = name === "CABA" ? `<line x1="${x0}" y1="${y0}" x2="${x - 14}" y2="${y + 4}" class="an-call"/><circle cx="${x0}" cy="${y0}" r="3" class="an-dot" style="--a:${lvl(name).a.toFixed(2)}"/>` : "";
+        const dark = tt > 0.45 && name !== "CABA";
+        return `${line}<text x="${x}" y="${y}" class="an-lbl${dark ? " on" : ""}"><tspan x="${x}" class="an-ab">${ab}</tspan><tspan x="${x}" dy="12">${v}</tspan></text>`; }).join("");
+      return `<svg class="an-svg" viewBox="-4 -4 ${M.w + 60} ${M.h + 8}" role="group" aria-label="Mapa de pedidos por provincia">${shapes}${texts}</svg>`;
+    };
     const topProv = Object.entries(prov).sort((a, b) => b[1] - a[1]).slice(0, 6);
     const bar = (label, v, max, shown) => `<div class="an-bar"><span>${esc(label)}</span><i><b style="width:${max ? Math.round((v / max) * 100) : 0}%"></b></i><strong>${shown ?? fmt(v)}</strong></div>`;
 
@@ -87,7 +99,7 @@
       </div>
       <div class="an-grid">
         <div class="panel"><h3>🗺️ Desde dónde compran</h3><p class="ed-hint">Pedidos por provincia: la que elige el cliente en el carrito (opcional) y la de los pedidos armados en el panel. Más oscuro = más pedidos.</p>
-          <div class="an-mapwrap"><div class="an-map">${PROVS.map(cell).join("")}</div>
+          <div class="an-mapwrap"><div class="an-mapbox">${mapSvg()}</div>
             <div class="an-leg"><b>${sel ? esc(sel) : "Top provincias"}</b>${sel ? `<p class="ed-hint">${prov[sel] || 0} pedido${prov[sel] === 1 ? "" : "s"} en el período. <button type="button" class="link-btn" data-an-prov="">Ver todas</button></p>`
               : topProv.length ? topProv.map(([n, v]) => bar(n, v, topProv[0][1])).join("") : '<p class="ed-hint">Sin pedidos con provincia todavía.</p>'}
             <div class="an-scale">Menos <i></i> Más</div></div></div></div>
@@ -121,6 +133,9 @@
 
   A.views.analitica.after = () => {
     document.querySelectorAll("[data-an-period]").forEach((b) => (b.onclick = () => { const h = `#analitica/${b.dataset.anPeriod}`; location.hash === h ? A.route() : (location.hash = h); }));
-    document.querySelectorAll("[data-an-prov]").forEach((b) => (b.onclick = () => { sel = b.dataset.anProv && sel !== b.dataset.anProv ? b.dataset.anProv : null; A.route(); }));
+    document.querySelectorAll("[data-an-prov]").forEach((b) => {
+      b.onclick = () => { sel = b.dataset.anProv && sel !== b.dataset.anProv ? b.dataset.anProv : null; A.route(); };
+      if (b.tagName === "path") b.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); b.onclick(); } };
+    });
   };
 })();

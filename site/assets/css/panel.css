@@ -602,6 +602,18 @@ a.kpi-link:hover, a.kpi-link:focus-visible { transform: translateY(-2px); outlin
 .gr-flags { display: flex; flex-wrap: wrap; gap: 6px 18px; }
 .gr-actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
 
+/* Mapa real de Argentina (Analítica → Desde dónde compran) */
+.an-mapbox { flex: 0 1 340px; max-width: 340px; width: 100%; }
+.an-svg { width: 100%; height: auto; display: block; }
+.an-prov { fill: var(--c0); fill-opacity: var(--a); stroke: var(--c0); stroke-opacity: .55; stroke-width: 1; stroke-linejoin: round; cursor: pointer; transition: fill-opacity .15s; }
+.an-prov[style*="--a:0.00"] { fill: var(--c2); fill-opacity: .06; }
+.an-prov:hover, .an-prov:focus-visible { stroke-opacity: 1; stroke-width: 2; outline: none; }
+.an-prov.sel { stroke: var(--c2); stroke-opacity: 1; stroke-width: 2.5; }
+.an-lbl { font-size: 10px; text-anchor: middle; fill: var(--c2); pointer-events: none; paint-order: stroke; stroke: var(--surface, #fff); stroke-width: 3px; stroke-opacity: .8; }
+.an-lbl.on { fill: #fff; stroke: none; }
+.an-ab { font-weight: 700; }
+.an-call { stroke: var(--c2); stroke-opacity: .6; stroke-width: 1; }
+.an-dot { fill: var(--c0); stroke: var(--c2); stroke-width: 1; }
 /* Panel → Integraciones */
 .integ { margin-bottom: 16px; }
 .integ-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
