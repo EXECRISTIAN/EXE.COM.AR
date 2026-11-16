@@ -550,11 +550,7 @@ a.kpi-link:hover, a.kpi-link:focus-visible { transform: translateY(-2px); outlin
 .an-grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 @media (max-width: 900px) { .an-grid, .an-grid3 { grid-template-columns: 1fr; } }
 .an-mapwrap { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
-.an-map { display: grid; grid-template-columns: repeat(6, 46px); grid-template-rows: repeat(10, 38px); gap: 4px; position: relative; }
-/* Silueta de Argentina detrás de las provincias (decorativa) */
-.an-silueta { position: absolute; inset: -6px; width: calc(100% + 12px); height: calc(100% + 12px); pointer-events: none; z-index: 0; }
-.an-silueta path { fill: var(--c0); fill-opacity: .14; stroke: var(--c0); stroke-opacity: .55; stroke-width: 1.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-.an-map .an-pv { position: relative; z-index: 1; }
+.an-map { display: grid; grid-template-columns: repeat(6, 46px); grid-template-rows: repeat(10, 38px); gap: 4px; }
 .an-pv { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; font: inherit; font-size: .68rem; border: 0; border-radius: 6px; cursor: pointer;
   background: color-mix(in srgb, var(--c0) calc(var(--a) * 100%), var(--surface)); transition: transform .12s, outline-color .12s; outline: 2px solid transparent; }
 .an-pv small { font-size: .6rem; opacity: .85; }
@@ -605,3 +601,16 @@ a.kpi-link:hover, a.kpi-link:focus-visible { transform: translateY(-2px); outlin
 .gr-card details summary { cursor: pointer; font-size: .9rem; color: var(--muted); margin-bottom: 6px; }
 .gr-flags { display: flex; flex-wrap: wrap; gap: 6px 18px; }
 .gr-actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+
+/* Mapa real de Argentina (Analítica → Desde dónde compran) */
+.an-mapbox { flex: 0 1 340px; max-width: 340px; width: 100%; }
+.an-svg { width: 100%; height: auto; display: block; }
+.an-prov { fill: var(--c0); fill-opacity: var(--a); stroke: var(--c0); stroke-opacity: .55; stroke-width: 1; stroke-linejoin: round; cursor: pointer; transition: fill-opacity .15s; }
+.an-prov[style*="--a:0.00"] { fill: var(--c2); fill-opacity: .06; }
+.an-prov:hover, .an-prov:focus-visible { stroke-opacity: 1; stroke-width: 2; outline: none; }
+.an-prov.sel { stroke: var(--c2); stroke-opacity: 1; stroke-width: 2.5; }
+.an-lbl { font-size: 10px; text-anchor: middle; fill: var(--c2); pointer-events: none; paint-order: stroke; stroke: var(--surface, #fff); stroke-width: 3px; stroke-opacity: .8; }
+.an-lbl.on { fill: #fff; stroke: none; }
+.an-ab { font-weight: 700; }
+.an-call { stroke: var(--c2); stroke-opacity: .6; stroke-width: 1; }
+.an-dot { fill: var(--c0); stroke: var(--c2); stroke-width: 1; }
