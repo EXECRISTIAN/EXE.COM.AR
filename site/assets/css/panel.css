@@ -550,7 +550,11 @@ a.kpi-link:hover, a.kpi-link:focus-visible { transform: translateY(-2px); outlin
 .an-grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 @media (max-width: 900px) { .an-grid, .an-grid3 { grid-template-columns: 1fr; } }
 .an-mapwrap { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
-.an-map { display: grid; grid-template-columns: repeat(6, 46px); grid-template-rows: repeat(10, 38px); gap: 4px; }
+.an-map { display: grid; grid-template-columns: repeat(6, 46px); grid-template-rows: repeat(10, 38px); gap: 4px; position: relative; }
+/* Silueta de Argentina detrás de las provincias (decorativa) */
+.an-silueta { position: absolute; inset: -6px; width: calc(100% + 12px); height: calc(100% + 12px); pointer-events: none; z-index: 0; }
+.an-silueta path { fill: var(--c0); fill-opacity: .14; stroke: var(--c0); stroke-opacity: .55; stroke-width: 1.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.an-map .an-pv { position: relative; z-index: 1; }
 .an-pv { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; font: inherit; font-size: .68rem; border: 0; border-radius: 6px; cursor: pointer;
   background: color-mix(in srgb, var(--c0) calc(var(--a) * 100%), var(--surface)); transition: transform .12s, outline-color .12s; outline: 2px solid transparent; }
 .an-pv small { font-size: .6rem; opacity: .85; }

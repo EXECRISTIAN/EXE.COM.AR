@@ -87,7 +87,7 @@
       </div>
       <div class="an-grid">
         <div class="panel"><h3>🗺️ Desde dónde compran</h3><p class="ed-hint">Pedidos por provincia: la que elige el cliente en el carrito (opcional) y la de los pedidos armados en el panel. Más oscuro = más pedidos.</p>
-          <div class="an-mapwrap"><div class="an-map">${PROVS.map(cell).join("")}</div>
+          <div class="an-mapwrap"><div class="an-map"><svg class="an-silueta" viewBox="0 0 296 416" preserveAspectRatio="none" aria-hidden="true"><path d="M117,4 L138,12 L160,2 L186,25 L223,46 L237,45 L222,69 L260,69 L281,47 L295,55 L293,66 L263,81 L237,105 L228,132 L225,151 L243,169 L250,182 L237,205 L204,212 L167,212 L170,235 L127,237 L138,255 L126,271 L92,302 L115,326 L77,354 L65,372 L77,382 L78,396 L126,411 L105,415 L74,414 L74,385 L19,372 L4,344 L24,309 L30,277 L-11,227 L-10,184 L5,140 L8,102 L65,65 L74,34 L98,12 Z"/></svg>${PROVS.map(cell).join("")}</div>
             <div class="an-leg"><b>${sel ? esc(sel) : "Top provincias"}</b>${sel ? `<p class="ed-hint">${prov[sel] || 0} pedido${prov[sel] === 1 ? "" : "s"} en el período. <button type="button" class="link-btn" data-an-prov="">Ver todas</button></p>`
               : topProv.length ? topProv.map(([n, v]) => bar(n, v, topProv[0][1])).join("") : '<p class="ed-hint">Sin pedidos con provincia todavía.</p>'}
             <div class="an-scale">Menos <i></i> Más</div></div></div></div>
