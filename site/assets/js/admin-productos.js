@@ -468,7 +468,7 @@
             <label class="field ed-wide">Compatibilidad (separada por coma)<input name="compat" value="${esc((p.compat || []).join(", "))}" placeholder="Ej: LGA1200, DDR4" ${ro}><small>Socket, tipo de memoria, etc. Los productos de otra categoría con la misma clave aparecen en la ficha como "Compatible con". Usadas: ${[...new Set(products.flatMap((x) => x.compat || []))].sort().map(esc).join(", ") || "ninguna"}</small></label>
             <label class="field ed-check"><input type="checkbox" name="outlet" ${p.outlet ? "checked" : ""} ${ro}> Es producto outlet</label>
             <label class="field">Grado (outlet)<select name="grade" ${ro}>
-              ${[["", "General: A a C (hasta definirlo)"], ["A", "A · Excelente (como nuevo)"], ["B", "B · Muy bueno (marcas leves)"], ["C", "C · Bueno (marcas visibles)"]].map(([v, t]) => `<option value="${v}" ${(p.grade || "") === v ? "selected" : ""}>${t}</option>`).join("")}
+              ${[["", "General: A a C (hasta definirlo)"], ["A", "A · Excelente (como nuevo)"], ["B", "B · Muy bueno (marcas leves)"], ["C", "C · Bueno (marcas visibles)"], ["D", "D · No funciona (repuesto)"]].map(([v, t]) => `<option value="${v}" ${(p.grade || "") === v ? "selected" : ""}>${t}</option>`).join("")}
             </select></label>
             <label class="field">Estado / condición<input name="condition" data-suggest="condition" value="${esc(p.condition || "")}" placeholder="Ej: Sin caja, con cooler" ${ro}></label>
           </div>

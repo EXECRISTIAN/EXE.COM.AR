@@ -69,16 +69,20 @@
     G: { name: "Grado A a C · Seleccionado", short: "A–C", txt: "Según la unidad, puede estar entre como nuevo y/o con posibles marcas de uso, visibles o no a simple vista. Todas funcionan perfecto.",
       // Solo en "¿Qué significa cada grado?": aclara que este grado lo pone el sistema, no una clasificación a mano
       info: { name: "Grado A a C · Asignado automáticamente", txt: "Es el grado que se asigna automáticamente a las unidades que todavía no fueron clasificadas a mano. Según la unidad, puede estar entre como nuevo y/o con posibles marcas de uso, visibles o no a simple vista. Todas funcionan perfecto." } },
+    D: { name: "Grado D · No funciona", short: "D", txt: "No funciona y puede estar en cualquier estado. Se vende para repuesto o reparación.",
+      base: "Sin garantía de funcionamiento." },
   };
   const OUTLET_BASE = "Producto usado o reacondicionado, con mantenimiento y pruebas de funcionamiento hechas por EXE.";
   const OUTLET_WARRANTY = `Garantía: ${cfg.outletWarrantyMonths || 3} meses.`;
   const IMG_NOTE = "Las imágenes son ilustrativas: el empaque, el color o detalles menores pueden variar sin afectar las características ni el funcionamiento.";
+  // Texto de base y garantía de cada grado (el D tiene el suyo: no funciona, sin garantía)
+  const baseOf = (g) => g.base || `${OUTLET_BASE} ${OUTLET_WARRANTY}`;
   const gradeOf = (p) => (p && p.outlet ? GRADES[p.grade] || GRADES.G : null);
   // Bloque de estado para la ficha del producto
   function outletInfo(p) {
     const g = gradeOf(p); if (!g) return "";
     return `<div class="pd-condition"><p><span class="tag-outlet">Outlet</span> <b>${esc(g.name)}</b>${p.condition ? ` · ${esc(p.condition)}` : ""}</p>
-      <p>${esc(g.txt)} ${esc(OUTLET_BASE)} ${esc(OUTLET_WARRANTY)}</p>
+      <p>${esc(g.txt)} ${esc(baseOf(g))}</p>
       <button type="button" class="link-btn" data-grades>¿Qué significa cada grado?</button></div>`;
   }
 
@@ -1317,16 +1321,16 @@
   function outletAckLines(lines) {
     const o = outletLines(lines); if (!o.length || ackSig !== cartSig()) return [];
     return ["", "Estado de los productos outlet (leído y aceptado):",
-      ...o.map((l) => { const g = gradeOf(l.product); return `• ${l.product.name}: ${g.name}${l.product.condition ? `, ${l.product.condition}` : ""}. ${g.txt}`; }),
-      `${OUTLET_BASE} ${OUTLET_WARRANTY} ${IMG_NOTE}`];
+      ...o.map((l) => { const g = gradeOf(l.product); return `• ${l.product.name}: ${g.name}${l.product.condition ? `, ${l.product.condition}` : ""}. ${g.txt} ${baseOf(g)}`; }),
+      IMG_NOTE];
   }
   const ackDialog = $("ackDialog");
   $("sendWa").onclick = () => {
     const o = outletLines(renderCart().lines);
     if (!o.length || ackSig === cartSig()) return sendOrder();
     $("ackList").innerHTML = o.map((l) => { const g = gradeOf(l.product);
-      return `<li><b>${esc(l.product.name)}</b><span class="ack-grade">${esc(g.name)}${l.product.condition ? ` · ${esc(l.product.condition)}` : ""}</span><small>${esc(g.txt)}</small></li>`; }).join("");
-    $("ackBase").textContent = `${OUTLET_BASE} ${OUTLET_WARRANTY}`;
+      return `<li><b>${esc(l.product.name)}</b><span class="ack-grade">${esc(g.name)}${l.product.condition ? ` · ${esc(l.product.condition)}` : ""}</span><small>${esc(g.txt)} ${esc(baseOf(g))}</small></li>`; }).join("");
+    $("ackBase").hidden = true;
     $("ackImg").textContent = IMG_NOTE;
     $("ackCheck").checked = false; $("ackOk").disabled = true;
     ackDialog.showModal();
@@ -1337,8 +1341,8 @@
   ackDialog.addEventListener("click", (e) => { if (e.target === ackDialog) ackDialog.close(); });
   // "¿Qué significa cada grado?"
   const gradesDialog = $("gradesDialog");
-  $("gradesList").innerHTML = ["A", "B", "C", "G"].map((k) => { const g = GRADES[k].info || GRADES[k]; return `<li><b>${esc(g.name)}</b><small>${esc(g.txt)}</small></li>`; }).join("");
-  $("gradesBase").textContent = `${OUTLET_BASE} ${OUTLET_WARRANTY} ${IMG_NOTE}`;
+  $("gradesList").innerHTML = ["A", "B", "C", "G", "D"].map((k) => { const g = GRADES[k].info || GRADES[k]; return `<li><b>${esc(g.name)}</b><small>${esc(g.txt)}</small></li>`; }).join("");
+  $("gradesBase").textContent = `Grados A, B y C: ${OUTLET_BASE.charAt(0).toLowerCase()}${OUTLET_BASE.slice(1)} ${OUTLET_WARRANTY} Grado D: sin garantía de funcionamiento. ${IMG_NOTE}`;
   document.addEventListener("click", (e) => { if (e.target.closest("[data-grades]")) { e.preventDefault(); gradesDialog.showModal(); } });
   $("gradesClose").onclick = () => gradesDialog.close();
   gradesDialog.addEventListener("click", (e) => { if (e.target === gradesDialog) gradesDialog.close(); });
