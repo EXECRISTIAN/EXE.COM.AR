@@ -163,6 +163,80 @@ button { font: inherit; }
 .dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-width: 0; }
 .dots button { width: 10px; height: 10px; padding: 0; border-radius: 50%; border: 0; background: #ffffff80; cursor: pointer; transition: background .3s, transform .3s; }
 .dots button.active { background: #fff; transform: scale(1.25); }
+.hero-count { display: none; }
+
+/* ---------- Controles del carrusel con el estilo del logo EXE (4 diseños que se turnan) ----------
+   Rasgos del logo: esquinas cortadas en diagonal (las "E"), brazos gruesos de la "X" y cortes inclinados.
+   Las flechas son las dos mitades de la "X". Cada vez que el carrusel termina una vuelta entra el diseño
+   siguiente (clase .ctl-1 … .ctl-4 en #heroNav, la pone app.js) con su animación de entrada. */
+.hero-nav[class*="ctl-"] { border-radius: 0; gap: 12px; --dur: 5s; }
+.hero-nav[class*="ctl-"] .hero-arrow { border-radius: 0; background: transparent; width: 34px; height: 34px; }
+.hero-nav[class*="ctl-"] .hero-arrow svg { width: 17px; height: 19px; transition: transform .25s var(--ease); }
+.hero-nav[class*="ctl-"] .hero-arrow.prev svg { transform: scaleX(-1); }
+.hero-nav[class*="ctl-"] .hero-arrow:hover { transform: none; }
+.hero-nav[class*="ctl-"] .hero-arrow.next:hover svg { transform: translateX(3px); }
+.hero-nav[class*="ctl-"] .hero-arrow.prev:hover svg { transform: scaleX(-1) translateX(3px); }
+.hero-nav[class*="ctl-"] .dots button { border-radius: 0; transform: none; }
+.hero-nav.ctl-in { animation: ctlIn .6s var(--ease) both; }
+@keyframes ctlIn { from { opacity: 0; transform: translateX(-50%) translateY(14px); } to { opacity: 1; transform: translateX(-50%); } }
+
+/* 1 · Media X: placa con puntas en diagonal; indicadores = trazos inclinados; el activo se estira */
+.hero-nav.ctl-1 { padding: 4px 16px; background: #000a; clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%); }
+.hero-nav.ctl-1.ctl-in { animation: ctlOpen .7s var(--ease) both; }
+@keyframes ctlOpen { from { clip-path: polygon(50% 0, 50% 0, 50% 50%, 50% 100%, 50% 100%, 50% 50%); } }
+.hero-nav.ctl-1 .dots { gap: 6px; }
+.hero-nav.ctl-1 .dots button { width: 10px; height: 14px; background: #fff6; transform: skewX(-38deg); transition: width .45s var(--ease), background .3s; }
+.hero-nav.ctl-1 .dots button:hover { background: #fffa; }
+.hero-nav.ctl-1 .dots button.active { width: 26px; background: #fff; transform: skewX(-38deg); }
+
+/* 2 · Placa biselada: botones con dos esquinas cortadas como la "E"; indicador activo en azul que gira */
+.hero-nav.ctl-2 { padding: 0; background: none; gap: 8px; }
+.hero-nav.ctl-2 .hero-arrow { width: 38px; height: 38px; background: #000b; clip-path: polygon(28% 0, 100% 0, 100% 72%, 72% 100%, 0 100%, 0 28%); transition: background .25s, color .25s; }
+.hero-nav.ctl-2 .hero-arrow.next { clip-path: polygon(0 0, 72% 0, 100% 28%, 100% 100%, 28% 100%, 0 72%); }
+.hero-nav.ctl-2 .hero-arrow:hover { background: #fff; color: #000; }
+.hero-nav.ctl-2 .dots { gap: 7px; padding: 12px 13px; background: #000b; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+.hero-nav.ctl-2 .dots button { width: 12px; height: 12px; background: #fff6; clip-path: polygon(30% 0, 100% 0, 100% 70%, 70% 100%, 0 100%, 0 30%); transition: background .3s, transform .5s var(--ease); }
+.hero-nav.ctl-2 .dots button.active { background: var(--c0, #0084d6); transform: rotate(90deg) scale(1.15); }
+.hero-nav.ctl-2.ctl-in > * { animation: ctlRise .55s var(--ease) both; }
+.hero-nav.ctl-2.ctl-in > :nth-child(2) { animation-delay: .08s; }
+.hero-nav.ctl-2.ctl-in > :nth-child(4) { animation-delay: .16s; }
+.hero-nav.ctl-2.ctl-in { animation: none; }
+@keyframes ctlRise { from { opacity: 0; transform: translateY(16px); } }
+
+/* 3 · Mini X: cada indicador es una "X" del logo; la activa crece y da un giro */
+.hero-nav.ctl-3 { padding: 4px 12px; background: #000a; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+.hero-nav.ctl-3 .dots { gap: 10px; align-items: center; }
+.hero-nav.ctl-3 .dots button { width: 18px; height: 18px; background: none; display: grid; place-items: center; }
+.hero-nav.ctl-3 .dots button::before { content: ""; width: 12px; height: 12px; background: #fff; opacity: .45; transition: width .4s var(--ease), height .4s var(--ease), opacity .3s;
+  clip-path: polygon(0 12%, 12% 0, 50% 38%, 88% 0, 100% 12%, 62% 50%, 100% 88%, 88% 100%, 50% 62%, 12% 100%, 0 88%, 38% 50%); }
+.hero-nav.ctl-3 .dots button:hover::before { opacity: .8; }
+.hero-nav.ctl-3 .dots button.active::before { width: 18px; height: 18px; opacity: 1; animation: ctlSpin .6s var(--ease); }
+@keyframes ctlSpin { from { transform: rotate(-90deg) scale(.6); } }
+.hero-nav.ctl-3.ctl-in { animation: ctlFade .6s var(--ease) both; }
+@keyframes ctlFade { from { opacity: 0; transform: translateX(-50%) scale(.85); } to { opacity: 1; transform: translateX(-50%); } }
+
+/* 4 · Barra de progreso: número de banner + segmentos inclinados; el activo se llena mientras dura el banner */
+.hero-nav.ctl-4 { padding: 6px 18px; gap: 14px; background: #000b; clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%); }
+.hero-nav.ctl-4.ctl-in { animation: ctlSlide .6s var(--ease) both; }
+@keyframes ctlSlide { from { opacity: 0; clip-path: polygon(12px 0, 12px 0, 0 100%, 0 100%); } }
+.hero-nav.ctl-4 .hero-count { display: inline-flex; gap: 4px; align-items: baseline; color: #fff; font: 700 13px var(--font, Lato, sans-serif); letter-spacing: .08em; min-width: 50px; justify-content: center; }
+.hero-nav.ctl-4 .hero-count small { color: #fffa; font-weight: 400; font-size: 12px; }
+.hero-nav.ctl-4 .hero-count b { display: inline-block; animation: ctlNum .4s var(--ease); }
+@keyframes ctlNum { from { opacity: 0; transform: translateY(8px); } }
+.hero-nav.ctl-4 .dots { gap: 5px; }
+.hero-nav.ctl-4 .dots button { width: 34px; height: 6px; background: #fff5; transform: skewX(-38deg); overflow: hidden; position: relative; }
+.hero-nav.ctl-4 .dots button::before { content: ""; position: absolute; inset: 0; background: #fff; transform: scaleX(0); transform-origin: left; }
+.hero-nav.ctl-4 .dots button.active::before { animation: ctlFill var(--dur) linear forwards; }
+.hero-nav.ctl-4 .dots button.done::before { transform: none; opacity: .6; }
+@keyframes ctlFill { to { transform: scaleX(1); } }
+@media (max-width: 560px) {
+  .hero-nav[class*="ctl-"] { scale: .72; transform-origin: 0 100%; bottom: 6px; }   /* más chicos en el celular (scale no pisa las animaciones) */
+  .hero-nav.ctl-4 .dots button { width: 22px; } .hero-nav.ctl-1 .dots button.active { width: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-nav[class*="ctl-"], .hero-nav[class*="ctl-"] *, .hero-nav[class*="ctl-"] *::before { animation: none !important; transition: none !important; }
+  .hero-nav.ctl-4 .dots button.active::before { transform: scaleX(1); }
+}
 
 /* ---------- Banners de marca: be97f60 (padding 60 0) / 9986b28 (min-h 500, margin-top 40) ---------- */
 .brand-banners { display: flex; gap: 0; padding: 60px 10px; max-width: 1220px; margin: 0 auto; }
