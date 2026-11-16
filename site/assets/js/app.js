@@ -1510,9 +1510,10 @@
   // HERO_LAPS vueltas antes de volver a él. Funciona igual si se agregan o quitan banners.
   const HERO_LAPS = 3;
   let slideCount = 0, current = 0, timer, dots = [], cloneTarget = 0, laps = 0;
-  // Controles con el estilo del logo: 4 diseños (styles.css, .ctl-1 … .ctl-4). Al terminar cada vuelta entra el siguiente.
+  // Controles con el estilo del logo: 4 diseños (styles.css, .ctl-1 … .ctl-4). El recorrido empieza en el primer banner:
+  // cada vez que se vuelve a él (solo o a mano: flechas, puntos o el dedo) entra el juego de botones siguiente.
   const CTL_STYLES = 4, heroNav = $("heroNav");
-  let ctl = 1;
+  let ctl = 1, shownDot = 0;
   function nextCtl() {
     heroNav.classList.remove(`ctl-${ctl}`, "ctl-in");
     ctl = (ctl % CTL_STYLES) + 1;
@@ -1521,6 +1522,8 @@
   }
   // Marca el indicador activo, los ya vistos (barra de progreso) y el contador "01 / 03"
   function markDot(k) {
+    if (k === 0 && shownDot !== 0) nextCtl();   // volvió al primer banner: terminó el recorrido
+    shownDot = k;
     dots.forEach((d, j) => { d.classList.toggle("active", j === k); d.classList.toggle("done", j < k); });
     const pad = (n) => String(n).padStart(2, "0");
     $("heroCount").innerHTML = slideCount ? `<b>${pad(k + 1)}</b><small>/ ${pad(slideCount)}</small>` : "";
@@ -1550,14 +1553,13 @@
   function autoNext() {
     if (current === slideCount) { current = cloneTarget; moveTo(current, false); }   // por si no llegó el fin de la animación
     if (current < slideCount - 1) return go(current + 1);
-    if (slideCount < 3) { if (current + 1 >= slideCount) nextCtl(); return go(current + 1); }   // con 2 banners no hay "resto" para repetir
+    if (slideCount < 3) return go(current + 1);         // con 2 banners no hay "resto" para repetir
     laps++;
     const t = laps >= HERO_LAPS ? 0 : 1;               // después de las vueltas, el primero; si no, el segundo
     if (t === 0) laps = 0;
     setClone(t);
     current = slideCount; moveTo(current);
     markDot(t);
-    nextCtl();   // terminó una vuelta: entra el siguiente juego de botones
   }
   const play = () => { clearInterval(timer); if (slideCount > 1) timer = setInterval(autoNext, 5000); };
   // Se puede volver a llamar si el panel cambió las imágenes del carrusel
@@ -1574,7 +1576,7 @@
     dots = [...$("dots").children];
     dots.forEach((d, i) => d.addEventListener("click", () => { go(i); play(); }));
     $("heroNav").hidden = slideCount < 2;
-    moveTo(0, false); markDot(0); play();
+    shownDot = 0; moveTo(0, false); markDot(0); play();
   }
   const settle = () => { if (current === slideCount) { current = cloneTarget; moveTo(current, false); } };
   $("heroPrev").onclick = () => { settle(); go(current - 1); play(); };
