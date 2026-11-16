@@ -1513,12 +1513,13 @@
   // Controles: 0 = diseño original (píldora redonda) y 1 … 4 = diseños con el estilo del logo (styles.css, .ctl-N).
   // El recorrido empieza en el primer banner: cada vez que se completa una vuelta HACIA ADELANTE (del último banner al
   // primero, solo o con la flecha → / deslizando) entra el juego de botones siguiente: original → 1 → 2 → 3 → 4 → original…
-  // Ir para atrás o tocar un punto no cambia el diseño.
+  // Al revés: pasar del primero al último hacia atrás (flecha ← o deslizando) vuelve al juego anterior.
+  // Moverse dentro de la vuelta o tocar un punto no cambia el diseño.
   const CTL_STYLES = 5, heroNav = $("heroNav");
   let ctl = 0;
-  function nextCtl() {
+  function nextCtl(step = 1) {
     heroNav.classList.remove(`ctl-${ctl}`, "ctl-in");
-    ctl = (ctl + 1) % CTL_STYLES;
+    ctl = (ctl + step + CTL_STYLES) % CTL_STYLES;
     void heroNav.offsetWidth;   // reinicia la animación de entrada
     if (ctl) heroNav.classList.add(`ctl-${ctl}`);
     heroNav.classList.add("ctl-in");
@@ -1542,7 +1543,7 @@
   };
   function go(i) {
     if (!slideCount) return;
-    if (i < 0) { setClone(0); moveTo(slideCount, false); i = slideCount - 1; }   // hacia atrás desde el primero: parte de la copia
+    if (i < 0) { setClone(0); moveTo(slideCount, false); i = slideCount - 1; nextCtl(-1); }   // hacia atrás desde el primero: parte de la copia y vuelve al juego anterior
     if (i >= slideCount) { setClone(0); nextCtl(); }   // avance manual desde el último: vuelve al primero (vuelta completa)
     current = Math.min(i, slideCount);
     moveTo(current);
