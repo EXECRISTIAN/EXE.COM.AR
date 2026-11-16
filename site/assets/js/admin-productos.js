@@ -37,7 +37,7 @@
   async function loadAll(force) {
     if (A.demo) return (cache = demoStore());
     if (cache && !force) return cache;
-    const cols = "id,name,brand,category,tags,compat,description,price,price_usd,stock,show_stock,active,outlet,condition,image,images,specs,weight_kg,location,sort,variants,updated_at,ask_price,ask_stock,cart_ok,hide_no_stock";
+    const cols = "id,name,brand,category,tags,compat,description,price,price_usd,stock,show_stock,active,outlet,condition,grade,image,images,specs,weight_kg,location,sort,variants,updated_at,ask_price,ask_stock,cart_ok,hide_no_stock";
     const fxr = await sb().from("fx_settings").select("*").eq("id", 1).maybeSingle();
     fx = fxr.data || null;
     const [p, c, s] = await Promise.all([
@@ -247,7 +247,7 @@
         <td><input type="checkbox" data-sel ${listState.sel.has(p.id) ? "checked" : ""} aria-label="Seleccionar"></td>
         <td>${(p.images || [])[0] ? `<img class="pr-thumb" src="${esc(imgUrl(p.images[0]))}" alt="" loading="lazy">` : `<span class="pr-thumb pr-nophoto" title="Sin foto">📷</span>`}</td>
         <td><a href="#editar/${encodeURIComponent(p.id)}" class="pr-name">${esc(p.name)}</a>
-          <small class="pr-meta">${esc(p.brand || "")}${p.outlet ? ` · <span class="pill pending">Outlet</span>` : ""}${p.condition ? ` · ${esc(p.condition)}` : ""}</small>
+          <small class="pr-meta">${esc(p.brand || "")}${p.outlet ? ` · <span class="pill pending">Outlet ${esc(p.grade || "A–C")}</span>` : ""}${p.condition ? ` · ${esc(p.condition)}` : ""}</small>
           ${(p.tags || []).length ? `<small class="pr-meta">🏷 ${p.tags.map(esc).join(", ")}</small>` : ""}</td>
         <td>${esc(p.category || "—")}</td>
         ${w ? `<td><input class="pr-in" data-f="cost" inputmode="numeric" value="${c ?? ""}" placeholder="—"></td>` : ""}
@@ -467,6 +467,9 @@
             <label class="field ed-wide">Etiquetas (separadas por coma)<input name="tags" data-suggest="tag" data-suggest-multi="1" value="${esc((p.tags || []).join(", "))}" placeholder="Ej: Gamer, Oferta, Oficina" ${ro}><small>Se muestran en la tienda y sirven para filtrar. Existentes: ${[...new Set(products.flatMap((x) => x.tags || []))].sort().map(esc).join(", ") || "ninguna"}</small></label>
             <label class="field ed-wide">Compatibilidad (separada por coma)<input name="compat" value="${esc((p.compat || []).join(", "))}" placeholder="Ej: LGA1200, DDR4" ${ro}><small>Socket, tipo de memoria, etc. Los productos de otra categoría con la misma clave aparecen en la ficha como "Compatible con". Usadas: ${[...new Set(products.flatMap((x) => x.compat || []))].sort().map(esc).join(", ") || "ninguna"}</small></label>
             <label class="field ed-check"><input type="checkbox" name="outlet" ${p.outlet ? "checked" : ""} ${ro}> Es producto outlet</label>
+            <label class="field">Grado (outlet)<select name="grade" ${ro}>
+              ${[["", "General: A a C (hasta definirlo)"], ["A", "A · Excelente (como nuevo)"], ["B", "B · Muy bueno (marcas leves)"], ["C", "C · Bueno (marcas visibles)"], ["D", "D · No funciona (repuesto)"]].map(([v, t]) => `<option value="${v}" ${(p.grade || "") === v ? "selected" : ""}>${t}</option>`).join("")}
+            </select></label>
             <label class="field">Estado / condición<input name="condition" data-suggest="condition" value="${esc(p.condition || "")}" placeholder="Ej: Sin caja, con cooler" ${ro}></label>
           </div>
         </section>
@@ -838,7 +841,7 @@
       if (ed.isNew && cache.products.some((x) => x.id === id)) return msg(`Ya existe un producto con el código "${id}". Cambialo.`, "error");
       const prod = {
         id, name: el("name").value.trim(), brand: el("brand").value.trim() || null, category: el("category").value.trim() || null,
-        outlet: el("outlet").checked, condition: el("condition").value.trim() || null,
+        outlet: el("outlet").checked, condition: el("condition").value.trim() || null, grade: el("grade").value || null,
         ...(isUsd() ? { price_usd: Math.max(0, val("price")) } : { price: Math.max(0, num(el("price").value)), price_usd: null }),
         ...Object.fromEntries(FLAGS.map(([f]) => [f, el(f).checked])),
         show_stock: el("show_stock").checked, stock: el("show_stock").checked ? Math.max(0, Math.round(num(el("stock").value))) : 999,
