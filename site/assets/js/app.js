@@ -61,6 +61,25 @@
     return `<button class="btn btn-primary" ${attr}="${esc(p.id)}" ${out ? "disabled" : ""}>${out ? "Sin stock" : "Agregar al carrito"}</button>`;
   };
 
+  /* ---------- Outlet: grados de estado (A / B / C). Sin grado cargado = general "A a C". ---------- */
+  const GRADES = {
+    A: { name: "Grado A · Excelente", short: "A", txt: "Como nuevo: sin marcas de uso a la vista." },
+    B: { name: "Grado B · Muy bueno", short: "B", txt: "Puede tener alguna marca leve de uso, como pequeños rayones o desgaste, que no afecta el funcionamiento." },
+    C: { name: "Grado C · Bueno", short: "C", txt: "Puede tener marcas de uso visibles o detalles estéticos (rayones, desgaste, alguna tapa o etiqueta faltante). Funciona perfecto." },
+    G: { name: "Grado A a C · Seleccionado", short: "A–C", txt: "Según la unidad, puede verse como nuevo o tener algunas marcas de uso. Todas funcionan perfecto." },
+  };
+  const OUTLET_BASE = "Producto usado o reacondicionado, con mantenimiento y pruebas de funcionamiento hechas por EXE.";
+  const OUTLET_WARRANTY = `Garantía: ${cfg.outletWarrantyMonths || 3} meses.`;
+  const IMG_NOTE = "Las imágenes son ilustrativas: el empaque, el color o detalles menores pueden variar sin afectar las características ni el funcionamiento.";
+  const gradeOf = (p) => (p && p.outlet ? GRADES[p.grade] || GRADES.G : null);
+  // Bloque de estado para la ficha del producto
+  function outletInfo(p) {
+    const g = gradeOf(p); if (!g) return "";
+    return `<div class="pd-condition"><p><span class="tag-outlet">Outlet</span> <b>${esc(g.name)}</b>${p.condition ? ` · ${esc(p.condition)}` : ""}</p>
+      <p>${esc(g.txt)} ${esc(OUTLET_BASE)} ${esc(OUTLET_WARRANTY)}</p>
+      <button type="button" class="link-btn" data-grades>¿Qué significa cada grado?</button></div>`;
+  }
+
   function stockBadge(p) {
     if (p.askStock) return p.price > 0 ? `<span class="stock ask">Consultar stock</span>` : "";
     if (p.noStock) return `<span class="stock low">Sin stock · a pedido</span>`;
@@ -307,7 +326,7 @@
         <h2 id="pdName">${esc(p.name)}</h2>
         <div class="price${p.price > 0 ? "" : " price-ask"}">${priceLabel(p)}</div>${usdNote(p)}
         ${p.price > 0 ? `<span class="price-note">Consultá el precio final actualizado</span>` : ""}
-        ${p.outlet ? `<p class="pd-condition"><span class="tag-outlet">Outlet</span> ${esc(p.condition || "")}</p>` : ""}
+        ${outletInfo(p)}
         ${(p.tags || []).length ? `<div class="p-tags">${p.tags.map((t) => `<button type="button" class="p-tag" data-tag="${esc(t)}" data-close-pd>${esc(t)}</button>`).join("")}</div>` : ""}
         <div class="pd-admin" id="pdAdmin" hidden></div>
         ${igpuNote(p)}
@@ -695,6 +714,7 @@
       $("customerProv").value ? `Provincia: ${$("customerProv").value}` : "",
       shipping ? `Envío ${shipping.label} (CP ${shipping.cp}): ${money(shipping.cost)} — cotización estimada` : "",
       note ? `\nNota: ${note}` : "",
+      ...outletAckLines(lines),
     ].filter((x, i, all) => x !== "" || all[i - 1] !== "").join("\n").trim();   // sin líneas vacías repetidas
   }
 
@@ -1037,7 +1057,7 @@
         <div class="pci-grid"><div class="pci-gal"><img id="pciMain" src="${esc(imgs[0])}" alt="" data-fallback>
           ${imgs.length > 1 ? `<div class="pci-th">${imgs.map((src, k) => `<button type="button" data-pci-img="${esc(src)}" aria-label="Ver foto ${k + 1}"><img src="${esc(src)}" alt="" loading="lazy"></button>`).join("")}</div>` : ""}</div>
         <div class="pci-txt"><h3>${esc(p.name)}</h3><b class="pci-price">${money(p.price)}</b>
-          ${p.outlet && p.condition ? `<p class="pd-condition"><span class="tag-outlet">Outlet</span> ${esc(p.condition)}</p>` : ""}
+          ${outletInfo(p)}
           <span class="pcc-tags">${fits ? pcTags(p).map((t) => `<span>${esc(t)}</span>`).join("") : `<span class="no">${esc(pcWhy(step.key, p))}</span>`}</span>
           ${fits ? `<button type="button" class="btn btn-primary" data-pc-sel="${esc(p.id)}">${isSel(p) ? "✔ Elegido" : "Elegir este"}</button>` : ""}</div></div>
         ${p.description ? `<div class="pd-desc">${esc(p.description)}</div>` : ""}
@@ -1289,7 +1309,39 @@
   document.addEventListener("click", (e) => { const b = e.target.closest("[data-copy-product]"); if (b) copyLink(productUrl(b.dataset.copyProduct), b); });
   document.addEventListener("click", (e) => { const b = e.target.closest("[data-share-product]"); if (b) shareProduct(b.dataset.shareProduct, b); });
   $("cartClear").onclick = () => { cart = []; shipping = null; if (shipOn) $("shipOpts").innerHTML = ""; save(); renderCart(); renderProducts(); };
-  $("sendWa").onclick = async () => {
+  /* ---------- Confirmación obligatoria del estado de los productos outlet antes de enviar el pedido ---------- */
+  let ackSig = "";
+  const outletLines = (lines) => lines.filter((l) => l.product && l.product.outlet);
+  function outletAckLines(lines) {
+    const o = outletLines(lines); if (!o.length || ackSig !== cartSig()) return [];
+    return ["", "Estado de los productos outlet (leído y aceptado):",
+      ...o.map((l) => { const g = gradeOf(l.product); return `• ${l.product.name}: ${g.name}${l.product.condition ? `, ${l.product.condition}` : ""}. ${g.txt}`; }),
+      `${OUTLET_BASE} ${OUTLET_WARRANTY} ${IMG_NOTE}`];
+  }
+  const ackDialog = $("ackDialog");
+  $("sendWa").onclick = () => {
+    const o = outletLines(renderCart().lines);
+    if (!o.length || ackSig === cartSig()) return sendOrder();
+    $("ackList").innerHTML = o.map((l) => { const g = gradeOf(l.product);
+      return `<li><b>${esc(l.product.name)}</b><span class="ack-grade">${esc(g.name)}${l.product.condition ? ` · ${esc(l.product.condition)}` : ""}</span><small>${esc(g.txt)}</small></li>`; }).join("");
+    $("ackBase").textContent = `${OUTLET_BASE} ${OUTLET_WARRANTY}`;
+    $("ackImg").textContent = IMG_NOTE;
+    $("ackCheck").checked = false; $("ackOk").disabled = true;
+    ackDialog.showModal();
+  };
+  $("ackCheck").onchange = (e) => { $("ackOk").disabled = !e.target.checked; };
+  $("ackCancel").onclick = () => ackDialog.close();
+  $("ackOk").onclick = () => { if (!$("ackCheck").checked) return; ackSig = cartSig(); ackDialog.close(); sendOrder(); };
+  ackDialog.addEventListener("click", (e) => { if (e.target === ackDialog) ackDialog.close(); });
+  // "¿Qué significa cada grado?"
+  const gradesDialog = $("gradesDialog");
+  $("gradesList").innerHTML = ["A", "B", "C", "G"].map((k) => `<li><b>${esc(GRADES[k].name)}</b><small>${esc(GRADES[k].txt)}</small></li>`).join("");
+  $("gradesBase").textContent = `${OUTLET_BASE} ${OUTLET_WARRANTY} ${IMG_NOTE}`;
+  document.addEventListener("click", (e) => { if (e.target.closest("[data-grades]")) { e.preventDefault(); gradesDialog.showModal(); } });
+  $("gradesClose").onclick = () => gradesDialog.close();
+  gradesDialog.addEventListener("click", (e) => { if (e.target === gradesDialog) gradesDialog.close(); });
+
+  async function sendOrder() {
     stat("wa", { province: $("customerProv").value || null, amount: Math.round(renderCart().total) || null });
     if (!promo.code) return window.open(waLink(buildMessage()), "_blank", "noopener");
     // Con código: la base registra el uso y da el número de verificación antes de abrir WhatsApp.
@@ -1301,7 +1353,7 @@
     } catch (e) { if (w) w.close(); promoMsg(esc(e.message), "err"); return; }
     const url = waLink(buildMessage());
     if (w) { w.opener = null; w.location.href = url; } else window.open(url, "_blank", "noopener");
-  };
+  }
   $("promoToggle").onclick = () => promoOpen($("promoRow").hidden);
   $("promoApply").onclick = () => promoApply($("promoCode").value);
   $("promoCode").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); promoApply($("promoCode").value); } });
@@ -1700,12 +1752,12 @@
     ...(!r.ask_price && r.price_usd != null && Number(r.price_usd) > 0 ? { priceUsd: Number(r.price_usd) } : {}),
     askStock: !!r.ask_stock, cartOk: r.cart_ok !== false, noStock: !r.ask_stock && r.show_stock && r.stock <= 0 && r.cart_ok !== false,
     ...(r.show_stock && !r.ask_stock && !(r.stock <= 0 && r.cart_ok !== false) ? { stock: r.stock } : {}), images: r.images && r.images.length ? r.images : (r.image ? [r.image] : []),
-    specs: r.specs && r.specs.length ? r.specs : undefined, outlet: r.outlet, condition: r.condition, weightKg: Number(r.weight_kg) || 1,
+    specs: r.specs && r.specs.length ? r.specs : undefined, outlet: r.outlet, condition: r.condition, grade: r.grade || null, weightKg: Number(r.weight_kg) || 1,
     variants: r.variants && r.variants.length ? r.variants : undefined, tags: r.tags || [], compat: r.compat || [],
   });
   const loadDb = () => {
     if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) return Promise.reject();
-    const cols = "id,name,brand,category,description,price,price_usd,stock,show_stock,image,images,specs,outlet,condition,weight_kg,variants,tags,compat,ask_price,ask_stock,cart_ok,hide_no_stock";
+    const cols = "id,name,brand,category,description,price,price_usd,stock,show_stock,image,images,specs,outlet,condition,grade,weight_kg,variants,tags,compat,ask_price,ask_stock,cart_ok,hide_no_stock";
     return fetch(`${cfg.supabaseUrl}/rest/v1/products?select=${cols}&active=eq.true&order=sort.asc,name.asc`, { headers: { apikey: cfg.supabaseAnonKey } })
       .then((r) => (r.ok ? r.json() : Promise.reject())).then((rows) => (rows.length ? rows.filter((r) => !(r.hide_no_stock && r.show_stock && r.stock <= 0)).map(fromDb) : Promise.reject()));
   };

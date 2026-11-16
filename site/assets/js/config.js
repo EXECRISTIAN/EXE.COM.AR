@@ -3,6 +3,7 @@ window.SITE_CONFIG = {
   // Número de WhatsApp en formato internacional, sin "+", espacios ni guiones.
   // Argentina: 549 + código de área sin 0 + número sin 15 -> "5491122334455"
   whatsappNumber: "5491130095254",
+  outletWarrantyMonths: 3,   // garantía de los productos outlet (usados / reacondicionados); mínimo legal: 3 meses
   email: "ventas@exe.com.ar",
   currency: "ARS",
   locale: "es-AR",

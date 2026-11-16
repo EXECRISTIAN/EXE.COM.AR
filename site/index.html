@@ -298,6 +298,29 @@
       <div class="cart-links"><button class="link-btn" id="cartClear">Vaciar carrito</button></div>
     </div>
   </aside>
+
+  <!-- Outlet: confirmación obligatoria del estado antes de enviar el pedido -->
+  <dialog class="exe-dialog" id="ackDialog" aria-labelledby="ackTitle">
+    <h2 id="ackTitle">Antes de enviar tu pedido</h2>
+    <p>Tu pedido incluye productos outlet. Revisá su estado:</p>
+    <ul class="ack-list" id="ackList"></ul>
+    <p class="ack-note" id="ackBase"></p>
+    <p class="ack-note" id="ackImg"></p>
+    <button type="button" class="link-btn" data-grades>¿Qué significa cada grado?</button>
+    <label class="ack-check"><input type="checkbox" id="ackCheck"> Leí y acepto el estado de estos productos</label>
+    <div class="exe-dialog-actions">
+      <button type="button" class="btn btn-outline" id="ackCancel">Volver</button>
+      <button type="button" class="btn btn-primary" id="ackOk" disabled>Confirmar y enviar</button>
+    </div>
+  </dialog>
+
+  <!-- Outlet: qué significa cada grado -->
+  <dialog class="exe-dialog" id="gradesDialog" aria-labelledby="gradesTitle">
+    <h2 id="gradesTitle">Grados de los productos outlet</h2>
+    <ul class="ack-list" id="gradesList"></ul>
+    <p class="ack-note" id="gradesBase"></p>
+    <div class="exe-dialog-actions"><button type="button" class="btn btn-primary" id="gradesClose">Entendido</button></div>
+  </dialog>
   <div class="toast" id="toast" role="status"></div>
 
   <!-- ===== Ficha de producto (se abre con #producto/<id>) ===== -->
