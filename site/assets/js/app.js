@@ -63,32 +63,23 @@
 
   /* ---------- Outlet: grados de estado (A / B / C). Sin grado cargado = general "A a C". ---------- */
   const GRADES = {
-    A: { name: "Grado A · Excelente", short: "A", look: "Como nuevo, sin marcas de uso", txt: "Como nuevo: sin marcas de uso a la vista." },
-    B: { name: "Grado B · Muy bueno", short: "B", look: "Marcas leves de uso", txt: "Puede tener alguna marca leve de uso, como pequeños rayones o desgaste, que no afecta el funcionamiento." },
-    C: { name: "Grado C · Bueno", short: "C", look: "Marcas de uso visibles o detalles estéticos", txt: "Puede tener marcas de uso visibles o detalles estéticos (rayones, desgaste, alguna tapa o etiqueta faltante). Funciona perfecto." },
-    G: { name: "Grado A a C · Predeterminado", short: "A–C", look: "Entre como nuevo y con marcas de uso visibles", auto: true, txt: "Grado asignado automáticamente: esta unidad todavía no fue clasificada a mano. Según la unidad, puede verse como nuevo o tener algunas marcas de uso. Todas funcionan perfecto." },
+    A: { name: "Grado A · Excelente", short: "A", txt: "Como nuevo: sin marcas de uso a la vista." },
+    B: { name: "Grado B · Muy bueno", short: "B", txt: "Puede tener alguna marca leve de uso, como pequeños rayones o desgaste, que no afecta el funcionamiento." },
+    C: { name: "Grado C · Bueno", short: "C", txt: "Puede tener marcas de uso visibles o detalles estéticos (rayones, desgaste, alguna tapa o etiqueta faltante). Funciona perfecto." },
+    G: { name: "Grado A a C · Seleccionado", short: "A–C", txt: "Según la unidad, puede verse como nuevo o tener algunas marcas de uso. Todas funcionan perfecto.",
+      // Solo en "¿Qué significa cada grado?": aclara que este grado lo pone el sistema, no una clasificación a mano
+      info: { name: "Grado A a C · Asignado automáticamente", txt: "Es el grado que se asigna automáticamente a las unidades que todavía no fueron clasificadas a mano. Según la unidad, puede verse como nuevo o tener algunas marcas de uso. Todas funcionan perfecto." } },
   };
   const OUTLET_BASE = "Producto usado o reacondicionado, con mantenimiento y pruebas de funcionamiento hechas por EXE.";
   const OUTLET_WARRANTY = `Garantía: ${cfg.outletWarrantyMonths || 3} meses.`;
   const IMG_NOTE = "Las imágenes son ilustrativas: el empaque, el color o detalles menores pueden variar sin afectar las características ni el funcionamiento.";
   const gradeOf = (p) => (p && p.outlet ? GRADES[p.grade] || GRADES.G : null);
-  // Ficha de estado: lo principal primero, en renglones cortos (ficha del producto y ventana antes de enviar)
-  function stateRows(p) {
-    const g = gradeOf(p);
-    return [["Estado", "Usado / reacondicionado"],
-      ["Grado", g.name.replace(/^Grado /, "")],
-      ["Aspecto", g.look],
-      ...(p.condition ? [["Incluye", p.condition]] : []),
-      ["Funcionamiento", "Probado, con mantenimiento de EXE ✔"],
-      ["Garantía", `${cfg.outletWarrantyMonths || 3} meses`]];
-  }
-  const stateTable = (p) => `<dl class="state-tbl">${stateRows(p).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>`;
-  const autoNote = (p) => (gradeOf(p).auto ? `<small class="state-auto">Grado asignado automáticamente: esta unidad todavía no fue clasificada a mano.</small>` : "");
+  // Bloque de estado para la ficha del producto
   function outletInfo(p) {
-    if (!gradeOf(p)) return "";
-    return `<div class="pd-condition"><p><span class="tag-outlet">Outlet</span> <b>Estado del producto</b></p>
-      ${stateTable(p)}${autoNote(p)}
-      <p class="grade-acts"><button type="button" class="link-btn" data-grades>¿Qué significa cada grado?</button></p></div>`;
+    const g = gradeOf(p); if (!g) return "";
+    return `<div class="pd-condition"><p><span class="tag-outlet">Outlet</span> <b>${esc(g.name)}</b>${p.condition ? ` · ${esc(p.condition)}` : ""}</p>
+      <p>${esc(g.txt)} ${esc(OUTLET_BASE)} ${esc(OUTLET_WARRANTY)}</p>
+      <button type="button" class="link-btn" data-grades>¿Qué significa cada grado?</button></div>`;
   }
 
   function stockBadge(p) {
@@ -1326,16 +1317,16 @@
   function outletAckLines(lines) {
     const o = outletLines(lines); if (!o.length || ackSig !== cartSig()) return [];
     return ["", "Estado de los productos outlet (leído y aceptado):",
-      ...o.map((l) => `• ${l.product.name}: ${stateRows(l.product).map(([k, v]) => `${k}: ${v}`).join(" · ")}${gradeOf(l.product).auto ? " (grado asignado automáticamente)" : ""}`),
-      IMG_NOTE];
+      ...o.map((l) => { const g = gradeOf(l.product); return `• ${l.product.name}: ${g.name}${l.product.condition ? `, ${l.product.condition}` : ""}. ${g.txt}`; }),
+      `${OUTLET_BASE} ${OUTLET_WARRANTY} ${IMG_NOTE}`];
   }
   const ackDialog = $("ackDialog");
   $("sendWa").onclick = () => {
     const o = outletLines(renderCart().lines);
     if (!o.length || ackSig === cartSig()) return sendOrder();
     $("ackList").innerHTML = o.map((l) => { const g = gradeOf(l.product);
-      return `<li><b>${esc(l.product.name)}</b>${stateTable(l.product)}${autoNote(l.product)}</li>`; }).join("");
-    $("ackBase").hidden = true;
+      return `<li><b>${esc(l.product.name)}</b><span class="ack-grade">${esc(g.name)}${l.product.condition ? ` · ${esc(l.product.condition)}` : ""}</span><small>${esc(g.txt)}</small></li>`; }).join("");
+    $("ackBase").textContent = `${OUTLET_BASE} ${OUTLET_WARRANTY}`;
     $("ackImg").textContent = IMG_NOTE;
     $("ackCheck").checked = false; $("ackOk").disabled = true;
     ackDialog.showModal();
@@ -1346,7 +1337,7 @@
   ackDialog.addEventListener("click", (e) => { if (e.target === ackDialog) ackDialog.close(); });
   // "¿Qué significa cada grado?"
   const gradesDialog = $("gradesDialog");
-  $("gradesList").innerHTML = ["A", "B", "C", "G"].map((k) => `<li><b>${esc(GRADES[k].name)}</b><small>${esc(GRADES[k].txt)}</small></li>`).join("");
+  $("gradesList").innerHTML = ["A", "B", "C", "G"].map((k) => { const g = GRADES[k].info || GRADES[k]; return `<li><b>${esc(g.name)}</b><small>${esc(g.txt)}</small></li>`; }).join("");
   $("gradesBase").textContent = `${OUTLET_BASE} ${OUTLET_WARRANTY} ${IMG_NOTE}`;
   document.addEventListener("click", (e) => { if (e.target.closest("[data-grades]")) { e.preventDefault(); gradesDialog.showModal(); } });
   $("gradesClose").onclick = () => gradesDialog.close();
