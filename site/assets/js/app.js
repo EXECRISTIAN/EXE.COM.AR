@@ -1511,10 +1511,11 @@
   const HERO_LAPS = 3;
   let slideCount = 0, current = 0, timer, dots = [], cloneTarget = 0, laps = 0;
   // Controles: 0 = diseño original (píldora redonda) y 1 … 4 = diseños con el estilo del logo (styles.css, .ctl-N).
-  // El recorrido empieza en el primer banner: cada vez que se vuelve a él (solo o a mano: flechas, puntos o el dedo)
-  // entra el juego de botones siguiente: original → 1 → 2 → 3 → 4 → original…
+  // El recorrido empieza en el primer banner: cada vez que se completa una vuelta HACIA ADELANTE (del último banner al
+  // primero, solo o con la flecha → / deslizando) entra el juego de botones siguiente: original → 1 → 2 → 3 → 4 → original…
+  // Ir para atrás o tocar un punto no cambia el diseño.
   const CTL_STYLES = 5, heroNav = $("heroNav");
-  let ctl = 0, shownDot = 0;
+  let ctl = 0;
   function nextCtl() {
     heroNav.classList.remove(`ctl-${ctl}`, "ctl-in");
     ctl = (ctl + 1) % CTL_STYLES;
@@ -1524,8 +1525,6 @@
   }
   // Marca el indicador activo, los ya vistos (barra de progreso) y el contador "01 / 03"
   function markDot(k) {
-    if (k === 0 && shownDot !== 0) nextCtl();   // volvió al primer banner: terminó el recorrido
-    shownDot = k;
     dots.forEach((d, j) => { d.classList.toggle("active", j === k); d.classList.toggle("done", j < k); });
     const pad = (n) => String(n).padStart(2, "0");
     $("heroCount").innerHTML = slideCount ? `<b>${pad(k + 1)}</b><small>/ ${pad(slideCount)}</small>` : "";
@@ -1544,7 +1543,7 @@
   function go(i) {
     if (!slideCount) return;
     if (i < 0) { setClone(0); moveTo(slideCount, false); i = slideCount - 1; }   // hacia atrás desde el primero: parte de la copia
-    if (i >= slideCount) setClone(0);   // avance manual desde el último: vuelve al primero
+    if (i >= slideCount) { setClone(0); nextCtl(); }   // avance manual desde el último: vuelve al primero (vuelta completa)
     current = Math.min(i, slideCount);
     moveTo(current);
     markDot(current === slideCount ? cloneTarget : current);
@@ -1562,6 +1561,7 @@
     setClone(t);
     current = slideCount; moveTo(current);
     markDot(t);
+    if (t === 0) nextCtl();   // volvió al primer banner: terminó el recorrido completo
   }
   const play = () => { clearInterval(timer); if (slideCount > 1) timer = setInterval(autoNext, 5000); };
   // Se puede volver a llamar si el panel cambió las imágenes del carrusel
@@ -1578,7 +1578,7 @@
     dots = [...$("dots").children];
     dots.forEach((d, i) => d.addEventListener("click", () => { go(i); play(); }));
     $("heroNav").hidden = slideCount < 2;
-    shownDot = 0; moveTo(0, false); markDot(0); play();
+    moveTo(0, false); markDot(0); play();
   }
   const settle = () => { if (current === slideCount) { current = cloneTarget; moveTo(current, false); } };
   $("heroPrev").onclick = () => { settle(); go(current - 1); play(); };
