@@ -13,16 +13,17 @@ window.SITE_CONFIG = {
   showStock: true,
   lowStockThreshold: 3,
 
-  // Logos del carrusel de marcas (imágenes en assets/img/marcas/).
+  // Logos del carrusel de marcas (imágenes en assets/img/marcas/). srcDark: versión transparente para el tema oscuro
+  // (sin fondo y con el negro pasado a blanco), así al pasar el mouse se ven los colores reales de la marca.
   brandLogos: [
     // brand: nombre que se muestra al filtrar; match: palabras que se buscan en la marca o el nombre del producto
     { name: "NVIDIA GeForce RTX", brand: "NVIDIA", match: ["nvidia", "geforce"], src: "assets/img/marcas/marca-316.webp" },
-    { name: "AMD", brand: "AMD", match: ["amd", "ryzen", "radeon"], src: "assets/img/marcas/marca-320.webp" },
-    { name: "Western Digital", brand: "Western Digital", match: ["western digital", "wd"], src: "assets/img/marcas/marca-322.webp" },
+    { name: "AMD", brand: "AMD", match: ["amd", "ryzen", "radeon"], src: "assets/img/marcas/marca-amd.svg", srcDark: "assets/img/marcas/marca-amd-osc.svg" },
+    { name: "Western Digital", brand: "Western Digital", match: ["western digital", "wd"], src: "assets/img/marcas/marca-wd.svg", srcDark: "assets/img/marcas/marca-wd-osc.svg" },
     { name: "ASUS ROG", brand: "ASUS", match: ["asus", "rog"], src: "assets/img/marcas/marca-331.webp" },
-    { name: "Intel", brand: "Intel", match: ["intel"], src: "assets/img/marcas/marca-364.webp" },
-    { name: "HyperX", brand: "HyperX", match: ["hyperx"], src: "assets/img/marcas/marca-365.webp" },
-    { name: "Steam", brand: "Steam", match: ["steam", "valve"], src: "assets/img/marcas/marca-steam.webp" },   // consola Steam Deck
+    { name: "Intel", brand: "Intel", match: ["intel"], src: "assets/img/marcas/marca-intel.svg", srcDark: "assets/img/marcas/marca-intel-osc.svg" },
+    { name: "HyperX", brand: "HyperX", match: ["hyperx"], src: "assets/img/marcas/marca-365.webp", srcDark: "assets/img/marcas/marca-365-osc.webp" },
+    { name: "Steam", brand: "Steam", match: ["steam", "valve"], src: "assets/img/marcas/marca-steam.svg", srcDark: "assets/img/marcas/marca-steam-osc.svg" },   // consola Steam Deck
   ],
 
   socials: {
