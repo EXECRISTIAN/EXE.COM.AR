@@ -961,3 +961,10 @@ body:has(#pcOverlay.show) .wa-float { display: none; }
 .exe-dialog-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
 .exe-dialog .link-btn { padding: 0; font-size: .85rem; }
 .grade-acts { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 6px !important; }
+
+/* Ficha de estado de productos outlet */
+.state-tbl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 8px 0 4px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--c4); font-size: .88rem; }
+.state-tbl dt { color: var(--muted); }
+.state-tbl dd { margin: 0; color: var(--c2); font-weight: 600; }
+.state-auto { display: block; color: var(--muted); font-size: .8rem; margin: 2px 0 4px; }
+.ack-list .state-tbl { margin: 6px 0 2px; background: var(--surface); }
