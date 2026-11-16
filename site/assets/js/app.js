@@ -1803,8 +1803,13 @@
   const logos = cfg.brandLogos || [];
   // Carrusel de logos sin cortes en cualquier ancho (16:9, 21:9, 32:9…): cada mitad del track se repite hasta
   // cubrir la pantalla y la animación corre -50 %. Solo se recalcula si cambia la cantidad de copias necesarias.
-  const logoBtn = (l, hidden) => `<button type="button" class="logo-btn" data-brand-tag="${esc(l.brand || l.name)}"${hidden ? ' tabindex="-1" aria-hidden="true"' : ""} title="Ver productos ${esc(l.brand || l.name)}" aria-label="Ver productos ${esc(l.brand || l.name)}"><img src="${esc(l.src)}" alt="${hidden ? "" : esc(l.name)}" width="150" height="134" decoding="async"></button>`;
+  const logoBtn = (l, hidden) => `<button type="button" class="logo-btn" data-brand-tag="${esc(l.brand || l.name)}"${hidden ? ' tabindex="-1" aria-hidden="true"' : ""} title="Ver productos ${esc(l.brand || l.name)}" aria-label="Ver productos ${esc(l.brand || l.name)}"><img src="${esc(darkTheme() && l.srcDark ? l.srcDark : l.src)}" alt="${hidden ? "" : esc(l.name)}" width="150" height="134" decoding="async"></button>`;
   let logoCopies = 0;
+  // Tema oscuro (elegido o del sistema): usa la versión srcDark de cada logo; si cambia el tema, se vuelven a armar.
+  function darkTheme() { const t = document.documentElement.dataset.theme; return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; }
+  const relogos = () => { logoCopies = 0; buildLogos(); };
+  new MutationObserver(relogos).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", relogos);
   function buildLogos() {
     const track = $("logos"); if (!logos.length) return;
     const itemW = track.firstElementChild ? track.firstElementChild.getBoundingClientRect().width : Math.min(240, Math.min(1400, innerWidth) / 5);
