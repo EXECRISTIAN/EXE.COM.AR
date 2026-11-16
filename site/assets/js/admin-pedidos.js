@@ -157,6 +157,7 @@
             <select id="orderStatus" ${can("orders.update_status") ? "" : "disabled"}>
               ${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === o.status ? "selected" : ""} ${k === "paid" && !can("orders.mark_paid") && o.status !== "paid" ? "disabled" : ""}>${v}</option>`).join("")}
             </select></label>
+          ${invoiceBlock(o)}
         </div>
         <form class="panel" id="orderInfo" autocomplete="off">
           <h3>Cliente y envío (sale en la etiqueta)</h3>
@@ -166,11 +167,36 @@
       </div>`;
   };
 
+  // Factura electrónica (ARCA). Solo aparece con la integración prendida o si el pedido ya tiene factura.
+  function invoiceBlock(o) {
+    if (o.invoice_cae) return `<p class="notice info">🧾 Factura ${o.invoice_type === 11 ? "C" : o.invoice_type || ""} ${String(o.invoice_pos || 0).padStart(5, "0")}-${String(o.invoice_number || 0).padStart(8, "0")} · CAE ${esc(o.invoice_cae)}${o.invoice_cae_due ? ` (vence ${esc(o.invoice_cae_due)})` : ""}${o.invoice_doc ? ` · Doc. ${esc(o.invoice_doc)}` : " · Consumidor final"}</p>`;
+    if (!A.integ.arca || !can("orders.mark_paid") || !["paid", "preparing", "shipped", "delivered"].includes(o.status)) return "";
+    return `<div class="invoice-box"><label class="field">DNI o CUIT del comprador (vacío = consumidor final)
+        <input id="invDoc" inputmode="numeric" maxlength="13" value="${esc(o.invoice_doc || "")}"></label>
+      <button type="button" class="btn btn-outline" id="invMake">🧾 Emitir factura (ARCA)</button> <span id="invMsg"></span></div>`;
+  }
+  async function makeInvoice(id) {
+    const msg = $("invMsg"), btn = $("invMake");
+    btn.disabled = true; msg.textContent = "Pidiendo el CAE a ARCA…";
+    try {
+      const { data: { session } } = await sb().auth.getSession();
+      const r = await fetch(`${window.SITE_CONFIG.supabaseUrl}/functions/v1/arca`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: window.SITE_CONFIG.supabaseAnonKey, Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ action: "invoice", order_id: Number(id), doc: $("invDoc").value.replace(/\D/g, "") || null }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || "Error");
+      A.route();
+    } catch (e) { msg.textContent = e.message; btn.disabled = false; }
+  }
+
   A.views.pedido.after = (id) => {
     if (id === "nuevo") return bindNew();
     const o = current; if (!o) return;
     $("printLabel").onclick = () => printDoc(labelHtml(o));
     $("printPick").onclick = () => printDoc(pickHtml(o));
+    if ($("invMake")) $("invMake").onclick = () => makeInvoice(id);
     const f = $("orderInfo");
     f.onsubmit = async (e) => {
       e.preventDefault();

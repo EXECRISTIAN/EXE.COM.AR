@@ -89,6 +89,14 @@
       if (rows && rows.length) GRADES = Object.fromEntries(rows.map((r) => [r.code, { enabled: r.enabled, inList: r.in_list, sort: r.sort, name: r.name, txt: r.txt,
         info: r.list_name || r.list_txt ? { name: r.list_name || r.name, txt: r.list_txt || r.txt } : null, base: r.own_base || null }]));
     }) : Promise.reject()).catch(() => {});
+  /* ---------- Integraciones (Panel → Integraciones) ----------
+     Cada una se prende y apaga desde el panel. Apagada, o si la base no responde = la tienda queda como sin esa función
+     (envío: solo se coordina por WhatsApp; pago: solo pedido por WhatsApp). No depende de config.js. */
+  const INTEG = { envios: false, mercadopago: false };
+  const integReady = (cfg.supabaseUrl && cfg.supabaseAnonKey
+    ? fetch(`${cfg.supabaseUrl}/rest/v1/integrations?select=key,enabled`, { headers: { apikey: cfg.supabaseAnonKey } })
+        .then((r) => (r.ok ? r.json() : [])).then((rows) => { for (const r of rows || []) if (r.key in INTEG) INTEG[r.key] = r.enabled === true; })
+    : Promise.resolve()).catch(() => {});
   // Bloque de estado para la ficha del producto
   function outletInfo(p) {
     if (!p.outlet) return "";
@@ -591,6 +599,10 @@
     promoShow(total, anyUsd, hasConsult);
     if (promo.code && promo.sig !== cartSig()) promoRecheck();
     $("sendWa").disabled = count === 0;
+    // Pago online: solo con la integración prendida, productos con precio y en stock, y sin código de descuento
+    // (los códigos se usan pidiendo por WhatsApp). Si no se cumple, el botón no aparece y todo queda como siempre.
+    $("payMp").hidden = !(INTEG.mercadopago && count > 0 && !promo.res
+      && lines.every((l) => l.product.price > 0 && !l.product.noStock && !l.product.askStock));
     // Vista previa de lo que se comparte (fotos + cantidad + total) y botones de compartir solo con productos
     $("cartShareBox").hidden = $("cartActs").hidden = count === 0;
     if (count) {
@@ -618,8 +630,8 @@
   // ---------- Envío (Envia.com) ----------
   let shipping = null; // { carrier, service, label, cp, cost, sig }
   let shipOptions = [];
-  const shipOn = cfg.shipping?.enabled && cfg.supabaseUrl && cfg.supabaseAnonKey;
-  if (shipOn) $("ship").hidden = false;
+  let shipOn = false;   // se prende solo si la integración "envios" está activa en el panel
+  integReady.then(() => { shipOn = INTEG.envios; $("ship").hidden = !shipOn; renderCart(); });
   async function shipApi(payload) {
     const r = await fetch(`${cfg.supabaseUrl}/functions/v1/envios`, {
       method: "POST",
@@ -635,7 +647,7 @@
       ? shipOptions.map((o, i) => `<label><input type="radio" name="ship" value="${i}"> ${esc(o.carrier)} · ${esc(o.descripcion)}${o.dias ? ` <small>(${esc(o.dias)})</small>` : ""} <b>${money(o.precio)}</b></label>`).join("")
       : `<small>No hay tarifas para ese código postal. Te cotizamos por WhatsApp.</small>`;
   }
-  if (shipOn) {
+  {
     $("shipQuote").onclick = async () => {
       const cp = $("shipCp").value.trim();
       if (!/^\d{4}$/.test(cp)) return toast("Ingresá un código postal de 4 dígitos");
@@ -1338,19 +1350,23 @@
       OUT.img];
   }
   const ackDialog = $("ackDialog");
-  $("sendWa").onclick = () => {
+  let afterAck = sendOrder;   // qué hacer después de "Leí y acepto": enviar por WhatsApp o pagar online
+  $("sendWa").onclick = () => askAck(sendOrder);
+  $("payMp").onclick = () => askAck(payOnline);
+  function askAck(next) {
+    afterAck = next;
     const o = outletLines(renderCart().lines);
-    if (!o.length || ackSig === cartSig()) return sendOrder();
+    if (!o.length || ackSig === cartSig()) return next();
     $("ackList").innerHTML = o.map((l) => { const g = gradeOf(l.product);
       return `<li><b>${esc(l.product.name)}</b><span class="ack-grade">${esc(g.name)}${l.product.condition ? ` · ${esc(l.product.condition)}` : ""}</span><small>${esc(g.txt)} ${esc(baseOf(g))}</small></li>`; }).join("");
     $("ackBase").hidden = true;
     $("ackImg").textContent = OUT.img;
     $("ackCheck").checked = false; $("ackOk").disabled = true;
     ackDialog.showModal();
-  };
+  }
   $("ackCheck").onchange = (e) => { $("ackOk").disabled = !e.target.checked; };
   $("ackCancel").onclick = () => ackDialog.close();
-  $("ackOk").onclick = () => { if (!$("ackCheck").checked) return; ackSig = cartSig(); ackDialog.close(); sendOrder(); };
+  $("ackOk").onclick = () => { if (!$("ackCheck").checked) return; ackSig = cartSig(); ackDialog.close(); afterAck(); };
   ackDialog.addEventListener("click", (e) => { if (e.target === ackDialog) ackDialog.close(); });
   // "¿Qué significa cada grado?"
   const gradesDialog = $("gradesDialog");
@@ -1363,6 +1379,26 @@
   document.addEventListener("click", (e) => { if (e.target.closest("[data-grades]")) { e.preventDefault(); renderGradesList(); gradesDialog.showModal(); } });
   $("gradesClose").onclick = () => gradesDialog.close();
   gradesDialog.addEventListener("click", (e) => { if (e.target === gradesDialog) gradesDialog.close(); });
+
+  // Pago online con Mercado Pago: la base arma el pedido con precios reales y la función devuelve el link de pago.
+  async function payOnline() {
+    await Promise.all([adminReady, integReady]);
+    if (!INTEG.mercadopago) return toast("El pago online no está disponible ahora");
+    if (!userApi) { toast("Ingresá a tu cuenta para pagar online"); return setTimeout(() => { location.href = "cuenta.html"; }, 900); }
+    const btn = $("payMp"); btn.disabled = true;
+    try {
+      const { data: { session } } = await userApi.auth.getSession();
+      const r = await fetch(`${cfg.supabaseUrl}/functions/v1/pagos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: cfg.supabaseAnonKey, Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ action: "checkout", name: $("customerName").value.trim(), items: cart.map((l) => ({ id: l.id, qty: l.qty, variant: l.variant || "" })) }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok || !data.url) throw new Error(data.error || "No se pudo iniciar el pago");
+      location.href = data.url;
+    } catch (e) { toast(e.message); }
+    finally { btn.disabled = false; }
+  }
 
   async function sendOrder() {
     stat("wa", { province: $("customerProv").value || null, amount: Math.round(renderCart().total) || null });
