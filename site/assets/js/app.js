@@ -66,9 +66,9 @@
     A: { name: "Grado A · Excelente", short: "A", txt: "Como nuevo: sin marcas de uso a la vista." },
     B: { name: "Grado B · Muy bueno", short: "B", txt: "Puede tener alguna marca leve de uso, como pequeños rayones o desgaste, que no afecta el funcionamiento." },
     C: { name: "Grado C · Bueno", short: "C", txt: "Puede tener marcas de uso visibles o detalles estéticos (rayones, desgaste, alguna tapa o etiqueta faltante). Funciona perfecto." },
-    G: { name: "Grado A a C · Seleccionado", short: "A–C", txt: "Según la unidad, puede estar como nuevo o tener marcas de uso, visibles o no. Todas funcionan perfecto.",
+    G: { name: "Grado A a C · Seleccionado", short: "A–C", txt: "Según la unidad, puede estar entre como nuevo y/o con posibles marcas de uso, visibles o no a simple vista. Todas funcionan perfecto.",
       // Solo en "¿Qué significa cada grado?": aclara que este grado lo pone el sistema, no una clasificación a mano
-      info: { name: "Grado A a C · Asignado automáticamente", txt: "Es el grado que se asigna automáticamente a las unidades que todavía no fueron clasificadas a mano. Según la unidad, puede estar como nuevo o tener marcas de uso, visibles o no. Todas funcionan perfecto." } },
+      info: { name: "Grado A a C · Asignado automáticamente", txt: "Es el grado que se asigna automáticamente a las unidades que todavía no fueron clasificadas a mano. Según la unidad, puede estar entre como nuevo y/o con posibles marcas de uso, visibles o no a simple vista. Todas funcionan perfecto." } },
   };
   const OUTLET_BASE = "Producto usado o reacondicionado, con mantenimiento y pruebas de funcionamiento hechas por EXE.";
   const OUTLET_WARRANTY = `Garantía: ${cfg.outletWarrantyMonths || 3} meses.`;
