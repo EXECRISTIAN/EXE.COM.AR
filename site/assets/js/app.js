@@ -66,21 +66,18 @@
     A: { name: "Grado A · Excelente", short: "A", txt: "Como nuevo: sin marcas de uso a la vista." },
     B: { name: "Grado B · Muy bueno", short: "B", txt: "Puede tener alguna marca leve de uso, como pequeños rayones o desgaste, que no afecta el funcionamiento." },
     C: { name: "Grado C · Bueno", short: "C", txt: "Puede tener marcas de uso visibles o detalles estéticos (rayones, desgaste, alguna tapa o etiqueta faltante). Funciona perfecto." },
-    G: { name: "Grado A a C · Asignado automáticamente", short: "A–C", txt: "Todavía no clasificamos esta unidad a mano, por eso mostramos el rango general: según la unidad, puede verse como nuevo o tener algunas marcas de uso. Todas funcionan perfecto. Si querés, te decimos el grado exacto antes de comprar." },
+    G: { name: "Grado A a C · Predeterminado", short: "A–C", txt: "Grado asignado automáticamente: esta unidad todavía no fue clasificada a mano. Según la unidad, puede verse como nuevo o tener algunas marcas de uso. Todas funcionan perfecto." },
   };
   const OUTLET_BASE = "Producto usado o reacondicionado, con mantenimiento y pruebas de funcionamiento hechas por EXE.";
   const OUTLET_WARRANTY = `Garantía: ${cfg.outletWarrantyMonths || 3} meses.`;
   const IMG_NOTE = "Las imágenes son ilustrativas: el empaque, el color o detalles menores pueden variar sin afectar las características ni el funcionamiento.";
   const gradeOf = (p) => (p && p.outlet ? GRADES[p.grade] || GRADES.G : null);
-  // Sin grado cargado: botón para pedir por WhatsApp que se clasifique esa unidad
-  const askGrade = (p) => (p && p.outlet && !GRADES[p.grade]
-    ? `<a class="btn btn-outline btn-sm ask-grade" href="${esc(waLink(`Hola EXE! ¿Me pueden decir el grado exacto (A, B o C) de: ${p.name}?`))}" target="_blank" rel="noopener">Pedir grado exacto</a>` : "");
   // Bloque de estado para la ficha del producto
   function outletInfo(p) {
     const g = gradeOf(p); if (!g) return "";
     return `<div class="pd-condition"><p><span class="tag-outlet">Outlet</span> <b>${esc(g.name)}</b>${p.condition ? ` · ${esc(p.condition)}` : ""}</p>
       <p>${esc(g.txt)} ${esc(OUTLET_BASE)} ${esc(OUTLET_WARRANTY)}</p>
-      <p class="grade-acts">${askGrade(p)}<button type="button" class="link-btn" data-grades>¿Qué significa cada grado?</button></p></div>`;
+      <p class="grade-acts"><button type="button" class="link-btn" data-grades>¿Qué significa cada grado?</button></p></div>`;
   }
 
   function stockBadge(p) {
@@ -1326,7 +1323,7 @@
     const o = outletLines(renderCart().lines);
     if (!o.length || ackSig === cartSig()) return sendOrder();
     $("ackList").innerHTML = o.map((l) => { const g = gradeOf(l.product);
-      return `<li><b>${esc(l.product.name)}</b><span class="ack-grade">${esc(g.name)}${l.product.condition ? ` · ${esc(l.product.condition)}` : ""}</span><small>${esc(g.txt)}</small>${askGrade(l.product)}</li>`; }).join("");
+      return `<li><b>${esc(l.product.name)}</b><span class="ack-grade">${esc(g.name)}${l.product.condition ? ` · ${esc(l.product.condition)}` : ""}</span><small>${esc(g.txt)}</small></li>`; }).join("");
     $("ackBase").textContent = `${OUTLET_BASE} ${OUTLET_WARRANTY}`;
     $("ackImg").textContent = IMG_NOTE;
     $("ackCheck").checked = false; $("ackOk").disabled = true;
