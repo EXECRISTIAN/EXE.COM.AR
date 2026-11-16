@@ -106,6 +106,8 @@ button { font: inherit; }
 .btn-outline:hover { background: var(--c2); color: var(--bg); }
 .btn-wa { background: var(--wa); color: #111; width: 100%; }
 .btn-wa:hover { background: #1ebe5a; }
+.btn-mp { background: #009ee3; color: #fff; width: 100%; margin-top: 8px; }
+.btn-mp:hover { background: #0089c7; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .link-btn { background: none; border: 0; color: var(--muted); text-decoration: underline; cursor: pointer; }
 

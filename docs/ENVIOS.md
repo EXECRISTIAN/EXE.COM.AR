@@ -1,6 +1,6 @@
 # Envíos con Envia.com
 
-Integración con la API de Envia.com (https://docs.envia.com), que reemplaza a la integración directa con Andreani: con **una sola cuenta** cotiza y genera guías de varios transportistas (Andreani, Correo Argentino, OCA, etc.). **Está preparada pero apagada** hasta activar Supabase.
+Integración con la API de Envia.com (https://docs.envia.com), que reemplaza a la integración directa con Andreani: con **una sola cuenta** cotiza y genera guías de varios transportistas (Andreani, Correo Argentino, OCA, etc.). **Se prende y apaga en Panel → 🔌 Integraciones** (ver `INTEGRACIONES.md`).
 
 ## Qué hace
 | Dónde | Qué |
@@ -25,7 +25,7 @@ Integración con la API de Envia.com (https://docs.envia.com), que reemplaza a l
    - `ENVIA_CARRIERS` — ej. `andreani,correo-argentino,oca` (los que tengas habilitados en Envia).
    - `ENVIA_ORIGEN` — dirección de despacho y datos del remitente (ejemplo en el encabezado de `index.ts`).
 5. `supabase functions deploy envios --no-verify-jwt`
-6. En `site/assets/js/config.js`: `shipping: { enabled: true }`.
+6. Prenderla en Panel → 🔌 Integraciones → Envíos (ya no se usa `config.js`; ver `INTEGRACIONES.md`).
 7. Probar con `ENVIA_ENV=test`; cuando esté bien, pasar a `prod` (y cargar saldo en Envia: las guías se descuentan de tu saldo).
 
 ## Endpoints usados
