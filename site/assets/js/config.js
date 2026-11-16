@@ -17,13 +17,13 @@ window.SITE_CONFIG = {
   // (sin fondo y con el negro pasado a blanco), así al pasar el mouse se ven los colores reales de la marca.
   brandLogos: [
     // brand: nombre que se muestra al filtrar; match: palabras que se buscan en la marca o el nombre del producto
-    { name: "NVIDIA GeForce RTX", brand: "NVIDIA", match: ["nvidia", "geforce"], src: "assets/img/marcas/marca-316.webp", srcDark: "assets/img/marcas/marca-316-osc.webp" },
-    { name: "AMD", brand: "AMD", match: ["amd", "ryzen", "radeon"], src: "assets/img/marcas/marca-320.webp", srcDark: "assets/img/marcas/marca-320-osc.webp" },
-    { name: "Western Digital", brand: "Western Digital", match: ["western digital", "wd"], src: "assets/img/marcas/marca-322.webp", srcDark: "assets/img/marcas/marca-322-osc.webp" },
-    { name: "ASUS ROG", brand: "ASUS", match: ["asus", "rog"], src: "assets/img/marcas/marca-331.webp", srcDark: "assets/img/marcas/marca-331-osc.webp" },
-    { name: "Intel", brand: "Intel", match: ["intel"], src: "assets/img/marcas/marca-364.webp", srcDark: "assets/img/marcas/marca-364-osc.webp" },
+    { name: "NVIDIA GeForce RTX", brand: "NVIDIA", match: ["nvidia", "geforce"], src: "assets/img/marcas/marca-316.webp" },
+    { name: "AMD", brand: "AMD", match: ["amd", "ryzen", "radeon"], src: "assets/img/marcas/marca-amd.svg", srcDark: "assets/img/marcas/marca-amd-osc.svg" },
+    { name: "Western Digital", brand: "Western Digital", match: ["western digital", "wd"], src: "assets/img/marcas/marca-wd.svg", srcDark: "assets/img/marcas/marca-wd-osc.svg" },
+    { name: "ASUS ROG", brand: "ASUS", match: ["asus", "rog"], src: "assets/img/marcas/marca-331.webp" },
+    { name: "Intel", brand: "Intel", match: ["intel"], src: "assets/img/marcas/marca-intel.svg", srcDark: "assets/img/marcas/marca-intel-osc.svg" },
     { name: "HyperX", brand: "HyperX", match: ["hyperx"], src: "assets/img/marcas/marca-365.webp", srcDark: "assets/img/marcas/marca-365-osc.webp" },
-    { name: "Steam", brand: "Steam", match: ["steam", "valve"], src: "assets/img/marcas/marca-steam.webp", srcDark: "assets/img/marcas/marca-steam-osc.webp" },   // consola Steam Deck
+    { name: "Steam", brand: "Steam", match: ["steam", "valve"], src: "assets/img/marcas/marca-steam.svg", srcDark: "assets/img/marcas/marca-steam-osc.svg" },   // consola Steam Deck
   ],
 
   socials: {
