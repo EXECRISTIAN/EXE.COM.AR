@@ -1395,7 +1395,16 @@
   /* ---------- Carrusel principal ---------- */
   const track = $("heroTrack");
   // Siempre avanza en el mismo sentido: al final del último pasa a una copia del primero y salta sin animación al real
-  let slideCount = 0, current = 0, timer, dots = [];
+  // Orden automático (pedido de Cristian 16/11): el primer banner aparece una vez y después el resto da
+  // HERO_LAPS vueltas antes de volver a él. Funciona igual si se agregan o quitan banners.
+  const HERO_LAPS = 3;
+  let slideCount = 0, current = 0, timer, dots = [], cloneTarget = 0, laps = 0;
+  // La copia al final del carrusel muestra el banner al que se va a llegar (el primero o el segundo),
+  // así el paso desde el último siempre se anima hacia adelante.
+  const setClone = (t) => {
+    const c = track.querySelector(".hero-clone"); if (!c || cloneTarget === t) return;
+    c.innerHTML = track.children[t].innerHTML; c.querySelectorAll("a").forEach((a) => (a.tabIndex = -1)); cloneTarget = t;
+  };
   const moveTo = (i, animate = true) => {
     track.style.transition = animate ? "" : "none";
     track.style.transform = `translateX(-${i * 100}%)`;
@@ -1403,19 +1412,32 @@
   };
   function go(i) {
     if (!slideCount) return;
-    if (i < 0) { moveTo(slideCount, false); i = slideCount - 1; }   // hacia atrás desde el primero: parte de la copia
+    if (i < 0) { setClone(0); moveTo(slideCount, false); i = slideCount - 1; }   // hacia atrás desde el primero: parte de la copia
+    if (i >= slideCount) setClone(0);   // avance manual desde el último: vuelve al primero
     current = Math.min(i, slideCount);
     moveTo(current);
-    dots.forEach((d, k) => d.classList.toggle("active", k === current % slideCount));
+    const shown = current === slideCount ? cloneTarget : current;
+    dots.forEach((d, k) => d.classList.toggle("active", k === shown));
   }
   track.addEventListener("transitionend", (e) => {
-    if (e.target === track && current === slideCount) { current = 0; moveTo(0, false); }
+    if (e.target === track && current === slideCount) { current = cloneTarget; moveTo(current, false); }
   });
-  const play = () => { clearInterval(timer); if (slideCount > 1) timer = setInterval(() => go(current + 1), 5000); };
+  function autoNext() {
+    if (current === slideCount) { current = cloneTarget; moveTo(current, false); }   // por si no llegó el fin de la animación
+    if (current < slideCount - 1) return go(current + 1);
+    if (slideCount < 3) return go(current + 1);         // con 2 banners no hay "resto" para repetir
+    laps++;
+    const t = laps >= HERO_LAPS ? 0 : 1;               // después de las vueltas, el primero; si no, el segundo
+    if (t === 0) laps = 0;
+    setClone(t);
+    current = slideCount; moveTo(current);
+    dots.forEach((d, k) => d.classList.toggle("active", k === t));
+  }
+  const play = () => { clearInterval(timer); if (slideCount > 1) timer = setInterval(autoNext, 5000); };
   // Se puede volver a llamar si el panel cambió las imágenes del carrusel
   function setupHero() {
     track.querySelectorAll(".hero-clone").forEach((c) => c.remove());
-    slideCount = track.children.length; current = 0;
+    slideCount = track.children.length; current = 0; cloneTarget = 0; laps = 0;
     if (slideCount > 1) {
       const clone = track.children[0].cloneNode(true);
       clone.classList.add("hero-clone"); clone.setAttribute("aria-hidden", "true");
@@ -1428,15 +1450,17 @@
     $("heroNav").hidden = slideCount < 2;
     moveTo(0, false); dots.forEach((d, k) => d.classList.toggle("active", k === 0)); play();
   }
-  $("heroPrev").onclick = () => { go(current - 1); play(); };
-  $("heroNext").onclick = () => { go(current + 1); play(); };
+  const settle = () => { if (current === slideCount) { current = cloneTarget; moveTo(current, false); } };
+  $("heroPrev").onclick = () => { settle(); go(current - 1); play(); };
+  $("heroNext").onclick = () => { settle(); go(current + 1); play(); };
   // Táctil: el carrusel sigue al dedo (touchstart/touchmove/touchend) y al soltar decide por distancia o velocidad
   // (un "flick" rápido alcanza aunque sea corto). El CSS deja el scroll vertical al navegador (touch-action: pan-y).
   let drag = null;
   track.addEventListener("touchstart", (e) => {
     if (slideCount < 2 || e.touches.length > 1) return;
     clearInterval(timer);
-    if (current === slideCount) { current = 0; moveTo(0, false); }   // si quedó en la copia, pasa al real
+    if (current === slideCount) { current = cloneTarget; moveTo(current, false); }   // si quedó en la copia, pasa al real
+    setClone(0);
     drag = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now(), dx: 0, axis: null };
   }, { passive: true });
   track.addEventListener("touchmove", (e) => {
