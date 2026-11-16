@@ -614,3 +614,13 @@ a.kpi-link:hover, a.kpi-link:focus-visible { transform: translateY(-2px); outlin
 .an-ab { font-weight: 700; }
 .an-call { stroke: var(--c2); stroke-opacity: .6; stroke-width: 1; }
 .an-dot { fill: var(--c0); stroke: var(--c2); stroke-width: 1; }
+/* Panel → Integraciones */
+.integ { margin-bottom: 16px; }
+.integ-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.integ-head h3 { margin: 0; }
+.integ ol { margin: 8px 0 8px 20px; padding: 0; display: grid; gap: 4px; }
+.integ .pill { margin-right: 4px; }
+.integ-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.integ-msg { font-size: .9em; }
+.integ-padron { margin-top: 12px; }
+.invoice-box { margin-top: 12px; display: grid; gap: 8px; }

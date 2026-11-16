@@ -9,6 +9,7 @@
 //     {"name":"EXE","company":"EXE","email":"ventas@exe.com.ar","phone":"1130095254","street":"Av. Rivadavia",
 //      "number":"1234","district":"Flores","city":"Ciudad Autónoma de Buenos Aires","state":"C","country":"AR","postalCode":"1406"}
 //   SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY (los pone Supabase)
+// Se prende y apaga en Panel → Integraciones (ahí también van transportistas, ambiente y origen).
 // Deploy: supabase functions deploy envios --no-verify-jwt
 //
 // Acciones (POST JSON { action, ... }):
@@ -19,8 +20,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requirePermFor } from "../_shared/sesion.ts";
 
 const env = (k: string) => Deno.env.get(k) ?? "";
-const PROD = env("ENVIA_ENV") === "prod";
-const API = PROD ? "https://api.envia.com" : "https://api-test.envia.com";
+// Configuración no secreta: Panel → Integraciones → Envíos (tabla integrations). Si falta, se usan los secrets viejos.
+let CFG: Record<string, any> = {};
+let API = "https://api-test.envia.com";
 const GEO = "https://geocodes.envia.com";
 const db = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"));
 const cors = {
@@ -80,8 +82,16 @@ async function packageFor(items: { id: string; qty: number }[]) {
   };
 }
 
-const origin = () => JSON.parse(env("ENVIA_ORIGEN") || "{}");
-const carriers = () => env("ENVIA_CARRIERS").split(",").map((s) => s.trim()).filter(Boolean);
+const origin = () => (CFG.origin && Object.keys(CFG.origin).length ? CFG.origin : JSON.parse(env("ENVIA_ORIGEN") || "{}"));
+const carriers = () => String(CFG.carriers || env("ENVIA_CARRIERS")).split(",").map((s) => s.trim()).filter(Boolean);
+
+// Interruptor: apagada (o sin token) = la función no hace nada y la tienda sigue como sin envíos.
+async function loadCfg() {
+  const { data } = await db.from("integrations").select("enabled, config").eq("key", "envios").maybeSingle();
+  if (!data?.enabled || !env("ENVIA_TOKEN")) throw Object.assign(new Error("Envíos desactivados"), { status: 503 });
+  CFG = data.config || {};
+  API = (CFG.env || env("ENVIA_ENV")) === "prod" ? "https://api.envia.com" : "https://api-test.envia.com";
+}
 const cpOk = (cp: unknown) => /^\d{4}$/.test(String(cp ?? ""));
 
 const requirePerm = (req: Request, perm: string) => requirePermFor(req, db, perm);  // mismo control que la base, con la IP real
@@ -90,6 +100,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
   try {
     const body = await req.json();
+    await loadCfg();
     switch (body.action) {
       case "quote": {
         if (!cpOk(body.cp)) return json({ error: "Código postal inválido" }, 400);

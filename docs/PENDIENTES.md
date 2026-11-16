@@ -6,10 +6,9 @@ Para sumar a futuro: claves de formato (`ATX`, `M-ATX`, `ITX`) para gabinete ↔
 
 ## Necesitan a Cristian
 - **Revocar claves pegadas en el chat**: token `sbp_…` de Supabase, token de Envia.com y la primera clave de Resend (`re_CXX…`).
-- **Edge Functions** (`send-email`, `envios`, `mp-webhook`): no están desplegadas. Necesitan secrets que solo carga Cristian
-  (`RESEND_API_KEY`, `EMAIL_FROM`, `ADMIN_EMAIL`, `ENVIA_TOKEN`, `MP_ACCESS_TOKEN`) en Supabase → Edge Functions → Secrets.
+- **Integraciones** (Mercado Pago, Envia.com, ARCA): el código y el panel están listos y apagados. Falta cargar las claves
+  en Supabase → Edge Functions → Secrets y prenderlas desde Panel → 🔌 Integraciones. Paso a paso: `docs/INTEGRACIONES.md`.
 - **Protección de contraseñas filtradas** (HaveIBeenPwned) en Supabase Auth: es función del plan Pro (pago), queda apagada.
-- **Mercado Pago**: crear la cuenta de integración y el token para cobrar online.
 - **Dominio**: pasar exe.com.ar a GitHub Pages cuando se decida (hoy sigue el WordPress).
 
 ## Recordar a Cristian (28/09)

@@ -29,9 +29,8 @@ window.SITE_CONFIG = {
     facebook: "",
   },
 
-  // Envíos con Envia.com (Andreani, Correo Argentino, OCA…): cotización en el carrito.
-  // Requiere Supabase + la función "envios" (ver docs/ENVIOS.md).
-  shipping: { enabled: false },
+  // Envíos (Envia.com), pago online (Mercado Pago) y facturación (ARCA) NO se configuran acá:
+  // se prenden y apagan en Panel → 🔌 Integraciones (ver docs/INTEGRACIONES.md).
 
   // Backend (Supabase). Dejar vacío hasta crear el proyecto: el sitio funciona igual en modo estático.
   // Clave pública (publishable): es segura de exponer; los datos los protege la base con RLS.

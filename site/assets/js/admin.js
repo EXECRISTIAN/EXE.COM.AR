@@ -10,7 +10,7 @@
   const money = (n) => "$" + Number(n || 0).toLocaleString("es-AR");
 
   const DEMO = {
-    perms: new Set(["site.edit", "dashboard.access", "orders.read", "orders.update_status", "orders.create", "orders.mark_paid", "products.read", "products.write", "stock.write", "users.read", "users.moderate", "roles.manage", "emails.manage", "shipping.manage", "promos.manage", "analytics.read", "finance.manage"]),
+    perms: new Set(["site.edit", "dashboard.access", "orders.read", "orders.update_status", "orders.create", "orders.mark_paid", "products.read", "products.write", "stock.write", "users.read", "users.moderate", "roles.manage", "emails.manage", "shipping.manage", "promos.manage", "analytics.read", "finance.manage", "integrations.manage"]),
     orders: [
       { id: 1042, created_at: "2026-09-20", customer: "Juan Pérez", status: "paid", total: 452000, carrier: "andreani", tracking_number: "360000012345670", label_url: "#" },
       { id: 1043, created_at: "2026-09-22", customer: "Ana Gómez", status: "pending", total: 98000 },
@@ -34,6 +34,13 @@
   };
 
   let perms = new Set();
+  // Integraciones prendidas (Panel → Integraciones). Apagadas = sus botones no aparecen en el panel.
+  const integ = { envios: false, mercadopago: false, arca: false };
+  async function loadInteg() {
+    if (demo || !be) return;
+    const { data } = await be.sb.from("integrations").select("key, enabled").then((r) => r, () => ({ data: [] }));
+    for (const r of data || []) if (r.key in integ) integ[r.key] = r.enabled === true;
+  }
 
   async function boot() {
     if (demo) {
@@ -55,6 +62,7 @@
     }
     // Verificación en dos pasos: obligatoria para el panel (sin ella la base no da ningún permiso)
     if (!(await mfaGate())) return;
+    await loadInteg();
     open(user.email);
   }
 
@@ -167,7 +175,7 @@
   // Envíos (Envia.com): generar la guía (solo pedidos pagados) e imprimir la etiqueta. La función valida el permiso.
   function shipCell(o) {
     if (o.tracking_number) return `${esc(o.carrier || "")} ${esc(o.tracking_number)} ${o.label_url ? `<a href="${esc(o.label_url)}" target="_blank" rel="noopener">Etiqueta</a>` : ""}`;
-    if (perms.has("shipping.manage") && ["paid", "preparing"].includes(o.status)) return `<button class="link-btn" data-ship="${o.id}">Crear envío</button>`;
+    if (integ.envios && perms.has("shipping.manage") && ["paid", "preparing"].includes(o.status)) return `<button class="link-btn" data-ship="${o.id}">Crear envío</button>`;
     return "—";
   }
   async function createShipment(order_id) {
@@ -299,7 +307,7 @@
     run(); if (!labelize.obs) { labelize.obs = new MutationObserver(run); labelize.obs.observe($("view"), { childList: true, subtree: true }); }
   }
   // API para los módulos del panel (admin-productos.js)
-  window.EXE_ADMIN = { views, subviews, route, esc, money, $, shipCell, get perms() { return perms; }, demo, be, DEMO, alertView: (m) => alertView(m) };
+  window.EXE_ADMIN = { views, subviews, route, esc, money, $, shipCell, get perms() { return perms; }, integ, loadInteg, demo, be, DEMO, alertView: (m) => alertView(m) };
 
   $("logout").onclick = async () => { if (be) await be.sb.auth.signOut(); location.href = "../index.html"; };
   // boot() arranca cuando cargaron los módulos (admin-productos.js llama a EXE_ADMIN.start())
