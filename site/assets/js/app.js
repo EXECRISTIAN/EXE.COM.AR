@@ -62,25 +62,38 @@
   };
 
   /* ---------- Outlet: grados de estado (A / B / C). Sin grado cargado = general "A a C". ---------- */
-  const GRADES = {
-    A: { name: "Grado A · Excelente", short: "A", txt: "Como nuevo: sin marcas de uso a la vista." },
-    B: { name: "Grado B · Muy bueno", short: "B", txt: "Puede tener alguna marca leve de uso, como pequeños rayones o desgaste, que no afecta el funcionamiento." },
-    C: { name: "Grado C · Bueno", short: "C", txt: "Puede tener marcas de uso visibles o detalles estéticos (rayones, desgaste, alguna tapa o etiqueta faltante). Funciona perfecto." },
-    G: { name: "Grado A a C · Seleccionado", short: "A–C", txt: "Según la unidad, puede estar entre como nuevo y/o con posibles marcas de uso, visibles o no a simple vista. Todas funcionan perfecto.",
+  // Valores por defecto; si la base responde, se reemplazan por los que se editan en Panel → Grados outlet.
+  const OUT = {
+    enabled: true, ack: true, warranty: cfg.outletWarrantyMonths || 3,
+    base: "Producto usado o reacondicionado, con mantenimiento y pruebas de funcionamiento hechas por EXE.",
+    img: "Las imágenes son ilustrativas: el empaque, el color o detalles menores pueden variar sin afectar las características ni el funcionamiento.",
+  };
+  let GRADES = {
+    A: { enabled: true, inList: true, sort: 1, name: "Grado A · Excelente", txt: "Como nuevo: sin marcas de uso a la vista." },
+    B: { enabled: true, inList: true, sort: 2, name: "Grado B · Muy bueno", txt: "Puede tener alguna marca leve de uso, como pequeños rayones o desgaste, que no afecta el funcionamiento." },
+    C: { enabled: true, inList: true, sort: 3, name: "Grado C · Bueno", txt: "Puede tener marcas de uso visibles o detalles estéticos (rayones, desgaste, alguna tapa o etiqueta faltante). Funciona perfecto." },
+    G: { enabled: true, inList: true, sort: 4, name: "Grado A a C · Seleccionado", txt: "Según la unidad, puede estar entre como nuevo y/o con posibles marcas de uso, visibles o no a simple vista. Todas funcionan perfecto.",
       // Solo en "¿Qué significa cada grado?": aclara que este grado lo pone el sistema, no una clasificación a mano
       info: { name: "Grado A a C · Asignado automáticamente", txt: "Es el grado que se asigna automáticamente a las unidades que todavía no fueron clasificadas a mano. Según la unidad, puede estar entre como nuevo y/o con posibles marcas de uso, visibles o no a simple vista. Todas funcionan perfecto." } },
-    D: { name: "Grado D · No funciona", short: "D", txt: "No funciona y puede estar en cualquier estado. Se vende para repuesto o reparación.",
-      base: "Sin garantía de funcionamiento." },
+    // D: no aparece en la lista de grados, solo en los productos que lo tienen
+    D: { enabled: true, inList: false, sort: 5, name: "Grado D · No funciona", txt: "No funciona y puede estar en cualquier estado. Se vende para repuesto o reparación.", base: "Sin garantía de funcionamiento." },
   };
-  const OUTLET_BASE = "Producto usado o reacondicionado, con mantenimiento y pruebas de funcionamiento hechas por EXE.";
-  const OUTLET_WARRANTY = `Garantía: ${cfg.outletWarrantyMonths || 3} meses.`;
-  const IMG_NOTE = "Las imágenes son ilustrativas: el empaque, el color o detalles menores pueden variar sin afectar las características ni el funcionamiento.";
-  // Texto de base y garantía de cada grado (el D tiene el suyo: no funciona, sin garantía)
-  const baseOf = (g) => g.base || `${OUTLET_BASE} ${OUTLET_WARRANTY}`;
-  const gradeOf = (p) => (p && p.outlet ? GRADES[p.grade] || GRADES.G : null);
+  const warrantyText = () => (OUT.warranty > 0 ? `Garantía: ${OUT.warranty} ${OUT.warranty === 1 ? "mes" : "meses"}.` : "");
+  const baseOf = (g) => g.base || `${OUT.base} ${warrantyText()}`.trim();
+  // Grado que se muestra: el cargado o el general (G). Apagado (el sistema o ese grado) = sin información de grado.
+  const gradeOf = (p) => { if (!p || !p.outlet || !OUT.enabled) return null; const g = GRADES[p.grade] || GRADES.G; return g && g.enabled ? g : null; };
+  const gradesReady = (cfg.supabaseUrl && cfg.supabaseAnonKey ? Promise.all(["outlet_settings?select=*&id=eq.1", "outlet_grades?select=*"].map((q) =>
+      fetch(`${cfg.supabaseUrl}/rest/v1/${q}`, { headers: { apikey: cfg.supabaseAnonKey } }).then((r) => (r.ok ? r.json() : Promise.reject()))))
+    .then(([[st], rows]) => {
+      if (st) Object.assign(OUT, { enabled: st.enabled, ack: st.ack_enabled, warranty: st.warranty_months, base: st.base_text, img: st.img_note });
+      if (rows && rows.length) GRADES = Object.fromEntries(rows.map((r) => [r.code, { enabled: r.enabled, inList: r.in_list, sort: r.sort, name: r.name, txt: r.txt,
+        info: r.list_name || r.list_txt ? { name: r.list_name || r.name, txt: r.list_txt || r.txt } : null, base: r.own_base || null }]));
+    }) : Promise.reject()).catch(() => {});
   // Bloque de estado para la ficha del producto
   function outletInfo(p) {
-    const g = gradeOf(p); if (!g) return "";
+    if (!p.outlet) return "";
+    const g = gradeOf(p);
+    if (!g) return `<p class="pd-condition"><span class="tag-outlet">Outlet</span> ${esc(p.condition || "")}</p>`;
     return `<div class="pd-condition"><p><span class="tag-outlet">Outlet</span> <b>${esc(g.name)}</b>${p.condition ? ` · ${esc(p.condition)}` : ""}</p>
       <p>${esc(g.txt)} ${esc(baseOf(g))}</p>
       <button type="button" class="link-btn" data-grades>¿Qué significa cada grado?</button></div>`;
@@ -1317,12 +1330,12 @@
   $("cartClear").onclick = () => { cart = []; shipping = null; if (shipOn) $("shipOpts").innerHTML = ""; save(); renderCart(); renderProducts(); };
   /* ---------- Confirmación obligatoria del estado de los productos outlet antes de enviar el pedido ---------- */
   let ackSig = "";
-  const outletLines = (lines) => lines.filter((l) => l.product && l.product.outlet);
+  const outletLines = (lines) => (OUT.ack ? lines.filter((l) => gradeOf(l.product)) : []);
   function outletAckLines(lines) {
     const o = outletLines(lines); if (!o.length || ackSig !== cartSig()) return [];
     return ["", "Estado de los productos outlet (leído y aceptado):",
       ...o.map((l) => { const g = gradeOf(l.product); return `• ${l.product.name}: ${g.name}${l.product.condition ? `, ${l.product.condition}` : ""}. ${g.txt} ${baseOf(g)}`; }),
-      IMG_NOTE];
+      OUT.img];
   }
   const ackDialog = $("ackDialog");
   $("sendWa").onclick = () => {
@@ -1331,7 +1344,7 @@
     $("ackList").innerHTML = o.map((l) => { const g = gradeOf(l.product);
       return `<li><b>${esc(l.product.name)}</b><span class="ack-grade">${esc(g.name)}${l.product.condition ? ` · ${esc(l.product.condition)}` : ""}</span><small>${esc(g.txt)} ${esc(baseOf(g))}</small></li>`; }).join("");
     $("ackBase").hidden = true;
-    $("ackImg").textContent = IMG_NOTE;
+    $("ackImg").textContent = OUT.img;
     $("ackCheck").checked = false; $("ackOk").disabled = true;
     ackDialog.showModal();
   };
@@ -1341,9 +1354,13 @@
   ackDialog.addEventListener("click", (e) => { if (e.target === ackDialog) ackDialog.close(); });
   // "¿Qué significa cada grado?"
   const gradesDialog = $("gradesDialog");
-  $("gradesList").innerHTML = ["A", "B", "C", "G", "D"].map((k) => { const g = GRADES[k].info || GRADES[k]; return `<li><b>${esc(g.name)}</b><small>${esc(g.txt)}</small></li>`; }).join("");
-  $("gradesBase").textContent = `Grados A, B y C: ${OUTLET_BASE.charAt(0).toLowerCase()}${OUTLET_BASE.slice(1)} ${OUTLET_WARRANTY} Grado D: sin garantía de funcionamiento. ${IMG_NOTE}`;
-  document.addEventListener("click", (e) => { if (e.target.closest("[data-grades]")) { e.preventDefault(); gradesDialog.showModal(); } });
+  function renderGradesList() {
+    const list = Object.values(GRADES).filter((g) => g.enabled && g.inList).sort((a, b) => a.sort - b.sort);
+    $("gradesList").innerHTML = list.map((g) => { const x = g.info || g; return `<li><b>${esc(x.name)}</b><small>${esc(x.txt)}</small></li>`; }).join("");
+    const own = list.filter((g) => g.base).map((g) => `${(g.info || g).name}: ${g.base}`);
+    $("gradesBase").textContent = [`${OUT.base} ${warrantyText()}`.trim(), ...own, OUT.img].join(" ");
+  }
+  document.addEventListener("click", (e) => { if (e.target.closest("[data-grades]")) { e.preventDefault(); renderGradesList(); gradesDialog.showModal(); } });
   $("gradesClose").onclick = () => gradesDialog.close();
   gradesDialog.addEventListener("click", (e) => { if (e.target === gradesDialog) gradesDialog.close(); });
 
@@ -1789,7 +1806,7 @@
     if (!s) { s = document.createElement("script"); s.type = "application/ld+json"; s.id = "ldJson"; document.head.appendChild(s); }
     s.textContent = JSON.stringify(data).replace(/</g, "\\u003c");
   }
-  loadDb().catch(loadJson)
+  Promise.all([loadDb().catch(loadJson), gradesReady]).then(([data]) => data)
     // Los productos sin precio cargado no se muestran en la tienda (siguen en el panel; aparecen solos al ponerles precio)
     .then((data) => { products = data.filter((p) => Number(p.price) > 0); renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); routeSearch(); routePc(); paintZones(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
