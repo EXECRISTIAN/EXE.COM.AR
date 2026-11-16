@@ -22,6 +22,7 @@ window.SITE_CONFIG = {
     { name: "ASUS ROG", brand: "ASUS", match: ["asus", "rog"], src: "assets/img/marcas/marca-331.webp" },
     { name: "Intel", brand: "Intel", match: ["intel"], src: "assets/img/marcas/marca-364.webp" },
     { name: "HyperX", brand: "HyperX", match: ["hyperx"], src: "assets/img/marcas/marca-365.webp" },
+    { name: "Steam", brand: "Steam", match: ["steam", "valve"], src: "assets/img/marcas/marca-steam.webp" },   // consola Steam Deck
   ],
 
   socials: {
