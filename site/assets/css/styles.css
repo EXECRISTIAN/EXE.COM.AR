@@ -960,3 +960,5 @@ body:has(#pcOverlay.show) .wa-float { display: none; }
 .ack-check input { width: 18px; height: 18px; margin-top: 1px; flex: none; }
 .exe-dialog-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
 .exe-dialog .link-btn { padding: 0; font-size: .85rem; }
+.grade-acts { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 6px !important; }
+.ask-grade { padding: 6px 12px; font-size: .82rem; justify-self: start; margin-top: 4px; }
