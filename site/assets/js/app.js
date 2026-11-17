@@ -1621,16 +1621,19 @@
      Cada sección del inicio tiene data-block="id". Supabase dice el orden, cuáles se muestran y su contenido;
      las secciones nuevas (texto, imagen, imagen + texto, aviso) se crean acá. Si Supabase no responde, queda el HTML. */
   const src = (u) => esc(u || "");
+  // Versiones chicas generadas para las imágenes propias del inicio (el celular baja la que le corresponde).
+  const RESP = { "assets/img/hero-asus-amd-500-400.webp": [640, 960, 1280], "assets/img/hero-asus-z790.webp": [640, 960, 1280], "assets/img/categoria-01.webp": [528], "assets/img/categoria-02.webp": [528], "assets/img/categoria-03.webp": [528] };
+  const srcsetOf = (u, full, sizes) => { const w = RESP[u]; return w ? ` srcset="${w.map((n) => `${src(u.replace(/\.webp$/, `-${n}.webp`))} ${n}w`).join(", ")}, ${src(u)} ${full}w" sizes="${sizes}"` : ""; };
   const linkOf = (d) => (d.link ? `href="${src(d.link)}"${/^https?:/.test(d.link) ? ' target="_blank" rel="noopener"' : ""}` : d.filter ? `href="#productos" data-filter="${esc(d.filter)}"` : "");
   const renderers = {
     hero(el, d) {
       if (!d.slides || !d.slides.length) return;
-      track.innerHTML = d.slides.map((sl, i) => `<div class="hero-slide">${sl.link ? `<a ${linkOf(sl)}>` : ""}<img src="${src(sl.img)}" alt="${esc(sl.alt || "")}" width="1920" height="655"${i ? ' loading="lazy"' : ' fetchpriority="high"'}>${sl.link ? "</a>" : ""}</div>`).join("");
+      track.innerHTML = d.slides.map((sl, i) => `<div class="hero-slide">${sl.link ? `<a ${linkOf(sl)}>` : ""}<img src="${src(sl.img)}"${srcsetOf(sl.img, 1920, "100vw")} alt="${esc(sl.alt || "")}" width="1920" height="655"${i ? ' loading="lazy"' : ' fetchpriority="high"'}>${sl.link ? "</a>" : ""}</div>`).join("");
       setupHero();
     },
     tarjetas(el, d) {
       if (!d.cards) return;
-      el.innerHTML = d.cards.map((c, i) => `<article class="brand-card reveal" style="--d:${i * 0.12}s${c.pos ? `;--pos:${esc(c.pos)}` : ""}"><picture>${c.img_mobile ? `<source media="(max-width: 767px)" srcset="${src(c.img_mobile)}">` : ""}<img src="${src(c.img)}" alt="${esc(c.alt || "")}" width="1056" height="1110" loading="lazy"></picture>${c.text ? `<a ${linkOf(c) || 'href="#productos"'} class="btn btn-banner">${esc(c.text)}</a>` : ""}</article>`).join("");
+      el.innerHTML = d.cards.map((c, i) => `<article class="brand-card reveal" style="--d:${i * 0.12}s${c.pos ? `;--pos:${esc(c.pos)}` : ""}"><picture>${c.img_mobile ? `<source media="(max-width: 767px)" srcset="${src(c.img_mobile)}">` : ""}<img src="${src(c.img)}"${srcsetOf(c.img, 1056, "(max-width: 767px) 100vw, 33vw")} alt="${esc(c.alt || "")}" width="1056" height="1110" loading="lazy"></picture>${c.text ? `<a ${linkOf(c) || 'href="#productos"'} class="btn btn-banner">${esc(c.text)}</a>` : ""}</article>`).join("");
     },
     catalogo(el, d) {
       const h = el.querySelector(".section-head"); if (!h) return;
