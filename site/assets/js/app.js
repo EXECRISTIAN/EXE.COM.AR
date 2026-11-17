@@ -6,7 +6,10 @@
   // para que la política de seguridad (CSP) pueda bloquear todo JavaScript escrito dentro del HTML.
   document.addEventListener("error", (e) => {
     const img = e.target;
-    if (img instanceof HTMLImageElement && img.hasAttribute("data-fallback")) { img.removeAttribute("data-fallback"); img.src = PLACEHOLDER; }
+    if (!(img instanceof HTMLImageElement)) return;
+    // Miniatura que todavía no existe (foto vieja) → la foto completa
+    if (img.dataset.full && img.getAttribute("src") !== img.dataset.full) { img.src = img.dataset.full; return; }
+    if (img.hasAttribute("data-fallback")) { img.removeAttribute("data-fallback"); img.src = PLACEHOLDER; }
   }, true);
   const $ = (id) => document.getElementById(id);
   const money = (n) =>
@@ -15,6 +18,9 @@
   // tools/imagenes_muestra.py); si tampoco existe, el dibujo genérico. Al subir una foto real la reemplaza sola.
   const sampleImg = (p) => `assets/img/products/muestra/${encodeURIComponent(p.id)}.webp`;
   const mainImg = (p) => (p.images && p.images[0]) || p.image || sampleImg(p);
+  // Miniatura liviana para las tarjetas (480 px, <foto>-t.webp; ver tools/miniaturas.py y el panel). La ficha usa la foto completa.
+  const thumbOf = (u) => (/\.webp$/i.test(u || "") && /(^|\/)assets\/img\/products\/|\/storage\/v1\/object\/public\//.test(u) && !/-t\.webp$/i.test(u) ? u.replace(/\.webp$/i, "-t.webp") : u);
+  const thumbImg = (u, attrs) => { const t = thumbOf(u); return `<img src="${esc(t)}"${t !== u ? ` data-full="${esc(u)}"` : ""} ${attrs}>`; };
   // Al público siempre en pesos. Los productos valorados en dólares ya traen el precio en pesos
   // calculado con el dólar del día (lo actualiza la base), así que se muestra ese.
   const priceOf = (p, qty = 1) => money(p.price * qty);
@@ -29,6 +35,12 @@
   let filter = "Todos";
   let query = "";
   let sortBy = "";
+  // Grilla: se muestran de a pocos con "Ver más". En "Destacados" van primero los 10 con más interés
+  // (clics, agregados al carrito y búsquedas de los últimos 60 días, calculado por la base: popular_products).
+  // Se muestran 2 filas completas (8 en compu, 4 en celular) y asoma una tercera difuminada; "Ver más" suma 3 filas.
+  const FIRST_ROWS = 2, MORE_ROWS = 3;
+  let rows = FIRST_ROWS, gridKey = "", popular = [];
+  const gridCols = () => { const g = $("productGrid"); return Math.max(1, (getComputedStyle(g).gridTemplateColumns || "").split(" ").filter(Boolean).length); };
   const fp = { brands: new Set(), tags: new Set(), min: null, max: null, stock: false, logo: null, ids: null };   // panel "Filtros" (+ logo de marca elegido abajo)
   // Marca por logo: busca sus palabras en la marca o el nombre (ej. el logo NVIDIA encuentra las placas "GeForce" de MSI)
   const brandMatches = (p, bf) => {
@@ -159,8 +171,8 @@
     return `
     <article class="card reveal" style="--d:${(i % 4) * 0.08}s">
       <a class="card-media" href="#producto/${encodeURIComponent(p.id)}" aria-label="Ver detalles de ${esc(p.name)}">
-        <img src="${esc(mainImg(p))}" alt="${esc(p.name)}" loading="lazy" data-fallback>
-        ${p.images && p.images[1] ? `<img class="alt" src="${esc(p.images[1])}" alt="" loading="lazy">` : ""}
+        ${thumbImg(mainImg(p), `alt="${esc(p.name)}" loading="lazy" decoding="async" data-fallback`)}
+        ${p.images && p.images[1] ? thumbImg(p.images[1], 'class="alt" alt="" loading="lazy" decoding="async"') : ""}
         ${p.category ? `<span class="tag">${esc(p.category)}</span>` : ""}
         ${p.outlet ? `<span class="tag tag-outlet">Outlet</span>` : ""}
         ${p.images && p.images.length > 1 ? `<span class="img-count" aria-hidden="true">${p.images.length} fotos</span>` : ""}
@@ -290,8 +302,19 @@
     if (sortBy === "price-desc") list.sort((a, b) => (b.price || -1) - (a.price || -1));
     if (sortBy === "name-asc") list.sort((a, b) => a.name.localeCompare(b.name, "es"));
     if (sortBy === "name-desc") list.sort((a, b) => b.name.localeCompare(a.name, "es"));
+    if (!sortBy && popular.length) {
+      const rank = new Map(popular.map((id, i) => [id, i]));
+      const top = list.filter((p) => rank.has(p.id)).sort((a, b) => rank.get(a.id) - rank.get(b.id));
+      list.splice(0, list.length, ...top, ...list.filter((p) => !rank.has(p.id)));
+    }
+    // Si cambió la búsqueda, un filtro o el orden, se vuelve a mostrar desde los primeros
+    const key = JSON.stringify([filter, q, sortBy, [...fp.brands], [...fp.tags], fp.min, fp.max, fp.stock, fp.logo && fp.logo.brand, fp.ids && [...fp.ids]]);
+    if (key !== gridKey) { gridKey = key; rows = FIRST_ROWS; }
+    // Solo la vista inicial del catálogo va de a poco: si buscan o filtran, se muestran todos los resultados
+    const browsing = !q && filter === "Todos" && !fp.brands.size && !fp.tags.size && fp.min == null && fp.max == null && !fp.stock && !fp.logo && !fp.ids;
+    const cols = gridCols(), shown = browsing && rows !== Infinity ? rows * cols : list.length, rest_n = list.length - shown;
     $("productGrid").innerHTML = list.length
-      ? list.map(cardHtml).join("")
+      ? list.slice(0, shown).map(cardHtml).join("") + (rest_n > 0 ? `${list.slice(shown, shown + cols).map((p, j) => cardHtml(p, j).replace(/^(\s*<\w+)/, '$1 inert aria-hidden="true" data-peek')).join("")}<div class="grid-more"><button type="button" class="btn btn-outline" id="moreProducts">Ver más</button><button type="button" class="link-btn" id="allProducts">Ver todos (${list.length})</button></div>` : "")
       : fp.logo
         ? `<p class="empty-state">Todavía no tenemos productos ${esc(fp.logo.brand)} publicados.<br><a href="${esc(waLink(`Hola EXE! Busco productos ${fp.logo.brand}. ¿Qué tienen disponible?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te conseguimos lo que buscás.</p>`
         : query ? `<div class="sugg-head"><p class="empty-state">No encontramos «${esc(query)}» publicado${relatedFor(query.trim(), []).items.length ? ". Abajo te mostramos productos relacionados" : ", pero te lo podemos conseguir"}.</p>${askHtml(query)}</div>` : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
@@ -1231,7 +1254,22 @@
     }
   });
 
-  $("search").addEventListener("input", (e) => { query = e.target.value.trim(); renderProducts(); });
+  // Lo que se escribe en el buscador se guarda (anónimo) cuando la persona deja de tipear, para verlo en el panel
+  let searchTimer, lastSearch = "";
+  const logSearch = (v) => { v = v.trim().toLowerCase().replace(/\s+/g, " ").slice(0, 80); if (v.length >= 2 && v !== lastSearch) { lastSearch = v; stat("search", { query: v }); } };
+  $("search").addEventListener("input", (e) => {
+    query = e.target.value.trim(); renderProducts();
+    clearTimeout(searchTimer); searchTimer = setTimeout(() => logSearch(query), 1500);
+  });
+  // Si cambia la cantidad de columnas (girar el celular, achicar la ventana) se recalculan las filas
+  let lastCols = 0;
+  addEventListener("resize", () => { const c = gridCols(); if (lastCols && c !== lastCols && products.length) renderProducts(); lastCols = c; });
+  $("productGrid").addEventListener("click", (e) => {
+    const all = e.target.closest("#allProducts");
+    if (!all && !e.target.closest("#moreProducts")) return;
+    const first = rows * gridCols(); rows = all ? Infinity : rows + MORE_ROWS; renderProducts();
+    const next = $("productGrid").children[first]; if (next) next.querySelector("a, button")?.focus({ preventScroll: true });
+  });
 
   /* ---------- Filtros y orden ---------- */
   function renderTagOptions() {
@@ -1894,7 +1932,11 @@
     if (!s) { s = document.createElement("script"); s.type = "application/ld+json"; s.id = "ldJson"; document.head.appendChild(s); }
     s.textContent = JSON.stringify(data).replace(/</g, "\\u003c");
   }
-  Promise.all([loadDb().catch(loadJson), gradesReady]).then(([data]) => data)
+  const loadPopular = () => !cfg.supabaseUrl ? Promise.resolve([]) : fetch(`${cfg.supabaseUrl}/rest/v1/rpc/popular_products`, { method: "POST",
+      headers: { "Content-Type": "application/json", apikey: cfg.supabaseAnonKey, Authorization: `Bearer ${cfg.supabaseAnonKey}` }, body: "{}" })
+    .then((r) => (r.ok ? r.json() : [])).then((ids) => (Array.isArray(ids) ? ids.filter((x) => typeof x === "string") : [])).catch(() => []);
+  const popularReady = loadPopular();
+  Promise.all([loadDb().catch(loadJson), gradesReady, popularReady.then((ids) => { popular = ids; })]).then(([data]) => data)
     // Los productos sin precio cargado no se muestran en la tienda (siguen en el panel; aparecen solos al ponerles precio)
     .then((data) => { products = data.filter((p) => Number(p.price) > 0); renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); routeSearch(); routePc(); paintZones(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });

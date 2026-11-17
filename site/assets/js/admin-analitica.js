@@ -43,6 +43,7 @@
       sources: [{ s: "Instagram", n: 38 }, { s: "Google", n: 27 }, { s: "WhatsApp", n: 17 }, { s: "Directo", n: 11 }, { s: "Mercado Libre", n: 7 }],
       campaigns: [{ c: "historia-ig", n: 22 }, { c: "ml-perfil", n: 9 }],
       products: (A.DEMO.products || []).map((p, i) => ({ id: p.id, name: p.name, image: null, views: 800 - i * 200, adds: 70 - i * 20 })),
+      searches: [{ q: "rtx 3060", n: 41, people: 33, found: true }, { q: "fuente 650w", n: 27, people: 22, found: true }, { q: "ryzen 5 5600", n: 19, people: 17, found: false }, { q: "notebook", n: 12, people: 11, found: false }],
       provinces: { "Buenos Aires": 128, CABA: 96, "Córdoba": 41, "Santa Fe": 38, Mendoza: 14, "Entre Ríos": 12, "Tucumán": 11, Salta: 9, "Neuquén": 9, Corrientes: 7, Misiones: 6, "Río Negro": 6 },
     };
   }
@@ -52,7 +53,10 @@
     const [f, t] = range();
     let r;
     if (A.demo) r = demo();
-    else { const { data, error } = await sb().rpc("analytics_summary", { p_from: f, p_to: t }); if (error) throw error; r = data; }
+    else {
+      const [a, b] = await Promise.all([sb().rpc("analytics_summary", { p_from: f, p_to: t }), sb().rpc("search_summary", { p_from: f, p_to: t })]);
+      if (a.error) throw a.error; r = a.data; r.searches = b.error ? null : b.data || [];
+    }
     const k = r.kpis || {};
     const delta = (a, b) => { if (!b) return `<span class="vt-delta">sin datos para comparar</span>`; const v = Math.round(((a - b) / b) * 100); return `<span class="vt-delta ${v >= 0 ? "up" : "down"}">${v >= 0 ? "▲" : "▼"} ${Math.abs(v)}% vs período anterior</span>`; };
     const conv = k.people ? (k.wa / k.people) * 100 : 0, mob = k.people ? Math.round((k.mobile / k.people) * 100) : 0;
@@ -86,6 +90,12 @@
     const src = r.sources || [], stot = src.reduce((s, x) => s + x.n, 0) || 1, smax = Math.max(1, ...src.map((x) => x.n));
     const prods = (r.products || []).filter((x) => x.views > 0).slice(0, 6);
     const empty = !k.visits && !Object.keys(prov).length;
+    // Búsquedas: de la más repetida a la menos (la base ya las manda ordenadas)
+    const srch = r.searches, smaxQ = Math.max(1, ...(srch || []).map((x) => x.n));
+    const srchList = srch == null ? '<p class="ed-hint">No se pudieron cargar las búsquedas.</p>'
+      : !srch.length ? '<p class="ed-hint">Todavía nadie buscó nada en este período. Se guardan desde el 17/11/2026.</p>'
+      : `<div class="an-search">${srch.slice(0, 100).map((x, i) => `<div class="an-sq"><span class="an-sq-n">${i + 1}</span><span class="an-sq-q"><a href="../#buscar/${encodeURIComponent(x.q)}" target="_blank" rel="noopener">${esc(x.q)}</a>${x.found ? "" : ' <span class="pill pending" title="Ningún producto activo coincide: es demanda que hoy no cubrís">sin resultados</span>'}</span><i><b style="width:${Math.round((x.n / smaxQ) * 100)}%"></b></i><strong title="${x.people} persona${x.people === 1 ? "" : "s"}">${fmt(x.n)}</strong></div>`).join("")}</div>
+        ${srch.length > 100 ? `<p class="ed-hint">Se muestran las 100 más buscadas de ${srch.length}.</p>` : ""}`;
 
     return `<p class="ed-hint" style="margin-top:0">Quién visita la tienda, desde dónde compran, con qué dispositivo y de dónde llegan. Anónimo (sin nombre, IP ni GPS) y sin servicios pagos. No cuenta las visitas del equipo de EXE.</p>
       <div class="vt-bar-top">${Object.entries(PERIODS).map(([key, v]) => `<button type="button" class="vt-chip ${period === key ? "on" : ""}" data-an-period="${key}">${v}</button>`).join("")}</div>
@@ -120,6 +130,7 @@
           ${prods.length ? prods.map((x) => `<div class="an-prod">${x.image ? `<img src="${esc(/^(https?:)?\/\//.test(x.image) ? x.image : "../" + x.image)}" alt="">` : "<span></span>"}<span><a href="#editar/${encodeURIComponent(x.id)}">${esc(x.name || x.id)}</a><small>${fmt(x.views)} vistas · ${x.views ? Math.round((x.adds / x.views) * 100) : 0}% al carrito</small></span>${x.views >= 30 && x.adds / x.views < 0.05 ? '<b title="Muy mirado y poco agregado: revisar precio o fotos">⚠️</b>' : ""}</div>`).join("") : '<p class="ed-hint">Sin datos.</p>'}
           <p class="ed-hint">⚠️ = muy mirado y poco agregado: conviene revisar precio o fotos.</p></div>
       </div>
+      <div class="panel"><h3>🔎 Lo que buscan en la tienda</h3><p class="ed-hint">Lo que la gente escribió en el buscador, de lo más buscado a lo menos. El número es cuántas veces se buscó. <b>Sin resultados</b> = no tenés ningún producto publicado que coincida: es algo que te piden y hoy no ofrecés.</p>${srchList}</div>
       <div class="an-grid">
         <div class="panel"><h3>📣 Publicidad (opcional)</h3><p class="ed-hint">Las herramientas gratis de Meta y Google sirven para medir anuncios pagos. Solo hacen falta si pautás.</p>
           <div class="an-ads"><span><b>Meta Pixel (Instagram / Facebook)</b><small>Mide qué anuncios traen pedidos</small></span><span class="pill pending">Sin conectar</span></div>

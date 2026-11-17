@@ -591,14 +591,15 @@
   }
 
   // Foto → WebP liviano (máx. 1200 px, fondo blanco opcional) y subida a Supabase Storage
-  async function toWebp(file, white) {
+  // thumbW: miniatura para las tarjetas de la tienda (480 px de ancho, se guarda como <foto>-t.webp)
+  async function toWebp(file, white, thumbW) {
     const bmp = await createImageBitmap(file);
-    const k = Math.min(1, 1200 / Math.max(bmp.width, bmp.height));
+    const k = thumbW ? Math.min(1, thumbW / bmp.width) : Math.min(1, 1200 / Math.max(bmp.width, bmp.height));
     const cv = document.createElement("canvas"); cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
     const ctx = cv.getContext("2d");
     if (white) { ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height); }
     ctx.drawImage(bmp, 0, 0, cv.width, cv.height);
-    return new Promise((ok) => cv.toBlob(ok, "image/webp", 0.85));
+    return new Promise((ok) => cv.toBlob(ok, "image/webp", thumbW ? 0.78 : 0.85));
   }
   async function uploadFiles(files) {
     const idInput = document.querySelector("#edForm [name=id]");
@@ -612,6 +613,8 @@
         const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.webp`;
         const up = await sb().storage.from(BUCKET).upload(path, blob, { contentType: "image/webp", cacheControl: "31536000" });
         if (up.error) throw up.error;
+        // Miniatura para las tarjetas (si falla, la tienda usa la foto completa)
+        try { await sb().storage.from(BUCKET).upload(path.replace(/\.webp$/, "-t.webp"), await toWebp(blob, false, 480), { contentType: "image/webp", cacheControl: "31536000" }); } catch (e) { /* opcional */ }
         ed.images.push(sb().storage.from(BUCKET).getPublicUrl(path).data.publicUrl);
         renderPhotos();
       } catch (err) { return msg("No se pudo subir la foto: " + err.message, "error"); }
