@@ -2,6 +2,18 @@
 // derecho. No es seguridad real (el menú del navegador siempre permite abrirlas): la protección de
 // verdad está en el servidor. Se carga primero en TODAS las páginas (tools/csp.py lo exige en el deploy).
 (() => {
+  // Anti-clickjacking (GitHub Pages no permite la cabecera X-Frame-Options ni frame-ancestors):
+  // si otra web mete esta página dentro de un iframe, se oculta y sale del marco. Los marcos del propio sitio
+  // (ej. el editor visual del panel) siguen funcionando.
+  if (window.top !== window.self) {
+    let same = false;
+    try { same = window.top.location.origin === location.origin; } catch (e) { same = false; }
+    if (!same) {
+      document.documentElement.style.display = "none";
+      try { window.top.location = location.href; } catch (e) { /* bloqueado por el marco: queda oculta */ }
+      return;
+    }
+  }
   window.addEventListener("keydown", (e) => {
     // e.code no cambia con Alt/Opción (en Mac Opción+C da "ç"), así que se compara por tecla física.
     const k = e.key === "F12" ? "f12" : (e.code || "").replace(/^Key/, "").toLowerCase();
