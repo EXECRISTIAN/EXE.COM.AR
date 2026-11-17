@@ -6,7 +6,10 @@
   // para que la política de seguridad (CSP) pueda bloquear todo JavaScript escrito dentro del HTML.
   document.addEventListener("error", (e) => {
     const img = e.target;
-    if (img instanceof HTMLImageElement && img.hasAttribute("data-fallback")) { img.removeAttribute("data-fallback"); img.src = PLACEHOLDER; }
+    if (!(img instanceof HTMLImageElement)) return;
+    // Miniatura que todavía no existe (foto vieja) → la foto completa
+    if (img.dataset.full && img.getAttribute("src") !== img.dataset.full) { img.src = img.dataset.full; return; }
+    if (img.hasAttribute("data-fallback")) { img.removeAttribute("data-fallback"); img.src = PLACEHOLDER; }
   }, true);
   const $ = (id) => document.getElementById(id);
   const money = (n) =>
@@ -15,6 +18,9 @@
   // tools/imagenes_muestra.py); si tampoco existe, el dibujo genérico. Al subir una foto real la reemplaza sola.
   const sampleImg = (p) => `assets/img/products/muestra/${encodeURIComponent(p.id)}.webp`;
   const mainImg = (p) => (p.images && p.images[0]) || p.image || sampleImg(p);
+  // Miniatura liviana para las tarjetas (480 px, <foto>-t.webp; ver tools/miniaturas.py y el panel). La ficha usa la foto completa.
+  const thumbOf = (u) => (/\.webp$/i.test(u || "") && /(^|\/)assets\/img\/products\/|\/storage\/v1\/object\/public\//.test(u) && !/-t\.webp$/i.test(u) ? u.replace(/\.webp$/i, "-t.webp") : u);
+  const thumbImg = (u, attrs) => { const t = thumbOf(u); return `<img src="${esc(t)}"${t !== u ? ` data-full="${esc(u)}"` : ""} ${attrs}>`; };
   // Al público siempre en pesos. Los productos valorados en dólares ya traen el precio en pesos
   // calculado con el dólar del día (lo actualiza la base), así que se muestra ese.
   const priceOf = (p, qty = 1) => money(p.price * qty);
@@ -165,8 +171,8 @@
     return `
     <article class="card reveal" style="--d:${(i % 4) * 0.08}s">
       <a class="card-media" href="#producto/${encodeURIComponent(p.id)}" aria-label="Ver detalles de ${esc(p.name)}">
-        <img src="${esc(mainImg(p))}" alt="${esc(p.name)}" loading="lazy" data-fallback>
-        ${p.images && p.images[1] ? `<img class="alt" src="${esc(p.images[1])}" alt="" loading="lazy">` : ""}
+        ${thumbImg(mainImg(p), `alt="${esc(p.name)}" loading="lazy" decoding="async" data-fallback`)}
+        ${p.images && p.images[1] ? thumbImg(p.images[1], 'class="alt" alt="" loading="lazy" decoding="async"') : ""}
         ${p.category ? `<span class="tag">${esc(p.category)}</span>` : ""}
         ${p.outlet ? `<span class="tag tag-outlet">Outlet</span>` : ""}
         ${p.images && p.images.length > 1 ? `<span class="img-count" aria-hidden="true">${p.images.length} fotos</span>` : ""}
@@ -304,9 +310,11 @@
     // Si cambió la búsqueda, un filtro o el orden, se vuelve a mostrar desde los primeros
     const key = JSON.stringify([filter, q, sortBy, [...fp.brands], [...fp.tags], fp.min, fp.max, fp.stock, fp.logo && fp.logo.brand, fp.ids && [...fp.ids]]);
     if (key !== gridKey) { gridKey = key; rows = FIRST_ROWS; }
-    const cols = gridCols(), shown = rows * cols, rest_n = list.length - shown;
+    // Solo la vista inicial del catálogo va de a poco: si buscan o filtran, se muestran todos los resultados
+    const browsing = !q && filter === "Todos" && !fp.brands.size && !fp.tags.size && fp.min == null && fp.max == null && !fp.stock && !fp.logo && !fp.ids;
+    const cols = gridCols(), shown = browsing && rows !== Infinity ? rows * cols : list.length, rest_n = list.length - shown;
     $("productGrid").innerHTML = list.length
-      ? list.slice(0, shown).map(cardHtml).join("") + (rest_n > 0 ? `${list.slice(shown, shown + cols).map((p, j) => cardHtml(p, j).replace(/^(\s*<\w+)/, '$1 inert aria-hidden="true" data-peek')).join("")}<div class="grid-more"><button type="button" class="btn btn-outline" id="moreProducts">Ver más <small>(${rest_n} ${rest_n === 1 ? "producto" : "productos"} más)</small></button></div>` : "")
+      ? list.slice(0, shown).map(cardHtml).join("") + (rest_n > 0 ? `${list.slice(shown, shown + cols).map((p, j) => cardHtml(p, j).replace(/^(\s*<\w+)/, '$1 inert aria-hidden="true" data-peek')).join("")}<div class="grid-more"><button type="button" class="btn btn-outline" id="moreProducts">Ver más</button><button type="button" class="link-btn" id="allProducts">Ver todos (${list.length})</button></div>` : "")
       : fp.logo
         ? `<p class="empty-state">Todavía no tenemos productos ${esc(fp.logo.brand)} publicados.<br><a href="${esc(waLink(`Hola EXE! Busco productos ${fp.logo.brand}. ¿Qué tienen disponible?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te conseguimos lo que buscás.</p>`
         : query ? `<div class="sugg-head"><p class="empty-state">No encontramos «${esc(query)}» publicado${relatedFor(query.trim(), []).items.length ? ". Abajo te mostramos productos relacionados" : ", pero te lo podemos conseguir"}.</p>${askHtml(query)}</div>` : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
@@ -1257,8 +1265,9 @@
   let lastCols = 0;
   addEventListener("resize", () => { const c = gridCols(); if (lastCols && c !== lastCols && products.length) renderProducts(); lastCols = c; });
   $("productGrid").addEventListener("click", (e) => {
-    if (!e.target.closest("#moreProducts")) return;
-    const first = rows * gridCols(); rows += MORE_ROWS; renderProducts();
+    const all = e.target.closest("#allProducts");
+    if (!all && !e.target.closest("#moreProducts")) return;
+    const first = rows * gridCols(); rows = all ? Infinity : rows + MORE_ROWS; renderProducts();
     const next = $("productGrid").children[first]; if (next) next.querySelector("a, button")?.focus({ preventScroll: true });
   });
 

@@ -320,10 +320,10 @@ button { font: inherit; }
 .grid > [data-peek] { max-height: 170px; overflow: hidden; pointer-events: none; user-select: none;
   -webkit-mask-image: linear-gradient(#000 0%, transparent 95%); mask-image: linear-gradient(#000 0%, transparent 95%); }
 .grid > [data-peek] .sh-acts { visibility: hidden; }
-.grid-more { grid-column: 1/-1; display: flex; justify-content: center; margin-top: -64px; position: relative; z-index: 1; }
+.grid-more { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: -84px; position: relative; z-index: 1; }
 .grid-more .btn { background: var(--bg); box-shadow: 0 6px 18px rgb(0 0 0 / .12); }
 .grid-more .btn:hover { background: var(--c2); }
-.grid-more .btn small { font-weight: 400; opacity: .75; margin-left: 4px; }
+.grid-more .link-btn { font-size: .9rem; padding: 4px 8px; }
 .empty-state { grid-column: 1/-1; text-align: center; padding: 40px 0; color: var(--muted); }
 .sugg-head { grid-column: 1/-1; }
 .sugg-head .empty-state { padding: 8px 0 4px; }
