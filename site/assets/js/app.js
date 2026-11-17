@@ -29,6 +29,10 @@
   let filter = "Todos";
   let query = "";
   let sortBy = "";
+  // Grilla: se muestran de a pocos con "Ver más". En "Destacados" van primero los 10 con más interés
+  // (clics, agregados al carrito y búsquedas de los últimos 60 días, calculado por la base: popular_products).
+  const FIRST = 10, MORE = 20;
+  let shown = FIRST, gridKey = "", popular = [];
   const fp = { brands: new Set(), tags: new Set(), min: null, max: null, stock: false, logo: null, ids: null };   // panel "Filtros" (+ logo de marca elegido abajo)
   // Marca por logo: busca sus palabras en la marca o el nombre (ej. el logo NVIDIA encuentra las placas "GeForce" de MSI)
   const brandMatches = (p, bf) => {
@@ -290,8 +294,17 @@
     if (sortBy === "price-desc") list.sort((a, b) => (b.price || -1) - (a.price || -1));
     if (sortBy === "name-asc") list.sort((a, b) => a.name.localeCompare(b.name, "es"));
     if (sortBy === "name-desc") list.sort((a, b) => b.name.localeCompare(a.name, "es"));
+    if (!sortBy && popular.length) {
+      const rank = new Map(popular.map((id, i) => [id, i]));
+      const top = list.filter((p) => rank.has(p.id)).sort((a, b) => rank.get(a.id) - rank.get(b.id));
+      list.splice(0, list.length, ...top, ...list.filter((p) => !rank.has(p.id)));
+    }
+    // Si cambió la búsqueda, un filtro o el orden, se vuelve a mostrar desde los primeros
+    const key = JSON.stringify([filter, q, sortBy, [...fp.brands], [...fp.tags], fp.min, fp.max, fp.stock, fp.logo && fp.logo.brand, fp.ids && [...fp.ids]]);
+    if (key !== gridKey) { gridKey = key; shown = FIRST; }
+    const rest_n = list.length - shown;
     $("productGrid").innerHTML = list.length
-      ? list.map(cardHtml).join("")
+      ? list.slice(0, shown).map(cardHtml).join("") + (rest_n > 0 ? `<div class="grid-more"><button type="button" class="btn btn-outline" id="moreProducts">Ver más <small>(${rest_n} ${rest_n === 1 ? "producto" : "productos"} más)</small></button></div>` : "")
       : fp.logo
         ? `<p class="empty-state">Todavía no tenemos productos ${esc(fp.logo.brand)} publicados.<br><a href="${esc(waLink(`Hola EXE! Busco productos ${fp.logo.brand}. ¿Qué tienen disponible?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te conseguimos lo que buscás.</p>`
         : query ? `<div class="sugg-head"><p class="empty-state">No encontramos «${esc(query)}» publicado${relatedFor(query.trim(), []).items.length ? ". Abajo te mostramos productos relacionados" : ", pero te lo podemos conseguir"}.</p>${askHtml(query)}</div>` : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
@@ -1231,7 +1244,18 @@
     }
   });
 
-  $("search").addEventListener("input", (e) => { query = e.target.value.trim(); renderProducts(); });
+  // Lo que se escribe en el buscador se guarda (anónimo) cuando la persona deja de tipear, para verlo en el panel
+  let searchTimer, lastSearch = "";
+  const logSearch = (v) => { v = v.trim().toLowerCase().replace(/\s+/g, " ").slice(0, 80); if (v.length >= 2 && v !== lastSearch) { lastSearch = v; stat("search", { query: v }); } };
+  $("search").addEventListener("input", (e) => {
+    query = e.target.value.trim(); renderProducts();
+    clearTimeout(searchTimer); searchTimer = setTimeout(() => logSearch(query), 1500);
+  });
+  $("productGrid").addEventListener("click", (e) => {
+    if (!e.target.closest("#moreProducts")) return;
+    const first = shown; shown += MORE; renderProducts();
+    const next = $("productGrid").children[first]; if (next) next.querySelector("a, button")?.focus({ preventScroll: true });
+  });
 
   /* ---------- Filtros y orden ---------- */
   function renderTagOptions() {
@@ -1894,7 +1918,11 @@
     if (!s) { s = document.createElement("script"); s.type = "application/ld+json"; s.id = "ldJson"; document.head.appendChild(s); }
     s.textContent = JSON.stringify(data).replace(/</g, "\\u003c");
   }
-  Promise.all([loadDb().catch(loadJson), gradesReady]).then(([data]) => data)
+  const loadPopular = () => !cfg.supabaseUrl ? Promise.resolve([]) : fetch(`${cfg.supabaseUrl}/rest/v1/rpc/popular_products`, { method: "POST",
+      headers: { "Content-Type": "application/json", apikey: cfg.supabaseAnonKey, Authorization: `Bearer ${cfg.supabaseAnonKey}` }, body: "{}" })
+    .then((r) => (r.ok ? r.json() : [])).then((ids) => (Array.isArray(ids) ? ids.filter((x) => typeof x === "string") : [])).catch(() => []);
+  const popularReady = loadPopular();
+  Promise.all([loadDb().catch(loadJson), gradesReady, popularReady.then((ids) => { popular = ids; })]).then(([data]) => data)
     // Los productos sin precio cargado no se muestran en la tienda (siguen en el panel; aparecen solos al ponerles precio)
     .then((data) => { products = data.filter((p) => Number(p.price) > 0); renderFilters(); renderBrandOptions(); renderProducts(); renderCart(); routeProduct(); routeBudget(); routeSearch(); routePc(); paintZones(); try { structuredData(); } catch (e) { /* no afecta la tienda */ } })
     .catch(() => { $("productGrid").innerHTML = `<p class="empty-state">No se pudieron cargar los productos.</p>`; });
