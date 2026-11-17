@@ -316,7 +316,13 @@ button { font: inherit; }
 .card select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--c6); background: var(--surface); color: var(--c2); font: inherit; }
 .card .btn { margin-top: auto; padding: 12px 18px; }
 .price-usd { display: block; font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.grid-more { grid-column: 1/-1; display: flex; justify-content: center; padding-top: 8px; }
+.grid > [data-peek] > * { flex-shrink: 0; }
+.grid > [data-peek] { max-height: 170px; overflow: hidden; pointer-events: none; user-select: none;
+  -webkit-mask-image: linear-gradient(#000 0%, transparent 95%); mask-image: linear-gradient(#000 0%, transparent 95%); }
+.grid > [data-peek] .sh-acts { visibility: hidden; }
+.grid-more { grid-column: 1/-1; display: flex; justify-content: center; margin-top: -64px; position: relative; z-index: 1; }
+.grid-more .btn { background: var(--bg); box-shadow: 0 6px 18px rgb(0 0 0 / .12); }
+.grid-more .btn:hover { background: var(--c2); }
 .grid-more .btn small { font-weight: 400; opacity: .75; margin-left: 4px; }
 .empty-state { grid-column: 1/-1; text-align: center; padding: 40px 0; color: var(--muted); }
 .sugg-head { grid-column: 1/-1; }

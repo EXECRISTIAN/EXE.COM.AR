@@ -31,8 +31,10 @@
   let sortBy = "";
   // Grilla: se muestran de a pocos con "Ver más". En "Destacados" van primero los 10 con más interés
   // (clics, agregados al carrito y búsquedas de los últimos 60 días, calculado por la base: popular_products).
-  const FIRST = 10, MORE = 20;
-  let shown = FIRST, gridKey = "", popular = [];
+  // Se muestran 2 filas completas (8 en compu, 4 en celular) y asoma una tercera difuminada; "Ver más" suma 3 filas.
+  const FIRST_ROWS = 2, MORE_ROWS = 3;
+  let rows = FIRST_ROWS, gridKey = "", popular = [];
+  const gridCols = () => { const g = $("productGrid"); return Math.max(1, (getComputedStyle(g).gridTemplateColumns || "").split(" ").filter(Boolean).length); };
   const fp = { brands: new Set(), tags: new Set(), min: null, max: null, stock: false, logo: null, ids: null };   // panel "Filtros" (+ logo de marca elegido abajo)
   // Marca por logo: busca sus palabras en la marca o el nombre (ej. el logo NVIDIA encuentra las placas "GeForce" de MSI)
   const brandMatches = (p, bf) => {
@@ -301,10 +303,10 @@
     }
     // Si cambió la búsqueda, un filtro o el orden, se vuelve a mostrar desde los primeros
     const key = JSON.stringify([filter, q, sortBy, [...fp.brands], [...fp.tags], fp.min, fp.max, fp.stock, fp.logo && fp.logo.brand, fp.ids && [...fp.ids]]);
-    if (key !== gridKey) { gridKey = key; shown = FIRST; }
-    const rest_n = list.length - shown;
+    if (key !== gridKey) { gridKey = key; rows = FIRST_ROWS; }
+    const cols = gridCols(), shown = rows * cols, rest_n = list.length - shown;
     $("productGrid").innerHTML = list.length
-      ? list.slice(0, shown).map(cardHtml).join("") + (rest_n > 0 ? `<div class="grid-more"><button type="button" class="btn btn-outline" id="moreProducts">Ver más <small>(${rest_n} ${rest_n === 1 ? "producto" : "productos"} más)</small></button></div>` : "")
+      ? list.slice(0, shown).map(cardHtml).join("") + (rest_n > 0 ? `${list.slice(shown, shown + cols).map((p, j) => cardHtml(p, j).replace(/^(\s*<\w+)/, '$1 inert aria-hidden="true" data-peek')).join("")}<div class="grid-more"><button type="button" class="btn btn-outline" id="moreProducts">Ver más <small>(${rest_n} ${rest_n === 1 ? "producto" : "productos"} más)</small></button></div>` : "")
       : fp.logo
         ? `<p class="empty-state">Todavía no tenemos productos ${esc(fp.logo.brand)} publicados.<br><a href="${esc(waLink(`Hola EXE! Busco productos ${fp.logo.brand}. ¿Qué tienen disponible?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te conseguimos lo que buscás.</p>`
         : query ? `<div class="sugg-head"><p class="empty-state">No encontramos «${esc(query)}» publicado${relatedFor(query.trim(), []).items.length ? ". Abajo te mostramos productos relacionados" : ", pero te lo podemos conseguir"}.</p>${askHtml(query)}</div>` : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
@@ -1251,9 +1253,12 @@
     query = e.target.value.trim(); renderProducts();
     clearTimeout(searchTimer); searchTimer = setTimeout(() => logSearch(query), 1500);
   });
+  // Si cambia la cantidad de columnas (girar el celular, achicar la ventana) se recalculan las filas
+  let lastCols = 0;
+  addEventListener("resize", () => { const c = gridCols(); if (lastCols && c !== lastCols && products.length) renderProducts(); lastCols = c; });
   $("productGrid").addEventListener("click", (e) => {
     if (!e.target.closest("#moreProducts")) return;
-    const first = shown; shown += MORE; renderProducts();
+    const first = rows * gridCols(); rows += MORE_ROWS; renderProducts();
     const next = $("productGrid").children[first]; if (next) next.querySelector("a, button")?.focus({ preventScroll: true });
   });
 
