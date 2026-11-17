@@ -1622,7 +1622,7 @@
      las secciones nuevas (texto, imagen, imagen + texto, aviso) se crean acá. Si Supabase no responde, queda el HTML. */
   const src = (u) => esc(u || "");
   // Versiones chicas generadas para las imágenes propias del inicio (el celular baja la que le corresponde).
-  const RESP = { "assets/img/hero-asus-amd-500-400.webp": [640, 960, 1280], "assets/img/hero-asus-z790.webp": [640, 960, 1280], "assets/img/categoria-01.webp": [528], "assets/img/categoria-02.webp": [528], "assets/img/categoria-03.webp": [528] };
+  const RESP = { "assets/img/hero-asus-amd-500-400.webp": [640, 960, 1280], "assets/img/hero-asus-z790.webp": [640, 960, 1280], "assets/img/categoria-01.webp": [528, 800], "assets/img/categoria-02.webp": [528, 800], "assets/img/categoria-03.webp": [528, 800] };
   const srcsetOf = (u, full, sizes) => { const w = RESP[u]; return w ? ` srcset="${w.map((n) => `${src(u.replace(/\.webp$/, `-${n}.webp`))} ${n}w`).join(", ")}, ${src(u)} ${full}w" sizes="${sizes}"` : ""; };
   const linkOf = (d) => (d.link ? `href="${src(d.link)}"${/^https?:/.test(d.link) ? ' target="_blank" rel="noopener"' : ""}` : d.filter ? `href="#productos" data-filter="${esc(d.filter)}"` : "");
   const renderers = {
