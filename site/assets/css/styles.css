@@ -167,7 +167,10 @@ button { font: inherit; }
 /* Flechas: el diseño original (sin clase ctl-*) usa las finas; los 4 diseños del logo, las mitades de la "X" */
 .hero-arrow .arr-x { display: none; }
 .hero-nav[class*="ctl-"] .hero-arrow .arr-orig { display: none; }
-.hero-nav[class*="ctl-"] .hero-arrow .arr-x { display: block; }
+.hero-arrow .arr-e { display: none; }
+.hero-nav[class*="ctl-"]:not(.ctl-3) .hero-arrow .arr-x { display: block; }
+/* Mini X: flecha con el brazo corto del medio en punta, como la E del logo */
+.hero-nav.ctl-3 .hero-arrow .arr-e { display: block; }
 
 /* ---------- Controles del carrusel con el estilo del logo EXE (4 diseños que se turnan) ----------
    Rasgos del logo: esquinas cortadas en diagonal (las "E"), brazos gruesos de la "X" y cortes inclinados.
@@ -208,13 +211,13 @@ button { font: inherit; }
 @keyframes ctlRise { from { opacity: 0; transform: translateY(16px); } }
 
 /* 3 · Mini X: cada indicador es una "X" del logo; la activa crece y da un giro */
-.hero-nav.ctl-3 { padding: 4px 12px; background: #000a; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+.hero-nav.ctl-3 { padding: 4px 16px; background: #000a; clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%); }   /* misma placa en punta que Media X */
 .hero-nav.ctl-3 .dots { gap: 10px; align-items: center; }
-.hero-nav.ctl-3 .dots button { width: 18px; height: 18px; background: none; display: grid; place-items: center; }
-.hero-nav.ctl-3 .dots button::before { content: ""; width: 12px; height: 12px; background: #fff; opacity: .45; transition: width .4s var(--ease), height .4s var(--ease), opacity .3s;
-  clip-path: polygon(0 12%, 12% 0, 50% 38%, 88% 0, 100% 12%, 62% 50%, 100% 88%, 88% 100%, 50% 62%, 12% 100%, 0 88%, 38% 50%); }
+.hero-nav.ctl-3 .dots button { width: 20px; height: 18px; background: none; display: grid; place-items: center; }
+.hero-nav.ctl-3 .dots button::before { content: ""; width: 13px; height: 11.7px; background: #fff; opacity: .45; transition: width .4s var(--ease), height .4s var(--ease), opacity .3s;
+  clip-path: polygon(0 18.8%, 14.5% 0, 50% 33.7%, 85.5% 0, 100% 18.8%, 67.2% 50%, 100% 81.2%, 85.5% 100%, 50% 66.3%, 14.5% 100%, 0 81.2%, 32.8% 50%); }   /* X del logo: brazos a 40,6° y gruesos (236×213) */
 .hero-nav.ctl-3 .dots button:hover::before { opacity: .8; }
-.hero-nav.ctl-3 .dots button.active::before { width: 18px; height: 18px; opacity: 1; animation: ctlSpin .6s var(--ease); }
+.hero-nav.ctl-3 .dots button.active::before { width: 20px; height: 18px; opacity: 1; animation: ctlSpin .6s var(--ease); }
 @keyframes ctlSpin { from { transform: rotate(-90deg) scale(.6); } }
 .hero-nav.ctl-3.ctl-in { animation: ctlFade .6s var(--ease) both; }
 @keyframes ctlFade { from { opacity: 0; transform: translateX(-50%) scale(.85); } to { opacity: 1; transform: translateX(-50%); } }
