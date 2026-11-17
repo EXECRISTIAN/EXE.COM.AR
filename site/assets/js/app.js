@@ -37,8 +37,8 @@
   let sortBy = "";
   // Grilla: se muestran de a pocos con "Ver más". En "Destacados" van primero los 10 con más interés
   // (clics, agregados al carrito y búsquedas de los últimos 60 días, calculado por la base: popular_products).
-  // Se muestran 2 filas completas (8 en compu, 4 en celular) y asoma una tercera difuminada; "Ver más" suma 3 filas.
-  const FIRST_ROWS = 2, MORE_ROWS = 3;
+  // Se muestran 2 filas completas (8 en compu, 4 en celular) y asoma una tercera difuminada; "Ver todo" muestra el resto.
+  const FIRST_ROWS = 2;
   let rows = FIRST_ROWS, gridKey = "", popular = [];
   const gridCols = () => { const g = $("productGrid"); return Math.max(1, (getComputedStyle(g).gridTemplateColumns || "").split(" ").filter(Boolean).length); };
   const fp = { brands: new Set(), tags: new Set(), min: null, max: null, stock: false, logo: null, ids: null };   // panel "Filtros" (+ logo de marca elegido abajo)
@@ -314,7 +314,7 @@
     const browsing = !q && filter === "Todos" && !fp.brands.size && !fp.tags.size && fp.min == null && fp.max == null && !fp.stock && !fp.logo && !fp.ids;
     const cols = gridCols(), shown = browsing && rows !== Infinity ? rows * cols : list.length, rest_n = list.length - shown;
     $("productGrid").innerHTML = list.length
-      ? list.slice(0, shown).map(cardHtml).join("") + (rest_n > 0 ? `${list.slice(shown, shown + cols).map((p, j) => cardHtml(p, j).replace(/^(\s*<\w+)/, '$1 inert aria-hidden="true" data-peek')).join("")}<div class="grid-more"><button type="button" class="btn btn-outline" id="moreProducts">Ver más</button><button type="button" class="link-btn" id="allProducts">Ver todos (${list.length})</button></div>` : "")
+      ? list.slice(0, shown).map(cardHtml).join("") + (rest_n > 0 ? `${list.slice(shown, shown + cols).map((p, j) => cardHtml(p, j).replace(/^(\s*<\w+)/, '$1 inert aria-hidden="true" data-peek')).join("")}<div class="grid-more"><button type="button" class="btn btn-outline" id="allProducts">Ver todo <small>(${list.length})</small></button><span class="grid-more-arrows" aria-hidden="true"><svg viewBox="0 0 24 14"><path d="M3 2l9 9 9-9"/></svg><svg viewBox="0 0 24 14"><path d="M3 2l9 9 9-9"/></svg></span></div>` : "")
       : fp.logo
         ? `<p class="empty-state">Todavía no tenemos productos ${esc(fp.logo.brand)} publicados.<br><a href="${esc(waLink(`Hola EXE! Busco productos ${fp.logo.brand}. ¿Qué tienen disponible?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te conseguimos lo que buscás.</p>`
         : query ? `<div class="sugg-head"><p class="empty-state">No encontramos «${esc(query)}» publicado${relatedFor(query.trim(), []).items.length ? ". Abajo te mostramos productos relacionados" : ", pero te lo podemos conseguir"}.</p>${askHtml(query)}</div>` : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
@@ -1265,9 +1265,8 @@
   let lastCols = 0;
   addEventListener("resize", () => { const c = gridCols(); if (lastCols && c !== lastCols && products.length) renderProducts(); lastCols = c; });
   $("productGrid").addEventListener("click", (e) => {
-    const all = e.target.closest("#allProducts");
-    if (!all && !e.target.closest("#moreProducts")) return;
-    const first = rows * gridCols(); rows = all ? Infinity : rows + MORE_ROWS; renderProducts();
+    if (!e.target.closest("#allProducts")) return;
+    const first = rows * gridCols(); rows = Infinity; renderProducts();
     const next = $("productGrid").children[first]; if (next) next.querySelector("a, button")?.focus({ preventScroll: true });
   });
 
