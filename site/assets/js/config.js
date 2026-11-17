@@ -6,6 +6,9 @@ window.SITE_CONFIG = {
   outletWarrantyMonths: 3,   // garantía de los productos outlet (usados / reacondicionados); mínimo legal: 3 meses
   email: "ventas@exe.com.ar",
   currency: "ARS",
+  // Google Analytics 4: ID de medición ("G-XXXXXXXXXX"). Vacío = apagado (no se muestra el aviso de cookies).
+  // Solo carga si la persona acepta el aviso, y nunca para el equipo de EXE con sesión iniciada.
+  ga4Id: "",
   locale: "es-AR",
 
   // Stock: mostrar la cantidad disponible en la web (global).
