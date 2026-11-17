@@ -17,13 +17,17 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
       - name: Sintaxis de JavaScript de la tienda y el panel
-        run: for f in site/assets/js/*.js; do node --check "$f"; done
+        run: |
+          for f in site/assets/js/*.js; do node --check "$f"; done
       - name: Sintaxis de las funciones del servidor (TypeScript)
-        run: npx -y esbuild@0.24.0 --log-level=error --outdir=/tmp/out supabase/functions/*/index.ts
+        run: |
+          npx -y esbuild@0.24.0 --log-level=error --outdir=/tmp/out supabase/functions/*/index.ts
       - name: Política de seguridad de contenido (sin scripts inline)
-        run: python3 tools/csp.py
+        run: |
+          python3 tools/csp.py
       - name: JSON válidos
-        run: for f in site/data/*.json; do python3 -m json.tool "$f" > /dev/null || { echo "JSON roto: $f"; exit 1; }; done
+        run: |
+          for f in site/data/*.json; do python3 -m json.tool "$f" > /dev/null || { echo "JSON roto: $f"; exit 1; }; done
       - name: Sin claves secretas en el código
         run: |
           if grep -rnE '(sbp_[A-Za-z0-9]{20,}|re_[A-Za-z0-9]{20,}|service_role["'"'"' :=]+ey|sk_live_|APP_USR-[0-9]{6,}|-----BEGIN [A-Z ]*PRIVATE KEY)' site supabase tools --include='*.js' --include='*.ts' --include='*.html' --include='*.json' --include='*.sql' --include='*.py'; then
