@@ -1612,7 +1612,7 @@
       clone.querySelectorAll("a").forEach((a) => (a.tabIndex = -1));
       track.appendChild(clone);
     }
-    $("dots").innerHTML = Array.from({ length: slideCount }, (_, i) => `<button aria-label="Imagen ${i + 1}"${i === 0 ? ' class="active"' : ""}></button>`).join("");
+    $("dots").innerHTML = Array.from({ length: slideCount }, (_, i) => `<button aria-label="Imagen ${i + 1}"${i === 0 ? ' class="active"' : ""}><i></i></button>`).join("");
     dots = [...$("dots").children];
     dots.forEach((d, i) => d.addEventListener("click", () => { go(i); play(); }));
     $("heroNav").hidden = slideCount < 2;
