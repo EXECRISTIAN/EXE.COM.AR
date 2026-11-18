@@ -84,6 +84,15 @@ def og_image(p):
         return abs_url(src), (1200, 630)
 
 
+# Política de devoluciones (Google: hasMerchantReturnPolicy). Venta a distancia en Argentina: 10 días de arrepentimiento
+# desde que se recibe el producto (Ley 24.240, art. 34), con devolución por correo o en el local. Por esa ley, en el
+# arrepentimiento los gastos de devolución corren por cuenta del vendedor: por eso FreeReturn.
+RETURN_POLICY = {"@type": "MerchantReturnPolicy", "applicableCountry": "AR",
+                 "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 10,
+                 "returnMethod": ["https://schema.org/ReturnByMail", "https://schema.org/ReturnInStore"],
+                 "returnFees": "https://schema.org/FreeReturn"}
+
+
 def wa_number():
     m = re.search(r'whatsappNumber:\s*"(\d+)"', (SITE / "assets/js/config.js").read_text())
     return m.group(1) if m else ""
@@ -132,6 +141,7 @@ def page(p, wa):
         ld["offers"] = {"@type": "Offer", "url": url, "priceCurrency": "ARS", "price": round(price),
                         "availability": "https://schema.org/OutOfStock" if no_stock else "https://schema.org/InStock",
                         "itemCondition": "https://schema.org/UsedCondition" if p.get("outlet") else "https://schema.org/NewCondition",
+                        "hasMerchantReturnPolicy": RETURN_POLICY,
                         "seller": {"@type": "Organization", "name": "EXE"}}
     crumbs = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": 1, "name": "Inicio", "item": BASE}] + (
