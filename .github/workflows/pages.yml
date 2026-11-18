@@ -30,6 +30,15 @@ jobs:
       # Vista previa al compartir: una página por producto con su foto (Facebook/WhatsApp no leen el #)
       - name: Generar páginas de vista previa de productos
         run: pip install -q pillow && python3 tools/share_pages.py
+      # CSS crítico: los estilos de la primera pantalla van dentro de la página y la hoja completa carga después
+      # sin frenar el primer dibujo. Se genera en cada deploy (siempre coincide con styles.css) y se verifica con
+      # capturas en 10 tamaños × 2 temas; si algo no coincide o falla, se publica con la hoja normal.
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: CSS crítico de la tienda
+        run: |
+          npm install --no-save --no-package-lock playwright@1.49.1 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1 \
+            && node tools/critical.mjs --check || echo "Sin CSS crítico en este deploy (queda la hoja normal)"
       # Seguridad automática en TODAS las páginas, incluidas las que se agreguen en el futuro: política
       # CSP (solo corren scripts propios, con huellas recalculadas) y bloqueo del modo desarrollador.
       - name: Proteger todas las páginas (CSP + bloqueo del modo desarrollador)
