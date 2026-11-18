@@ -1917,7 +1917,7 @@
     const base = location.origin + location.pathname.replace(/[^/]*$/, "");
     const abs = (u) => (u && /^https?:/.test(u) ? u : base + (u || "").replace(/^\.?\//, ""));
     const items = products.slice(0, 100).map((p, i) => {
-      const prod = { "@type": "Product", name: p.name, url: `${base}#producto/${encodeURIComponent(p.id)}`, sku: p.id,
+      const prod = { "@type": "Product", name: p.name, url: `${base}p/${encodeURIComponent(p.id)}/`, sku: p.id,
         ...(p.brand ? { brand: { "@type": "Brand", name: p.brand } } : {}), ...(p.category ? { category: p.category } : {}),
         ...(p.images && p.images[0] ? { image: abs(p.images[0]) } : {}), ...(p.description ? { description: String(p.description).slice(0, 500) } : {}) };
       if (p.price > 0) prod.offers = { "@type": "Offer", priceCurrency: "ARS", price: p.price,
