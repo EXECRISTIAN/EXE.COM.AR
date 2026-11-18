@@ -1,0 +1,44 @@
+name: Pruebas
+# Corre en cada PR y en cada cambio publicado:
+#  · compra: abre la tienda en Chromium y hace una compra completa por WhatsApp (tests/e2e/compra.mjs)
+#  · seguridad: 29 pruebas contra la base de datos real, sin dejar nada escrito (supabase/tests/seguridad.sql).
+#    Necesita el secreto SUPABASE_DB_URL (Supabase → Connect → "Session pooler", con la contraseña de la base).
+#    Si el secreto no está cargado, se saltea y lo avisa (no falla).
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compra:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Instalar Chromium
+        run: npm install --no-save --no-package-lock playwright@1.49.1 >/dev/null && npx playwright install --with-deps chromium >/dev/null
+      - name: Compra de punta a punta (compu y celular)
+        run: node tests/e2e/compra.mjs
+
+  seguridad:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pruebas de seguridad de la base
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::notice::Pruebas de seguridad salteadas: falta el secreto SUPABASE_DB_URL en GitHub (Settings → Secrets → Actions)."
+            exit 0
+          fi
+          sudo apt-get install -y -qq postgresql-client >/dev/null
+          # El archivo termina con un aviso "RESULTADO OK" a propósito (así todo se deshace): ese aviso es el éxito.
+          out=$(psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -X -q -f supabase/tests/seguridad.sql 2>&1 || true)
+          echo "$out" | grep -E "RESULTADO|FALLA|REGRESIÓN|ERROR" | head -5
+          echo "$out" | grep -q "RESULTADO OK" || { echo "::error::Fallaron las pruebas de seguridad"; exit 1; }
