@@ -1917,12 +1917,15 @@
     const base = location.origin + location.pathname.replace(/[^/]*$/, "");
     const abs = (u) => (u && /^https?:/.test(u) ? u : base + (u || "").replace(/^\.?\//, ""));
     const items = products.slice(0, 100).map((p, i) => {
-      const prod = { "@type": "Product", name: p.name, url: `${base}#producto/${encodeURIComponent(p.id)}`, sku: p.id,
+      const prod = { "@type": "Product", name: p.name, url: `${base}p/${encodeURIComponent(p.id)}/`, sku: p.id,
         ...(p.brand ? { brand: { "@type": "Brand", name: p.brand } } : {}), ...(p.category ? { category: p.category } : {}),
         ...(p.images && p.images[0] ? { image: abs(p.images[0]) } : {}), ...(p.description ? { description: String(p.description).slice(0, 500) } : {}) };
       if (p.price > 0) prod.offers = { "@type": "Offer", priceCurrency: "ARS", price: p.price,
         availability: typeof p.stock === "number" && p.stock <= 0 ? "https://schema.org/OutOfStock" : p.noStock ? "https://schema.org/BackOrder" : "https://schema.org/InStock",
-        itemCondition: p.outlet ? "https://schema.org/UsedCondition" : "https://schema.org/NewCondition" };
+        itemCondition: p.outlet ? "https://schema.org/UsedCondition" : "https://schema.org/NewCondition",
+        // Devoluciones: 10 días de arrepentimiento (Ley 24.240, art. 34), por correo o en el local; mismo dato que tools/share_pages.py
+        hasMerchantReturnPolicy: { "@type": "MerchantReturnPolicy", applicableCountry: "AR", returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+          merchantReturnDays: 10, returnMethod: ["https://schema.org/ReturnByMail", "https://schema.org/ReturnInStore"], returnFees: "https://schema.org/FreeReturn" } };
       return { "@type": "ListItem", position: i + 1, item: prod };
     });
     const data = [{ "@context": "https://schema.org", "@type": "Store", name: "EXE", url: base, image: abs("assets/img/favicon.jpg"), telephone: "+54 9 11 3009 5254", email: "ventas@exe.com.ar", address: { "@type": "PostalAddress", addressCountry: "AR" } },
