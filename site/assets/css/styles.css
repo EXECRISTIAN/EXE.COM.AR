@@ -1073,3 +1073,5 @@ body:has(#pcOverlay.show) .wa-float { display: none; }
 .mc-item { display: flex; gap: 10px; align-items: center; }
 .mc-item img { width: 56px; height: 56px; object-fit: contain; border-radius: 8px; border: 1px solid var(--line); background: var(--media-bg, #fff); flex: none; }
 .mc-order footer { justify-content: space-between; border-top: 1px solid var(--line); padding-top: 10px; font-size: .92rem; }
+/* Texto del catálogo ubicado debajo de los productos (Panel → Página web) */
+.catalog-note { text-align: center; color: var(--muted); max-width: 65ch; margin: 28px auto 0; }

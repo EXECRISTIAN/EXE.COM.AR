@@ -11,7 +11,7 @@
   const TYPES = {
     hero: { name: "Carrusel de imágenes", fields: [{ k: "slides", list: "Imagen", item: [{ k: "img", t: "image", l: "Imagen (1920 × 655 px aprox.; se pueden agregar o quitar las que quieras)" }, { k: "alt", l: "Descripción de la imagen" }, { k: "link", l: "Link al tocar (opcional)" }] }] },
     tarjetas: { name: "Tarjetas con imagen y botón", fields: [{ k: "cards", list: "Tarjeta", item: [{ k: "img", t: "image", l: "Imagen (vertical, 352 × 480 px aprox.)" }, { k: "img_mobile", t: "image", l: "Imagen para celular (opcional)" }, { k: "alt", l: "Descripción de la imagen" }, { k: "text", l: "Texto del botón" }, { k: "filter", l: "Al tocar, mostrar la categoría…" }, { k: "link", l: "…o ir a este link" }] }] },
-    catalogo: { name: "Catálogo de productos", fields: [{ k: "title", l: "Título" }, { k: "text", t: "textarea", l: "Texto" }] },
+    catalogo: { name: "Catálogo de productos", fields: [{ k: "title", l: "Título" }, { k: "text", t: "textarea", l: "Texto" }, { k: "text_show", t: "select", o: ["no", "si"], l: "Mostrar el texto" }, { k: "text_pos", t: "select", o: ["debajo del título", "arriba del título", "debajo de los productos"], l: "Dónde va el texto" }] },
     banner: { name: "Banner ancho", fields: [{ k: "img", t: "image", l: "Imagen (ancha, 1400 × 400 px aprox.)" }, { k: "alt", l: "Descripción" }, { k: "filter", l: "Al tocar, mostrar la categoría…" }, { k: "link", l: "…o ir a este link" }] },
     beneficios: { name: "Beneficios", fields: [{ k: "items", list: "Beneficio", max: 3, item: [{ k: "title", l: "Título" }, { k: "text", l: "Texto" }] }] },
     logos: { name: "Carrusel de logos de marcas", fields: [], note: "Los logos se cargan en config.js. Acá podés mostrarlo, ocultarlo o moverlo." },
