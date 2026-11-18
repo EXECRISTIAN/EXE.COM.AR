@@ -45,6 +45,21 @@ def load_products():
     return json.load(open(SITE / "data/products.json"))
 
 
+def load_reviews():
+    """Reseñas publicadas (aprobadas en el panel), agrupadas por producto. Si la función no está activa, no hay."""
+    try:
+        url, key = config()
+        req = urllib.request.Request(
+            f"{url}/rest/v1/reviews?select=product_id,rating,comment,author,created_at&status=eq.approved&order=created_at.desc",
+            headers={"apikey": key, "Authorization": f"Bearer {key}"})
+        out = {}
+        for r in json.load(urllib.request.urlopen(req, timeout=30)):
+            out.setdefault(r["product_id"], []).append(r)
+        return out
+    except Exception:
+        return {}
+
+
 def abs_url(u):
     if not u:
         return BASE + "assets/img/banner-asus-series-500-400.webp"
@@ -115,7 +130,7 @@ def visible(p):
     return not (p.get("hide_no_stock") and p.get("show_stock") and (p.get("stock") or 0) <= 0)
 
 
-def page(p, wa):
+def page(p, wa, revs=()):
     pid = p["id"]
     e = lambda s: html.escape(str(s or ""), quote=True)
     img, size = og_image(p)
@@ -144,6 +159,17 @@ def page(p, wa):
                         "itemCondition": "https://schema.org/UsedCondition" if p.get("outlet") else "https://schema.org/NewCondition",
                         "hasMerchantReturnPolicy": RETURN_POLICY,
                         "seller": {"@type": "Organization", "name": "EXE"}}
+    # Reseñas reales (solo aprobadas): estrellas en Google. Se muestran también en la página, como pide Google.
+    if revs:
+        ld["aggregateRating"] = {"@type": "AggregateRating", "ratingValue": round(sum(r["rating"] for r in revs) / len(revs), 1),
+                                 "reviewCount": len(revs), "bestRating": 5, "worstRating": 1}
+        ld["review"] = [{"@type": "Review", "author": {"@type": "Person", "name": r["author"]}, "datePublished": (r.get("created_at") or "")[:10],
+                         "reviewRating": {"@type": "Rating", "ratingValue": r["rating"], "bestRating": 5},
+                         **({"reviewBody": r["comment"]} if r.get("comment") else {})} for r in revs[:5]]
+    stars = lambda n: "★" * int(round(n)) + "☆" * (5 - int(round(n)))
+    reviews_html = ("<h2>Opiniones de clientes</h2>" + f'<p class="pp-desc">{stars(ld["aggregateRating"]["ratingValue"])} '
+                    f'{str(ld["aggregateRating"]["ratingValue"]).replace(".", ",")} de 5 · {len(revs)} opinión{"es" if len(revs) != 1 else ""} de compradores</p>'
+                    + "".join(f'<p class="pp-desc"><b>{stars(r["rating"])} {e(r["author"])}</b><br>{e(r.get("comment") or "")}</p>' for r in revs[:10])) if revs else ""
     crumbs = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": 1, "name": "Inicio", "item": BASE}] + (
         [{"@type": "ListItem", "position": 2, "name": p["category"], "item": f"{BASE}#productos"}] if p.get("category") else []) + [
@@ -236,6 +262,7 @@ def page(p, wa):
       </div>
     </div>
     {f"<h2>Especificaciones</h2>{specs}" if specs else ""}
+    {reviews_html}
     <h2>Devoluciones</h2>
     <p class="pp-desc">Tenés 10 días desde que lo recibís para arrepentirte de la compra, y el envío de la devolución no tiene costo
       para vos. Lo podés devolver por correo o en persona. Para que la devolución sea aceptada, el producto tiene que ser el mismo
@@ -260,12 +287,13 @@ def sitemap(products):
 def main():
     products = [p for p in load_products() if safe_id(p.get("id")) and p.get("name") and visible(p)]
     wa = wa_number()
+    reviews = load_reviews()
     if OUT.exists():
         shutil.rmtree(OUT)
     for p in products:
         d = OUT / p["id"]
         d.mkdir(parents=True, exist_ok=True)
-        (d / "index.html").write_text(page(p, wa))
+        (d / "index.html").write_text(page(p, wa, reviews.get(p["id"], [])))
     sitemap(products)
     print(f"{len(products)} páginas de producto en site/p/ y en sitemap.xml")
 

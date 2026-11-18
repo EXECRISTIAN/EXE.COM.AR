@@ -634,3 +634,9 @@ a.kpi-link:hover, a.kpi-link:focus-visible { transform: translateY(-2px); outlin
 .integ-msg { font-size: .9em; }
 .integ-padron { margin-top: 12px; }
 .invoice-box { margin-top: 12px; display: grid; gap: 8px; }
+
+/* Reseñas */
+.rv-adm { display: grid; gap: 8px; }
+.rv-adm-head { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.rv-adm-head small { color: var(--muted); }
+.rv-adm-acts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }

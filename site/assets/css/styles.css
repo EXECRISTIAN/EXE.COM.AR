@@ -1073,3 +1073,17 @@ body:has(#pcOverlay.show) .wa-float { display: none; }
 .mc-item { display: flex; gap: 10px; align-items: center; }
 .mc-item img { width: 56px; height: 56px; object-fit: contain; border-radius: 8px; border: 1px solid var(--line); background: var(--media-bg, #fff); flex: none; }
 .mc-order footer { justify-content: space-between; border-top: 1px solid var(--line); padding-top: 10px; font-size: .92rem; }
+
+/* Reseñas de clientes (ficha del producto y Mis compras) */
+.rv-stars { color: #f5a623; letter-spacing: .05em; }
+.rv-avg { margin: 4px 0 12px; }
+.rv-item { padding: 10px 0; border-top: 1px solid var(--line); }
+.rv-item p { margin: 6px 0 0; }
+.rv-item small { color: var(--muted); margin-left: 6px; }
+.rv-reply { padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, var(--c0) 7%, var(--surface)); font-size: .92rem; }
+.rv-form { display: grid; gap: 8px; margin-top: 8px; padding: 10px; border: 1px dashed var(--line); border-radius: 10px; }
+.rv-pick { display: flex; gap: 2px; }
+.rv-pick button { border: 0; background: none; font-size: 1.6rem; line-height: 1; color: #c7c7c7; cursor: pointer; padding: 2px; min-width: 32px; min-height: 32px; }
+.rv-pick button.on { color: #f5a623; }
+.rv-form textarea { width: 100%; font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--c2); }
+.rv-state { font-size: .85rem; color: var(--muted); }

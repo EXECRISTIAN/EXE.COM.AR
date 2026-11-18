@@ -351,6 +351,24 @@
         <a class="pd-rel" href="#producto/${encodeURIComponent(x.id)}" data-rel="${esc(x.id)}"><img src="${esc(mainImg(x))}" alt="" loading="lazy" data-fallback><span>${esc(x.name)}</span><b>${esc(priceLabel(x))}</b></a>`).join("")}</div></div>`).join("")}
     </section>`;
   }
+  /* ---------- Reseñas de clientes (solo compradores; EXE las aprueba en el panel antes de mostrarlas) ---------- */
+  const starsTxt = (n) => "★★★★★".slice(0, Math.round(n)) + "☆☆☆☆☆".slice(0, 5 - Math.round(n));
+  async function loadReviews(id) {
+    const box = $("pdReviews"); if (!box || !cfg.supabaseUrl) return;
+    try {
+      const r = await fetch(`${cfg.supabaseUrl}/rest/v1/reviews?select=rating,comment,author,reply,created_at&product_id=eq.${encodeURIComponent(id)}&status=eq.approved&order=created_at.desc&limit=20`,
+        { headers: { apikey: cfg.supabaseAnonKey } });
+      if (!r.ok) return;
+      const rows = await r.json(); if (!Array.isArray(rows) || !rows.length || !$("pdReviews")) return;
+      const avg = rows.reduce((t, x) => t + x.rating, 0) / rows.length;
+      box.innerHTML = `<h3 class="pd-specs-title">Opiniones de clientes</h3>
+        <p class="rv-avg"><span class="rv-stars" aria-hidden="true">${starsTxt(avg)}</span> <b>${avg.toLocaleString("es-AR", { maximumFractionDigits: 1 })}</b> de 5 · ${rows.length} ${rows.length === 1 ? "opinión" : "opiniones"} de compradores</p>
+        ${rows.map((x) => `<div class="rv-item"><span class="rv-stars" role="img" aria-label="${x.rating} de 5 estrellas">${starsTxt(x.rating)}</span> <b>${esc(x.author)}</b>
+          <small>${new Date(x.created_at).toLocaleDateString("es-AR")}</small>${x.comment ? `<p>${esc(x.comment)}</p>` : ""}${x.reply ? `<p class="rv-reply"><b>Respuesta de EXE:</b> ${esc(x.reply)}</p>` : ""}</div>`).join("")}`;
+      box.hidden = false;
+    } catch (e) { /* sin reseñas: no se muestra nada */ }
+  }
+
   function openProduct(id) {
     const p = products.find((x) => x.id === id);
     if (!p) return;
@@ -400,9 +418,10 @@
           ? p.specs.map((s, k) => `<details class="pd-spec"${k === 0 ? " open" : ""}><summary>${esc(s.title)}</summary>
               <table>${s.rows.map(([key, val]) => `<tr><th>${esc(key)}</th><td>${esc(val)}</td></tr>`).join("")}</table></details>`).join("")
           : `<p class="pd-nospecs">La ficha técnica de este producto está en revisión. Consultanos por WhatsApp y te pasamos todos los datos.</p>`}
+        <div id="pdReviews" hidden></div>
         ${relatedHtml(p)}
       </div>`;
-    pdSetImage(0); pdSetQty(1); adminSources(p.id);
+    pdSetImage(0); pdSetQty(1); adminSources(p.id); loadReviews(p.id);
     $("pdOverlay").hidden = false;
     requestAnimationFrame(() => $("pdOverlay").classList.add("show"));
     document.body.classList.add("no-scroll");

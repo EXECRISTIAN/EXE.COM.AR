@@ -481,12 +481,44 @@
     shipped: ["Enviado", "paid"], delivered: ["Entregado", "paid"], cancelled: ["Cancelado", "cancelled"] };
   const money = (n) => "$ " + Math.round(Number(n) || 0).toLocaleString("es-AR");
   const imgSrc = (u) => (!u ? "assets/img/placeholder.svg" : /^(https?:)?\/\//.test(u) ? u : u.replace(/^\.?\//, ""));
+  const RV_ST = { pending: "en revisión", approved: "publicada", rejected: "no publicada" };
+  const rateHtml = (pid, r) => r
+    ? `<br><span class="rv-state"><span class="rv-stars">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</span> Tu opinión está ${RV_ST[r.status] || r.status}. <button type="button" class="link-btn" data-rate="${esc(pid)}" data-cur="${r.rating}" data-txt="${esc(r.comment || "")}">Editar</button></span>`
+    : `<br><button type="button" class="link-btn" data-rate="${esc(pid)}">★ Calificar este producto</button>`;
+  // Formulario para calificar (1 a 5 estrellas + comentario opcional). EXE la revisa antes de publicarla.
+  document.addEventListener("click", async (e) => {
+    const b = e.target.closest("[data-rate]");
+    if (b) {
+      const pid = b.dataset.rate, host = b.closest("span, li");
+      if (host.querySelector(".rv-form")) return;
+      let val = Number(b.dataset.cur) || 0;
+      const f = document.createElement("form"); f.className = "rv-form";
+      f.innerHTML = `<div class="rv-pick" role="radiogroup" aria-label="Calificación">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-star="${n}" aria-label="${n} estrella${n > 1 ? "s" : ""}">★</button>`).join("")}</div>
+        <textarea maxlength="1000" rows="3" placeholder="Contá cómo te fue con el producto (opcional)">${esc(b.dataset.txt || "")}</textarea>
+        <div><button class="btn btn-primary" type="submit">Enviar opinión</button> <span class="rv-state" aria-live="polite"></span></div>`;
+      const paint = () => f.querySelectorAll("[data-star]").forEach((s) => s.classList.toggle("on", Number(s.dataset.star) <= val));
+      f.addEventListener("click", (ev) => { const s = ev.target.closest("[data-star]"); if (s) { val = Number(s.dataset.star); paint(); } });
+      f.addEventListener("submit", async (ev) => {
+        ev.preventDefault(); const msg = f.querySelector(".rv-state");
+        if (!val) { msg.textContent = "Elegí de 1 a 5 estrellas."; return; }
+        msg.textContent = "Enviando…";
+        const { error } = await sb.rpc("submit_review", { p_product: pid, p_rating: val, p_comment: f.querySelector("textarea").value });
+        if (error) { msg.textContent = error.message; return; }
+        renderOrders();
+      });
+      host.appendChild(f); paint();
+    }
+  });
   async function renderOrders() {
     const box = $("orders"); if (!box) return;
     await sb.rpc("claim_my_orders").catch(() => {});
     const { data, error } = await sb.rpc("my_orders");
     if (error) { box.innerHTML = `<p class="notice error">No se pudieron cargar tus compras. Probá de nuevo en un rato.</p>`; return; }
     const orders = data || [];
+    // Reseñas propias (si la función de reseñas todavía no está activa en la base, no se ofrece calificar)
+    const rv = await sb.from("reviews").select("product_id, rating, comment, status").then((r) => (r.error ? null : r.data)).catch(() => null);
+    const mine = new Map((rv || []).map((x) => [x.product_id, x]));
+    const canRate = (o) => rv && ["paid", "preparing", "shipped", "delivered"].includes(o.status);
     if ($("accOrders")) $("accOrders").textContent = orders.length;
     box.innerHTML = `<h2 class="mc-title">Mis compras</h2>` + (orders.length ? orders.map((o) => {
       const [label, cls] = ST[o.status] || [o.status, ""];
@@ -497,7 +529,7 @@
         const link = i.active ? `p/${encodeURIComponent(i.product_id)}/` : null;
         return `<li class="mc-item"><img src="${esc(imgSrc(i.image))}" alt="" loading="lazy" width="56" height="56">
           <span>${link ? `<a href="${esc(link)}">${esc(name)}</a>` : esc(name)}${i.variant ? ` <small>(${esc(i.variant)})</small>` : ""}<br>
-          <small>${i.qty} × ${money(i.unit_price)}</small></span></li>`;
+          <small>${i.qty} × ${money(i.unit_price)}</small>${canRate(o) ? rateHtml(i.product_id, mine.get(i.product_id)) : ""}</span></li>`;
       }).join("");
       return `<article class="mc-order">
         <header><b>Pedido #${esc(o.id)}</b><span>${new Date(o.created_at).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" })}</span>
