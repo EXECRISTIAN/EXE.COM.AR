@@ -1694,7 +1694,17 @@
     catalogo(el, d) {
       const h = el.querySelector(".section-head"); if (!h) return;
       if (d.title) h.querySelector("h2").textContent = d.title;
-      if (d.text !== undefined) h.querySelector("p").textContent = d.text;
+      // Texto del catálogo: se muestra u oculta y se ubica desde el panel (Página web → Catálogo de productos)
+      const p = $("catalogText"); if (!p) return;
+      if (d.text !== undefined) p.textContent = d.text;
+      const show = d.text_show === "si" && !!p.textContent.trim();
+      p.hidden = !show;
+      if (!show) return;
+      const pos = d.text_pos || "debajo del título";
+      p.classList.toggle("catalog-note", pos === "debajo de los productos");
+      if (pos === "arriba del título") h.insertBefore(p, h.querySelector("h2"));
+      else if (pos === "debajo de los productos") { const g = $("productGrid"); g.parentNode.insertBefore(p, g.nextSibling); }
+      else h.appendChild(p);
     },
     banner(el, d) {
       const a = el.querySelector(".wide-banner"); if (!a) return;
