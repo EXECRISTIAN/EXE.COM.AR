@@ -18,7 +18,8 @@ import sys
 
 SITE = pathlib.Path(__file__).resolve().parent.parent / "site"
 # Orígenes externos de scripts permitidos por página (además de 'self').
-EXTRA = {"cuenta.html": ["https://challenges.cloudflare.com"]}  # Turnstile (anti-bots del registro)
+EXTRA = {"cuenta.html": ["https://challenges.cloudflare.com"],  # Turnstile (anti-bots del registro)
+         "index.html": ["https://www.googletagmanager.com"]}  # Google Analytics 4 (solo si se acepta el aviso)
 META_RE = re.compile(r'<meta http-equiv="Content-Security-Policy" content="[^"]*">')
 INLINE_RE = re.compile(r"<script(?![^>]*\bsrc=)([^>]*)>(.*?)</script>", re.S)
 
@@ -32,7 +33,7 @@ def policy(page: pathlib.Path, html: str) -> str:
             continue  # bloques de datos (ej. application/ld+json) no se ejecutan
         digest = base64.b64encode(hashlib.sha256(body.encode()).digest()).decode()
         hashes.append(f"'sha256-{digest}'")
-    script = " ".join(["'self'", *hashes, *EXTRA.get(page.name, [])])
+    script = " ".join(["'self'", *hashes, *EXTRA.get(page.relative_to(SITE).as_posix(), [])])
     return (f'<meta http-equiv="Content-Security-Policy" content="script-src {script}; '
             "object-src 'none'; base-uri 'self'; form-action 'self'\">")
 

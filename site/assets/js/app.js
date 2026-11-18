@@ -495,6 +495,7 @@
       });
     }
     function track(type, extra = {}) {
+      ga(type, extra);
       if (off) return;
       q.push({ visitor, type, device, os, browser, source: src || first || null, campaign: camp || store("exe-camp") || null, ...extra });
       if (!timer) timer = setTimeout(flush, 1500);
@@ -503,6 +504,51 @@
     return track;
   })();
   stat("view");
+
+  /* ---------- Google Analytics 4 (opcional) con aviso de cookies ----------
+     Se activa poniendo el ID en config.js (ga4Id). Solo carga si la persona toca "Aceptar"; si rechaza,
+     no se carga nada de Google (la analítica propia, anónima, sigue igual). El equipo de EXE no se mide. */
+  function ga(type, extra) {
+    if (!window.gtag || !gaOn) return;
+    const p = extra.product_id && products.find((x) => x.id === extra.product_id);
+    const item = p ? { items: [{ item_id: p.id, item_name: p.name, item_brand: p.brand || undefined, item_category: p.category || undefined, price: Number(p.price) || undefined }], currency: "ARS", value: Number(p.price) || undefined } : {};
+    const ev = { product: ["view_item", item], add: ["add_to_cart", item], cart: ["view_cart", {}], wa: ["generate_lead", { currency: "ARS", value: Number(extra.amount) || undefined }], search: ["search", { search_term: extra.query }] }[type];
+    if (ev) window.gtag("event", ev[0], ev[1]);
+  }
+  let gaOn = false;
+  (function cookies() {
+    const id = /^G-[A-Z0-9]{4,20}$/.test(cfg.ga4Id || "") ? cfg.ga4Id : "";
+    if (!id || window.parent !== window) return;
+    const KEY = "exe-cookies", get = () => { try { return localStorage.getItem(KEY); } catch (e) { return null; } };
+    const set = (v) => { try { localStorage.setItem(KEY, v); } catch (e) {} };
+    const load = () => staffReady.then((staff) => {
+      if (staff || adminApi || gaOn) return;
+      gaOn = true;
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag("js", new Date());
+      window.gtag("config", id, { anonymize_ip: true });
+      const sc = document.createElement("script"); sc.async = true; sc.src = `https://www.googletagmanager.com/gtag/js?id=${id}`; document.head.appendChild(sc);
+    });
+    const banner = () => {
+      if ($("cookieBar")) return;
+      const el = document.createElement("div");
+      el.id = "cookieBar"; el.className = "cookie-bar"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Aviso de cookies");
+      el.innerHTML = `<p>Usamos cookies de Google Analytics para saber cómo se usa la tienda y mejorarla. No guardan tu nombre ni datos de contacto. ¿Las aceptás?</p>
+        <div class="cookie-acts"><button type="button" class="btn btn-outline" data-ck="no">Rechazar</button><button type="button" class="btn btn-primary" data-ck="si">Aceptar</button></div>`;
+      el.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-ck]"); if (!b) return;
+        const was = get(); set(b.dataset.ck); el.remove();
+        if (b.dataset.ck === "si") load();
+        else if (was === "si") location.reload();   // si antes había aceptado, recargar para que Google deje de medir
+      });
+      document.body.appendChild(el);
+    };
+    const prefs = $("cookiePrefs"); if (prefs) { prefs.hidden = false; prefs.onclick = banner; }
+    const v = get();
+    if (v === "si") load();
+    else if (v !== "no") staffReady.then((staff) => { if (!staff && !adminApi) setTimeout(banner, 1200); });
+  })();
 
 
   async function adminSources(id) {

@@ -134,7 +134,7 @@
       <div class="an-grid">
         <div class="panel"><h3>📣 Publicidad (opcional)</h3><p class="ed-hint">Las herramientas gratis de Meta y Google sirven para medir anuncios pagos. Solo hacen falta si pautás.</p>
           <div class="an-ads"><span><b>Meta Pixel (Instagram / Facebook)</b><small>Mide qué anuncios traen pedidos</small></span><span class="pill pending">Sin conectar</span></div>
-          <div class="an-ads"><span><b>Google Analytics 4</b><small>Visitas y búsquedas de Google</small></span><span class="pill pending">Sin conectar</span></div>
+          <div class="an-ads"><span><b>Google Analytics 4</b><small>Visitas y búsquedas de Google</small></span>${(window.SITE_CONFIG || {}).ga4Id ? `<span class="pill paid">Activa · ${esc(window.SITE_CONFIG.ga4Id)}</span>` : '<span class="pill pending">Sin conectar</span>'}</div>
           <div class="an-ads"><span><b>Analítica propia de EXE</b><small>Todo lo de esta página, sin terceros</small></span><span class="pill paid">Activa</span></div>
           <p class="ed-hint">Para conectar Meta o Google: creá la cuenta gratis, pasame el ID (Pixel ID o G-XXXX) y lo agrego junto con el aviso de privacidad para los visitantes.</p></div>
         <div class="panel"><h3>🔒 Privacidad (Ley 25.326)</h3>
