@@ -1063,5 +1063,15 @@ body:has(#pcOverlay.show) .wa-float { display: none; }
 .exe-dialog-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
 .exe-dialog .link-btn { padding: 0; font-size: .85rem; }
 
+/* Mi cuenta: Mis compras */
+.mc-title { font-size: 1.2rem; margin: 22px 0 10px; }
+.mc-order { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--surface); display: grid; gap: 10px; }
+.mc-order header, .mc-order footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.mc-order header span:not(.pill) { color: var(--muted); font-size: .9rem; }
+.mc-pay { padding: 6px 14px; margin-left: auto; }
+.mc-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mc-item { display: flex; gap: 10px; align-items: center; }
+.mc-item img { width: 56px; height: 56px; object-fit: contain; border-radius: 8px; border: 1px solid var(--line); background: var(--media-bg, #fff); flex: none; }
+.mc-order footer { justify-content: space-between; border-top: 1px solid var(--line); padding-top: 10px; font-size: .92rem; }
 /* Texto del catálogo ubicado debajo de los productos (Panel → Página web) */
 .catalog-note { text-align: center; color: var(--muted); max-width: 65ch; margin: 28px auto 0; }
