@@ -18,7 +18,7 @@ const cors = {
 };
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
-const SITE = /^https:\/\/([a-z0-9-]+\.)*(exe\.com\.ar|github\.io)$/i;
+const SITE = /^https:\/\/(www\.)?exe\.com\.ar$/i;   // a dónde vuelve el cliente después de pagar: solo la tienda
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
