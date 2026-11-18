@@ -37,8 +37,8 @@
   let sortBy = "";
   // Grilla: se muestran de a pocos con "Ver más". En "Destacados" van primero los 10 con más interés
   // (clics, agregados al carrito y búsquedas de los últimos 60 días, calculado por la base: popular_products).
-  // Se muestran 2 filas completas (8 en compu, 4 en celular) y asoma una tercera difuminada; "Ver todo" muestra el resto.
-  const FIRST_ROWS = 2;
+  // Se muestra 1 fila completa (4 en compu, 2 en celular) y desde la 2.ª asoma difuminada; "Ver todo" muestra el resto.
+  const FIRST_ROWS = 1;
   let rows = FIRST_ROWS, gridKey = "", popular = [];
   const gridCols = () => { const g = $("productGrid"); return Math.max(1, (getComputedStyle(g).gridTemplateColumns || "").split(" ").filter(Boolean).length); };
   const fp = { brands: new Set(), tags: new Set(), min: null, max: null, stock: false, logo: null, ids: null };   // panel "Filtros" (+ logo de marca elegido abajo)
