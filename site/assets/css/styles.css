@@ -1062,3 +1062,6 @@ body:has(#pcOverlay.show) .wa-float { display: none; }
 .ack-check input { width: 18px; height: 18px; margin-top: 1px; flex: none; }
 .exe-dialog-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
 .exe-dialog .link-btn { padding: 0; font-size: .85rem; }
+
+/* Texto del catálogo ubicado debajo de los productos (Panel → Página web) */
+.catalog-note { text-align: center; color: var(--muted); max-width: 65ch; margin: 28px auto 0; }
