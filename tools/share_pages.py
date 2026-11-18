@@ -87,8 +87,7 @@ def og_image(p):
 # Política de devoluciones (Google: hasMerchantReturnPolicy). Venta a distancia en Argentina: 10 días de arrepentimiento
 # desde que se recibe el producto (Ley 24.240, art. 34), con devolución por correo o en el local. Por esa ley, en el
 # arrepentimiento los gastos de devolución corren por cuenta del vendedor: por eso FreeReturn. Condición de EXE: el producto
-# vuelve completo, es el mismo que se envió, sin abrir si es nuevo (los outlet ya vienen abiertos) y en las mismas condiciones
-# (sin daños ni uso indebido). Se muestra en la página.
+# vuelve sin uso, sin daños, completo, con su embalaje original y es el mismo que se envió. Se muestra en la página.
 RETURN_POLICY = {"@type": "MerchantReturnPolicy", "applicableCountry": "AR",
                  "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 10,
                  "returnMethod": ["https://schema.org/ReturnByMail", "https://schema.org/ReturnInStore"],
@@ -240,8 +239,8 @@ def page(p, wa):
     <h2>Devoluciones</h2>
     <p class="pp-desc">Tenés 10 días desde que lo recibís para arrepentirte de la compra, y el envío de la devolución no tiene costo
       para vos. Lo podés devolver por correo o en persona. Para que la devolución sea aceptada, el producto tiene que ser el mismo
-      que te enviamos, estar completo (con caja, accesorios y todo lo que incluía){"" if p.get("outlet") else ", sin abrir (con su embalaje original intacto)"} y en las mismas
-      condiciones en que lo recibiste, sin daños, golpes ni uso indebido. Para iniciarla, escribinos por WhatsApp.</p>
+      que te enviamos, sin uso, sin daños, completo (con accesorios y todo lo que incluía), con su embalaje original y en las
+      mismas condiciones en que lo recibiste. Para iniciarla, escribinos por WhatsApp.</p>
   </main>
 </body>
 </html>
