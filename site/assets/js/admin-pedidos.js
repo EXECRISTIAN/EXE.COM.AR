@@ -90,7 +90,7 @@
     <div class="grid-2">
       <label class="field">Nombre y apellido *<input name="customer_name" maxlength="120" value="${esc(o.customer_name || "")}" ${ro}></label>
       <label class="field">Teléfono<input name="customer_phone" maxlength="40" inputmode="tel" value="${esc(o.customer_phone || "")}" ${ro}></label>
-      <label class="field">Email<input name="customer_email" maxlength="160" type="email" value="${esc(o.customer_email || "")}" ${ro}></label>
+      <label class="field">Email<input name="customer_email" maxlength="160" type="email" value="${esc(o.customer_email || "")}" ${ro}><small class="ed-hint">Si el cliente tiene cuenta en la web con este email (verificado), la compra le aparece en "Mis compras".</small></label>
       <label class="field">Transportista<input name="carrier" maxlength="60" list="carrierList" value="${esc(o.carrier || "")}" ${ro}></label>
       <label class="field wide">Dirección (calle, número, piso)<input name="ship_address" maxlength="200" value="${esc(o.ship_address || "")}" ${ro}></label>
       <label class="field">Localidad<input name="ship_city" maxlength="80" value="${esc(o.ship_city || "")}" ${ro}></label>

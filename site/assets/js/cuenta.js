@@ -471,12 +471,43 @@
     // Administradores: la verificación en dos pasos es obligatoria (la base no da permisos sin ella)
     const mst = perms.has("dashboard.access") && MFA ? await MFA.status().catch(() => null) : null;
     $("mfaNeed").hidden = !(mst && !mst.factors.length);
-    const { data: orders } = await sb.from("orders").select("id, created_at, status, total, carrier, tracking_number, payment_url, invoice_cae, invoice_pos, invoice_number").order("created_at", { ascending: false });
-    $("orders").innerHTML = orders?.length
-      ? `<table class="table"><tr><th>Pedido</th><th>Fecha</th><th>Estado</th><th>Total</th><th>Envío</th></tr>${orders
-          .map((o) => `<tr><td>#${esc(o.id)}</td><td>${new Date(o.created_at).toLocaleDateString("es-AR")}</td><td><span class="pill ${esc(o.status)}">${esc(o.status)}</span>${o.status === "pending" && o.payment_url && /^https:\/\/([a-z0-9-]+\.)*mercadopago\.com(\.ar)?\//.test(o.payment_url) ? ` <a href="${esc(o.payment_url)}">Pagar</a>` : ""}${o.invoice_cae ? `<br><small>Factura ${String(o.invoice_pos).padStart(5, "0")}-${String(o.invoice_number).padStart(8, "0")}</small>` : ""}</td><td>$${Number(o.total).toLocaleString("es-AR")}</td><td>${o.tracking_number ? `${esc(o.carrier || "")} <a href="https://envia.com/es-AR/rastreo?label=${encodeURIComponent(o.tracking_number)}" target="_blank" rel="noopener">Seguir ${esc(o.tracking_number)}</a>` : "—"}</td></tr>`)
-          .join("")}</table>`
-      : `<p class="notice info">Todavía no tenés pedidos.</p>`;
+    renderOrders();
+  }
+
+  /* ---------- Mis compras ----------
+     Incluye las ventas que EXE carga en el panel con el email de la cuenta (se vinculan solas si el email está verificado;
+     claim_my_orders trae las anteriores al registro). my_orders devuelve cada compra con nombre y foto de sus productos. */
+  const ST = { pending: ["Pendiente de pago", "pending"], paid: ["Pagado", "paid"], preparing: ["En preparación", "paid"],
+    shipped: ["Enviado", "paid"], delivered: ["Entregado", "paid"], cancelled: ["Cancelado", "cancelled"] };
+  const money = (n) => "$ " + Math.round(Number(n) || 0).toLocaleString("es-AR");
+  const imgSrc = (u) => (!u ? "assets/img/placeholder.svg" : /^(https?:)?\/\//.test(u) ? u : u.replace(/^\.?\//, ""));
+  async function renderOrders() {
+    const box = $("orders"); if (!box) return;
+    await sb.rpc("claim_my_orders").catch(() => {});
+    const { data, error } = await sb.rpc("my_orders");
+    if (error) { box.innerHTML = `<p class="notice error">No se pudieron cargar tus compras. Probá de nuevo en un rato.</p>`; return; }
+    const orders = data || [];
+    if ($("accOrders")) $("accOrders").textContent = orders.length;
+    box.innerHTML = `<h2 class="mc-title">Mis compras</h2>` + (orders.length ? orders.map((o) => {
+      const [label, cls] = ST[o.status] || [o.status, ""];
+      const pay = o.status === "pending" && o.payment_url && /^https:\/\/([a-z0-9-]+\.)*mercadopago\.com(\.ar)?\//.test(o.payment_url)
+        ? ` <a class="btn btn-primary mc-pay" href="${esc(o.payment_url)}">Pagar</a>` : "";
+      const items = (o.items || []).map((i) => {
+        const name = i.name || i.product_id;
+        const link = i.active ? `p/${encodeURIComponent(i.product_id)}/` : null;
+        return `<li class="mc-item"><img src="${esc(imgSrc(i.image))}" alt="" loading="lazy" width="56" height="56">
+          <span>${link ? `<a href="${esc(link)}">${esc(name)}</a>` : esc(name)}${i.variant ? ` <small>(${esc(i.variant)})</small>` : ""}<br>
+          <small>${i.qty} × ${money(i.unit_price)}</small></span></li>`;
+      }).join("");
+      return `<article class="mc-order">
+        <header><b>Pedido #${esc(o.id)}</b><span>${new Date(o.created_at).toLocaleDateString("es-AR", { day: "numeric", month: "long", year: "numeric" })}</span>
+          <span class="pill ${esc(cls)}">${esc(label)}</span>${pay}</header>
+        <ul class="mc-items">${items}</ul>
+        <footer><span>${o.shipping_cost ? `Envío ${money(o.shipping_cost)} · ` : ""}<b>Total ${money(o.total)}</b></span>
+          ${o.tracking_number ? `<span>${esc(o.carrier || "Envío")}: <a href="https://envia.com/es-AR/rastreo?label=${encodeURIComponent(o.tracking_number)}" target="_blank" rel="noopener">seguir ${esc(o.tracking_number)}</a></span>` : ""}
+          ${o.invoice_cae ? `<small>Factura ${String(o.invoice_pos).padStart(5, "0")}-${String(o.invoice_number).padStart(8, "0")}</small>` : ""}</footer>
+      </article>`;
+    }).join("") : `<p class="notice info">Todavía no tenés compras. Cuando compres en EXE, ya sea por la web, WhatsApp o en persona, van a aparecer acá si usaste el email de esta cuenta.</p>`);
   }
   (async () => {
     if (cameFromEmail && (await be.user()) && (await afterAuth())) return;

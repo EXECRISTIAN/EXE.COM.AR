@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
-Disallow: /admin/
-Disallow: /cuenta.html
+
+# El panel (/admin/) y la cuenta (/cuenta.html) no se bloquean acá a propósito: llevan <meta name="robots" content="noindex">,
+# y Google solo puede ver ese noindex si puede rastrear la página. Bloqueadas por robots.txt, igual podían aparecer como URL sueltas.
 
 Sitemap: https://exe.com.ar/sitemap.xml

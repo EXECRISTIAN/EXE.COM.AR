@@ -131,7 +131,7 @@ button { font: inherit; }
 .nav a { color: var(--c3); font-weight: 500; font-size: .95rem; position: relative; padding: 6px 0; }
 .nav a::after { content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 2px; background: var(--c0);
   transform: scaleX(0); transform-origin: right; transition: transform .3s var(--ease); }
-.nav a:hover, .nav a.active { color: var(--c0); }
+.nav a:hover, .nav a.active { color: var(--c1); }   /* c1: más oscuro que el acento, contraste 4.5:1 sobre el encabezado */
 .nav-theme { display: none; }
 .nav-theme { display: none; }
 .nav a:hover::after, .nav a.active::after { transform: scaleX(1); transform-origin: left; }
@@ -160,9 +160,13 @@ button { font: inherit; }
   display: grid; place-items: center; transition: background .3s, transform .3s; }
 .hero-arrow:hover { background: #fff3; transform: scale(1.08); }
 .hero-arrow svg { width: 18px; height: 18px; }
-.dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-width: 0; }
-.dots button { width: 10px; height: 10px; padding: 0; border-radius: 50%; border: 0; background: #ffffff80; cursor: pointer; transition: background .3s, transform .3s; }
-.dots button.active { background: #fff; transform: scale(1.25); }
+.dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 0; min-width: 0; }
+/* Cada punto es un botón de 24×24 (zona de toque, accesibilidad) con el punto visible adentro (<i>).
+   Sin espacio entre botones: así los puntos quedan a 24 px de centro a centro. Márgenes negativos: el alto visible no cambia. */
+.dots { align-items: center; }
+.dots button { display: grid; place-items: center; min-width: 24px; height: 24px; margin: -7px 0; padding: 0; border: 0; background: none; cursor: pointer; }
+.dots button > i { display: block; width: 10px; height: 10px; padding: 0; border-radius: 50%; border: 0; background: #ffffff80; cursor: pointer; transition: background .3s, transform .3s; }
+.dots button.active > i { background: #fff; transform: scale(1.25); }
 .hero-count { display: none; }
 /* Flechas: el diseño original (sin clase ctl-*) usa las finas; los 4 diseños del logo, las mitades de la "X" */
 .hero-arrow .arr-x { display: none; }
@@ -183,7 +187,7 @@ button { font: inherit; }
 .hero-nav[class*="ctl-"] .hero-arrow:hover { transform: none; }
 .hero-nav[class*="ctl-"] .hero-arrow.next:hover svg { transform: translateX(3px); }
 .hero-nav[class*="ctl-"] .hero-arrow.prev:hover svg { transform: scaleX(-1) translateX(3px); }
-.hero-nav[class*="ctl-"] .dots button { border-radius: 0; transform: none; }
+.hero-nav[class*="ctl-"] .dots button > i { border-radius: 0; transform: none; }
 .hero-nav.ctl-in { animation: ctlIn .6s var(--ease) both; }
 @keyframes ctlIn { from { opacity: 0; transform: translateX(-50%) translateY(14px); } to { opacity: 1; transform: translateX(-50%); } }
 
@@ -191,19 +195,19 @@ button { font: inherit; }
 .hero-nav.ctl-1 { padding: 4px 16px; background: #000a; clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%); }
 .hero-nav.ctl-1.ctl-in { animation: ctlOpen .7s var(--ease) both; }
 @keyframes ctlOpen { from { clip-path: polygon(50% 0, 50% 0, 50% 50%, 50% 100%, 50% 100%, 50% 50%); } }
-.hero-nav.ctl-1 .dots { gap: 6px; }
-.hero-nav.ctl-1 .dots button { width: 10px; height: 14px; background: #fff6; transform: skewX(-38deg); transition: width .45s var(--ease), background .3s; }
-.hero-nav.ctl-1 .dots button:hover { background: #fffa; }
-.hero-nav.ctl-1 .dots button.active { width: 26px; background: #fff; transform: skewX(-38deg); }
+.hero-nav.ctl-1 .dots { gap: 0; }
+.hero-nav.ctl-1 .dots button > i { width: 10px; height: 14px; background: #fff6; transform: skewX(-38deg); transition: width .45s var(--ease), background .3s; }
+.hero-nav.ctl-1 .dots button:hover > i { background: #fffa; }
+.hero-nav.ctl-1 .dots button.active > i { width: 26px; background: #fff; transform: skewX(-38deg); }
 
 /* 2 · Placa biselada: botones con dos esquinas cortadas como la "E"; indicador activo en azul que gira */
 .hero-nav.ctl-2 { padding: 0; background: none; gap: 8px; }
 .hero-nav.ctl-2 .hero-arrow { width: 38px; height: 38px; background: #000b; clip-path: polygon(28% 0, 100% 0, 100% 72%, 72% 100%, 0 100%, 0 28%); transition: background .25s, color .25s; }
 .hero-nav.ctl-2 .hero-arrow.next { clip-path: polygon(0 0, 72% 0, 100% 28%, 100% 100%, 28% 100%, 0 72%); }
 .hero-nav.ctl-2 .hero-arrow:hover { background: #fff; color: #000; }
-.hero-nav.ctl-2 .dots { gap: 7px; padding: 12px 13px; background: #000b; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
-.hero-nav.ctl-2 .dots button { width: 12px; height: 12px; background: #fff6; clip-path: polygon(30% 0, 100% 0, 100% 70%, 70% 100%, 0 100%, 0 30%); transition: background .3s, transform .5s var(--ease); }
-.hero-nav.ctl-2 .dots button.active { background: var(--c0, #0084d6); transform: rotate(90deg) scale(1.15); }
+.hero-nav.ctl-2 .dots { gap: 0; padding: 12px 13px; background: #000b; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+.hero-nav.ctl-2 .dots button > i { width: 12px; height: 12px; background: #fff6; clip-path: polygon(30% 0, 100% 0, 100% 70%, 70% 100%, 0 100%, 0 30%); transition: background .3s, transform .5s var(--ease); }
+.hero-nav.ctl-2 .dots button.active > i { background: var(--c0, #0084d6); transform: rotate(90deg) scale(1.15); }
 .hero-nav.ctl-2.ctl-in > * { animation: ctlRise .55s var(--ease) both; }
 .hero-nav.ctl-2.ctl-in > :nth-child(2) { animation-delay: .08s; }
 .hero-nav.ctl-2.ctl-in > :nth-child(4) { animation-delay: .16s; }
@@ -212,12 +216,12 @@ button { font: inherit; }
 
 /* 3 · Mini X: cada indicador es una "X" del logo; la activa crece y da un giro */
 .hero-nav.ctl-3 { padding: 4px 16px; background: #000a; clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%); }   /* misma placa en punta que Media X */
-.hero-nav.ctl-3 .dots { gap: 10px; align-items: center; }
-.hero-nav.ctl-3 .dots button { width: 20px; height: 18px; background: none; display: grid; place-items: center; }
-.hero-nav.ctl-3 .dots button::before { content: ""; width: 13px; height: 11.7px; background: #fff; opacity: .45; transition: width .4s var(--ease), height .4s var(--ease), opacity .3s;
+.hero-nav.ctl-3 .dots { gap: 6px; align-items: center; }
+.hero-nav.ctl-3 .dots button > i { width: 20px; height: 18px; background: none; display: grid; place-items: center; }
+.hero-nav.ctl-3 .dots button > i::before { content: ""; width: 13px; height: 11.7px; background: #fff; opacity: .45; transition: width .4s var(--ease), height .4s var(--ease), opacity .3s;
   clip-path: polygon(0 18.8%, 14.5% 0, 50% 33.7%, 85.5% 0, 100% 18.8%, 67.2% 50%, 100% 81.2%, 85.5% 100%, 50% 66.3%, 14.5% 100%, 0 81.2%, 32.8% 50%); }   /* X del logo: brazos a 40,6° y gruesos (236×213) */
-.hero-nav.ctl-3 .dots button:hover::before { opacity: .8; }
-.hero-nav.ctl-3 .dots button.active::before { width: 20px; height: 18px; opacity: 1; animation: ctlSpin .6s var(--ease); }
+.hero-nav.ctl-3 .dots button:hover > i::before { opacity: .8; }
+.hero-nav.ctl-3 .dots button.active > i::before { width: 20px; height: 18px; opacity: 1; animation: ctlSpin .6s var(--ease); }
 @keyframes ctlSpin { from { transform: rotate(-90deg) scale(.6); } }
 .hero-nav.ctl-3.ctl-in { animation: ctlFade .6s var(--ease) both; }
 @keyframes ctlFade { from { opacity: 0; transform: translateX(-50%) scale(.85); } to { opacity: 1; transform: translateX(-50%); } }
@@ -231,18 +235,19 @@ button { font: inherit; }
 .hero-nav.ctl-4 .hero-count b { display: inline-block; animation: ctlNum .4s var(--ease); }
 @keyframes ctlNum { from { opacity: 0; transform: translateY(8px); } }
 .hero-nav.ctl-4 .dots { gap: 5px; }
-.hero-nav.ctl-4 .dots button { width: 34px; height: 6px; background: #fff5; transform: skewX(-38deg); overflow: hidden; position: relative; }
-.hero-nav.ctl-4 .dots button::before { content: ""; position: absolute; inset: 0; background: #fff; transform: scaleX(0); transform-origin: left; }
-.hero-nav.ctl-4 .dots button.active::before { animation: ctlFill var(--dur) linear forwards; }
-.hero-nav.ctl-4 .dots button.done::before { transform: none; opacity: .6; }
+.hero-nav.ctl-4 .dots button > i { width: 34px; height: 6px; background: #fff5; transform: skewX(-38deg); overflow: hidden; position: relative; }
+.hero-nav.ctl-4 .dots button > i::before { content: ""; position: absolute; inset: 0; background: #fff; transform: scaleX(0); transform-origin: left; }
+.hero-nav.ctl-4 .dots button.active > i::before { animation: ctlFill var(--dur) linear forwards; }
+.hero-nav.ctl-4 .dots button.done > i::before { transform: none; opacity: .6; }
 @keyframes ctlFill { to { transform: scaleX(1); } }
 @media (max-width: 560px) {
   .hero-nav[class*="ctl-"] { scale: .72; transform-origin: 0 100%; bottom: 6px; }   /* más chicos en el celular (scale no pisa las animaciones) */
-  .hero-nav.ctl-4 .dots button { width: 22px; } .hero-nav.ctl-1 .dots button.active { width: 20px; }
+  .hero-nav[class*="ctl-"] .dots button { min-width: 34px; height: 34px; margin: -12px 0; }   /* 34 × .72 = 24 px reales */
+  .hero-nav.ctl-4 .dots button > i { width: 22px; } .hero-nav.ctl-1 .dots button.active > i { width: 20px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-nav[class*="ctl-"], .hero-nav[class*="ctl-"] *, .hero-nav[class*="ctl-"] *::before { animation: none !important; transition: none !important; }
-  .hero-nav.ctl-4 .dots button.active::before { transform: scaleX(1); }
+  .hero-nav.ctl-4 .dots button.active > i::before { transform: scaleX(1); }
 }
 
 /* ---------- Banners de marca: be97f60 (padding 60 0) / 9986b28 (min-h 500, margin-top 40) ---------- */
@@ -320,10 +325,17 @@ button { font: inherit; }
 .grid > [data-peek] { max-height: 170px; overflow: hidden; pointer-events: none; user-select: none;
   -webkit-mask-image: linear-gradient(#000 0%, transparent 95%); mask-image: linear-gradient(#000 0%, transparent 95%); }
 .grid > [data-peek] .sh-acts { visibility: hidden; }
-.grid-more { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: -84px; position: relative; z-index: 1; }
+.grid-more { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: -84px; position: relative; z-index: 1; }
 .grid-more .btn { background: var(--bg); box-shadow: 0 6px 18px rgb(0 0 0 / .12); }
 .grid-more .btn:hover { background: var(--c2); }
-.grid-more .link-btn { font-size: .9rem; padding: 4px 8px; }
+.grid-more .btn small { font-weight: 400; opacity: .7; }
+/* Flechas animadas debajo de "Ver todo": invitan a seguir bajando */
+.grid-more-arrows { display: grid; justify-items: center; color: var(--c2); }
+.grid-more-arrows svg { width: 22px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; margin-top: -3px;
+  animation: moreArrow 1.6s ease-in-out infinite; }
+.grid-more-arrows svg + svg { animation-delay: .2s; }
+@keyframes moreArrow { 0%, 100% { opacity: .2; transform: translateY(-3px); } 50% { opacity: 1; transform: translateY(3px); } }
+@media (prefers-reduced-motion: reduce) { .grid-more-arrows svg { animation: none; opacity: .6; } }
 .empty-state { grid-column: 1/-1; text-align: center; padding: 40px 0; color: var(--muted); }
 .sugg-head { grid-column: 1/-1; }
 .sugg-head .empty-state { padding: 8px 0 4px; }
@@ -757,9 +769,8 @@ html { touch-action: manipulation; }
 .pd-thumbs.fade-l.fade-r { -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); }
 @media (pointer: coarse) {
   /* Áreas de toque de ~48 px sin cambiar el tamaño visible: un pseudoelemento invisible agranda la zona que recibe el toque */
-  .hero-arrow, .dots button, .icon-btn, .pd-nav, .qty button, .chip, .p-tag, .tag-brand, .theme-switch button { position: relative; }
+  .hero-arrow, .icon-btn, .pd-nav, .qty button, .chip, .p-tag, .tag-brand, .theme-switch button { position: relative; }
   .hero-arrow::after { content: ""; position: absolute; inset: -8px; }
-  .dots button::after { content: ""; position: absolute; inset: -14px -4px; }
   .icon-btn::after, .pd-nav::after { content: ""; position: absolute; inset: -3px; }
   .qty button::after { content: ""; position: absolute; inset: -10px -3px; }
   .chip::after, .p-tag::after, .tag-brand::after { content: ""; position: absolute; inset: -8px -4px; }
@@ -1060,3 +1071,15 @@ body:has(#pcOverlay.show) .wa-float { display: none; }
 .cookie-acts { display: flex; gap: 8px; margin-left: auto; }
 .cookie-acts .btn { padding: 8px 16px; }
 .cookie-prefs { font-size: inherit; color: inherit; padding: 0 0 0 6px; }
+/* Mi cuenta: Mis compras */
+.mc-title { font-size: 1.2rem; margin: 22px 0 10px; }
+.mc-order { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--surface); display: grid; gap: 10px; }
+.mc-order header, .mc-order footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.mc-order header span:not(.pill) { color: var(--muted); font-size: .9rem; }
+.mc-pay { padding: 6px 14px; margin-left: auto; }
+.mc-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mc-item { display: flex; gap: 10px; align-items: center; }
+.mc-item img { width: 56px; height: 56px; object-fit: contain; border-radius: 8px; border: 1px solid var(--line); background: var(--media-bg, #fff); flex: none; }
+.mc-order footer { justify-content: space-between; border-top: 1px solid var(--line); padding-top: 10px; font-size: .92rem; }
+/* Texto del catálogo ubicado debajo de los productos (Panel → Página web) */
+.catalog-note { text-align: center; color: var(--muted); max-width: 65ch; margin: 28px auto 0; }

@@ -37,8 +37,8 @@
   let sortBy = "";
   // Grilla: se muestran de a pocos con "Ver más". En "Destacados" van primero los 10 con más interés
   // (clics, agregados al carrito y búsquedas de los últimos 60 días, calculado por la base: popular_products).
-  // Se muestran 2 filas completas (8 en compu, 4 en celular) y asoma una tercera difuminada; "Ver más" suma 3 filas.
-  const FIRST_ROWS = 2, MORE_ROWS = 3;
+  // Se muestra 1 fila completa (4 en compu, 2 en celular) y desde la 2.ª asoma difuminada; "Ver todo" muestra el resto.
+  const FIRST_ROWS = 1;
   let rows = FIRST_ROWS, gridKey = "", popular = [];
   const gridCols = () => { const g = $("productGrid"); return Math.max(1, (getComputedStyle(g).gridTemplateColumns || "").split(" ").filter(Boolean).length); };
   const fp = { brands: new Set(), tags: new Set(), min: null, max: null, stock: false, logo: null, ids: null };   // panel "Filtros" (+ logo de marca elegido abajo)
@@ -314,7 +314,7 @@
     const browsing = !q && filter === "Todos" && !fp.brands.size && !fp.tags.size && fp.min == null && fp.max == null && !fp.stock && !fp.logo && !fp.ids;
     const cols = gridCols(), shown = browsing && rows !== Infinity ? rows * cols : list.length, rest_n = list.length - shown;
     $("productGrid").innerHTML = list.length
-      ? list.slice(0, shown).map(cardHtml).join("") + (rest_n > 0 ? `${list.slice(shown, shown + cols).map((p, j) => cardHtml(p, j).replace(/^(\s*<\w+)/, '$1 inert aria-hidden="true" data-peek')).join("")}<div class="grid-more"><button type="button" class="btn btn-outline" id="moreProducts">Ver más</button><button type="button" class="link-btn" id="allProducts">Ver todos (${list.length})</button></div>` : "")
+      ? list.slice(0, shown).map(cardHtml).join("") + (rest_n > 0 ? `${list.slice(shown, shown + cols).map((p, j) => cardHtml(p, j).replace(/^(\s*<\w+)/, '$1 inert aria-hidden="true" data-peek')).join("")}<div class="grid-more"><button type="button" class="btn btn-outline" id="allProducts">Ver todo <small>(${list.length})</small></button><span class="grid-more-arrows" aria-hidden="true"><svg viewBox="0 0 24 14"><path d="M3 2l9 9 9-9"/></svg><svg viewBox="0 0 24 14"><path d="M3 2l9 9 9-9"/></svg></span></div>` : "")
       : fp.logo
         ? `<p class="empty-state">Todavía no tenemos productos ${esc(fp.logo.brand)} publicados.<br><a href="${esc(waLink(`Hola EXE! Busco productos ${fp.logo.brand}. ¿Qué tienen disponible?`))}" target="_blank" rel="noopener">Consultanos por WhatsApp</a> y te conseguimos lo que buscás.</p>`
         : query ? `<div class="sugg-head"><p class="empty-state">No encontramos «${esc(query)}» publicado${relatedFor(query.trim(), []).items.length ? ". Abajo te mostramos productos relacionados" : ", pero te lo podemos conseguir"}.</p>${askHtml(query)}</div>` : `<p class="empty-state">No encontramos productos con ese criterio.</p>`;
@@ -1311,9 +1311,8 @@
   let lastCols = 0;
   addEventListener("resize", () => { const c = gridCols(); if (lastCols && c !== lastCols && products.length) renderProducts(); lastCols = c; });
   $("productGrid").addEventListener("click", (e) => {
-    const all = e.target.closest("#allProducts");
-    if (!all && !e.target.closest("#moreProducts")) return;
-    const first = rows * gridCols(); rows = all ? Infinity : rows + MORE_ROWS; renderProducts();
+    if (!e.target.closest("#allProducts")) return;
+    const first = rows * gridCols(); rows = Infinity; renderProducts();
     const next = $("productGrid").children[first]; if (next) next.querySelector("a, button")?.focus({ preventScroll: true });
   });
 
@@ -1659,7 +1658,7 @@
       clone.querySelectorAll("a").forEach((a) => (a.tabIndex = -1));
       track.appendChild(clone);
     }
-    $("dots").innerHTML = Array.from({ length: slideCount }, (_, i) => `<button aria-label="Imagen ${i + 1}"${i === 0 ? ' class="active"' : ""}></button>`).join("");
+    $("dots").innerHTML = Array.from({ length: slideCount }, (_, i) => `<button aria-label="Imagen ${i + 1}"${i === 0 ? ' class="active"' : ""}><i></i></button>`).join("");
     dots = [...$("dots").children];
     dots.forEach((d, i) => d.addEventListener("click", () => { go(i); play(); }));
     $("heroNav").hidden = slideCount < 2;
@@ -1722,7 +1721,17 @@
     catalogo(el, d) {
       const h = el.querySelector(".section-head"); if (!h) return;
       if (d.title) h.querySelector("h2").textContent = d.title;
-      if (d.text !== undefined) h.querySelector("p").textContent = d.text;
+      // Texto del catálogo: se muestra u oculta y se ubica desde el panel (Página web → Catálogo de productos)
+      const p = $("catalogText"); if (!p) return;
+      if (d.text !== undefined) p.textContent = d.text;
+      const show = d.text_show === "si" && !!p.textContent.trim();
+      p.hidden = !show;
+      if (!show) return;
+      const pos = d.text_pos || "debajo del título";
+      p.classList.toggle("catalog-note", pos === "debajo de los productos");
+      if (pos === "arriba del título") h.insertBefore(p, h.querySelector("h2"));
+      else if (pos === "debajo de los productos") { const g = $("productGrid"); g.parentNode.insertBefore(p, g.nextSibling); }
+      else h.appendChild(p);
     },
     banner(el, d) {
       const a = el.querySelector(".wide-banner"); if (!a) return;
@@ -1964,12 +1973,15 @@
     const base = location.origin + location.pathname.replace(/[^/]*$/, "");
     const abs = (u) => (u && /^https?:/.test(u) ? u : base + (u || "").replace(/^\.?\//, ""));
     const items = products.slice(0, 100).map((p, i) => {
-      const prod = { "@type": "Product", name: p.name, url: `${base}#producto/${encodeURIComponent(p.id)}`, sku: p.id,
+      const prod = { "@type": "Product", name: p.name, url: `${base}p/${encodeURIComponent(p.id)}/`, sku: p.id,
         ...(p.brand ? { brand: { "@type": "Brand", name: p.brand } } : {}), ...(p.category ? { category: p.category } : {}),
         ...(p.images && p.images[0] ? { image: abs(p.images[0]) } : {}), ...(p.description ? { description: String(p.description).slice(0, 500) } : {}) };
       if (p.price > 0) prod.offers = { "@type": "Offer", priceCurrency: "ARS", price: p.price,
         availability: typeof p.stock === "number" && p.stock <= 0 ? "https://schema.org/OutOfStock" : p.noStock ? "https://schema.org/BackOrder" : "https://schema.org/InStock",
-        itemCondition: p.outlet ? "https://schema.org/UsedCondition" : "https://schema.org/NewCondition" };
+        itemCondition: p.outlet ? "https://schema.org/UsedCondition" : "https://schema.org/NewCondition",
+        // Devoluciones: 10 días de arrepentimiento (Ley 24.240, art. 34), por correo o en el local; mismo dato que tools/share_pages.py
+        hasMerchantReturnPolicy: { "@type": "MerchantReturnPolicy", applicableCountry: "AR", returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+          merchantReturnDays: 10, returnMethod: ["https://schema.org/ReturnByMail", "https://schema.org/ReturnInStore"], returnFees: "https://schema.org/FreeReturn" } };
       return { "@type": "ListItem", position: i + 1, item: prod };
     });
     const data = [{ "@context": "https://schema.org", "@type": "Store", name: "EXE", url: base, image: abs("assets/img/favicon.jpg"), telephone: "+54 9 11 3009 5254", email: "ventas@exe.com.ar", address: { "@type": "PostalAddress", addressCountry: "AR" } },
