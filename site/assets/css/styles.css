@@ -251,7 +251,7 @@ button { font: inherit; }
 }
 
 /* ---------- Banners de marca: be97f60 (padding 60 0) / 9986b28 (min-h 500, margin-top 40) ---------- */
-.brand-banners { display: flex; gap: 0; padding: 60px 10px; max-width: 1220px; margin: 0 auto; }
+.brand-banners { display: flex; gap: 0; padding: 60px 10px 24px; max-width: 1220px; margin: 0 auto; }
 .brand-card { position: relative; flex: 1; min-height: 0; aspect-ratio: 352 / 370; margin: 10px; padding: 40px 40px 16px; border-radius: 20px; overflow: hidden;
   display: flex; flex-direction: column; justify-content: flex-end; align-items: center; isolation: isolate; }
 .brand-card picture, .brand-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: var(--pos, 50% 50%); z-index: -1; }
@@ -292,6 +292,7 @@ button { font: inherit; }
 
 /* ---------- Catálogo ---------- */
 .section { padding: 80px 0; }
+#productos { padding-top: 40px; }   /* menos espacio entre las tarjetas de categorías y "Productos destacados" */
 .section-head { text-align: center; max-width: 760px; margin: 0 auto 36px; }
 .section-head h2 { color: var(--heading); font-weight: 500; font-size: clamp(1.7rem, 3vw, 2.4rem); margin-bottom: 0; }
 .section-head p { margin-top: 20px; }
@@ -534,7 +535,7 @@ html[data-wa-float="off"] .wa-float { display: none; }
   .nav-theme .theme-switch { background: #0d1117; border-color: #ffffff1f; }
   .nav-theme { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; color: var(--c3); font-weight: 500; font-size: .95rem; }
   .nav-theme .theme-switch { background: #0d1117; border-color: #ffffff1f; }
-  .brand-banners { flex-direction: column; padding: 0 10px 40px; }
+  .brand-banners { flex-direction: column; padding: 0 10px 12px; }   /* poco espacio antes de "Productos destacados" */
   /* Celular vertical: tarjetas chatas (más bajas que los banners principales), con zoom al producto */
   .brand-card { width: min(100% - 20px, 460px); aspect-ratio: 2.6 / 1; margin: 7px; padding: 14px; align-self: center; }
   .brand-card img { object-position: var(--pos-m, 50% 35%); }
@@ -548,6 +549,7 @@ html[data-wa-float="off"] .wa-float { display: none; }
   .feature { width: 100%; padding: 30px; }
   .footer-grid { grid-template-columns: 1fr; }
   .section { padding: 50px 0; }
+  #productos { padding-top: 22px; }
   .grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .card-body { padding: 12px; }
   .card h3 { font-size: .9rem; }
