@@ -251,7 +251,7 @@ button { font: inherit; }
 }
 
 /* ---------- Banners de marca: be97f60 (padding 60 0) / 9986b28 (min-h 500, margin-top 40) ---------- */
-.brand-banners { display: flex; gap: 0; padding: 60px 10px; max-width: 1220px; margin: 0 auto; }
+.brand-banners { display: flex; gap: 0; padding: 60px 10px 24px; max-width: 1220px; margin: 0 auto; }
 .brand-card { position: relative; flex: 1; min-height: 0; aspect-ratio: 352 / 370; margin: 10px; padding: 40px 40px 16px; border-radius: 20px; overflow: hidden;
   display: flex; flex-direction: column; justify-content: flex-end; align-items: center; isolation: isolate; }
 .brand-card picture, .brand-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: var(--pos, 50% 50%); z-index: -1; }
@@ -292,6 +292,7 @@ button { font: inherit; }
 
 /* ---------- Catálogo ---------- */
 .section { padding: 80px 0; }
+#productos { padding-top: 40px; }   /* menos espacio entre las tarjetas de categorías y "Productos destacados" */
 .section-head { text-align: center; max-width: 760px; margin: 0 auto 36px; }
 .section-head h2 { color: var(--heading); font-weight: 500; font-size: clamp(1.7rem, 3vw, 2.4rem); margin-bottom: 0; }
 .section-head p { margin-top: 20px; }
@@ -326,16 +327,30 @@ button { font: inherit; }
   -webkit-mask-image: linear-gradient(#000 0%, transparent 95%); mask-image: linear-gradient(#000 0%, transparent 95%); }
 .grid > [data-peek] .sh-acts { visibility: hidden; }
 .grid-more { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: -84px; position: relative; z-index: 1; }
-.grid-more .btn { background: var(--bg); box-shadow: 0 6px 18px rgb(0 0 0 / .12); }
-.grid-more .btn:hover { background: var(--c2); }
-.grid-more .btn small { font-weight: 400; opacity: .7; }
-/* Flechas animadas debajo de "Ver todo": invitan a seguir bajando */
-.grid-more-arrows { display: grid; justify-items: center; color: var(--c2); }
-.grid-more-arrows svg { width: 22px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; margin-top: -3px;
-  animation: moreArrow 1.6s ease-in-out infinite; }
-.grid-more-arrows svg + svg { animation-delay: .2s; }
-@keyframes moreArrow { 0%, 100% { opacity: .2; transform: translateY(-3px); } 50% { opacity: 1; transform: translateY(3px); } }
-@media (prefers-reduced-motion: reduce) { .grid-more-arrows svg { animation: none; opacity: .6; } }
+/* Botón "Ver todo": naranja (el mismo tono de las etiquetas Outlet), grande y animado */
+.grid-more .btn { position: relative; overflow: hidden; min-width: min(320px, 86vw); padding: 16px 44px; border: 0; border-radius: 999px;
+  font-size: 1.2rem; font-weight: 700; letter-spacing: .02em; color: #fff; text-shadow: 0 1px 2px rgb(0 0 0 / .25);
+  background-color: #c2410c; background-image: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%); background-size: 200% 200%;
+  box-shadow: 0 8px 22px rgb(234 88 12 / .35), 0 2px 6px rgb(0 0 0 / .12);
+  animation: verGlow 2.4s ease-in-out infinite, verShift 6s ease infinite; transition: transform .25s var(--ease), box-shadow .25s; }
+.grid-more .btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 14px 30px rgb(234 88 12 / .45), 0 3px 8px rgb(0 0 0 / .15); background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%); background-size: 200% 200%; color: #fff; }
+.grid-more .btn:active { transform: translateY(0) scale(.98); }
+.grid-more .btn:focus-visible { outline: 3px solid #fdba74; outline-offset: 3px; }
+.grid-more .btn small { font-weight: 600; opacity: .9; margin-left: 6px; font-size: .85em; }
+/* Brillo que cruza el botón */
+.grid-more .btn::after { content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 45%; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / .45), transparent); transform: skewX(-20deg); animation: verShine 3.2s ease-in-out infinite; }
+@keyframes verGlow { 0%, 100% { box-shadow: 0 8px 22px rgb(234 88 12 / .35), 0 0 0 0 rgb(245 158 11 / .45); } 50% { box-shadow: 0 8px 22px rgb(234 88 12 / .35), 0 0 0 10px rgb(245 158 11 / 0); } }
+@keyframes verShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes verShine { 0%, 55% { left: -60%; } 85%, 100% { left: 130%; } }
+/* Flechas animadas debajo de "Ver todo": tres, en cascada */
+.grid-more-arrows { display: grid; justify-items: center; color: #f59e0b; margin-top: 2px; }
+.grid-more-arrows svg { width: 26px; height: 14px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; margin-top: -4px;
+  animation: moreArrow 1.5s ease-in-out infinite; }
+.grid-more-arrows svg:nth-child(2) { animation-delay: .18s; }
+.grid-more-arrows svg:nth-child(3) { animation-delay: .36s; }
+@keyframes moreArrow { 0%, 100% { opacity: .15; transform: translateY(-4px) scale(.9); } 50% { opacity: 1; transform: translateY(4px) scale(1); } }
+@media (prefers-reduced-motion: reduce) { .grid-more .btn, .grid-more .btn::after, .grid-more-arrows svg { animation: none; } .grid-more-arrows svg { opacity: .7; } }
 .empty-state { grid-column: 1/-1; text-align: center; padding: 40px 0; color: var(--muted); }
 .sugg-head { grid-column: 1/-1; }
 .sugg-head .empty-state { padding: 8px 0 4px; }
@@ -534,7 +549,7 @@ html[data-wa-float="off"] .wa-float { display: none; }
   .nav-theme .theme-switch { background: #0d1117; border-color: #ffffff1f; }
   .nav-theme { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; color: var(--c3); font-weight: 500; font-size: .95rem; }
   .nav-theme .theme-switch { background: #0d1117; border-color: #ffffff1f; }
-  .brand-banners { flex-direction: column; padding: 0 10px 40px; }
+  .brand-banners { flex-direction: column; padding: 0 10px 12px; }   /* poco espacio antes de "Productos destacados" */
   /* Celular vertical: tarjetas chatas (más bajas que los banners principales), con zoom al producto */
   .brand-card { width: min(100% - 20px, 460px); aspect-ratio: 2.6 / 1; margin: 7px; padding: 14px; align-self: center; }
   .brand-card img { object-position: var(--pos-m, 50% 35%); }
@@ -548,6 +563,7 @@ html[data-wa-float="off"] .wa-float { display: none; }
   .feature { width: 100%; padding: 30px; }
   .footer-grid { grid-template-columns: 1fr; }
   .section { padding: 50px 0; }
+  #productos { padding-top: 22px; }
   .grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .card-body { padding: 12px; }
   .card h3 { font-size: .9rem; }
